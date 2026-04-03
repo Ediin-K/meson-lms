@@ -1,0 +1,17 @@
+*.iml
+.idea/
+
+# Java / Maven
+backend/target/
+*.class
+*.jar
+*.war
+
+# Node / frontend
+frontend/node_modules/
+frontend/dist/
+
+# Env & local
+.env
+.env.local
+.env.*.local
