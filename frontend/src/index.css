@@ -1,9 +1,43 @@
 @import "tailwindcss";
 
+/* Sfond bazë i njëjtë me fundin e faqes — nuk mbetet “strikë” e bardhë poshtë footer-it */
+html {
+  min-height: 100dvh;
+  background-color: #d8e8f2;
+}
+
 body {
   margin: 0;
+  min-height: 100dvh;
+  background-color: #d8e8f2;
 }
 
 #root {
   min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background-color: #d8e8f2;
+}
+
+/* Dorë (pointer) për elemente të klikueshme — përputhet me hover në UI */
+a[href]:not([aria-disabled="true"]),
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+input[type="submit"]:not(:disabled),
+input[type="button"]:not(:disabled),
+input[type="reset"]:not(:disabled),
+label[for],
+select:not(:disabled),
+summary {
+  cursor: pointer;
+}
+
+.MuiButtonBase-root:not(.Mui-disabled) {
+  cursor: pointer;
+}
+
+.Mui-disabled,
+button:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
 }
