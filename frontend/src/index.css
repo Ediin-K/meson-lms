@@ -1,10 +1,14 @@
 @import "tailwindcss";
 
+
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Sfond bazë i njëjtë me fundin e faqes — nuk mbetet “strikë” e bardhë poshtë footer-it */
 html {
   min-height: 100dvh;
   background-color: #d8e8f2;
 }
+
 
 body {
   margin: 0;
