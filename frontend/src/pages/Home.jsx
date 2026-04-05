@@ -4,7 +4,6 @@ import { Autoplay, Pagination, EffectFade } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/pagination'
 import 'swiper/css/effect-fade'
-import Header from "../components/ui/Header.jsx";
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
@@ -191,6 +190,7 @@ function SpotlightCard({
   const IconGlyph = icon
   return (
     <Card elevation={0} className={cardShell}>
+
       <Box className={mediaShell}>
         <img
           src={heroImg}
@@ -263,7 +263,6 @@ function StudentFacultyBanner({ t }) {
       className="mb-6 rounded-2xl border border-sky-200/70 bg-gradient-to-br from-sky-50/90 via-white to-slate-50 p-5 shadow-sm ring-1 ring-sky-100/60 sm:p-6"
       aria-labelledby="student-faculty-heading"
     >
-      <Header/>
       <Typography
         variant="overline"
         className="!font-semibold !tracking-widest !text-sky-600"

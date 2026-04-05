@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { useAppPreferences } from '../../context/appPreferencesContext.js'
-
 export default function Header() {
   const { locale, setLocale, role, setRole, t } = useAppPreferences()
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -59,7 +58,7 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 -mx-4 border-b border-slate-200/80 bg-gradient-to-b from-white/98 via-sky-50/40 to-slate-100/55 shadow-[0_1px_0_0_rgba(15,23,42,0.06)] backdrop-blur-md">
       <a
-        href="#main-content"
+        href="#"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-slate-900 focus:px-4 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg"
       >
         {t('header.skip')}
@@ -71,7 +70,7 @@ export default function Header() {
       <div className="flex w-full items-center justify-between gap-2 px-4 py-3 sm:gap-4 sm:px-6">
         <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-6 md:gap-8">
           <a
-            href="#"
+            href="/"
             className="shrink-0 select-none bg-gradient-to-r from-slate-900 via-sky-700 to-sky-600 bg-clip-text text-3xl font-black tracking-tight text-transparent no-underline outline-none ring-sky-500/0 focus-visible:ring-2 focus-visible:ring-offset-2 sm:text-4xl"
             style={{
               fontFamily:
@@ -168,16 +167,14 @@ export default function Header() {
           </div>
 
           <button
-            type="button"
             className="hidden rounded-full border-2 border-slate-300/90 bg-white/95 px-3 py-2 text-sm font-semibold text-slate-800 shadow-sm outline-none ring-sky-500/0 transition hover:border-sky-500/50 hover:bg-sky-50/90 hover:text-sky-900 focus-visible:ring-2 focus-visible:ring-sky-500 sm:inline-flex sm:px-4"
           >
-            {t('header.login')}
+           <a href={"/login"}>{t('header.login')}</a>
           </button>
           <button
-            type="button"
             className="hidden rounded-full px-2 py-2 text-sm font-semibold text-slate-600 outline-none ring-sky-500/0 transition hover:bg-slate-900/[0.06] hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-sky-500 md:inline-flex md:px-3"
           >
-            {t('header.logout')}
+            <a href={"/login"}>{t('header.logout')}</a>
           </button>
 
           <div className="relative hidden md:block" ref={profileWrapRef}>
