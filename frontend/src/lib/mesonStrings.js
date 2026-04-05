@@ -28,6 +28,8 @@ export const STRINGS = {
       help: 'Ndihmë',
       studentLabel: 'Student',
       profileSub: 'Profili',
+      themeLight: 'Modalitet i çelët',
+      themeDark: 'Modalitet i errët',
     },
     home: {
       brand: 'Meson LMS',
@@ -212,6 +214,8 @@ export const STRINGS = {
       help: 'Help',
       studentLabel: 'Student',
       profileSub: 'Profile',
+      themeLight: 'Light mode',
+      themeDark: 'Dark mode',
     },
     home: {
       brand: 'Meson LMS',
