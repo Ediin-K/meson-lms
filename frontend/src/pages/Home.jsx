@@ -4,7 +4,7 @@ import { Autoplay, Pagination, EffectFade } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/pagination'
 import 'swiper/css/effect-fade'
-
+import Header from "../components/ui/Header.jsx";
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
@@ -258,10 +258,12 @@ const STUDENT_TASK_KEYS = ['task1', 'task2', 'task3']
 
 function StudentFacultyBanner({ t }) {
   return (
+
     <section
       className="mb-6 rounded-2xl border border-sky-200/70 bg-gradient-to-br from-sky-50/90 via-white to-slate-50 p-5 shadow-sm ring-1 ring-sky-100/60 sm:p-6"
       aria-labelledby="student-faculty-heading"
     >
+      <Header/>
       <Typography
         variant="overline"
         className="!font-semibold !tracking-widest !text-sky-600"
@@ -303,6 +305,7 @@ function StudentFacultyBanner({ t }) {
 
 function StudentDashboard({ t }) {
   return (
+
     <section
       className="mb-6 rounded-2xl border border-sky-200/60 bg-white/90 p-4 shadow-sm ring-1 ring-sky-100/50 sm:p-6"
       aria-labelledby="student-dash-heading"

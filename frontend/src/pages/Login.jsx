@@ -13,7 +13,6 @@ import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined'
 import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined'
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined'
 
-import Header from '../components/ui/Header.jsx'
 import InputField from '../components/register/InputField.jsx'
 import PasswordField from '../components/register/PasswordField.jsx'
 import LoginSubmitButton from '../components/login/LoginSubmitButton.jsx'
@@ -71,7 +70,7 @@ const DEMO_PASSWORD = 'meson123'
 export default function Login() {
   const [mode, setMode] = useState(
     () =>
-      typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches
+      typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: light)').matches
         ? 'dark'
         : 'light',
   )
@@ -168,7 +167,6 @@ export default function Login() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <div className="flex min-h-dvh flex-col bg-[#F9FAFB] text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
-        <Header />
 
         <main
           className="relative flex flex-1 flex-col items-center justify-center overflow-hidden px-4 py-10 sm:px-6 sm:py-12"

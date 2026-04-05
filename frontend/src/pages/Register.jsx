@@ -12,8 +12,6 @@ import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined'
 import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined'
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline'
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined'
-
-import Header from '../components/ui/Header.jsx'
 import InputField from '../components/register/InputField.jsx'
 import RoleCard from '../components/register/RoleCard.jsx'
 import PasswordField from '../components/register/PasswordField.jsx'
@@ -117,7 +115,7 @@ function GoogleIcon() {
 export default function Register() {
   const [mode, setMode] = useState(
     () =>
-      typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches
+      typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: light)').matches
         ? 'dark'
         : 'light',
   )
@@ -258,7 +256,6 @@ export default function Register() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <div className="flex min-h-dvh flex-col bg-[#F9FAFB] text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
-        <Header />
 
         <main className="relative flex-1 overflow-hidden bg-gradient-to-b from-sky-50/70 via-[#F9FAFB] to-indigo-50/40 dark:from-slate-900 dark:via-slate-950 dark:to-indigo-950/40">
           <div
