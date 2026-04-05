@@ -80,7 +80,7 @@ export default function Header() {
     'rounded-full px-2.5 py-2 text-sm font-medium text-slate-800 no-underline outline-none ring-sky-500/0 transition hover:bg-slate-900/[0.07] hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-sky-500 lg:px-3 dark:text-slate-100 dark:hover:bg-white/10 dark:hover:text-white'
 
   return (
-    <header className="sticky top-0 z-50 -mx-4 border-b border-slate-200/80 bg-gradient-to-b from-white/98 via-sky-50/40 to-slate-100/55 shadow-[0_1px_0_0_rgba(15,23,42,0.06)] backdrop-blur-md dark:border-slate-700/80 dark:from-slate-900/98 dark:via-slate-900/90 dark:to-slate-950/95 dark:shadow-[0_1px_0_0_rgba(0,0,0,0.35)]">
+      <header className="sticky top-0 z-50 -mx-4 border-b border-slate-200/80 bg-white shadow-sm backdrop-blur-md dark:border-slate-700/80 dark:bg-slate-900">
       <a
         href="#"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-slate-900 focus:px-4 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg"
