@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { useAppPreferences } from '../../context/appPreferencesContext.js'
+import { GB, AL } from 'country-flag-icons/react/3x2'
 
 function ThemeToggleIcon({ dark }) {
   if (dark) {
@@ -154,8 +155,8 @@ export default function Header() {
                 setProfileOpen(false)
               }}
             >
-              <span aria-hidden className="select-none">
-                {locale === 'sq' ? '🇦🇱' : '🇬🇧'}
+              <span aria-hidden className="w-6 h-4">
+                {locale === 'sq' ? <AL/> : <GB/>}
               </span>
             </button>
             {langOpen ? (
@@ -175,7 +176,7 @@ export default function Header() {
                     setLangOpen(false)
                   }}
                 >
-                  <span aria-hidden className="select-none">🇦🇱</span>
+                  <span aria-hidden className="select-none"><AL className="w-6 h-4" /></span>
                   {locale === 'sq' ? (
                     <span className="text-sm font-bold text-sky-600">✓</span>
                   ) : null}
@@ -190,7 +191,7 @@ export default function Header() {
                     setLangOpen(false)
                   }}
                 >
-                  <span aria-hidden className="select-none">🇬🇧</span>
+                  <span aria-hidden className="select-none"><GB className="w-6 h-4" /></span>
                   {locale === 'en' ? (
                     <span className="text-sm font-bold text-sky-600">✓</span>
                   ) : null}
