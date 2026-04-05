@@ -1,22 +1,19 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import Typography from '@mui/material/Typography'
 import Link from '@mui/material/Link'
 import Alert from '@mui/material/Alert'
-import IconButton from '@mui/material/IconButton'
-import Tooltip from '@mui/material/Tooltip'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Checkbox from '@mui/material/Checkbox'
-import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined'
-import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined'
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined'
 
 import InputField from '../components/register/InputField.jsx'
 import PasswordField from '../components/register/PasswordField.jsx'
 import LoginSubmitButton from '../components/login/LoginSubmitButton.jsx'
 import { isValidEmailFormat } from '../lib/registerValidation.js'
+import { useAppPreferences } from '../context/appPreferencesContext.js'
 
 function MicrosoftIcon() {
   return (
@@ -68,38 +65,25 @@ const DEMO_EMAIL = 'demo@meson.edu'
 const DEMO_PASSWORD = 'meson123'
 
 export default function Login() {
-  const [mode, setMode] = useState(
-    () =>
-      typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: light)').matches
-        ? 'dark'
-        : 'light',
-  )
+  const { colorMode } = useAppPreferences()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [remember, setRemember] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-  const [touched, setTouched] = useState({})
   const [attemptedSubmit, setAttemptedSubmit] = useState(false)
   const [loading, setLoading] = useState(false)
   const [globalError, setGlobalError] = useState('')
-
-  useEffect(() => {
-    const root = document.documentElement
-    if (mode === 'dark') root.classList.add('dark')
-    else root.classList.remove('dark')
-    return () => root.classList.remove('dark')
-  }, [mode])
 
   const theme = useMemo(
     () =>
       createTheme({
         palette: {
-          mode,
+          mode: colorMode,
           primary: { main: '#4F46E5' },
           secondary: { main: '#22C55E' },
           background: {
-            default: mode === 'dark' ? '#0f172a' : '#F9FAFB',
-            paper: mode === 'dark' ? '#1e293b' : '#FFFFFF',
+            default: colorMode === 'dark' ? '#0f172a' : '#F9FAFB',
+            paper: colorMode === 'dark' ? '#1e293b' : '#FFFFFF',
           },
           error: { main: '#EF4444' },
         },
@@ -117,7 +101,7 @@ export default function Login() {
           },
         },
       }),
-    [mode],
+    [colorMode],
   )
 
   const errors = useMemo(
@@ -129,12 +113,9 @@ export default function Login() {
   )
 
   const getFieldError = (field) => {
-    const show = touched[field] || attemptedSubmit
-    if (!show) return ''
+    if (!attemptedSubmit) return ''
     return errors[field] || ''
   }
-
-  const touch = (field) => setTouched((prev) => ({ ...prev, [field]: true }))
 
   const clearGlobalError = () => setGlobalError('')
 
@@ -145,7 +126,6 @@ export default function Login() {
       password: validatePassword(password),
     }
     setAttemptedSubmit(true)
-    setTouched({ email: true, password: true })
     if (errs.email || errs.password) return
 
     setLoading(true)
@@ -186,20 +166,6 @@ export default function Login() {
           />
 
           <div className="relative w-full max-w-[420px]">
-            <div className="mb-4 flex justify-end">
-              <Tooltip title={mode === 'dark' ? 'Light mode' : 'Dark mode'}>
-                <IconButton
-                  type="button"
-                  onClick={() => setMode((m) => (m === 'dark' ? 'light' : 'dark'))}
-                  aria-label={mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-                  size="small"
-                  className="text-slate-600 dark:text-slate-300"
-                >
-                  {mode === 'dark' ? <LightModeOutlinedIcon /> : <DarkModeOutlinedIcon />}
-                </IconButton>
-              </Tooltip>
-            </div>
-
             <div className="rounded-[12px] border border-slate-200/90 bg-white/90 p-8 shadow-xl shadow-slate-200/40 backdrop-blur-md transition-colors dark:border-slate-700/90 dark:bg-slate-900/85 dark:shadow-black/40 sm:p-9">
               <Typography
                 id="login-heading"
@@ -232,11 +198,9 @@ export default function Login() {
                     label="Email"
                     value={email}
                     onChange={(e) => {
-                      touch('email')
                       setEmail(e.target.value)
                       clearGlobalError()
                     }}
-                    onBlur={() => touch('email')}
                     error={getFieldError('email')}
                     type="email"
                     autoComplete="email"
@@ -252,11 +216,9 @@ export default function Login() {
                     label="Password"
                     value={password}
                     onChange={(e) => {
-                      touch('password')
                       setPassword(e.target.value)
                       clearGlobalError()
                     }}
-                    onBlur={() => touch('password')}
                     error={getFieldError('password')}
                     showPassword={showPassword}
                     onToggleVisibility={() => setShowPassword((s) => !s)}

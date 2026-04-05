@@ -1,15 +1,11 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import Typography from '@mui/material/Typography'
 import Link from '@mui/material/Link'
-import IconButton from '@mui/material/IconButton'
-import Tooltip from '@mui/material/Tooltip'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Checkbox from '@mui/material/Checkbox'
-import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined'
-import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined'
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline'
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined'
 import InputField from '../components/register/InputField.jsx'
@@ -21,24 +17,44 @@ import {
   isValidEmailFormat,
   suggestRoleFromEmail,
 } from '../lib/registerValidation.js'
+import { useAppPreferences } from '../context/appPreferencesContext.js'
+import LegalDocumentModal from '../components/legal/LegalDocumentModal.jsx'
+import {
+  LEGAL_DOCUMENT_VERSION,
+  PRIVACY_POLICY,
+  TERMS_OF_SERVICE,
+} from '../legal/mesonLegalDocuments.js'
+
+/** Set true to require scrolling to the end before “I have read” is enabled (stricter UX). */
+const REQUIRE_SCROLL_TO_ACKNOWLEDGE_LEGAL = false
 
 const ROLES = [
   {
     id: 'student',
     title: 'Student',
-    description: 'Take courses, submit assignments, and track grades.',
+    subtitle: 'Take classes and submit work.',
+    highlights: ['Courses & lessons', 'Assignments & grades'],
   },
   {
     id: 'instructor',
-    title: 'Instructor',
-    description: 'Create content, grade work, and manage your classes.',
+    title: 'Teacher',
+    subtitle: 'Teach classes and grade work.',
+    highlights: ['Lessons & assessments', 'Classes & feedback'],
   },
   {
     id: 'parent',
-    title: 'Parent / Guardian',
-    description: 'Stay informed about a learner’s progress and school updates.',
+    title: 'Parent',
+    subtitle: 'Follow your child’s progress.',
+    highlights: ['Progress & news', 'Schedules & updates'],
   },
 ]
+
+function roleLabelForUi(id) {
+  if (id === 'instructor') return 'Teacher'
+  if (id === 'parent') return 'Parent'
+  if (id === 'student') return 'Student'
+  return id
+}
 
 const initialValues = {
   firstName: '',
@@ -113,37 +129,28 @@ function GoogleIcon() {
 }
 
 export default function Register() {
-  const [mode, setMode] = useState(
-    () =>
-      typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: light)').matches
-        ? 'dark'
-        : 'light',
-  )
+  const { colorMode } = useAppPreferences()
   const [values, setValues] = useState(initialValues)
-  const [touched, setTouched] = useState({})
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [attemptedSubmit, setAttemptedSubmit] = useState(false)
   const [roleSuggestion, setRoleSuggestion] = useState(null)
   const [roleDismissed, setRoleDismissed] = useState(false)
-
-  useEffect(() => {
-    const root = document.documentElement
-    if (mode === 'dark') root.classList.add('dark')
-    else root.classList.remove('dark')
-    return () => root.classList.remove('dark')
-  }, [mode])
+  const [termsModalOpen, setTermsModalOpen] = useState(false)
+  const [privacyModalOpen, setPrivacyModalOpen] = useState(false)
+  const [termsReadAcknowledged, setTermsReadAcknowledged] = useState(false)
+  const [privacyReadAcknowledged, setPrivacyReadAcknowledged] = useState(false)
 
   const theme = useMemo(
     () =>
       createTheme({
         palette: {
-          mode,
+          mode: colorMode,
           primary: { main: '#4F46E5' },
           secondary: { main: '#22C55E' },
           background: {
-            default: mode === 'dark' ? '#0f172a' : '#F9FAFB',
-            paper: mode === 'dark' ? '#1e293b' : '#FFFFFF',
+            default: colorMode === 'dark' ? '#0f172a' : '#F9FAFB',
+            paper: colorMode === 'dark' ? '#1e293b' : '#FFFFFF',
           },
           error: { main: '#EF4444' },
         },
@@ -161,40 +168,39 @@ export default function Register() {
           },
         },
       }),
-    [mode],
+    [colorMode],
   )
 
   const passwordStrength = useMemo(() => getPasswordStrength(values.password), [values.password])
 
-  const validationErrors = useMemo(
-    () => ({
+  const validationErrors = useMemo(() => {
+    let termsMsg = ''
+    if (attemptedSubmit) {
+      if (!termsReadAcknowledged || !privacyReadAcknowledged) {
+        termsMsg =
+          'Open the Terms of Service and Privacy Policy and tap “I have read and understood” for each.'
+      } else if (!values.terms) {
+        termsMsg = 'You must agree to the Terms of Service and Privacy Policy.'
+      }
+    }
+    return {
       firstName: validateFirstName(values.firstName),
       lastName: validateLastName(values.lastName),
       email: validateEmail(values.email),
       password: validatePassword(values.password),
       confirmPassword: validateConfirm(values.password, values.confirmPassword),
-      terms:
-        attemptedSubmit && !values.terms
-          ? 'You must accept the terms and privacy policy'
-          : '',
-    }),
-    [values, attemptedSubmit],
-  )
+      terms: termsMsg,
+    }
+  }, [values, attemptedSubmit, termsReadAcknowledged, privacyReadAcknowledged])
 
   const getFieldError = (field) => {
-    if (field === 'terms') return attemptedSubmit ? validationErrors.terms : ''
-    const show = touched[field] || attemptedSubmit
-    if (!show) return ''
+    if (!attemptedSubmit) return ''
+    if (field === 'terms') return validationErrors.terms
     return validationErrors[field] || ''
-  }
-
-  const touch = (field) => {
-    setTouched((prev) => ({ ...prev, [field]: true }))
   }
 
   const handleChange = (field) => (e) => {
     const value = field === 'terms' ? e.target.checked : e.target.value
-    touch(field)
     setValues((prev) => {
       const next = { ...prev, [field]: value }
       if (field === 'email') {
@@ -207,7 +213,6 @@ export default function Register() {
   }
 
   const handleEmailBlur = () => {
-    touch('email')
     const s = suggestRoleFromEmail(values.email)
     setRoleSuggestion(s)
   }
@@ -220,29 +225,29 @@ export default function Register() {
 
   const handleSubmit = (e) => {
     e.preventDefault()
+    const termsErr =
+      !termsReadAcknowledged || !privacyReadAcknowledged
+        ? 'ack'
+        : !values.terms
+          ? 'tick'
+          : ''
     const errs = {
       firstName: validateFirstName(values.firstName),
       lastName: validateLastName(values.lastName),
       email: validateEmail(values.email),
       password: validatePassword(values.password),
       confirmPassword: validateConfirm(values.password, values.confirmPassword),
-      terms: !values.terms ? 'You must accept the terms and privacy policy' : '',
+      terms: termsErr,
     }
     setAttemptedSubmit(true)
-    setTouched({
-      firstName: true,
-      lastName: true,
-      email: true,
-      password: true,
-      confirmPassword: true,
-      terms: true,
-    })
     if (Object.values(errs).some(Boolean)) return
     console.info('Register payload (demo)', {
       firstName: values.firstName.trim(),
       lastName: values.lastName.trim(),
       email: values.email.trim(),
       role: values.role,
+      termsAccepted: true,
+      termsVersion: LEGAL_DOCUMENT_VERSION,
     })
   }
 
@@ -257,7 +262,7 @@ export default function Register() {
       <CssBaseline />
       <div className="flex min-h-dvh flex-col bg-[#F9FAFB] text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
 
-        <main className="relative flex-1 overflow-hidden bg-gradient-to-b from-sky-50/70 via-[#F9FAFB] to-indigo-50/40 dark:from-slate-900 dark:via-slate-950 dark:to-indigo-950/40">
+        <main className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-gradient-to-b from-sky-50/70 via-[#F9FAFB] to-indigo-50/40 dark:from-slate-900 dark:via-slate-950 dark:to-indigo-950/40">
           <div
             className="pointer-events-none absolute inset-0 opacity-[0.45] dark:opacity-30"
             aria-hidden
@@ -266,37 +271,33 @@ export default function Register() {
                 'radial-gradient(circle at 20% 10%, rgba(14, 165, 233, 0.12), transparent 42%), radial-gradient(circle at 85% 30%, rgba(79, 70, 229, 0.08), transparent 38%), radial-gradient(circle at 50% 100%, rgba(148, 163, 184, 0.15), transparent 50%)',
             }}
           />
-          <div className="relative mx-auto w-full max-w-md px-4 py-10 sm:px-6 sm:py-14">
-            <div className="mb-4 flex justify-end">
-              <Tooltip title={mode === 'dark' ? 'Light mode' : 'Dark mode'}>
-                <IconButton
-                  type="button"
-                  onClick={() => setMode((m) => (m === 'dark' ? 'light' : 'dark'))}
-                  aria-label={mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-                  size="small"
-                  className="text-slate-600 dark:text-slate-300"
+          <div className="relative flex w-full flex-1 flex-col items-center justify-center px-4 py-12 sm:px-6 sm:py-16">
+            <div className="relative w-full max-w-5xl rounded-[12px] border border-slate-200/90 bg-white/90 p-6 shadow-xl shadow-slate-200/40 backdrop-blur-md transition-colors dark:border-slate-700/90 dark:bg-slate-900/85 dark:shadow-black/40 sm:p-8 lg:p-10">
+              <div className="text-center">
+                <Typography
+                  variant="h4"
+                  component="h1"
+                  className="font-bold tracking-tight text-slate-900 dark:text-white sm:text-[2rem]"
                 >
-                  {mode === 'dark' ? <LightModeOutlinedIcon /> : <DarkModeOutlinedIcon />}
-                </IconButton>
-              </Tooltip>
-            </div>
+                  Create your account
+                </Typography>
+                <Typography variant="body2" className="mx-auto mt-2 max-w-xl text-slate-600 dark:text-slate-400">
+                  Join Meson to start learning with structure and support—free to get started.
+                </Typography>
+              </div>
 
-            <div className="rounded-[12px] border border-slate-200/90 bg-white/90 p-8 shadow-xl shadow-slate-200/40 backdrop-blur-md transition-colors dark:border-slate-700/90 dark:bg-slate-900/85 dark:shadow-black/40 sm:p-9">
-          <Typography variant="h4" component="h1" className="font-bold tracking-tight text-slate-900 dark:text-white">
-            Create your account
-          </Typography>
-          <Typography variant="body2" className="mt-2 text-slate-600 dark:text-slate-400">
-            Join Meson to start learning with structure and support—free to get started.
-          </Typography>
-
-          <form className="mt-8 space-y-5" onSubmit={handleSubmit} noValidate>
+              <form
+                className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-x-10 md:gap-y-5"
+                onSubmit={handleSubmit}
+                noValidate
+              >
+                <div className="flex min-w-0 flex-col gap-5">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <InputField
                 id="firstName"
                 label="First name"
                 value={values.firstName}
                 onChange={handleChange('firstName')}
-                onBlur={() => touch('firstName')}
                 error={getFieldError('firstName')}
                 autoFocus
                 autoComplete="given-name"
@@ -307,7 +308,6 @@ export default function Register() {
                 label="Last name"
                 value={values.lastName}
                 onChange={handleChange('lastName')}
-                onBlur={() => touch('lastName')}
                 error={getFieldError('lastName')}
                 autoComplete="family-name"
                 startIcon={PersonOutlineIcon}
@@ -333,8 +333,8 @@ export default function Register() {
               >
                 <span className="text-slate-700 dark:text-slate-200">
                   Suggested role based on your email:{' '}
-                  <strong className="capitalize text-emerald-800 dark:text-emerald-300">
-                    {roleSuggestion === 'parent' ? 'Parent / Guardian' : roleSuggestion}
+                  <strong className="text-emerald-800 dark:text-emerald-300">
+                    {roleLabelForUi(roleSuggestion)}
                   </strong>
                 </span>
                 <div className="flex flex-wrap gap-2">
@@ -356,31 +356,11 @@ export default function Register() {
               </div>
             )}
 
-            <fieldset className="min-w-0 border-0 p-0">
-              <legend className="mb-3 text-sm font-medium text-slate-700 dark:text-slate-300">Choose your role</legend>
-              <div role="radiogroup" aria-label="Choose your role" className="flex flex-col gap-3">
-                {ROLES.map((r) => (
-                  <RoleCard
-                    key={r.id}
-                    roleId={r.id}
-                    title={r.title}
-                    description={r.description}
-                    selected={values.role === r.id}
-                    onSelect={() => {
-                      setValues((prev) => ({ ...prev, role: r.id }))
-                      setRoleDismissed(true)
-                    }}
-                  />
-                ))}
-              </div>
-            </fieldset>
-
             <PasswordField
               id="password"
               label="Password"
               value={values.password}
               onChange={handleChange('password')}
-              onBlur={() => touch('password')}
               error={getFieldError('password')}
               showPassword={showPassword}
               onToggleVisibility={() => setShowPassword((s) => !s)}
@@ -393,86 +373,148 @@ export default function Register() {
               label="Confirm password"
               value={values.confirmPassword}
               onChange={handleChange('confirmPassword')}
-              onBlur={() => touch('confirmPassword')}
               error={getFieldError('confirmPassword')}
               showPassword={showConfirmPassword}
               onToggleVisibility={() => setShowConfirmPassword((s) => !s)}
               showStrength={false}
             />
+                </div>
 
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={values.terms}
-                  onChange={handleChange('terms')}
-                  color="primary"
-                  aria-describedby="terms-description"
-                />
-              }
-              label={
-                <span id="terms-description" className="text-sm text-slate-600 dark:text-slate-400">
-                  I agree to the{' '}
-                  <Link
-                    href="#"
-                    underline="always"
-                    className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
-                  >
-                    Terms of Service
-                  </Link>{' '}
-                  and{' '}
-                  <Link
-                    href="#"
-                    underline="always"
-                    className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
-                  >
-                    Privacy Policy
-                  </Link>
-                </span>
-              }
-            />
-            {attemptedSubmit && validationErrors.terms && (
-              <p className="flex items-center gap-1 text-sm text-red-600 dark:text-red-400" role="alert">
-                <span aria-hidden className="inline-block h-1.5 w-1.5 rounded-full bg-red-500" />
-                {validationErrors.terms}
+                <div className="flex min-w-0 flex-col gap-5">
+            <fieldset className="min-w-0 border-0 p-0">
+              <legend
+                id="role-legend"
+                className="text-sm font-semibold text-slate-800 dark:text-slate-100"
+              >
+                Choose your role
+              </legend>
+              <p
+                id="role-field-hint"
+                className="mt-1 max-w-2xl text-xs leading-snug text-slate-600 dark:text-slate-400"
+              >
+                Pick the role that fits you—this sets which tools you see first.
               </p>
-            )}
+              <div
+                role="radiogroup"
+                aria-labelledby="role-legend"
+                aria-describedby="role-field-hint"
+                className="mt-3 grid grid-cols-3 gap-2.5 max-[340px]:grid-cols-1 sm:gap-3 sm:items-stretch"
+              >
+                {ROLES.map((r) => (
+                  <RoleCard
+                    key={r.id}
+                    roleId={r.id}
+                    title={r.title}
+                    subtitle={r.subtitle}
+                    highlights={r.highlights}
+                    selected={values.role === r.id}
+                    onSelect={() => {
+                      setValues((prev) => ({ ...prev, role: r.id }))
+                      setRoleDismissed(true)
+                    }}
+                  />
+                ))}
+              </div>
+            </fieldset>
+                </div>
 
-            <RegisterButton type="submit">Start learning</RegisterButton>
+            <div className="col-span-full flex flex-col items-center gap-4 border-t border-slate-200/90 pt-6 dark:border-slate-600/80 md:col-span-2 md:pt-7">
+              <FormControlLabel
+                className="m-0"
+                control={
+                  <Checkbox
+                    checked={values.terms}
+                    onChange={handleChange('terms')}
+                    color="primary"
+                    disabled={!termsReadAcknowledged || !privacyReadAcknowledged}
+                    aria-describedby="terms-description terms-legal-hint"
+                  />
+                }
+                label={
+                  <span
+                    id="terms-description"
+                    className="text-center text-sm text-slate-600 dark:text-slate-400"
+                  >
+                    I agree to the{' '}
+                    <button
+                      type="button"
+                      className="font-medium text-indigo-600 underline decoration-indigo-600/50 underline-offset-2 transition-colors hover:text-indigo-500 dark:text-indigo-400 dark:decoration-indigo-400/50 dark:hover:text-indigo-300"
+                      onClick={() => setTermsModalOpen(true)}
+                    >
+                      Terms of Service
+                    </button>{' '}
+                    and{' '}
+                    <button
+                      type="button"
+                      className="font-medium text-indigo-600 underline decoration-indigo-600/50 underline-offset-2 transition-colors hover:text-indigo-500 dark:text-indigo-400 dark:decoration-indigo-400/50 dark:hover:text-indigo-300"
+                      onClick={() => setPrivacyModalOpen(true)}
+                    >
+                      Privacy Policy
+                    </button>
+                  </span>
+                }
+              />
+              {(!termsReadAcknowledged || !privacyReadAcknowledged) && (
+                <p
+                  id="terms-legal-hint"
+                  className="max-w-md text-center text-xs leading-snug text-slate-500 dark:text-slate-400"
+                >
+                  Open each document above and confirm with &quot;I have read and understood&quot; to enable
+                  the checkbox.
+                </p>
+              )}
+              {attemptedSubmit && validationErrors.terms && (
+                <p
+                  className="flex items-center justify-center gap-1 text-center text-sm text-red-600 dark:text-red-400"
+                  role="alert"
+                >
+                  <span aria-hidden className="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-red-500" />
+                  {validationErrors.terms}
+                </p>
+              )}
 
-            <div className="flex items-center gap-3 py-2">
-              <span
-                className="h-px flex-1 bg-slate-200 transition-colors dark:bg-slate-600"
-                aria-hidden
-              />
-              <span className="shrink-0 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
-                Or continue with
-              </span>
-              <span
-                className="h-px flex-1 bg-slate-200 transition-colors dark:bg-slate-600"
-                aria-hidden
-              />
+              <div className="w-full max-w-xs">
+                <RegisterButton type="submit">Start learning</RegisterButton>
+              </div>
+
+              <div className="flex w-full max-w-md items-center gap-3 py-1">
+                <span
+                  className="h-px flex-1 bg-slate-200 transition-colors dark:bg-slate-600"
+                  aria-hidden
+                />
+                <span className="shrink-0 text-center text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
+                  Or continue with
+                </span>
+                <span
+                  className="h-px flex-1 bg-slate-200 transition-colors dark:bg-slate-600"
+                  aria-hidden
+                />
+              </div>
+
+              <div className="grid w-full max-w-md grid-cols-1 gap-3 sm:grid-cols-2">
+                <button
+                  type="button"
+                  className="flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-white py-3 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:scale-[1.01] hover:border-slate-300 hover:shadow-md dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500"
+                  aria-label="Continue with Google"
+                >
+                  <GoogleIcon />
+                  Google
+                </button>
+                <button
+                  type="button"
+                  className="flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-white py-3 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:scale-[1.01] hover:border-slate-300 hover:shadow-md dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500"
+                  aria-label="Continue with Microsoft"
+                >
+                  <MicrosoftIcon />
+                  Microsoft
+                </button>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <button
-                type="button"
-                className="flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-white py-3 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:scale-[1.01] hover:border-slate-300 hover:shadow-md dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500"
-                aria-label="Continue with Google"
-              >
-                <GoogleIcon />
-                Google
-              </button>
-              <button
-                type="button"
-                className="flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-white py-3 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:scale-[1.01] hover:border-slate-300 hover:shadow-md dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500"
-                aria-label="Continue with Microsoft"
-              >
-                <MicrosoftIcon />
-                Microsoft
-              </button>
-            </div>
-
-            <Typography variant="body2" className="text-center text-slate-600 dark:text-slate-400">
+            <Typography
+              variant="body2"
+              className="col-span-full text-center text-slate-600 dark:text-slate-400 md:col-span-2"
+            >
               Already have an account?{' '}
               <Link
                 component={RouterLink}
@@ -482,11 +524,25 @@ export default function Register() {
                 Log in
               </Link>
             </Typography>
-          </form>
+              </form>
             </div>
           </div>
         </main>
       </div>
+      <LegalDocumentModal
+        open={termsModalOpen}
+        onClose={() => setTermsModalOpen(false)}
+        document={TERMS_OF_SERVICE}
+        onAcknowledge={() => setTermsReadAcknowledged(true)}
+        requireScrollToAcknowledge={REQUIRE_SCROLL_TO_ACKNOWLEDGE_LEGAL}
+      />
+      <LegalDocumentModal
+        open={privacyModalOpen}
+        onClose={() => setPrivacyModalOpen(false)}
+        document={PRIVACY_POLICY}
+        onAcknowledge={() => setPrivacyReadAcknowledged(true)}
+        requireScrollToAcknowledge={REQUIRE_SCROLL_TO_ACKNOWLEDGE_LEGAL}
+      />
     </ThemeProvider>
   )
 }
