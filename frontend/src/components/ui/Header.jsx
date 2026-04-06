@@ -208,16 +208,18 @@ export default function Header() {
             ) : null}
           </div>
 
-          <button
+          <Link
+            to="/login"
             className="hidden rounded-full border-2 border-slate-300/90 bg-white/95 px-3 py-2 text-sm font-semibold text-slate-800 shadow-sm outline-none ring-sky-500/0 transition hover:border-sky-500/50 hover:bg-sky-50/90 hover:text-sky-900 focus-visible:ring-2 focus-visible:ring-sky-500 sm:inline-flex sm:px-4"
           >
-           <a href={"/login"}>{t('header.login')}</a>
-          </button>
-          <button
+           {t('header.login')}
+          </Link>
+          <Link
+            to="/login"
             className="hidden rounded-full px-2 py-2 text-sm font-semibold text-slate-600 outline-none ring-sky-500/0 transition hover:bg-slate-900/[0.06] hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-sky-500 md:inline-flex md:px-3"
           >
-            <a href={"/login"}>{t('header.logout')}</a>
-          </button>
+            {t('header.logout')}
+          </Link>
 
           <div className="relative hidden md:block" ref={profileWrapRef}>
             <button
@@ -259,14 +261,14 @@ export default function Header() {
                   </button>
                 ))}
                 <div className="my-1 h-px bg-slate-200" />
-                <button
-                  type="button"
+                <Link
+                  to="/login"
                   role="menuitem"
                   className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm font-medium text-rose-600 outline-none hover:bg-rose-50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-rose-400"
                   onClick={() => setProfileOpen(false)}
                 >
                   {t('header.logout')}
-                </button>
+                </Link>
               </div>
             ) : null}
           </div>
@@ -382,18 +384,18 @@ export default function Header() {
             >
               {t('header.profile')}
             </button>
-            <button
-              type="button"
+            <Link
+              to="/login"
               className="w-full rounded-xl border-2 border-slate-300 bg-white py-3 text-sm font-semibold text-slate-800 outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
             >
               {t('header.login')}
-            </button>
-            <button
-              type="button"
+            </Link>
+            <Link
+              to="/login"
               className="w-full rounded-xl py-3 text-sm font-semibold text-slate-600 outline-none hover:bg-slate-900/[0.05] focus-visible:ring-2 focus-visible:ring-sky-500"
             >
               {t('header.logout')}
-            </button>
+            </Link>
           </div>
         </div>
       ) : null}

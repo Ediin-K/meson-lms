@@ -15,7 +15,6 @@ import LinearProgress from '@mui/material/LinearProgress'
 import Typography from '@mui/material/Typography'
 
 import ArrowForwardRounded from '@mui/icons-material/ArrowForwardRounded'
-import MenuBookRounded from '@mui/icons-material/MenuBookRounded'
 import PaletteRounded from '@mui/icons-material/PaletteRounded'
 import CodeRounded from '@mui/icons-material/CodeRounded'
 import GraphicEqRounded from '@mui/icons-material/GraphicEqRounded'
@@ -24,7 +23,6 @@ import ViewQuiltRounded from '@mui/icons-material/ViewQuiltRounded'
 import ThreeDRotationRounded from '@mui/icons-material/ThreeDRotationRounded'
 import CampaignRounded from '@mui/icons-material/CampaignRounded'
 import SchoolRounded from '@mui/icons-material/SchoolRounded'
-import OpenInNewRounded from '@mui/icons-material/OpenInNewRounded'
 import ChevronLeftRounded from '@mui/icons-material/ChevronLeftRounded'
 import ChevronRightRounded from '@mui/icons-material/ChevronRightRounded'
 import AssignmentTurnedInRounded from '@mui/icons-material/AssignmentTurnedInRounded'
@@ -173,9 +171,9 @@ const categories = [
 ]
 
 const cardShell =
-  'group overflow-hidden rounded-[1.35rem] border border-sky-100/90 bg-white/90 shadow-md shadow-sky-100/40 transition duration-300 hover:-translate-y-1 hover:border-sky-200 hover:shadow-lg hover:shadow-sky-200/50'
+  'group overflow-hidden rounded-[1.35rem] border border-sky-100/90 bg-white/90 shadow-md shadow-sky-100/40 transition duration-300 hover:-translate-y-1 hover:border-sky-200 hover:shadow-lg hover:shadow-sky-200/50 dark:!border-slate-600 dark:!bg-slate-800 dark:!shadow-black/50 dark:hover:!border-slate-500 dark:hover:!shadow-black/60'
 
-const mediaShell = 'relative aspect-[16/10] overflow-hidden rounded-t-[1.35rem] bg-slate-100'
+const mediaShell = 'relative aspect-[16/10] overflow-hidden rounded-t-[1.35rem] bg-slate-100 dark:bg-slate-800'
 
 function SpotlightCard({
   title,
@@ -183,8 +181,6 @@ function SpotlightCard({
   icon,
   chip,
   chipColor,
-  actionLabel,
-  actionExternal,
   imgLoading,
 }) {
   const IconGlyph = icon
@@ -208,7 +204,7 @@ function SpotlightCard({
               color={chipColor === 'default' ? 'default' : chipColor}
               className={
                 chipColor === 'default'
-                  ? '!bg-white/90 !font-semibold !text-slate-700'
+                  ? '!bg-white/90 !font-semibold !text-slate-700 dark:!bg-slate-800/90 dark:!text-slate-300'
                   : chipColor === 'primary'
                     ? '!bg-sky-600 !font-semibold !text-white'
                     : '!font-semibold'
@@ -216,30 +212,17 @@ function SpotlightCard({
             />
           </div>
         ) : null}
-        <div className="absolute bottom-3 left-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-white/95 text-sky-600 shadow-md backdrop-blur-sm">
+        <div className="absolute bottom-3 left-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-white/95 text-sky-600 shadow-md backdrop-blur-sm dark:bg-slate-800/95 dark:text-sky-400">
           <IconGlyph fontSize="medium" />
         </div>
       </Box>
       <CardContent className="!rounded-b-[1.35rem] !p-4 !pt-3">
-        <Typography variant="h6" component="h3" className="!font-bold !text-slate-800">
+        <Typography variant="h6" component="h3" className="!font-bold !text-slate-800 dark:!text-white">
           {title}
         </Typography>
-        <Typography variant="body2" className="!mt-0.5 !text-slate-500">
+        <Typography variant="body2" className="!mt-0.5 !text-slate-500 dark:!text-slate-400">
           {meta}
         </Typography>
-        <Button
-          size="small"
-          endIcon={
-            actionExternal ? (
-              <OpenInNewRounded sx={{ fontSize: 18 }} />
-            ) : (
-              <MenuBookRounded sx={{ fontSize: 18 }} />
-            )
-          }
-          className="!mt-3 !-ml-2 !rounded-full !font-semibold !text-sky-700 hover:!bg-sky-50"
-        >
-          {actionLabel}
-        </Button>
       </CardContent>
     </Card>
   )
@@ -260,12 +243,12 @@ function StudentFacultyBanner({ t }) {
   return (
 
     <section
-      className="mb-6 rounded-2xl border border-sky-200/70 bg-gradient-to-br from-sky-50/90 via-white to-slate-50 p-5 shadow-sm ring-1 ring-sky-100/60 sm:p-6"
+      className="mb-6 rounded-2xl border border-sky-200/70 bg-gradient-to-br from-sky-50/90 via-white to-slate-50 p-5 shadow-sm ring-1 ring-sky-100/60 sm:p-6 dark:border-slate-700/70 dark:bg-gradient-to-br dark:from-slate-900/90 dark:via-slate-950 dark:to-indigo-950/60 dark:ring-slate-600/60"
       aria-labelledby="student-faculty-heading"
     >
       <Typography
         variant="overline"
-        className="!font-semibold !tracking-widest !text-sky-600"
+        className="!font-semibold !tracking-widest !text-sky-600 dark:!text-sky-400"
       >
         {t('home.student.facultyOverline')}
       </Typography>
@@ -273,26 +256,26 @@ function StudentFacultyBanner({ t }) {
         id="student-faculty-heading"
         variant="h5"
         component="h2"
-        className="!mt-1 !font-bold !text-slate-900"
+        className="!mt-1 !font-bold !text-slate-900 dark:!text-white"
       >
         {t('home.student.facultyTitle')}
       </Typography>
-      <Typography variant="body2" className="!mt-2 !max-w-2xl !text-slate-600">
+      <Typography variant="body2" className="!mt-2 !max-w-2xl !text-slate-600 dark:!text-slate-400">
         {t('home.student.facultyBody')}
       </Typography>
-      <div className="mt-4 flex flex-col gap-3 rounded-xl border border-sky-100/80 bg-white/90 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mt-4 flex flex-col gap-3 rounded-xl border border-sky-100/80 bg-white/90 px-4 py-4 sm:flex-row sm:items-center sm:justify-between dark:!border-slate-600/80 dark:!bg-slate-900/85">
         <div className="flex items-start gap-3">
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-sky-100 text-sky-700">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-sky-100 text-sky-700 dark:bg-sky-900/50 dark:text-sky-300">
             <SchoolRounded />
           </span>
           <div>
-            <Typography variant="subtitle1" className="!font-bold !text-slate-900">
+            <Typography variant="subtitle1" className="!font-bold !text-slate-900 dark:!text-white">
               {t('home.student.facultyName')}
             </Typography>
-            <Typography variant="body2" className="!text-slate-600">
+            <Typography variant="body2" className="!text-slate-600 dark:!text-slate-400">
               {t('home.student.facultyMeta')}
             </Typography>
-            <Typography variant="caption" className="!mt-1 !block !text-slate-500">
+            <Typography variant="caption" className="!mt-1 !block !text-slate-500 dark:!text-slate-500">
               {t('home.student.facultyProgram')}
             </Typography>
           </div>
@@ -306,17 +289,17 @@ function StudentDashboard({ t }) {
   return (
 
     <section
-      className="mb-6 rounded-2xl border border-sky-200/60 bg-white/90 p-4 shadow-sm ring-1 ring-sky-100/50 sm:p-6"
+      className="mb-6 rounded-2xl border border-sky-200/60 bg-white/90 p-4 shadow-sm ring-1 ring-sky-100/50 sm:p-6 dark:!border-slate-700/60 dark:!bg-slate-900/85 dark:!ring-slate-600/50"
       aria-labelledby="student-dash-heading"
     >
       <Typography
         id="student-dash-heading"
         variant="overline"
-        className="!font-semibold !tracking-widest !text-sky-600"
+        className="!font-semibold !tracking-widest !text-sky-600 dark:!text-sky-400"
       >
         {t('home.student.overline')}
       </Typography>
-      <Typography variant="h5" component="h2" className="!mt-1 !font-bold !text-slate-800">
+      <Typography variant="h5" component="h2" className="!mt-1 !font-bold !text-slate-800 dark:!text-white">
         {t('home.student.welcome')}
       </Typography>
 
@@ -327,24 +310,24 @@ function StudentDashboard({ t }) {
             elevation={0}
             component="section"
             aria-labelledby="student-news-heading"
-            className="h-full rounded-2xl border border-amber-200/55 bg-amber-50/35 p-4 ring-1 ring-amber-100/60"
+            className="h-full rounded-2xl border border-slate-200/90 bg-slate-50/50 p-4 dark:!border-slate-700/90 dark:!bg-slate-900/50"
           >
             <Typography
               id="student-news-heading"
               variant="subtitle2"
-              className="!mb-3 !flex !items-center !gap-2 !font-bold !text-amber-950"
+              className="!mb-3 !flex !items-center !gap-2 !font-bold !text-amber-950 dark:!text-amber-100"
             >
               <CampaignOutlined className="text-amber-700" fontSize="small" />
               {t('home.student.announcementsTitle')}
             </Typography>
             <ul className="list-none space-y-2.5 p-0">
               <li>
-                <Typography variant="body2" className="!text-slate-800">
+                <Typography variant="body2" className="!text-slate-800 dark:!text-slate-200">
                   • {t('home.student.announcement1')}
                 </Typography>
               </li>
               <li>
-                <Typography variant="body2" className="!text-slate-800">
+                <Typography variant="body2" className="!text-slate-800 dark:!text-slate-200">
                   • {t('home.student.announcement2')}
                 </Typography>
               </li>
@@ -356,12 +339,12 @@ function StudentDashboard({ t }) {
         <div className="order-1 lg:order-2 lg:col-span-6">
           <Card
             elevation={0}
-            className="flex h-full min-h-[220px] flex-col justify-center rounded-2xl border border-sky-200/80 bg-gradient-to-br from-sky-50/90 via-white to-sky-50/40 p-5 sm:min-h-[260px] sm:p-6"
+            className="flex h-full min-h-[220px] flex-col justify-center rounded-2xl border border-slate-200/90 bg-slate-50/50 p-5 sm:min-h-[260px] sm:p-6 dark:!border-slate-700/90 dark:!bg-slate-900/50"
           >
-            <Typography variant="subtitle1" className="!font-bold !text-slate-900">
+            <Typography variant="subtitle1" className="!font-bold !text-slate-900 dark:!text-white">
               {t('home.student.continueTitle')}
             </Typography>
-            <Typography variant="body2" className="!mt-2 !text-slate-600">
+            <Typography variant="body2" className="!mt-2 !text-slate-600 dark:!text-slate-400">
               {t('home.student.continueCourse')}
             </Typography>
             <Button
@@ -381,17 +364,17 @@ function StudentDashboard({ t }) {
             elevation={0}
             component="section"
             aria-labelledby="student-tasks-heading"
-            className="h-full rounded-2xl border border-slate-200/90 bg-slate-50/50 p-4"
+            className="h-full rounded-2xl border border-slate-200/90 bg-slate-50/50 p-4 dark:!border-slate-700/90 dark:!bg-slate-900/50"
           >
             <Typography
               id="student-tasks-heading"
               variant="subtitle2"
-              className="!flex !items-center !gap-2 !font-bold !text-slate-900"
+              className="!flex !items-center !gap-2 !font-bold !text-slate-900 dark:!text-white"
             >
               <AssignmentTurnedInRounded className="text-sky-600" fontSize="small" />
               {t('home.student.tasks.panelTitle')}
             </Typography>
-            <Typography variant="caption" className="!mt-1 !mb-3 !block !text-slate-500">
+            <Typography variant="caption" className="!mt-1 !mb-3 !block !text-slate-500 dark:!text-slate-400">
               {t('home.student.tasks.panelSubtitle')}
             </Typography>
             <div className="flex flex-col gap-3">
@@ -403,20 +386,20 @@ function StudentDashboard({ t }) {
                 return (
                   <div
                     key={key}
-                    className="rounded-xl border border-slate-200/80 bg-white px-3 py-3 shadow-sm"
+                    className="rounded-xl border border-slate-200/80 bg-white px-3 py-3 shadow-sm dark:border-slate-600/80 dark:bg-slate-800"
                   >
-                    <Typography variant="body2" className="!font-semibold !text-slate-900">
+                    <Typography variant="body2" className="!font-semibold !text-slate-900 dark:!text-white">
                       {t(`home.student.tasks.${key}.name`)}
                     </Typography>
-                    <Typography variant="caption" className="!mt-0.5 !block !font-medium !text-sky-700">
+                    <Typography variant="caption" className="!mt-0.5 !block !font-medium !text-sky-700 dark:!text-sky-400">
                       {t(`home.student.tasks.${key}.course`)}
                     </Typography>
-                    <Typography variant="caption" className="!mt-1.5 !block !text-slate-600">
+                    <Typography variant="caption" className="!mt-1.5 !block !text-slate-600 dark:!text-slate-400">
                       {t(`home.student.tasks.${key}.due`)}
                     </Typography>
                     <Typography
                       variant="caption"
-                      className="!mt-0.5 !block !text-amber-900/90"
+                      className="!mt-0.5 !block !text-amber-900/90 dark:!text-amber-300/90"
                     >
                       {t(`home.student.tasks.${key}.extension`)}
                     </Typography>
@@ -437,7 +420,7 @@ function StudentDashboard({ t }) {
                       />
                       <Typography
                         variant="caption"
-                        className="!shrink-0 !font-bold !tabular-nums !text-slate-700"
+                        className="!shrink-0 !font-bold !tabular-nums !text-slate-700 dark:!text-slate-300"
                       >
                         {pct}% {t('home.student.tasks.progressLabel')}
                       </Typography>
@@ -448,7 +431,7 @@ function StudentDashboard({ t }) {
             </div>
             <Button
               size="small"
-              className="!mt-3 !w-full !font-semibold !text-sky-700 hover:!bg-sky-50"
+              className="!mt-3 !w-full !font-semibold !text-sky-700 hover:!bg-sky-50 dark:!text-sky-400 dark:hover:!bg-sky-950"
             >
               {t('home.student.assignLink')}
             </Button>
@@ -456,7 +439,7 @@ function StudentDashboard({ t }) {
         </aside>
       </div>
 
-      <Typography variant="body2" className="!mt-5 !text-slate-600">
+      <Typography variant="body2" className="!mt-5 !text-slate-600 dark:!text-slate-400">
         {t('home.student.dashboardHint')}
       </Typography>
     </section>
@@ -562,7 +545,7 @@ export default function Home() {
 
   return (
     <div className="flex w-full min-h-0 flex-1 flex-col">
-      <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-sky-200/45 bg-gradient-to-b from-white via-sky-50/35 to-slate-50 px-2 py-5 shadow-[0_1px_3px_rgba(15,23,42,0.04)] ring-1 ring-sky-100/40 sm:px-4 sm:py-7">
+      <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-sky-200/45 bg-gradient-to-b from-white via-sky-50/35 to-slate-50 px-2 py-5 shadow-[0_1px_3px_rgba(15,23,42,0.04)] ring-1 ring-sky-100/40 transition-colors dark:border-slate-700/45 dark:bg-gradient-to-b dark:from-slate-900 dark:via-slate-950 dark:to-indigo-950/40 dark:shadow-black/10 dark:ring-slate-600/40 sm:px-4 sm:py-7">
         {showStudentDash ? <StudentDashboard t={t} /> : null}
         {showStudentDash ? <StudentFacultyBanner t={t} /> : null}
 
@@ -693,20 +676,20 @@ export default function Home() {
             <Box className="mb-8 text-center md:text-left">
               <Typography
                 variant="overline"
-                className="!font-semibold !tracking-widest !text-sky-600"
+                className="!font-semibold !tracking-widest !text-sky-600 dark:!text-sky-400"
               >
                 {t('home.univOverline')}
               </Typography>
               <Typography
                 variant="h4"
                 component="h2"
-                className="!mt-1 !font-bold !text-slate-800"
+                className="!mt-1 !font-bold !text-slate-800 dark:!text-white"
               >
                 {t('home.univTitle')}
               </Typography>
               <Typography
                 variant="body1"
-                className="!mt-2 !max-w-2xl !text-slate-600 md:mx-0 mx-auto"
+                className="!mt-2 !max-w-2xl !text-slate-600 md:mx-0 mx-auto dark:!text-slate-400"
               >
                 {t('home.univBody')}
               </Typography>
@@ -735,20 +718,20 @@ export default function Home() {
             <Box className="mb-8 text-center md:text-left">
               <Typography
                 variant="overline"
-                className="!font-semibold !tracking-widest !text-sky-600"
+                className="!font-semibold !tracking-widest !text-sky-600 dark:!text-sky-400"
               >
                 {t('home.student.subjects.overline')}
               </Typography>
               <Typography
                 variant="h4"
                 component="h2"
-                className="!mt-1 !font-bold !text-slate-800"
+                className="!mt-1 !font-bold !text-slate-800 dark:!text-white"
               >
                 {t('home.student.subjects.title')}
               </Typography>
               <Typography
                 variant="body1"
-                className="!mt-2 !max-w-2xl !text-slate-600 md:mx-0 mx-auto"
+                className="!mt-2 !max-w-2xl !text-slate-600 md:mx-0 mx-auto dark:!text-slate-400"
               >
                 {t('home.student.subjects.body')}
               </Typography>
@@ -777,20 +760,20 @@ export default function Home() {
             <Box className="mb-8 text-center md:text-left">
               <Typography
                 variant="overline"
-                className="!font-semibold !tracking-widest !text-sky-600"
+                className="!font-semibold !tracking-widest !text-sky-600 dark:!text-sky-400"
               >
                 {role === 'admin' ? t('home.admin.overline') : t('home.catOverline')}
               </Typography>
               <Typography
                 variant="h4"
                 component="h2"
-                className="!mt-1 !font-bold !text-slate-800"
+                className="!mt-1 !font-bold !text-slate-800 dark:!text-white"
               >
                 {role === 'admin' ? t('home.admin.browseCategories') : t('home.catTitle')}
               </Typography>
               <Typography
                 variant="body1"
-                className="!mt-2 !max-w-2xl !text-slate-600 md:mx-0 mx-auto"
+                className="!mt-2 !max-w-2xl !text-slate-600 md:mx-0 mx-auto dark:!text-slate-400"
               >
                 {t('home.catBody')}
               </Typography>
