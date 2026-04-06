@@ -98,7 +98,7 @@ export default function Header() {
         <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-6 md:gap-8">
           <a
             href="/"
-            className="shrink-0 select-none bg-gradient-to-r from-slate-900 via-sky-700 to-sky-600 bg-clip-text text-3xl font-black tracking-tight text-transparent no-underline outline-none ring-sky-500/0 focus-visible:ring-2 focus-visible:ring-offset-2 dark:from-sky-200 dark:via-sky-400 dark:to-indigo-300 sm:text-4xl"
+            className="-mt-2 shrink-0 select-none bg-gradient-to-r from-slate-900 via-sky-700 to-sky-600 bg-clip-text text-3xl font-black tracking-tight text-transparent no-underline outline-none ring-sky-500/0 focus-visible:ring-2 focus-visible:ring-offset-2 dark:from-sky-200 dark:via-sky-400 dark:to-indigo-300 sm:text-4xl"
             style={{
               fontFamily:
                 'ui-rounded, "Nunito", "Segoe UI", system-ui, -apple-system, sans-serif',
