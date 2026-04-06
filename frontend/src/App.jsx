@@ -3,6 +3,7 @@ import Home from "./pages/Home.jsx";
 import Header from "./components/ui/Header.jsx";
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
+import About from './pages/About.jsx';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import 'swiper/css';
 
@@ -19,6 +20,7 @@ function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/about" element={<About />} />
             <Route path="/" element={<Home />} />
           </Routes>
         </div>

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useAppPreferences } from '../../context/appPreferencesContext.js'
 import { GB, AL } from 'country-flag-icons/react/3x2'
 
@@ -40,7 +41,8 @@ export default function Header() {
   const profileMenuId = useId()
 
   const navLinks = [
-    { label: t('header.navHome'), href: '#' },
+    { label: t('header.navHome'), href: '/' },
+    { label: t('header.navAbout'), href: '/about' },
     { label: t('header.navCourses'), href: '#' },
     { label: t('header.navAssignments'), href: '#' },
     { label: t('header.navLibrary'), href: '#' },
@@ -109,11 +111,17 @@ export default function Header() {
             className="hidden min-w-0 items-center gap-0.5 overflow-x-auto md:flex lg:gap-1"
             aria-label={t('header.mainNav')}
           >
-            {navLinks.map(({ label, href }) => (
-              <a key={label} href={href} className={`whitespace-nowrap ${linkFocusClass}`}>
-                {label}
-              </a>
-            ))}
+            {navLinks.map(({ label, href }) =>
+              href.startsWith('/') && href !== '#' ? (
+                <Link key={label} to={href} className={`whitespace-nowrap ${linkFocusClass}`}>
+                  {label}
+                </Link>
+              ) : (
+                <a key={label} href={href} className={`whitespace-nowrap ${linkFocusClass}`}>
+                  {label}
+                </a>
+              ),
+            )}
           </nav>
         </div>
 
@@ -338,15 +346,25 @@ export default function Header() {
             </button>
           </div>
           <nav className="flex flex-col gap-1" aria-label={t('header.mainNav')}>
-            {navLinks.map(({ label, href }) => (
-              <a
-                key={label}
-                href={href}
-                className="rounded-xl px-3 py-3 text-sm font-medium text-slate-800 no-underline outline-none ring-sky-500/0 hover:bg-slate-900/[0.06] focus-visible:ring-2 focus-visible:ring-sky-500"
-              >
-                {label}
-              </a>
-            ))}
+            {navLinks.map(({ label, href }) =>
+              href.startsWith('/') && href !== '#' ? (
+                <Link
+                  key={label}
+                  to={href}
+                  className="rounded-xl px-3 py-3 text-sm font-medium text-slate-800 no-underline outline-none ring-sky-500/0 hover:bg-slate-900/[0.06] focus-visible:ring-2 focus-visible:ring-sky-500 dark:text-slate-100 dark:hover:bg-white/10"
+                >
+                  {label}
+                </Link>
+              ) : (
+                <a
+                  key={label}
+                  href={href}
+                  className="rounded-xl px-3 py-3 text-sm font-medium text-slate-800 no-underline outline-none ring-sky-500/0 hover:bg-slate-900/[0.06] focus-visible:ring-2 focus-visible:ring-sky-500 dark:text-slate-100 dark:hover:bg-white/10"
+                >
+                  {label}
+                </a>
+              ),
+            )}
           </nav>
           <div className="mt-4 flex flex-col gap-2 border-t border-slate-200/80 pt-4">
             <div className="flex items-center gap-3 rounded-xl bg-sky-50/70 px-3 py-2 ring-1 ring-slate-200/60">
