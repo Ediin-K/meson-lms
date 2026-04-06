@@ -26,7 +26,7 @@ import Footer from '../components/ui/Footer.jsx'
 import heroImg from '../assets/images/ubt.webp'
 
 const cardBase =
-  'rounded-2xl border border-sky-100/90 bg-white/95 shadow-md shadow-sky-100/30 transition duration-300 dark:border-slate-700/90 dark:bg-slate-900/85 dark:shadow-slate-950/40'
+  'rounded-2xl border border-slate-200/90 bg-slate-50/50 shadow-md shadow-sky-100/30 transition duration-300 dark:!border-slate-700/90 dark:!bg-slate-900/50 dark:shadow-slate-950/40'
 
 const cardHover =
   'hover:-translate-y-1 hover:border-sky-200/90 hover:shadow-lg hover:shadow-sky-200/40 dark:hover:border-sky-600/50 dark:hover:shadow-sky-900/30'
