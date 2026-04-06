@@ -15,7 +15,6 @@ import LinearProgress from '@mui/material/LinearProgress'
 import Typography from '@mui/material/Typography'
 
 import ArrowForwardRounded from '@mui/icons-material/ArrowForwardRounded'
-import MenuBookRounded from '@mui/icons-material/MenuBookRounded'
 import PaletteRounded from '@mui/icons-material/PaletteRounded'
 import CodeRounded from '@mui/icons-material/CodeRounded'
 import GraphicEqRounded from '@mui/icons-material/GraphicEqRounded'
@@ -24,7 +23,6 @@ import ViewQuiltRounded from '@mui/icons-material/ViewQuiltRounded'
 import ThreeDRotationRounded from '@mui/icons-material/ThreeDRotationRounded'
 import CampaignRounded from '@mui/icons-material/CampaignRounded'
 import SchoolRounded from '@mui/icons-material/SchoolRounded'
-import OpenInNewRounded from '@mui/icons-material/OpenInNewRounded'
 import ChevronLeftRounded from '@mui/icons-material/ChevronLeftRounded'
 import ChevronRightRounded from '@mui/icons-material/ChevronRightRounded'
 import AssignmentTurnedInRounded from '@mui/icons-material/AssignmentTurnedInRounded'
@@ -173,7 +171,7 @@ const categories = [
 ]
 
 const cardShell =
-  'group overflow-hidden rounded-[1.35rem] border border-sky-100/90 bg-white/90 shadow-md shadow-sky-100/40 transition duration-300 hover:-translate-y-1 hover:border-sky-200 hover:shadow-lg hover:shadow-sky-200/50 dark:border-slate-700/90 dark:bg-slate-900/85 dark:shadow-black/40 dark:hover:border-slate-600 dark:hover:shadow-black/50'
+  'group overflow-hidden rounded-[1.35rem] border border-sky-100/90 bg-white/90 shadow-md shadow-sky-100/40 transition duration-300 hover:-translate-y-1 hover:border-sky-200 hover:shadow-lg hover:shadow-sky-200/50 dark:!border-slate-600 dark:!bg-slate-800 dark:!shadow-black/50 dark:hover:!border-slate-500 dark:hover:!shadow-black/60'
 
 const mediaShell = 'relative aspect-[16/10] overflow-hidden rounded-t-[1.35rem] bg-slate-100 dark:bg-slate-800'
 
@@ -183,8 +181,6 @@ function SpotlightCard({
   icon,
   chip,
   chipColor,
-  actionLabel,
-  actionExternal,
   imgLoading,
 }) {
   const IconGlyph = icon
@@ -267,7 +263,7 @@ function StudentFacultyBanner({ t }) {
       <Typography variant="body2" className="!mt-2 !max-w-2xl !text-slate-600 dark:!text-slate-400">
         {t('home.student.facultyBody')}
       </Typography>
-      <div className="mt-4 flex flex-col gap-3 rounded-xl border border-sky-100/80 bg-white/90 px-4 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-slate-600/80 dark:bg-slate-900/85">
+      <div className="mt-4 flex flex-col gap-3 rounded-xl border border-sky-100/80 bg-white/90 px-4 py-4 sm:flex-row sm:items-center sm:justify-between dark:!border-slate-600/80 dark:!bg-slate-900/85">
         <div className="flex items-start gap-3">
           <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-sky-100 text-sky-700 dark:bg-sky-900/50 dark:text-sky-300">
             <SchoolRounded />
@@ -293,7 +289,7 @@ function StudentDashboard({ t }) {
   return (
 
     <section
-      className="mb-6 rounded-2xl border border-sky-200/60 bg-white/90 p-4 shadow-sm ring-1 ring-sky-100/50 sm:p-6 dark:border-slate-700/60 dark:bg-slate-900/85 dark:ring-slate-600/50"
+      className="mb-6 rounded-2xl border border-sky-200/60 bg-white/90 p-4 shadow-sm ring-1 ring-sky-100/50 sm:p-6 dark:!border-slate-700/60 dark:!bg-slate-900/85 dark:!ring-slate-600/50"
       aria-labelledby="student-dash-heading"
     >
       <Typography
@@ -314,7 +310,7 @@ function StudentDashboard({ t }) {
             elevation={0}
             component="section"
             aria-labelledby="student-news-heading"
-            className="h-full rounded-2xl border border-amber-200/55 bg-amber-50/35 p-4 ring-1 ring-amber-100/60 dark:border-amber-700/55 dark:bg-amber-950/35 dark:ring-amber-600/60"
+            className="h-full rounded-2xl border border-slate-200/90 bg-slate-50/50 p-4 dark:!border-slate-700/90 dark:!bg-slate-900/50"
           >
             <Typography
               id="student-news-heading"
@@ -343,7 +339,7 @@ function StudentDashboard({ t }) {
         <div className="order-1 lg:order-2 lg:col-span-6">
           <Card
             elevation={0}
-            className="flex h-full min-h-[220px] flex-col justify-center rounded-2xl border border-sky-200/80 bg-gradient-to-br from-sky-50/90 via-white to-sky-50/40 p-5 sm:min-h-[260px] sm:p-6 dark:border-slate-700/80 dark:bg-gradient-to-br dark:from-slate-900/90 dark:via-slate-950 dark:to-slate-950/40"
+            className="flex h-full min-h-[220px] flex-col justify-center rounded-2xl border border-slate-200/90 bg-slate-50/50 p-5 sm:min-h-[260px] sm:p-6 dark:!border-slate-700/90 dark:!bg-slate-900/50"
           >
             <Typography variant="subtitle1" className="!font-bold !text-slate-900 dark:!text-white">
               {t('home.student.continueTitle')}
@@ -368,7 +364,7 @@ function StudentDashboard({ t }) {
             elevation={0}
             component="section"
             aria-labelledby="student-tasks-heading"
-            className="h-full rounded-2xl border border-slate-200/90 bg-slate-50/50 p-4 dark:border-slate-700/90 dark:bg-slate-900/50"
+            className="h-full rounded-2xl border border-slate-200/90 bg-slate-50/50 p-4 dark:!border-slate-700/90 dark:!bg-slate-900/50"
           >
             <Typography
               id="student-tasks-heading"
