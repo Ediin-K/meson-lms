@@ -4,7 +4,8 @@ import Header from "./components/ui/Header.jsx";
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
 import About from './pages/About.jsx';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import CourseDetail from './pages/CourseDetail.jsx';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import 'swiper/css';
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/about" element={<About />} />
+            <Route path="/course/:courseId" element={<CourseDetail />} />
             <Route path="/" element={<Home />} />
           </Routes>
         </div>
