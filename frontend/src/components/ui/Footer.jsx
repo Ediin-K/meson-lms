@@ -28,7 +28,7 @@ export default function Footer() {
     [t('header.navHome'), '#'],
     [t('header.navCourses'), '#'],
     [t('header.navAssignments'), '#'],
-    [t('header.navLibrary'), '#'],
+    [t('header.navLibrary'), 'https://www.ubt-uni.net/sq/ubt/jeta-ne-kampus/ubt-biblioteka/'],
   ]
 
   const legal = [
