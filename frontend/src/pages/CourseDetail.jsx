@@ -31,10 +31,10 @@ export default function CourseDetail(){
     return (
         <Container maxWidth="lg" className="!px-0 sm:!px-3" sx={{ mt: 6, mb: 6 }}>
             {/* Header */}
-            <Box className="mb-8">
+            <Box className="mb-8 flex items-center justify-between">
                 <Link
                     to="/"
-                    className="inline-flex items-center gap-2 mb-4 text-sky-600 hover:text-sky-700 dark:text-sky-400 dark:hover:text-sky-300"
+                    className="inline-flex items-center gap-2 text-sky-600 hover:text-sky-700 dark:text-sky-400 dark:hover:text-sky-300"
                 >
                     <ArrowBackRounded fontSize="small" />
                     {t('course.backToSubjects')}
@@ -45,20 +45,20 @@ export default function CourseDetail(){
                 >
                     {t('course.subjectDetail')}
                 </Typography>
-                <Typography
-                    variant="h4"
-                    component="h1"
-                    className="!mt-1 !font-bold !text-slate-800 dark:!text-white"
-                >
-                    {course.title}
-                </Typography>
-                <Typography variant="body1" className="!mt-2 !text-slate-600 dark:!text-slate-400">
-                    {course.description}
-                </Typography>
-                <Typography variant="body2" className="!mt-3 !text-slate-600 dark:!text-slate-400">
-                    {course.meta}
-                </Typography>
             </Box>
+            <Typography
+                variant="h4"
+                component="h1"
+                className="!mt-1 !font-bold !text-slate-800 dark:!text-white"
+            >
+                {course.title}
+            </Typography>
+            <Typography variant="body1" className="!mt-2 !text-slate-600 dark:!text-slate-400">
+                {course.description}
+            </Typography>
+            <Typography variant="body2" className="!mt-3 !text-slate-600 dark:!text-slate-400">
+                {course.meta}
+            </Typography>
 
             {/* Lessons Grid */}
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
