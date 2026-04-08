@@ -109,9 +109,9 @@ export default function Contact() {
                             fullWidth
                             sx={inputStyle}
                         >
-                            <MenuItem value="platform">Platform</MenuItem>
-                            <MenuItem value="course">Course</MenuItem>
-                            <MenuItem value="account">Account</MenuItem>
+                            <MenuItem value="platform">Platforma</MenuItem>
+                            <MenuItem value="course">Kursi</MenuItem>
+                            <MenuItem value="account">Llogaria</MenuItem>
                             <MenuItem value="other">Tjeter</MenuItem>
                         </TextField>
                         <TextField
