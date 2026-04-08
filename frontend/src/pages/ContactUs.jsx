@@ -23,6 +23,12 @@ const inputStyle = {
     '.dark & .MuiOutlinedInput-root fieldset': { borderColor: '#334155' },
 }
 
+const SELECT_SLOT_PROPS = {
+    select: {
+        MenuProps: { disableScrollLock: true },
+    },
+}
+
 const isValidEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
 
 const initialForm = {
@@ -35,10 +41,10 @@ const initialForm = {
 
 function validate(form) {
     const e = {}
-    if (!form.name.trim()) e.name = 'Kjo fushë është e detyrueshme.'
-    if (!isValidEmail(form.email)) e.email = 'Shkruani një email të vlefshëm.'
-    if (!form.role) e.role = 'Kjo fushë është e detyrueshme.'
-    if (!form.topic) e.topic = 'Kjo fushë është e detyrueshme.'
+    if (!form.name.trim()) e.name = 'E detyrueshme.'
+    if (!isValidEmail(form.email)) e.email = 'Email i pavlefshëm.'
+    if (!form.role) e.role = 'E detyrueshme.'
+    if (!form.topic) e.topic = 'E detyrueshme.'
     if (form.message.trim().length < 15) e.message = 'Minimum 15 karaktere.'
     return e
 }
@@ -87,20 +93,13 @@ export default function Contact() {
                 </Box>
 
                 {submitted && (
-                    <Alert
-                        severity="success"
-                        onClose={() => setSubmitted(false)}
-                    >
+                    <Alert severity="success" onClose={() => setSubmitted(false)}>
                         Mesazhi u dërgua me sukses. Do t'ju kthejmë përgjigje së shpejti.
                     </Alert>
                 )}
 
-                <Box
-                    component="form"
-                    onSubmit={handleSubmit}
-                    noValidate
-                    className="space-y-4"
-                >
+                <Box component="form" onSubmit={handleSubmit} noValidate className="space-y-4">
+
                     <TextField
                         label="Emri i plotë"
                         value={form.name}
@@ -133,6 +132,7 @@ export default function Contact() {
                         helperText={errors.role}
                         fullWidth
                         sx={inputStyle}
+                        slotProps={SELECT_SLOT_PROPS}
                     >
                         <MenuItem value="student">Student</MenuItem>
                         <MenuItem value="teacher">Mësues / Instruktor</MenuItem>
@@ -149,6 +149,7 @@ export default function Contact() {
                         helperText={errors.topic}
                         fullWidth
                         sx={inputStyle}
+                        slotProps={SELECT_SLOT_PROPS}
                     >
                         <MenuItem value="access">Problem hyrje / llogarie</MenuItem>
                         <MenuItem value="course">Pyetje për kurs</MenuItem>
@@ -205,12 +206,10 @@ export default function Contact() {
                             Pastro
                         </Button>
                     </Box>
+
                 </Box>
 
-                <Typography
-                    variant="caption"
-                    className="block text-center text-slate-400 dark:text-slate-500"
-                >
+                <Typography variant="caption" className="block text-center text-slate-400 dark:text-slate-500">
                     Mund të na gjeni edhe në{' '}
                     <span className="text-indigo-500">support@meson.edu</span>
                 </Typography>
