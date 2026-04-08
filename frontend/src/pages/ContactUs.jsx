@@ -5,69 +5,66 @@ import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import Box from '@mui/material/Box'
 import Alert from '@mui/material/Alert'
-import Grid from '@mui/material/Grid'
 import MenuItem from '@mui/material/MenuItem'
-import Checkbox from '@mui/material/Checkbox'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import LinearProgress from '@mui/material/LinearProgress'
 
 const inputStyle = {
     '& .MuiInputBase-input': { color: '#0f172a' },
     '& .MuiInputBase-input::placeholder': { color: '#64748b', opacity: 1 },
     '& .MuiInputLabel-root': { color: '#475569' },
-    '& .MuiInputLabel-root.Mui-focused': { color: '#0284c7' },
+    '& .MuiInputLabel-root.Mui-focused': { color: '#4F46E5' },
     '& .MuiOutlinedInput-root': {
-        '& fieldset': { borderColor: '#cbd5f5' },
+        '& fieldset': { borderColor: '#e2e8f0' },
         '&:hover fieldset': { borderColor: '#94a3b8' },
-        '&.Mui-focused fieldset': { borderColor: '#0284c7' },
+        '&.Mui-focused fieldset': { borderColor: '#4F46E5' },
     },
-    '.dark & .MuiInputBase-input': { color: '#fff' },
-    '.dark & .MuiInputBase-input::placeholder': { color: '#fff', opacity: 0.6 },
-    '.dark & .MuiInputLabel-root': { color: '#fff' },
-    '.dark & .MuiOutlinedInput-root fieldset': { borderColor: '#94a3b8' },
+    '.dark & .MuiInputBase-input': { color: '#f1f5f9' },
+    '.dark & .MuiInputBase-input::placeholder': { color: '#94a3b8', opacity: 1 },
+    '.dark & .MuiInputLabel-root': { color: '#94a3b8' },
+    '.dark & .MuiOutlinedInput-root fieldset': { borderColor: '#334155' },
+}
+
+const isValidEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
+
+const initialForm = {
+    name: '',
+    email: '',
+    role: '',
+    topic: '',
+    message: '',
+}
+
+function validate(form) {
+    const e = {}
+    if (!form.name.trim()) e.name = 'Kjo fushë është e detyrueshme.'
+    if (!isValidEmail(form.email)) e.email = 'Shkruani një email të vlefshëm.'
+    if (!form.role) e.role = 'Kjo fushë është e detyrueshme.'
+    if (!form.topic) e.topic = 'Kjo fushë është e detyrueshme.'
+    if (form.message.trim().length < 15) e.message = 'Minimum 15 karaktere.'
+    return e
 }
 
 export default function Contact() {
-    const initialForm = {
-        category: '',
-        course: '',
-        subject: '',
-        message: '',
-        name: '',
-        email: '',
-        consent: false,
-    }
-
     const [form, setForm] = useState(initialForm)
     const [errors, setErrors] = useState({})
     const [submitted, setSubmitted] = useState(false)
 
-    const messageProgress = useMemo(() => Math.min(100, (form.message.length / 600) * 100), [form.message])
+    const charCount = useMemo(() => Math.min(form.message.length, 600), [form.message])
 
     const handleChange = (field) => (e) => {
-        const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value
+        let value = e.target.value
+        if (field === 'message' && value.length > 600) value = value.slice(0, 600)
         setForm((p) => ({ ...p, [field]: value }))
         setErrors((p) => ({ ...p, [field]: undefined }))
         setSubmitted(false)
     }
 
-    const validate = () => {
-        const e = {}
-        if (!form.category) e.category = 'Required'
-        if (!form.subject.trim()) e.subject = 'Required'
-        if (form.message.trim().length < 15) e.message = 'Too short'
-        if (!form.name.trim()) e.name = 'Required'
-        if (!form.email.trim()) e.email = 'Required'
-        if (!form.consent) e.consent = 'Required'
-        return e
-    }
-
     const handleSubmit = (e) => {
         e.preventDefault()
-        const err = validate()
+        const err = validate(form)
         setErrors(err)
         if (Object.keys(err).length) return
         setSubmitted(true)
+        setForm(initialForm)
     }
 
     const handleReset = () => {
@@ -78,158 +75,146 @@ export default function Contact() {
 
     return (
         <Container maxWidth="sm" className="!py-10">
-            <Box className="rounded-3xl border p-6 shadow-xl bg-white dark:bg-slate-900 space-y-6">
-                <Box className="text-center mb-4">
-                    <Typography className="font-bold text-slate-900 dark:text-white text-xl md:text-2xl">
-                        Support
+            <Box className="space-y-6 rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xl dark:border-slate-700/90 dark:bg-slate-900">
+
+                <Box className="text-center">
+                    <Typography variant="h5" className="font-bold text-slate-900 dark:text-white">
+                        Na kontaktoni
                     </Typography>
-                    <Typography className="mt-1 text-slate-600 dark:text-white">
-                        Na trego problemin tend
+                    <Typography variant="body2" className="mt-1 text-slate-500 dark:text-slate-400">
+                        Ekipi ynë i mbështetjes ju përgjigjet brenda 24 orëve.
                     </Typography>
                 </Box>
 
                 {submitted && (
-                    <Alert severity="success">
-                        Kerkesa u dergua ✔
+                    <Alert
+                        severity="success"
+                        onClose={() => setSubmitted(false)}
+                    >
+                        Mesazhi u dërgua me sukses. Do t'ju kthejmë përgjigje së shpejti.
                     </Alert>
                 )}
 
-                <Box component="form" onSubmit={handleSubmit} className="space-y-6">
-                    <Box className="p-4 border rounded-lg bg-slate-50 dark:bg-slate-800 space-y-3">
-                        <Typography className="font-semibold text-slate-800 dark:text-white">
-                            Problemi
-                        </Typography>
-                        <TextField
-                            select
-                            label="Kategoria"
-                            value={form.category}
-                            onChange={handleChange('category')}
-                            error={!!errors.category}
-                            helperText={errors.category}
-                            fullWidth
-                            sx={inputStyle}
-                        >
-                            <MenuItem value="platform">Platforma</MenuItem>
-                            <MenuItem value="course">Kursi</MenuItem>
-                            <MenuItem value="account">Llogaria</MenuItem>
-                            <MenuItem value="other">Tjeter</MenuItem>
-                        </TextField>
-                        <TextField
-                            label="Subjekti"
-                            value={form.subject}
-                            onChange={handleChange('subject')}
-                            error={!!errors.subject}
-                            helperText={errors.subject}
-                            fullWidth
-                            sx={inputStyle}
-                        />
-                        <TextField
-                            label="Kursi (opsional)"
-                            value={form.course}
-                            onChange={handleChange('course')}
-                            fullWidth
-                            sx={inputStyle}
-                        />
-                    </Box>
+                <Box
+                    component="form"
+                    onSubmit={handleSubmit}
+                    noValidate
+                    className="space-y-4"
+                >
+                    <TextField
+                        label="Emri i plotë"
+                        value={form.name}
+                        onChange={handleChange('name')}
+                        error={!!errors.name}
+                        helperText={errors.name}
+                        fullWidth
+                        autoComplete="name"
+                        sx={inputStyle}
+                    />
 
-                    <Box className="p-4 border rounded-lg bg-slate-50 dark:bg-slate-800 space-y-3">
-                        <Typography className="font-semibold text-slate-800 dark:text-white">
-                            Pershkrimi
-                        </Typography>
-                        <TextField
-                            label="Shpjego problemin..."
-                            value={form.message}
-                            onChange={handleChange('message')}
-                            error={!!errors.message}
-                            helperText={
-                                errors.message ? errors.message :
-                                    <span className="dark:text-white">{form.message.length}/600</span>
-                            }
-                            multiline
-                            minRows={6}
-                            fullWidth
-                            sx={inputStyle}
-                        />
-                        <LinearProgress
-                            value={messageProgress}
-                            variant="determinate"
-                            className="mt-2"
-                        />
-                    </Box>
+                    <TextField
+                        label="Adresa e emailit"
+                        type="email"
+                        value={form.email}
+                        onChange={handleChange('email')}
+                        error={!!errors.email}
+                        helperText={errors.email}
+                        fullWidth
+                        autoComplete="email"
+                        sx={inputStyle}
+                    />
 
-                    <Box className="p-4 border rounded-lg bg-slate-50 dark:bg-slate-800 space-y-3">
-                        <Typography className="font-semibold text-slate-800 dark:text-white">
-                            Informacioni yt
-                        </Typography>
-                        <Grid container spacing={3}>
-                            <Grid item xs={12} md={6}>
-                                <TextField
-                                    label="Emri"
-                                    value={form.name}
-                                    onChange={handleChange('name')}
-                                    error={!!errors.name}
-                                    helperText={errors.name}
-                                    fullWidth
-                                    sx={inputStyle}
-                                />
-                            </Grid>
-                            <Grid item xs={12} md={6}>
-                                <TextField
-                                    label="Email"
-                                    value={form.email}
-                                    onChange={handleChange('email')}
-                                    error={!!errors.email}
-                                    helperText={errors.email}
-                                    fullWidth
-                                    sx={inputStyle}
-                                />
-                            </Grid>
-                        </Grid>
-                    </Box>
+                    <TextField
+                        select
+                        label="Roli juaj"
+                        value={form.role}
+                        onChange={handleChange('role')}
+                        error={!!errors.role}
+                        helperText={errors.role}
+                        fullWidth
+                        sx={inputStyle}
+                    >
+                        <MenuItem value="student">Student</MenuItem>
+                        <MenuItem value="teacher">Mësues / Instruktor</MenuItem>
+                        <MenuItem value="parent">Prind</MenuItem>
+                        <MenuItem value="admin">Administrator</MenuItem>
+                    </TextField>
 
-                    <Box className="flex items-center gap-2">
-                        <FormControlLabel
-                            control={
-                                <Checkbox
-                                    checked={form.consent}
-                                    onChange={handleChange('consent')}
-                                    sx={{
-                                        color: '#0284c7',
-                                        '&.Mui-checked': { color: '#fff' },
-                                        '.MuiSvgIcon-root': { color: '#fff' },
-                                    }}
-                                />
-                            }
-                            label={<span className="dark:text-white">Pranoj kushtet</span>}
-                        />
+                    <TextField
+                        select
+                        label="Tema e mesazhit"
+                        value={form.topic}
+                        onChange={handleChange('topic')}
+                        error={!!errors.topic}
+                        helperText={errors.topic}
+                        fullWidth
+                        sx={inputStyle}
+                    >
+                        <MenuItem value="access">Problem hyrje / llogarie</MenuItem>
+                        <MenuItem value="course">Pyetje për kurs</MenuItem>
+                        <MenuItem value="grade">Notim / vlerësim</MenuItem>
+                        <MenuItem value="technical">Problem teknik</MenuItem>
+                        <MenuItem value="billing">Pagesë / abonim</MenuItem>
+                        <MenuItem value="other">Tjetër</MenuItem>
+                    </TextField>
+
+                    <TextField
+                        label="Mesazhi"
+                        value={form.message}
+                        onChange={handleChange('message')}
+                        error={!!errors.message}
+                        helperText={
+                            errors.message ?? (
+                                <span className="dark:text-slate-400">{charCount} / 600</span>
+                            )
+                        }
+                        multiline
+                        minRows={5}
+                        fullWidth
+                        sx={inputStyle}
+                    />
+
+                    <Box className="flex gap-3 pt-2">
                         <Button
-                            variant="text"
-                            size="small"
-                            className="!text-sky-400 dark:!text-sky-300"
-                            onClick={() => {}}
+                            type="submit"
+                            variant="contained"
+                            fullWidth
+                            sx={{
+                                backgroundColor: '#4F46E5',
+                                '&:hover': { backgroundColor: '#4338CA' },
+                                borderRadius: '12px',
+                                textTransform: 'none',
+                                fontWeight: 600,
+                                paddingY: '10px',
+                            }}
                         >
-                            Shiko kushtet
-                        </Button>
-                        {errors.consent && (
-                            <Typography className="text-red-500 text-sm">
-                                {errors.consent}
-                            </Typography>
-                        )}
-                    </Box>
-
-                    <Box className="flex flex-col gap-3">
-                        <Button type="submit" variant="contained" fullWidth>
-                            Dergo
+                            Dërgo mesazhin
                         </Button>
                         <Button
-                            onClick={handleReset}
+                            type="button"
                             variant="outlined"
-                            fullWidth
+                            onClick={handleReset}
+                            sx={{
+                                borderRadius: '12px',
+                                textTransform: 'none',
+                                borderColor: '#e2e8f0',
+                                color: '#64748b',
+                                '&:hover': { borderColor: '#94a3b8' },
+                            }}
                         >
-                            Reset
+                            Pastro
                         </Button>
                     </Box>
                 </Box>
+
+                <Typography
+                    variant="caption"
+                    className="block text-center text-slate-400 dark:text-slate-500"
+                >
+                    Mund të na gjeni edhe në{' '}
+                    <span className="text-indigo-500">support@meson.edu</span>
+                </Typography>
+
             </Box>
         </Container>
     )
