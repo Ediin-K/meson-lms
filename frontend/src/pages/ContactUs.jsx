@@ -187,7 +187,7 @@ export default function Contact() {
                         </Grid>
                     </Box>
 
-                    <Box className="flex flex-col items-start">
+                    <Box className="flex items-center gap-2">
                         <FormControlLabel
                             control={
                                 <Checkbox
@@ -202,6 +202,14 @@ export default function Contact() {
                             }
                             label={<span className="dark:text-white">Pranoj kushtet</span>}
                         />
+                        <Button
+                            variant="text"
+                            size="small"
+                            className="!text-sky-400 dark:!text-sky-300"
+                            onClick={() => {}}
+                        >
+                            Shiko kushtet
+                        </Button>
                         {errors.consent && (
                             <Typography className="text-red-500 text-sm">
                                 {errors.consent}
