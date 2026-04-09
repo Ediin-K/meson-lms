@@ -60,117 +60,6 @@ function chipLabel(chipKey, t) {
   return path ? t(path) : null
 }
 
-const universities = [
-  {
-    title: 'Universiteti UBT',
-    meta: 'Prishtinë · Kosovë',
-    chipKey: 'partner',
-    chipColor: 'primary',
-    icon: SchoolRounded,
-  },
-  {
-    title: 'Universiteti i Prishtinës',
-    meta: 'Prishtinë · Kosovë',
-    chipKey: null,
-    chipColor: 'default',
-    icon: SchoolRounded,
-  },
-  {
-    title: 'Universiteti i Tiranës',
-    meta: 'Tiranë · Shqipëri',
-    chipKey: null,
-    chipColor: 'default',
-    icon: SchoolRounded,
-  },
-  {
-    title: 'Universiteti Politeknik i Tiranës',
-    meta: 'Tiranë · Shqipëri',
-    chipKey: null,
-    chipColor: 'default',
-    icon: SchoolRounded,
-  },
-  {
-    title: 'Universiteti i Shkodrës',
-    meta: 'Shkodër · Shqipëri',
-    chipKey: null,
-    chipColor: 'default',
-    icon: SchoolRounded,
-  },
-  {
-    title: 'Universiteti i Prizrenit',
-    meta: 'Prizren · Kosovë',
-    chipKey: null,
-    chipColor: 'default',
-    icon: SchoolRounded,
-  },
-  {
-    title: 'Kolegji AAB',
-    meta: 'Prishtinë · Kosovë',
-    chipKey: null,
-    chipColor: 'default',
-    icon: SchoolRounded,
-  },
-  {
-    title: 'Universiteti i Elbasanit',
-    meta: 'Elbasan · Shqipëri',
-    chipKey: null,
-    chipColor: 'default',
-    icon: SchoolRounded,
-  },
-]
-
-const categories = [
-  {
-    title: 'Histori e artit',
-    meta: '-50% · 3 kurse',
-    icon: PaletteRounded,
-    chipKey: 'offer',
-    chipColor: 'error',
-  },
-  {
-    title: 'UI & UX',
-    meta: 'Së shpejti · 16 kurse',
-    icon: ViewQuiltRounded,
-    chipKey: 'soon',
-    chipColor: 'default',
-  },
-  {
-    title: 'Dizajn 3D',
-    meta: '4 kurse',
-    icon: ThreeDRotationRounded,
-    chipKey: null,
-    chipColor: 'default',
-  },
-  {
-    title: 'Media & PR',
-    meta: '9 kurse',
-    icon: CampaignRounded,
-    chipKey: null,
-    chipColor: 'default',
-  },
-  {
-    title: 'Programim',
-    meta: 'E re · 2 kurse',
-    icon: CodeRounded,
-    chipKey: 'new',
-    chipColor: 'success',
-  },
-  {
-    title: 'Muzikë',
-    meta: '6 kurse',
-    icon: GraphicEqRounded,
-    chipKey: null,
-    chipColor: 'default',
-  },
-  {
-    title: 'Gjuhë',
-    meta: '3 kurse',
-    icon: TranslateRounded,
-    chipKey: null,
-    chipColor: 'default',
-  },
-]
-
 const cardShell =
   'group overflow-hidden rounded-[1.35rem] border border-sky-100/90 bg-white/90 shadow-md shadow-sky-100/40 transition duration-300 hover:-translate-y-1 hover:border-sky-200 hover:shadow-lg hover:shadow-sky-200/50 dark:!border-slate-600 dark:!bg-slate-800 dark:!shadow-black/50 dark:hover:!border-slate-500 dark:hover:!shadow-black/60'
 
@@ -543,6 +432,116 @@ export default function Home() {
 
   const showMarketingHero = role === 'guest'
   const showStudentDash = role === 'student'
+  const universities = [
+    {
+      title: t('home.unis.t1.title'),
+      meta: t('home.unis.t1.meta'),
+      chipKey: 'partner',
+      chipColor: 'primary',
+      icon: SchoolRounded,
+    },
+    {
+      title: t('home.unis.t2.title'),
+      meta: t('home.unis.t2.meta'),
+      chipKey: null,
+      chipColor: 'default',
+      icon: SchoolRounded,
+    },
+    {
+      title: t('home.unis.t3.title'),
+      meta: t('home.unis.t3.meta'),
+      chipKey: null,
+      chipColor: 'default',
+      icon: SchoolRounded,
+    },
+    {
+      title: t('home.unis.t4.title'),
+      meta: t('home.unis.t4.meta'),
+      chipKey: null,
+      chipColor: 'default',
+      icon: SchoolRounded,
+    },
+    {
+      title: t('home.unis.t5.title'),
+      meta: t('home.unis.t5.meta'),
+      chipKey: null,
+      chipColor: 'default',
+      icon: SchoolRounded,
+    },
+    {
+      title: t('home.unis.t6.title'),
+      meta: t('home.unis.t6.meta'),
+      chipKey: null,
+      chipColor: 'default',
+      icon: SchoolRounded,
+    },
+    {
+      title: t('home.unis.t7.title'),
+      meta: t('home.unis.t7.meta'),
+      chipKey: null,
+      chipColor: 'default',
+      icon: SchoolRounded,
+    },
+    {
+      title: t('home.unis.t8.title'),
+      meta: t('home.unis.t8.meta'),
+      chipKey: null,
+      chipColor: 'default',
+      icon: SchoolRounded,
+    },
+  ];
+  const categories = [
+    {
+      title: t('home.categories.t1.title'),
+      meta: t('home.categories.t1.meta'),
+      icon: PaletteRounded,
+      chipKey: 'offer',
+      chipColor: 'error',
+    },
+    {
+      title: t('home.categories.t2.title'),
+      meta: t('home.categories.t2.meta'),
+      icon: ViewQuiltRounded,
+      chipKey: 'soon',
+      chipColor: 'default',
+    },
+    {
+      title: t('home.categories.t3.title'),
+      meta: t('home.categories.t3.meta'),
+      icon: ThreeDRotationRounded,
+      chipKey: null,
+      chipColor: 'default',
+    },
+    {
+      title: t('home.categories.t4.title'),
+      meta: t('home.categories.t4.meta'),
+      icon: CampaignRounded,
+      chipKey: null,
+      chipColor: 'default',
+    },
+    {
+      title: t('home.categories.t5.title'),
+      meta: t('home.categories.t5.meta'),
+      icon: CodeRounded,
+      chipKey: 'new',
+      chipColor: 'success',
+    },
+    {
+      title: t('home.categories.t6.title'),
+      meta: t('home.categories.t6.meta'),
+      icon: GraphicEqRounded,
+      chipKey: null,
+      chipColor: 'default',
+    },
+    {
+      title: t('home.categories.t7.title'),
+      meta: t('home.categories.t7.meta'),
+      icon: TranslateRounded,
+      chipKey: null,
+      chipColor: 'default',
+    },
+  ];
+
 
   return (
     <div className="flex w-full min-h-0 flex-1 flex-col">
