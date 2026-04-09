@@ -696,10 +696,10 @@ export default function Home() {
             </Box>
 
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {universities.map((u,i) => (
+              {universities.map((u) => (
                 <SpotlightCard
                   key={u.title}
-                  title={u.t(`home.categories.t${i}`)}
+                  title={u.title}
                   meta={u.meta}
                   icon={u.icon}
                   chip={chipLabel(u.chipKey, t)}
