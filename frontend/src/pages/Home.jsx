@@ -14,7 +14,6 @@ import Container from '@mui/material/Container'
 import IconButton from '@mui/material/IconButton'
 import LinearProgress from '@mui/material/LinearProgress'
 import Typography from '@mui/material/Typography'
-
 import ArrowForwardRounded from '@mui/icons-material/ArrowForwardRounded'
 import PaletteRounded from '@mui/icons-material/PaletteRounded'
 import CodeRounded from '@mui/icons-material/CodeRounded'
@@ -543,6 +542,7 @@ export default function Home() {
   ];
 
 
+
   return (
     <div className="flex w-full min-h-0 flex-1 flex-col">
       <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-sky-200/45 bg-gradient-to-b from-white via-sky-50/35 to-slate-50 px-2 py-5 shadow-[0_1px_3px_rgba(15,23,42,0.04)] ring-1 ring-sky-100/40 transition-colors dark:border-slate-700/45 dark:bg-gradient-to-b dark:from-slate-900 dark:via-slate-950 dark:to-indigo-950/40 dark:shadow-black/10 dark:ring-slate-600/40 sm:px-4 sm:py-7">
@@ -696,10 +696,10 @@ export default function Home() {
             </Box>
 
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {universities.map((u) => (
+              {universities.map((u,i) => (
                 <SpotlightCard
                   key={u.title}
-                  title={u.title}
+                  title={u.t(`home.categories.t${i}`)}
                   meta={u.meta}
                   icon={u.icon}
                   chip={chipLabel(u.chipKey, t)}
