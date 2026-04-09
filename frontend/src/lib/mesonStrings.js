@@ -223,6 +223,65 @@ export const STRINGS = {
       ctaFinalBody: 'Krijo llogari dhe eksploro kurset dhe mjedisin e Meson.',
       ctaRegister: 'Regjistrohu',
     },
+    support:{
+      header:{
+        h1:'Si mund t\'ju ndihmojmë?',
+        h2:'Gjeni përgjigjen në FAQ ose na dërgoni mesazh.',
+        faq:'Pyetje të shpeshta'
+      },
+      faq:{
+        q1: 'Si e ndryshoj fjalëkalimin?',
+        a1: 'Shko te Cilësimet → Siguria → Ndrysho fjalëkalimin. Do të marrësh një email konfirmimi.',
+        q2: 'Si dorëzoj një detyrë?',
+        a2:'Hyr në kurs → zgjidh detyrën → ngarko skedarin ose shkruaj përgjigjen → shtyp Dorëzo para afatit.',
+        q3: 'Nuk po më hapet kursi, çfarë bëj?',
+        a3: 'Provo me një shfletues tjetër ose pastro cache-in. Nëse problemi vazhdon, kontakto mësuesin ose na shkruaj.',
+        q4: 'Si shoh notën time?',
+        a4: "Shko te kursi → seksioni Notat. Notat shfaqen pasi mësuesi t'i vlerësojë punimet.",
+        q5: 'Si regjistrohem në një kurs të ri?',
+        a5: 'Shko te Kurset → Shfleto → gjej kursin dhe shtyp Regjistrohu. Disa kurse kërkojnë kod nga mësuesi.',
+        q6: 'Si kontaktoj mësuesin tim?',
+        a6: 'Hyr në kurs → shtyp butonin Mesazh pranë emrit të mësuesit, ose përdor seksionin Diskutimet.',
+      },
+      ask:{
+        h1:'Nuk gjete përgjigjen?',
+        h2:'Na shkruaj dhe t\'ju përgjigjemi brenda 24 orëve.',
+        btn:'Na shkruaj'
+      },
+      form:{
+        h1:'Dërgo një mesazh',
+        alert:'Mesazhi u dërgua. Do t\'ju kthejmë përgjigje së shpejti.',
+        name:'Emri i plotë',
+        email:'Adresa e emailit',
+        role:'Roli juaj',
+        topic:'Tema e mesazhit',
+        message:'Mesazhi',
+        send:'Dërgo mesazhin',
+        clear:'Pastro',
+        link:'Mund të na gjeni edhe në ',
+
+      },
+      role_options:{
+        s:'Student',
+        t:'Mesimdhënës',
+        p:'Prind',
+      },
+      topic:{
+        a:'Problem hyrje / llogarie',
+        c:'Pyetje për kurs',
+        g:'Notim / vlerësim',
+        t:'Problem teknik',
+        p:'Pagesë / abonim',
+        o:'Tjetër',
+      },
+      validate:{
+        name:'E detyrueshme',
+        email:'Email i pavlefshëm',
+        role:'E detyrueshme',
+        topic:'E detyrueshme',
+        message:'Minimum 15 karaktere'
+      }
+    },
     footer: {
       tagline:
         'Një LMS i fokusuar te përdoruesi: mësim i organizuar, komunikim i qartë dhe ndihmë kur ju nevojitet.',
@@ -429,6 +488,64 @@ export const STRINGS = {
         reports: 'Reports',
         users: 'Users',
         browseCategories: 'Course catalog by category',
+      },
+    },
+    support: {
+      header: {
+        h1: 'How can we help you?',
+        h2: 'Find the answer in the FAQ or send us a message.',
+        faq: 'Frequently Asked Questions'
+      },
+      faq: {
+        q1: 'How do I change my password?',
+        a1: 'Go to Settings → Security → Change password. You will receive a confirmation email.',
+        q2: 'How do I submit an assignment?',
+        a2: 'Enter the course → select the assignment → upload the file or write your answer → click Submit before the deadline.',
+        q3: 'The course is not opening, what should I do?',
+        a3: 'Try using another browser or clear your cache. If the problem continues, contact your teacher or write to us.',
+        q4: 'How can I see my grade?',
+        a4: 'Go to the course → Grades section. Grades appear after the teacher evaluates your work.',
+        q5: 'How do I enroll in a new course?',
+        a5: 'Go to Courses → Browse → find the course and click Enroll. Some courses require a code from the teacher.',
+        q6: 'How do I contact my teacher?',
+        a6: 'Enter the course → click the Message button next to the teacher’s name, or use the Discussions section.',
+      },
+      ask: {
+        h1: 'Didn’t find the answer?',
+        h2: 'Write to us and we will reply within 24 hours.',
+        btn: 'Contact us'
+      },
+      form: {
+        h1: 'Send a message',
+        alert: 'Message sent. We will get back to you shortly.',
+        name: 'Full name',
+        email: 'Email address',
+        role: 'Your role',
+        topic: 'Message topic',
+        message: 'Message',
+        send: 'Send message',
+        clear: 'Clear',
+        link: 'You can also find us at ',
+      },
+      role_options: {
+        s: 'Student',
+        t: 'Teacher',
+        p: 'Parent',
+      },
+      topic: {
+        a: 'Login / account issue',
+        c: 'Course question',
+        g: 'Grading / evaluation',
+        t: 'Technical issue',
+        p: 'Payment / subscription',
+        o: 'Other',
+      },
+      validate: {
+        name: 'Required',
+        email: 'Invalid email',
+        role: 'Required',
+        topic: 'Required',
+        message: 'Minimum 15 characters'
       },
     },
     about: {
