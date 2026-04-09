@@ -10,6 +10,10 @@ import Accordion from '@mui/material/Accordion'
 import AccordionSummary from '@mui/material/AccordionSummary'
 import AccordionDetails from '@mui/material/AccordionDetails'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import Footer from '../components/ui/Footer.jsx'
+import { useAppPreferences } from '../context/appPreferencesContext.js'
+
+
 
 const inputStyle = {
     '& .MuiInputBase-input': { color: '#0f172a' },
@@ -39,48 +43,6 @@ const ACCORDION_SX = {
     backgroundImage: 'none',
 }
 
-const FAQ_ITEMS = [
-    {
-        q: 'Si e ndryshoj fjalëkalimin?',
-        a: 'Shko te Cilësimet → Siguria → Ndrysho fjalëkalimin. Do të marrësh një email konfirmimi.',
-    },
-    {
-        q: 'Si dorëzoj një detyrë?',
-        a: 'Hyr në kurs → zgjidh detyrën → ngarko skedarin ose shkruaj përgjigjen → shtyp Dorëzo para afatit.',
-    },
-    {
-        q: 'Nuk po më hapet kursi, çfarë bëj?',
-        a: 'Provo me një shfletues tjetër ose pastro cache-in. Nëse problemi vazhdon, kontakto mësuesin ose na shkruaj.',
-    },
-    {
-        q: 'Si shoh notën time?',
-        a: "Shko te kursi → seksioni Notat. Notat shfaqen pasi mësuesi t'i vlerësojë punimet.",
-    },
-    {
-        q: 'Si regjistrohem në një kurs të ri?',
-        a: 'Shko te Kurset → Shfleto → gjej kursin dhe shtyp Regjistrohu. Disa kurse kërkojnë kod nga mësuesi.',
-    },
-    {
-        q: 'Si kontaktoj mësuesin tim?',
-        a: 'Hyr në kurs → shtyp butonin Mesazh pranë emrit të mësuesit, ose përdor seksionin Diskutimet.',
-    },
-]
-
-const ROLE_OPTIONS = [
-    { value: 'student', label: 'Student' },
-    { value: 'teacher', label: 'Mësues / Instruktor' },
-    { value: 'parent', label: 'Prind' },
-    { value: 'admin', label: 'Administrator' },
-]
-
-const TOPIC_OPTIONS = [
-    { value: 'access', label: 'Problem hyrje / llogarie' },
-    { value: 'course', label: 'Pyetje për kurs' },
-    { value: 'grade', label: 'Notim / vlerësim' },
-    { value: 'technical', label: 'Problem teknik' },
-    { value: 'billing', label: 'Pagesë / abonim' },
-    { value: 'other', label: 'Tjetër' },
-]
 
 const isValidEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
 
@@ -92,15 +54,7 @@ const initialForm = {
     message: '',
 }
 
-function validate(form) {
-    const e = {}
-    if (!form.name.trim()) e.name = 'E detyrueshme.'
-    if (!isValidEmail(form.email)) e.email = 'Email i pavlefshëm.'
-    if (!form.role) e.role = 'E detyrueshme.'
-    if (!form.topic) e.topic = 'E detyrueshme.'
-    if (form.message.trim().length < 15) e.message = 'Minimum 15 karaktere.'
-    return e
-}
+
 
 function SelectField({ label, value, onChange, error, helperText, options }) {
     return (
@@ -125,6 +79,7 @@ function SelectField({ label, value, onChange, error, helperText, options }) {
 }
 
 export default function Support() {
+    const { t } = useAppPreferences()
     const [form, setForm] = useState(initialForm)
     const [errors, setErrors] = useState({})
     const [submitted, setSubmitted] = useState(false)
@@ -155,179 +110,238 @@ export default function Support() {
         setSubmitted(false)
     }
 
+    const FAQ_ITEMS = [
+        {
+            q: t('support.faq.q1'),
+            a: t('support.faq.a1'),
+        },
+        {
+            q: t('support.faq.q2'),
+            a: t('support.faq.a2'),
+        },
+        {
+            q: t('support.faq.q3'),
+            a: t('support.faq.a3'),
+        },
+        {
+            q: t('support.faq.q4'),
+            a: t('support.faq.a4'),
+        },
+        {
+            q: t('support.faq.q5'),
+            a: t('support.faq.a5'),
+        },
+        {
+            q: t('support.faq.q6'),
+            a: t('support.faq.a6'),
+        },
+    ]
+    const ROLE_OPTIONS = [
+        { value: 'student', label: t('support.role_options.s') },
+        { value: 'teacher', label: t('support.role_options.t') },
+        { value: 'parent', label: t('support.role_options.p') },
+    ]
+
+
+    const TOPIC_OPTIONS = [
+        { value: 'access', label: t('support.topic.a') },
+        { value: 'course', label: t('support.topic.c')  },
+        { value: 'grade', label: t('support.topic.g')  },
+        { value: 'technical', label: t('support.topic.t')  },
+        { value: 'billing', label: t('support.topic.p')  },
+        { value: 'other', label: t('support.topic.o')  },
+    ]
+
+
+    function validate(form) {
+        const e = {}
+        if (!form.name.trim()) e.name = t('support.validate.name')
+        if (!isValidEmail(form.email)) e.email = t('support.validate.email')
+        if (!form.role) e.role = t('support.validate.role')
+        if (!form.topic) e.topic = t('support.validate.topic')
+        if (form.message.trim().length < 15) e.message = t('support.validate.message')
+        return e
+    }
+
+
     return (
-        <Container maxWidth="md" className="!py-10">
-            <Box className="space-y-8">
+        <Box className="flex min-h-screen flex-col">
+            <Container maxWidth="md" className="!flex-1 !py-10">
+                <Box className="space-y-8">
 
-                <Box className="text-center">
-                    <Typography variant="h5" className="font-bold text-slate-900 dark:text-white">
-                        Si mund t'ju ndihmojmë?
-                    </Typography>
-                    <Typography variant="body2" className="mt-1 text-slate-500 dark:text-slate-400">
-                        Gjeni përgjigjen në FAQ ose na dërgoni mesazh.
-                    </Typography>
-                </Box>
-
-                <Box className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm dark:border-slate-700/90 dark:bg-slate-900">
-                    <Typography variant="h6" className="mb-4 font-semibold text-slate-900 dark:text-white">
-                        Pyetje të shpeshta
-                    </Typography>
-                    {FAQ_ITEMS.map((item, i) => (
-                        <Accordion key={i} disableGutters elevation={0} sx={ACCORDION_SX}>
-                            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                                <Typography variant="body2" className="font-medium text-slate-800 dark:text-slate-100">
-                                    {item.q}
-                                </Typography>
-                            </AccordionSummary>
-                            <AccordionDetails>
-                                <Typography variant="body2" className="text-slate-500 dark:text-slate-400">
-                                    {item.a}
-                                </Typography>
-                            </AccordionDetails>
-                        </Accordion>
-                    ))}
-                </Box>
-
-                <Box className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200/90 bg-slate-50 p-5 dark:border-slate-700/90 dark:bg-slate-800/50">
-                    <Box>
-                        <Typography variant="body1" className="font-semibold text-slate-900 dark:text-white">
-                            Nuk gjete përgjigjen?
+                    <Box className="text-center">
+                        <Typography variant="h5" className="font-bold text-slate-900 dark:text-white">
+                            {t('support.header.h1')}
                         </Typography>
-                        <Typography variant="body2" className="text-slate-500 dark:text-slate-400">
-                            Na shkruaj dhe t'ju përgjigjemi brenda 24 orëve.
+                        <Typography variant="body2" className="mt-1 text-slate-500 dark:text-slate-400">
+                            {t('support.header.h2')}
                         </Typography>
                     </Box>
-                    <Button
-                        variant="contained"
-                        onClick={() => contactRef.current?.scrollIntoView({ behavior: 'smooth' })}
-                        sx={{
-                            backgroundColor: '#4F46E5',
-                            '&:hover': { backgroundColor: '#4338CA' },
-                            borderRadius: '10px',
-                            textTransform: 'none',
-                            fontWeight: 600,
-                        }}
+
+                    <Box className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm dark:border-slate-700/90 dark:bg-slate-900">
+                        <Typography variant="h6" className="mb-4 font-semibold text-slate-900 dark:text-white">
+                            {t('support.header.faq')}
+                        </Typography>
+                        {FAQ_ITEMS.map((item, i) => (
+                            <Accordion key={i} disableGutters elevation={0} sx={ACCORDION_SX}>
+                                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                                    <Typography variant="body2" className="font-medium text-slate-800 dark:text-slate-100">
+                                        {item.q}
+                                    </Typography>
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                    <Typography variant="body2" className="text-slate-500 dark:text-slate-400">
+                                        {item.a}
+                                    </Typography>
+                                </AccordionDetails>
+                            </Accordion>
+                        ))}
+                    </Box>
+
+                    <Box className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200/90 bg-slate-50 p-5 dark:border-slate-700/90 dark:bg-slate-800/50">
+                        <Box>
+                            <Typography variant="body1" className="font-semibold text-slate-900 dark:text-white">
+                                {t('support.ask.h1')}
+                            </Typography>
+                            <Typography variant="body2" className="text-slate-500 dark:text-slate-400">
+                                {t('support.ask.h2')}
+                            </Typography>
+                        </Box>
+                        <Button
+                            variant="contained"
+                            onClick={() => contactRef.current?.scrollIntoView({ behavior: 'smooth' })}
+                            sx={{
+                                backgroundColor: '#4F46E5',
+                                '&:hover': { backgroundColor: '#4338CA' },
+                                borderRadius: '10px',
+                                textTransform: 'none',
+                                fontWeight: 600,
+                            }}
+                        >
+                            {t('support.ask.btn')}
+                        </Button>
+                    </Box>
+
+                    <Box
+                        ref={contactRef}
+                        className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm dark:border-slate-700/90 dark:bg-slate-900"
                     >
-                        Na shkruaj
-                    </Button>
-                </Box>
+                        <Typography variant="h6" className="mb-5 font-semibold text-slate-900 dark:text-white">
+                            {t('support.form.h1')}
+                        </Typography>
 
-                <Box
-                    ref={contactRef}
-                    className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm dark:border-slate-700/90 dark:bg-slate-900"
-                >
-                    <Typography variant="h6" className="mb-5 font-semibold text-slate-900 dark:text-white">
-                        Dërgo një mesazh
-                    </Typography>
+                        {submitted && (
+                            <Alert severity="success" onClose={() => setSubmitted(false)} className="mb-4">
+                                {t('support.form.alert')}
+                            </Alert>
+                        )}
 
-                    {submitted && (
-                        <Alert severity="success" onClose={() => setSubmitted(false)} className="mb-4">
-                            Mesazhi u dërgua. Do t'ju kthejmë përgjigje së shpejti.
-                        </Alert>
-                    )}
+                        <Box component="form" onSubmit={handleSubmit} noValidate className="space-y-4">
 
-                    <Box component="form" onSubmit={handleSubmit} noValidate className="space-y-4">
+                            <Box className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <TextField
+                                    label={t('support.form.name')}
+                                    value={form.name}
+                                    onChange={handleChange('name')}
+                                    error={!!errors.name}
+                                    helperText={errors.name}
+                                    fullWidth
+                                    autoComplete="name"
+                                    sx={inputStyle}
+                                />
+                                <TextField
+                                    label={t('support.form.email')}
+                                    type="email"
+                                    value={form.email}
+                                    onChange={handleChange('email')}
+                                    error={!!errors.email}
+                                    helperText={errors.email}
+                                    fullWidth
+                                    autoComplete="email"
+                                    sx={inputStyle}
+                                />
+                            </Box>
 
-                        <Box className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <Box className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <SelectField
+                                    label={t('support.form.role')}
+                                    value={form.role}
+                                    onChange={handleChange('role')}
+                                    error={!!errors.role}
+                                    helperText={errors.role}
+                                    options={ROLE_OPTIONS}
+                                />
+                                <SelectField
+                                    label={t('support.form.topic')}
+                                    value={form.topic}
+                                    onChange={handleChange('topic')}
+                                    error={!!errors.topic}
+                                    helperText={errors.topic}
+                                    options={TOPIC_OPTIONS}
+                                />
+                            </Box>
+
                             <TextField
-                                label="Emri i plotë"
-                                value={form.name}
-                                onChange={handleChange('name')}
-                                error={!!errors.name}
-                                helperText={errors.name}
+                                label={t('support.form.message')}
+                                value={form.message}
+                                onChange={handleChange('message')}
+                                error={!!errors.message}
+                                helperText={
+                                    errors.message ?? (
+                                        <span className="dark:text-slate-400">{charCount} / 600</span>
+                                    )
+                                }
+                                multiline
+                                minRows={4}
                                 fullWidth
-                                autoComplete="name"
                                 sx={inputStyle}
                             />
-                            <TextField
-                                label="Adresa e emailit"
-                                type="email"
-                                value={form.email}
-                                onChange={handleChange('email')}
-                                error={!!errors.email}
-                                helperText={errors.email}
-                                fullWidth
-                                autoComplete="email"
-                                sx={inputStyle}
-                            />
+
+                            <Box className="flex gap-3 pt-1">
+                                <Button
+                                    type="submit"
+                                    variant="contained"
+                                    fullWidth
+                                    sx={{
+                                        backgroundColor: '#4F46E5',
+                                        '&:hover': { backgroundColor: '#4338CA' },
+                                        borderRadius: '10px',
+                                        textTransform: 'none',
+                                        fontWeight: 600,
+                                        paddingY: '10px',
+                                    }}
+                                >
+                                    {t('support.form.send')}
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant="outlined"
+                                    onClick={handleReset}
+                                    sx={{
+                                        borderRadius: '10px',
+                                        textTransform: 'none',
+                                        borderColor: '#e2e8f0',
+                                        color: '#64748b',
+                                        '&:hover': { borderColor: '#94a3b8' },
+                                    }}
+                                >
+                                    {t('support.form.clear')}
+                                </Button>
+                            </Box>
+
                         </Box>
 
-                        <Box className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            <SelectField
-                                label="Roli juaj"
-                                value={form.role}
-                                onChange={handleChange('role')}
-                                error={!!errors.role}
-                                helperText={errors.role}
-                                options={ROLE_OPTIONS}
-                            />
-                            <SelectField
-                                label="Tema e mesazhit"
-                                value={form.topic}
-                                onChange={handleChange('topic')}
-                                error={!!errors.topic}
-                                helperText={errors.topic}
-                                options={TOPIC_OPTIONS}
-                            />
-                        </Box>
+                        <Typography variant="caption" className="mt-4 block text-center text-slate-400 dark:text-slate-500">
 
-                        <TextField
-                            label="Mesazhi"
-                            value={form.message}
-                            onChange={handleChange('message')}
-                            error={!!errors.message}
-                            helperText={
-                                errors.message ?? (
-                                    <span className="dark:text-slate-400">{charCount} / 600</span>
-                                )
-                            }
-                            multiline
-                            minRows={4}
-                            fullWidth
-                            sx={inputStyle}
-                        />
-
-                        <Box className="flex gap-3 pt-1">
-                            <Button
-                                type="submit"
-                                variant="contained"
-                                fullWidth
-                                sx={{
-                                    backgroundColor: '#4F46E5',
-                                    '&:hover': { backgroundColor: '#4338CA' },
-                                    borderRadius: '10px',
-                                    textTransform: 'none',
-                                    fontWeight: 600,
-                                    paddingY: '10px',
-                                }}
-                            >
-                                Dërgo mesazhin
-                            </Button>
-                            <Button
-                                type="button"
-                                variant="outlined"
-                                onClick={handleReset}
-                                sx={{
-                                    borderRadius: '10px',
-                                    textTransform: 'none',
-                                    borderColor: '#e2e8f0',
-                                    color: '#64748b',
-                                    '&:hover': { borderColor: '#94a3b8' },
-                                }}
-                            >
-                                Pastro
-                            </Button>
-                        </Box>
+                            {t('support.form.link')}
+                            <a href="mailto:support@meson.edu" className="text-indigo-500 hover:text-indigo-600 underline">support@meson.edu</a>
+                        </Typography>
 
                     </Box>
-
-                    <Typography variant="caption" className="mt-4 block text-center text-slate-400 dark:text-slate-500">
-                        Mund të na gjeni edhe në{' '}
-                        <span className="text-indigo-500">support@meson.edu</span>
-                    </Typography>
                 </Box>
+            </Container>
 
-            </Box>
-        </Container>
+            <Footer />
+        </Box>
     )
 }
