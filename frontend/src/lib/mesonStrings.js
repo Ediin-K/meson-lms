@@ -390,6 +390,8 @@ export const STRINGS = {
         'Një LMS i fokusuar te përdoruesi: mësim i organizuar, komunikim i qartë dhe ndihmë kur ju nevojitet.',
       quick: 'Shpejt',
       support: 'Mbështetje',
+      supportLink: 'Kontaktoni mbështetjen',
+      help:'Ndihmë',
       email: 'Email',
       phone: 'Telefon',
       hours: 'Orari',
@@ -811,6 +813,8 @@ export const STRINGS = {
       tagline:
         'A user-focused LMS: organised learning, clear communication, and help when you need it.',
       quick: 'Quick links',
+      help:'Help',
+      supportLink: 'Contact support',
       support: 'Support',
       email: 'Email',
       phone: 'Phone',

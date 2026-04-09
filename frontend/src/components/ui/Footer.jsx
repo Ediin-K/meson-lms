@@ -124,7 +124,7 @@ export default function Footer() {
                     />
                     <div>
                       <Typography variant="caption" className="!block !text-slate-500">
-                        {t('footer.supportCenter')}
+                        {t('footer.help')}
                       </Typography>
                       <Link
                           href="/support"
