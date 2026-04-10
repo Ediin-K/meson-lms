@@ -10,6 +10,7 @@ export const STRINGS = {
       navAssignments: 'Detyrat',
       navLibrary: 'Biblioteka',
       navAbout: 'Rreth nesh',
+      contact:'Na Kontaktoni',
       login: 'Hyr',
       logout: 'Dil',
       profileMenu: 'Hap menunë e profilit',
@@ -385,6 +386,32 @@ export const STRINGS = {
         message:'Minimum 15 karaktere'
       }
     },
+    contact:{
+      title:'Na kontaktoni',
+      header:' Ekipi ynë i mbështetjes ju përgjigjet brenda 24 orëve.',
+      alert:'Mesazhi u dërgua me sukses. Do t\'ju kthejmë përgjigje së shpejti.\n',
+      name:'Emri i plotë',
+      email:'Adresa e emailit',
+      role: {
+        r:'Roli juaj',
+        r1:'Student',
+        r2:'Mësues / Instruktor',
+        r3:'Prind',
+      },
+      topic:{
+        t:'Tema e mesazhit',
+        t1:'Problem hyrje / llogarie',
+        t2:'Pyetje për kurs',
+        t3:'Notim / vlerësim',
+        t4:'Problem teknik',
+        t5:'Pagesë / abonim',
+        t6:'Tjetër',
+      },
+      message:'Mesazhi',
+      btn:'Dërgo mesazhin',
+      clr:'Pastro',
+      link:'Mund të na gjeni edhe në '
+    },
     footer: {
       tagline:
         'Një LMS i fokusuar te përdoruesi: mësim i organizuar, komunikim i qartë dhe ndihmë kur ju nevojitet.',
@@ -436,6 +463,7 @@ export const STRINGS = {
       navAssignments: 'Assignments',
       navLibrary: 'Library',
       navAbout: 'About',
+      contact:'Contact Us',
       login: 'Log in',
       logout: 'Log out',
       profileMenu: 'Open profile menu',
@@ -755,6 +783,32 @@ export const STRINGS = {
         topic: 'Required',
         message: 'Minimum 15 characters'
       },
+    },
+    contact: {
+      title: 'Contact Us',
+      header: 'Our support team responds within 24 hours.',
+      alert: "Message sent successfully. We'll get back to you soon.\n",
+      name: 'Full Name',
+      email: 'Email Address',
+      role: {
+        r: 'Your Role',
+        r1: 'Student',
+        r2: 'Teacher / Instructor',
+        r3: 'Parent',
+      },
+      topic: {
+        t: 'Message Topic',
+        t1: 'Login / Account Issue',
+        t2: 'Course Question',
+        t3: 'Grading / Evaluation',
+        t4: 'Technical Issue',
+        t5: 'Payment / Subscription',
+        t6: 'Other',
+      },
+      message: 'Message',
+      btn: 'Send Message',
+      clr: 'Clear',
+      link: 'You can also reach us at '
     },
     about: {
       heroOverline: 'Meson LMS',

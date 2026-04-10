@@ -102,9 +102,9 @@ export default function Footer() {
                   {t('footer.quick')}
                 </Typography>
                 <ul className="mt-5 flex list-none flex-col gap-3 p-0">
-                  {quick.map(([label, href]) => (
+                  {quick.map(([label,href]) => (
                       <li key={label}>
-                        <Link href={href} className={footerLinkClass} variant="body2">
+                        <Link href={href==='https://www.ubt-uni.net/sq/ubt/jeta-ne-kampus/ubt-biblioteka/'?'https://www.ubt-uni.net/sq/ubt/jeta-ne-kampus/ubt-biblioteka/':`/${href}`} className={footerLinkClass} variant="body2">
                           {label}
                         </Link>
                       </li>
