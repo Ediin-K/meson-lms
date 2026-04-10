@@ -6,6 +6,8 @@ import Button from '@mui/material/Button'
 import Box from '@mui/material/Box'
 import Alert from '@mui/material/Alert'
 import MenuItem from '@mui/material/MenuItem'
+import { useAppPreferences } from '../context/appPreferencesContext.js'
+import Footer from "../components/ui/Footer.jsx";
 
 const inputStyle = {
     '& .MuiInputBase-input': { color: '#0f172a' },
@@ -53,6 +55,8 @@ export default function Contact() {
     const [form, setForm] = useState(initialForm)
     const [errors, setErrors] = useState({})
     const [submitted, setSubmitted] = useState(false)
+    const { t } = useAppPreferences()
+
 
     const charCount = useMemo(() => Math.min(form.message.length, 600), [form.message])
 
@@ -80,28 +84,29 @@ export default function Contact() {
     }
 
     return (
+        <>
         <Container maxWidth="sm" className="!py-10">
             <Box className="space-y-6 rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xl dark:border-slate-700/90 dark:bg-slate-900">
 
                 <Box className="text-center">
                     <Typography variant="h5" className="font-bold text-slate-900 dark:text-white">
-                        Na kontaktoni
+                        {t('contact.title')}
                     </Typography>
                     <Typography variant="body2" className="mt-1 text-slate-500 dark:text-slate-400">
-                        Ekipi ynë i mbështetjes ju përgjigjet brenda 24 orëve.
+                        {t('contact.header')}
                     </Typography>
                 </Box>
 
                 {submitted && (
                     <Alert severity="success" onClose={() => setSubmitted(false)}>
-                        Mesazhi u dërgua me sukses. Do t'ju kthejmë përgjigje së shpejti.
+                        {t('contact.alert')}
                     </Alert>
                 )}
 
                 <Box component="form" onSubmit={handleSubmit} noValidate className="space-y-4">
 
                     <TextField
-                        label="Emri i plotë"
+                        label={t('contact.name')}
                         value={form.name}
                         onChange={handleChange('name')}
                         error={!!errors.name}
@@ -112,7 +117,7 @@ export default function Contact() {
                     />
 
                     <TextField
-                        label="Adresa e emailit"
+                        label={t('contact.email')}
                         type="email"
                         value={form.email}
                         onChange={handleChange('email')}
@@ -125,7 +130,7 @@ export default function Contact() {
 
                     <TextField
                         select
-                        label="Roli juaj"
+                        label={t('contact.role.r')}
                         value={form.role}
                         onChange={handleChange('role')}
                         error={!!errors.role}
@@ -134,15 +139,14 @@ export default function Contact() {
                         sx={inputStyle}
                         slotProps={SELECT_SLOT_PROPS}
                     >
-                        <MenuItem value="student">Student</MenuItem>
-                        <MenuItem value="teacher">Mësues / Instruktor</MenuItem>
-                        <MenuItem value="parent">Prind</MenuItem>
-                        <MenuItem value="admin">Administrator</MenuItem>
+                        <MenuItem value="student">{t('contact.role.r1')}</MenuItem>
+                        <MenuItem value="teacher">{t('contact.role.r2')}</MenuItem>
+                        <MenuItem value="parent">{t('contact.role.r3')}</MenuItem>
                     </TextField>
 
                     <TextField
                         select
-                        label="Tema e mesazhit"
+                        label={t('contact.topic.t')}
                         value={form.topic}
                         onChange={handleChange('topic')}
                         error={!!errors.topic}
@@ -151,16 +155,16 @@ export default function Contact() {
                         sx={inputStyle}
                         slotProps={SELECT_SLOT_PROPS}
                     >
-                        <MenuItem value="access">Problem hyrje / llogarie</MenuItem>
-                        <MenuItem value="course">Pyetje për kurs</MenuItem>
-                        <MenuItem value="grade">Notim / vlerësim</MenuItem>
-                        <MenuItem value="technical">Problem teknik</MenuItem>
-                        <MenuItem value="billing">Pagesë / abonim</MenuItem>
-                        <MenuItem value="other">Tjetër</MenuItem>
+                        <MenuItem value="access">{t('contact.topic.t1')}</MenuItem>
+                        <MenuItem value="course">{t('contact.topic.t2')}</MenuItem>
+                        <MenuItem value="grade">{t('contact.topic.t3')}</MenuItem>
+                        <MenuItem value="technical">{t('contact.topic.t4')}</MenuItem>
+                        <MenuItem value="billing">{t('contact.topic.t5')}</MenuItem>
+                        <MenuItem value="other">{t('contact.topic.t6')}</MenuItem>
                     </TextField>
 
                     <TextField
-                        label="Mesazhi"
+                        label={t('contact.message')}
                         value={form.message}
                         onChange={handleChange('message')}
                         error={!!errors.message}
@@ -189,7 +193,7 @@ export default function Contact() {
                                 paddingY: '10px',
                             }}
                         >
-                            Dërgo mesazhin
+                            {t('contact.btn')}
                         </Button>
                         <Button
                             type="button"
@@ -203,18 +207,25 @@ export default function Contact() {
                                 '&:hover': { borderColor: '#94a3b8' },
                             }}
                         >
-                            Pastro
+                            {t('contact.clr')}
                         </Button>
                     </Box>
 
                 </Box>
 
                 <Typography variant="caption" className="block text-center text-slate-400 dark:text-slate-500">
-                    Mund të na gjeni edhe në{' '}
-                    <span className="text-indigo-500">support@meson.edu</span>
+                    {t('contact.link')}
+                    <a
+                        href="mailto:support@meson.edu"
+                        className="text-indigo-500 hover:underline"
+                    >
+                        support@meson.edu
+                    </a>
                 </Typography>
 
             </Box>
         </Container>
+            <Footer/>
+        </>
     )
 }

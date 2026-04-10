@@ -46,6 +46,8 @@ export default function Header() {
     { label: t('header.navCourses'), href: '#' },
     { label: t('header.navAssignments'), href: '#' },
     { label: t('header.navLibrary'), href: 'https://www.ubt-uni.net/sq/ubt/jeta-ne-kampus/ubt-biblioteka/' },
+    { label: t('header.contact'), href: '/contactus' },
+
   ]
 
   const closeAllDropdowns = useCallback(() => {
