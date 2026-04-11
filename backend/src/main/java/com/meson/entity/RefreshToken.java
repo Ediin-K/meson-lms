@@ -1,4 +1,4 @@
-package com.meson.mesonlmsbackend.entity;
+package com.meson.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

@@ -1,9 +1,8 @@
-package com.meson.mesonlmsbackend.entity;
+package com.meson.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.Set;
-
 
 @Entity
 @Table(name="roles")
@@ -11,21 +10,20 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+public class Role {
 
-public class Role{
     @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, uniqeue = true)
+    @Column(nullable = false, unique = true)
     private String emertimi;
 
-    private String pershkrimi ;
+    private String pershkrimi;
 
     @Column(nullable = false, unique = true)
-    private String normalized_name
+    private String normalizedName;
 
     @OneToMany(mappedBy = "role", cascade = CascadeType.ALL)
     private Set<UserRole> userRoles;
-
 }

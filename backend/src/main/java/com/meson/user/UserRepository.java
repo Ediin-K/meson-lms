@@ -1,8 +1,8 @@
-package com.meson.user;
+package com.meson.repository;
 
+import com.meson.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserRepository extends JpaRepository<User, Long> {
-
     boolean existsByEmailIgnoreCase(String email);
 }
