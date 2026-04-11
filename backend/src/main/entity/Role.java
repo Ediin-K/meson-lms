@@ -24,4 +24,8 @@ public class Role{
 
     @Column(nullable = false, unique = true)
     private String normalized_name
+
+    @OneToMany(mappedBy = "role", cascade = CascadeType.ALL)
+    private Set<UserRole> userRoles;
+
 }
