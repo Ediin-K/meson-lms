@@ -1,10 +1,9 @@
-package com.meson.mesonlmsbackend.entity;
+package com.meson.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
 import java.util.*;
-
 
 @Entity
 @Table(name="users")
@@ -12,8 +11,7 @@ import java.util.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User{
-
+public class User {
 
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -34,21 +32,29 @@ public class User{
     private String phoneNumber;
 
     @Column(nullable = false)
-    private boolean emailConfirmed=false;
+    private boolean emailConfirmed = false;
 
     @Column(nullable = false)
-    private boolean lockoutEnable=false;
+    private boolean lockoutEnable = false;
 
     @Column(nullable = false)
-    private int accessFailedCount=0;
+    private int accessFailedCount = 0;
 
     @Column(nullable=false)
-    private LocalDateTime dataKrijimit=LocalDateTime.now();
+    private LocalDateTime dataKrijimit = LocalDateTime.now();
 
     @Column(nullable = false)
     private String statusi = "active";
 
-    @OneToMany(mappedBy="user")
-    private List<UserRole> userRoles = new ArrayList<>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private Set<UserRole> userRoles;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private Set<UserClaim> userClaims;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private Set<UserToken> userTokens;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private Set<RefreshToken> refreshTokens;
 }
