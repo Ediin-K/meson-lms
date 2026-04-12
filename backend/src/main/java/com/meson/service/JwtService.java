@@ -11,41 +11,40 @@ import java.security.Key;
 import java.util.Date;
 import java.util.function.Function;
 
-
 @Service
-public class JwtService{
+public class JwtService {
+
     @Value("${jwt.secret}")
     private String secret;
 
-    @Value("{jwt.expiration}")
+    @Value("${jwt.expiration}")
     private long expiration;
 
-    //Gjeneron token per userin
-    public String generateToken(String email){
+    public String generateToken(String email) {
         return Jwts.builder()
                 .setSubject(email)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis()+expiration))
-                .setWith(getKey(),SignatureAlgorithm.HS256)
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(getKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    //Merr emailin nga tokeni
-    public String extractEmail(String token){
-        return extractClaim(token,Claims::getSubject);
+    public String extractEmail(String token) {
+        return extractClaim(token, Claims::getSubject);
     }
 
-    //Kontrollon nese tokeni eshte valid
-    public boolean isTokenValid(String token,String email){
+    public boolean isTokenValid(String token, String email) {
         return extractEmail(token).equals(email) && !isTokenExpired(token);
     }
 
-    //Merr daten e skadimit te tokeit
-    public Date extractExpiration(String token){
-        return extractClaim(token,Claim::getExpiration)
+    private boolean isTokenExpired(String token) {
+        return extractExpiration(token).before(new Date());
     }
 
-    //Merr nje claim specifik nga tokeni
+    private Date extractExpiration(String token) {
+        return extractClaim(token, Claims::getExpiration);
+    }
+
     private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(getKey())
@@ -55,11 +54,8 @@ public class JwtService{
         return claimsResolver.apply(claims);
     }
 
-    // Gjeneron celesin nga secret
     private Key getKey() {
         byte[] keyBytes = io.jsonwebtoken.io.Decoders.BASE64.decode(secret);
         return Keys.hmacShaKeyFor(keyBytes);
     }
-}
-
 }
