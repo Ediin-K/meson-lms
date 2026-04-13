@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Link as RouterLink } from 'react-router-dom'
+import {Link as RouterLink, useNavigate} from 'react-router-dom'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import Typography from '@mui/material/Typography'
@@ -20,10 +20,10 @@ import {
 import { useAppPreferences } from '../context/appPreferencesContext.js'
 import LegalDocumentModal from '../components/legal/LegalDocumentModal.jsx'
 import {
-  LEGAL_DOCUMENT_VERSION,
   PRIVACY_POLICY,
   TERMS_OF_SERVICE,
 } from '../legal/mesonLegalDocuments.js'
+import {register} from '../../../backend/src/services/authService.js'
 
 /** Set true to require scrolling to the end before “I have read” is enabled (stricter UX). */
 const REQUIRE_SCROLL_TO_ACKNOWLEDGE_LEGAL = false
@@ -140,6 +140,9 @@ export default function Register() {
   const [privacyModalOpen, setPrivacyModalOpen] = useState(false)
   const [termsReadAcknowledged, setTermsReadAcknowledged] = useState(false)
   const [privacyReadAcknowledged, setPrivacyReadAcknowledged] = useState(false)
+  const [loading,setLoading] = useState(false)
+  const [globalError,setGlobalError] = useState('')
+  const navigate = useNavigate()
 
   const theme = useMemo(
     () =>
@@ -223,14 +226,16 @@ export default function Register() {
     setRoleDismissed(true)
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+
     const termsErr =
-      !termsReadAcknowledged || !privacyReadAcknowledged
-        ? 'ack'
-        : !values.terms
-          ? 'tick'
-          : ''
+        !termsReadAcknowledged || !privacyReadAcknowledged
+            ? 'ack'
+            : !values.terms
+                ? 'tick'
+                : ''
+
     const errs = {
       firstName: validateFirstName(values.firstName),
       lastName: validateLastName(values.lastName),
@@ -239,16 +244,31 @@ export default function Register() {
       confirmPassword: validateConfirm(values.password, values.confirmPassword),
       terms: termsErr,
     }
+
     setAttemptedSubmit(true)
     if (Object.values(errs).some(Boolean)) return
-    console.info('Register payload (demo)', {
-      firstName: values.firstName.trim(),
-      lastName: values.lastName.trim(),
-      email: values.email.trim(),
-      role: values.role,
-      termsAccepted: true,
-      termsVersion: LEGAL_DOCUMENT_VERSION,
-    })
+
+    setLoading(true)
+    setGlobalError('')
+
+    try {
+      await register(
+          values.firstName,
+          values.lastName,
+          values.email,
+          values.password,
+          values.role
+      )
+
+      navigate('/login')
+
+    } catch (error) {
+      setGlobalError(
+          error.message || 'Regjistrimi dështoi'
+      )
+    } finally {
+      setLoading(false)
+    }
   }
 
   const showRoleHint =
@@ -291,6 +311,11 @@ export default function Register() {
                 onSubmit={handleSubmit}
                 noValidate
               >
+                {globalError && (
+                    <p className="text-red-500 text-sm text-center">
+                      {globalError}
+                    </p>
+                )}
                 <div className="flex min-w-0 flex-col gap-5">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <InputField
@@ -341,7 +366,7 @@ export default function Register() {
                   <button
                     type="button"
                     onClick={applySuggestedRole}
-                    className="rounded-full bg-emerald-600 px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
+                    className="rounded-full bg-emerald-600 px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-emerald-500  focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
                   >
                     Use suggested role
                   </button>
@@ -474,7 +499,7 @@ export default function Register() {
               )}
 
               <div className="w-full max-w-xs">
-                <RegisterButton type="submit">Start learning</RegisterButton>
+                <RegisterButton type="submit" disabled={loading}>Start learning</RegisterButton>
               </div>
 
               <div className="flex w-full max-w-md items-center gap-3 py-1">
