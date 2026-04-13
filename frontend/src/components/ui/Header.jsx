@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import {Link, useNavigate} from 'react-router-dom'
 import { useAppPreferences } from '../../context/appPreferencesContext.js'
 import { GB, AL } from 'country-flag-icons/react/3x2'
+import {logout} from '../../../../backend/src/services/authService.js'
 
 function ThemeToggleIcon({ dark }) {
   if (dark) {
@@ -27,15 +28,15 @@ function ThemeToggleIcon({ dark }) {
 }
 
 export default function Header() {
-  const { locale, setLocale, role, setRole, colorMode, toggleColorMode, t } = useAppPreferences()
+  const { locale, setLocale, role, setRole, colorMode, toggleColorMode, t ,isAuthenticated} = useAppPreferences()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [langOpen, setLangOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
-
   const langWrapRef = useRef(null)
   const profileWrapRef = useRef(null)
   const langBtnRef = useRef(null)
   const profileBtnRef = useRef(null)
+  const navigate = useNavigate()
 
   const langMenuId = useId()
   const profileMenuId = useId()
@@ -46,8 +47,6 @@ export default function Header() {
     { label: t('header.navCourses'), href: '#' },
     { label: t('header.navAssignments'), href: '#' },
     { label: t('header.navLibrary'), href: 'https://www.ubt-uni.net/sq/ubt/jeta-ne-kampus/ubt-biblioteka/' },
-    { label: t('header.contact'), href: '/contactus' },
-
   ]
 
   const closeAllDropdowns = useCallback(() => {
@@ -210,18 +209,24 @@ export default function Header() {
             ) : null}
           </div>
 
-          <Link
-            to="/login"
-            className="hidden rounded-full border-2 border-slate-300/90 bg-white/95 px-3 py-2 text-sm font-semibold text-slate-800 shadow-sm outline-none ring-sky-500/0 transition hover:border-sky-500/50 hover:bg-sky-50/90 hover:text-sky-900 focus-visible:ring-2 focus-visible:ring-sky-500 sm:inline-flex sm:px-4"
-          >
-           {t('header.login')}
-          </Link>
-          <Link
-            to="/login"
-            className="hidden rounded-full px-2 py-2 text-sm font-semibold text-slate-600 outline-none ring-sky-500/0 transition hover:bg-slate-900/[0.06] hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-sky-500 md:inline-flex md:px-3"
-          >
-            {t('header.logout')}
-          </Link>
+          {isAuthenticated ? (
+              <button
+                  onClick={() => {
+                    logout()
+                    navigate('/login') // ose window.location
+                  }}
+                  className="hidden rounded-full px-2 py-2 text-sm font-semibold text-slate-600 md:inline-flex md:px-3"
+              >
+                Logout
+              </button>
+          ) : (
+              <Link
+                  to="/login"
+                  className="hidden rounded-full border-2 border-slate-300/90 bg-white/95 px-3 py-2 text-sm font-semibold text-slate-800 sm:inline-flex"
+              >
+                Login
+              </Link>
+          )}
 
           <div className="relative hidden md:block" ref={profileWrapRef}>
             <button

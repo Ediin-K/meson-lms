@@ -63,7 +63,7 @@ function validatePassword(v) {
 }
 
 export default function Login() {
-  const { colorMode } = useAppPreferences()
+  const { setIsAuthenticated,colorMode,setRole } = useAppPreferences()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [remember, setRemember] = useState(false)
@@ -119,38 +119,35 @@ export default function Login() {
   const clearGlobalError = () => setGlobalError('')
 
   const handleSubmit = async (e) => {
-    // 1. Parandalon rifreskimin
     e.preventDefault()
 
-    // 2. Valido fushat
     const errs = {
       email: validateEmail(email),
       password: validatePassword(password),
     }
-    setAttemptedSubmit(true)
 
-    // 3. Nese ka gabime → ndalo
+    setAttemptedSubmit(true)
     if (errs.email || errs.password) return
 
-    // 4. Fillo loading
     setLoading(true)
     setGlobalError('')
 
     try {
-      // 5. Dërgo kërkesë te backend
       const data = await login(email, password)
 
-      // 6. Ruaj token-in
       localStorage.setItem('token', data.token)
       localStorage.setItem('email', data.email)
 
-      // 7. Ridrejto te dashboard
-      navigate('/dashboard')
+      setIsAuthenticated(true)
 
+      if (data.role) {
+        setRole(data.role)
+        localStorage.setItem('role', data.role)
+      }
+
+      navigate('/')
     } catch (error) {
-      setGlobalError(
-          error.response?.data?.message || 'Gabim në login'
-      )
+      setGlobalError(error.response?.data?.message || 'Gabim në login')
     } finally {
       setLoading(false)
     }

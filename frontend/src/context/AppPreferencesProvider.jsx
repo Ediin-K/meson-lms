@@ -19,10 +19,10 @@ function readStoredLocale() {
 function readStoredRole() {
   try {
     const v = localStorage.getItem(STORAGE_ROLE)
-    if (v === 'guest' || v === 'student' || v === 'admin') return v
-  } catch {
-    /* ignore */
-  }
+    if (['guest', 'student', 'teacher', 'parent', 'admin'].includes(v)) {
+      return v
+    }
+  } catch {}
   return 'guest'
 }
 
@@ -43,7 +43,14 @@ export function AppPreferencesProvider({ children }) {
   const [locale, setLocaleState] = useState(readStoredLocale)
   const [role, setRoleState] = useState(readStoredRole)
   const [colorMode, setColorModeState] = useState(readStoredColorMode)
-
+  const [isAuthenticated, setIsAuthenticated] = useState(
+      !!localStorage.getItem('token')
+  )
+  const logout = useCallback(() => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('email')
+    setIsAuthenticated(false)
+  }, [])
   const setLocale = useCallback((next) => {
     const v = next === 'en' ? 'en' : 'sq'
     setLocaleState(v)
@@ -55,14 +62,11 @@ export function AppPreferencesProvider({ children }) {
   }, [])
 
   const setRole = useCallback((next) => {
-    const v =
-      next === 'student' ? 'student' : next === 'admin' ? 'admin' : 'guest'
+    const allowed = ['guest', 'student', 'teacher', 'parent', 'admin']
+    const v = allowed.includes(next) ? next : 'guest'
+
     setRoleState(v)
-    try {
-      localStorage.setItem(STORAGE_ROLE, v)
-    } catch {
-      /* ignore */
-    }
+    localStorage.setItem(STORAGE_ROLE, v)
   }, [])
 
   const setColorMode = useCallback((next) => {
@@ -98,19 +102,30 @@ export function AppPreferencesProvider({ children }) {
     [locale],
   )
 
-  const value = useMemo(
-    () => ({
-      locale,
-      setLocale,
-      role,
-      setRole,
-      colorMode,
-      setColorMode,
-      toggleColorMode,
-      t,
-    }),
-    [locale, role, colorMode, setLocale, setRole, setColorMode, toggleColorMode, t],
-  )
+  const value = useMemo(() => ({
+    locale,
+    setLocale,
+    role,
+    setRole,
+    colorMode,
+    setColorMode,
+    toggleColorMode,
+    t,
+    isAuthenticated,
+    setIsAuthenticated,
+    logout
+  }), [
+    locale,
+    role,
+    colorMode,
+    t,
+    isAuthenticated,
+    setLocale,
+    setRole,
+    setColorMode,
+    toggleColorMode,
+    logout
+  ])
 
   return (
     <AppPreferencesContext.Provider value={value}>
