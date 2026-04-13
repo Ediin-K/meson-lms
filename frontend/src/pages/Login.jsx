@@ -9,6 +9,8 @@ import FormControlLabel from '@mui/material/FormControlLabel'
 import Checkbox from '@mui/material/Checkbox'
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined'
 
+import { useNavigate } from 'react-router-dom'
+import {login} from '../../../backend/src/services/authService.js'
 import InputField from '../components/register/InputField.jsx'
 import PasswordField from '../components/register/PasswordField.jsx'
 import LoginSubmitButton from '../components/login/LoginSubmitButton.jsx'
@@ -60,10 +62,6 @@ function validatePassword(v) {
   return ''
 }
 
-/** Demo credentials that “succeed” (no global error) — replace with real API. */
-const DEMO_EMAIL = 'demo@meson.edu'
-const DEMO_PASSWORD = 'meson123'
-
 export default function Login() {
   const { colorMode } = useAppPreferences()
   const [email, setEmail] = useState('')
@@ -73,6 +71,7 @@ export default function Login() {
   const [attemptedSubmit, setAttemptedSubmit] = useState(false)
   const [loading, setLoading] = useState(false)
   const [globalError, setGlobalError] = useState('')
+  const navigate = useNavigate()
 
   const theme = useMemo(
     () =>
@@ -119,28 +118,42 @@ export default function Login() {
 
   const clearGlobalError = () => setGlobalError('')
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
+    // 1. Parandalon rifreskimin
     e.preventDefault()
+
+    // 2. Valido fushat
     const errs = {
       email: validateEmail(email),
       password: validatePassword(password),
     }
     setAttemptedSubmit(true)
+
+    // 3. Nese ka gabime → ndalo
     if (errs.email || errs.password) return
 
+    // 4. Fillo loading
     setLoading(true)
     setGlobalError('')
 
-    window.setTimeout(() => {
+    try {
+      // 5. Dërgo kërkesë te backend
+      const data = await login(email, password)
+
+      // 6. Ruaj token-in
+      localStorage.setItem('token', data.token)
+      localStorage.setItem('email', data.email)
+
+      // 7. Ridrejto te dashboard
+      navigate('/dashboard')
+
+    } catch (error) {
+      setGlobalError(
+          error.response?.data?.message || 'Gabim në login'
+      )
+    } finally {
       setLoading(false)
-      const ok =
-        email.trim().toLowerCase() === DEMO_EMAIL && password === DEMO_PASSWORD
-      if (ok) {
-        console.info('Login success (demo)', { email: email.trim(), remember })
-        return
-      }
-      setGlobalError('Invalid email or password')
-    }, 900)
+    }
   }
 
   return (
@@ -243,7 +256,9 @@ export default function Login() {
                       checked={remember}
                       onChange={(e) => setRemember(e.target.checked)}
                       color="primary"
-                      inputProps={{ 'aria-label': 'Remember me on this device' }}
+                      slotProps={{
+                        input: { 'aria-label': 'Remember me on this device' }
+                      }}
                     />
                   }
                   label={
@@ -270,7 +285,7 @@ export default function Login() {
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <button
                     type="button"
-                    className="flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-white py-3 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:scale-[1.01] hover:border-slate-300 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500"
+                    className="flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-white py-3 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:scale-[1.01] hover:border-slate-300 hover:shadow-md  focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500"
                     aria-label="Continue with Google"
                   >
                     <GoogleIcon />
@@ -278,7 +293,7 @@ export default function Login() {
                   </button>
                   <button
                     type="button"
-                    className="flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-white py-3 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:scale-[1.01] hover:border-slate-300 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500"
+                    className="flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-white py-3 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:scale-[1.01] hover:border-slate-300 hover:shadow-md  focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500"
                     aria-label="Continue with Microsoft"
                   >
                     <MicrosoftIcon />

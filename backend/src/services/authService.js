@@ -6,7 +6,7 @@ export const login = async (email, password) => {
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({email, password}),
+        body: JSON.stringify({ email, password }),
     });
 
     if (!response.ok) {
@@ -14,33 +14,33 @@ export const login = async (email, password) => {
     }
 
     return response.json();
+};
 
-    export const register = async (emri, mbiemri, email, password, roli) => {
-        const response = await fetch(`${API_URL}/register`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({emri, mbiemri, email, password, roli}),
-        });
+export const register = async (emri, mbiemri, email, password, roli) => {
+    const response = await fetch(`${API_URL}/register`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ emri, mbiemri, email, password, roli }),
+    });
 
-        if (!response.ok) {
-            throw new Error('Regjistrim i dështuar!');
-        }
+    if (!response.ok) {
+        throw new Error('Regjistrim i dështuar!');
+    }
 
-        return response.json();
-    };
+    return response.json();
+};
 
-    export const logout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('email');
-    };
+export const logout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('email');
+};
 
-    export const getToken = () => {
-        return localStorage.getItem('token');
-    };
+export const getToken = () => {
+    return localStorage.getItem('token');
+};
 
-    export const isAuthenticated = () => {
-        return !!localStorage.getItem('token');
-    };
-}
+export const isAuthenticated = () => {
+    return !!localStorage.getItem('token');
+};
