@@ -41,13 +41,41 @@ export default function Header() {
   const langMenuId = useId()
   const profileMenuId = useId()
 
-  const navLinks = [
-    { label: t('header.navHome'), href: '/' },
-    { label: t('header.navAbout'), href: '/about' },
-    { label: t('header.navCourses'), href: '#' },
-    { label: t('header.navAssignments'), href: '#' },
-    { label: t('header.navLibrary'), href: 'https://www.ubt-uni.net/sq/ubt/jeta-ne-kampus/ubt-biblioteka/' },
-  ]
+  const getNavLinks = () => {
+    if (!isAuthenticated) {
+      return [
+        { label: t('header.navHome'), href: '/' },
+        { label: t('header.navAbout'), href: '/about' },
+        { label: t('header.navLibrary'), href: 'https://www.ubt-uni.net/sq/ubt/jeta-ne-kampus/ubt-biblioteka/' },
+      ]
+    }
+    
+    switch (role) {
+      case 'admin':
+        return [
+          { label: 'Admin Dashboard', href: '/admin' },
+          { label: 'User Management', href: '/admin/users' },
+          { label: 'Settings', href: '/admin/settings' },
+        ]
+      case 'teacher':
+        return [
+          { label: 'Dashboard', href: '/dashboard' },
+          { label: 'My Classes', href: '/classes' },
+          { label: 'Assignments', href: '/assignments' },
+          { label: 'Library', href: 'https://www.ubt-uni.net/sq/ubt/jeta-ne-kampus/ubt-biblioteka/' },
+        ]
+      case 'student':
+      default:
+        return [
+          { label: 'Dashboard', href: '/dashboard' },
+          { label: 'My Courses', href: '/courses' },
+          { label: 'Assignments', href: '/assignments' },
+          { label: t('header.navLibrary'), href: 'https://www.ubt-uni.net/sq/ubt/jeta-ne-kampus/ubt-biblioteka/' },
+        ]
+    }
+  }
+
+  const navLinks = getNavLinks()
 
   const closeAllDropdowns = useCallback(() => {
     setLangOpen(false)
@@ -136,19 +164,7 @@ export default function Header() {
             <ThemeToggleIcon dark={colorMode === 'dark'} />
           </button>
 
-          <label className="hidden items-center gap-1.5 md:flex">
-            <span className="sr-only">{t('header.roleLabel')}</span>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="max-w-[7.5rem] cursor-pointer rounded-lg border border-slate-300/90 bg-white/95 py-1.5 pl-2 pr-7 text-xs font-semibold text-slate-800 shadow-sm outline-none ring-sky-500/0 focus-visible:ring-2 focus-visible:ring-sky-500 dark:border-slate-600 dark:bg-slate-800/95 dark:text-slate-100 sm:max-w-[9rem] sm:text-sm"
-              aria-label={t('header.roleLabel')}
-            >
-              <option value="guest">{t('header.roleGuest')}</option>
-              <option value="student">{t('header.roleStudent')}</option>
-              <option value="admin">{t('header.roleAdmin')}</option>
-            </select>
-          </label>
+
 
           <div className="relative" ref={langWrapRef}>
             <button
@@ -313,21 +329,7 @@ export default function Header() {
               {colorMode === 'dark' ? t('header.themeLight') : t('header.themeDark')}
             </button>
           </div>
-          <div className="mb-4 flex flex-col gap-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              {t('header.roleLabel')}
-            </span>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="w-full cursor-pointer rounded-xl border border-slate-300 bg-white py-3 pl-3 pr-10 text-sm font-semibold text-slate-800 outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
-              aria-label={t('header.roleLabel')}
-            >
-              <option value="guest">{t('header.roleGuest')}</option>
-              <option value="student">{t('header.roleStudent')}</option>
-              <option value="admin">{t('header.roleAdmin')}</option>
-            </select>
-          </div>
+
           <div className="mb-4 flex gap-3">
             <button
               type="button"
@@ -381,8 +383,10 @@ export default function Header() {
                 S
               </span>
               <div>
-                <p className="text-sm font-semibold text-slate-800">{t('header.studentLabel')}</p>
-                <p className="text-xs text-slate-500">{t('header.profileSub')}</p>
+                <p className="text-sm font-semibold text-slate-800">
+                  {role === 'admin' ? 'Admin' : role === 'teacher' ? 'Teacher' : t('header.studentLabel')}
+                </p>
+                <p className="text-xs text-slate-500 capitalize">{role}</p>
               </div>
             </div>
             <button
