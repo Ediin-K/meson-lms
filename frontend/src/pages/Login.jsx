@@ -10,7 +10,7 @@ import Checkbox from '@mui/material/Checkbox'
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined'
 
 import { useNavigate } from 'react-router-dom'
-import {login} from '../../../backend/src/services/authService.js'
+import { login } from '../../../backend/src/services/authService.js'
 import InputField from '../components/register/InputField.jsx'
 import PasswordField from '../components/register/PasswordField.jsx'
 import LoginSubmitButton from '../components/login/LoginSubmitButton.jsx'
@@ -63,7 +63,7 @@ function validatePassword(v) {
 }
 
 export default function Login() {
-  const { setIsAuthenticated,colorMode,setRole } = useAppPreferences()
+  const { setIsAuthenticated, colorMode, setRole } = useAppPreferences()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [remember, setRemember] = useState(false)

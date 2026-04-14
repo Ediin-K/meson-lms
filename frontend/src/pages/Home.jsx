@@ -1,5 +1,5 @@
 import { createElement, useMemo, useRef } from 'react'
-import { Link} from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Autoplay, Pagination, EffectFade } from 'swiper/modules'
 import 'swiper/css'
@@ -740,19 +740,19 @@ export default function Home() {
 
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {STUDENT_SUBJECT_ROWS.map(({ id, icon }) => (
-                  <Link key={id} to={`/course/${id}`} className="block">
-                    <SpotlightCard
-                        title={t(`home.student.subjects.${id}.title`)}
-                        meta={t(`home.student.subjects.${id}.meta`)}
-                        icon={icon}
-                        chip={t('home.student.subjects.chipActive')}
-                        chipColor="success"
-                        actionLabel={t('home.student.subjects.openSubject')}
-                        actionExternal={false}
-                        imgLoading="lazy"
-                    />
+                <Link key={id} to={`/course/${id}`} className="block">
+                  <SpotlightCard
+                    title={t(`home.student.subjects.${id}.title`)}
+                    meta={t(`home.student.subjects.${id}.meta`)}
+                    icon={icon}
+                    chip={t('home.student.subjects.chipActive')}
+                    chipColor="success"
+                    actionLabel={t('home.student.subjects.openSubject')}
+                    actionExternal={false}
+                    imgLoading="lazy"
+                  />
                 </Link>
-                ))}
+              ))}
             </div>
           </Container>
         ) : null}
