@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
-import {Link, useNavigate} from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAppPreferences } from '../../context/appPreferencesContext.js'
 import { GB, AL } from 'country-flag-icons/react/3x2'
-import {logout} from '../../../../backend/src/services/authService.js'
+import { logout } from '../../../../backend/src/services/authService.js'
 
 function ThemeToggleIcon({ dark }) {
   if (dark) {
@@ -28,7 +28,7 @@ function ThemeToggleIcon({ dark }) {
 }
 
 export default function Header() {
-  const { locale, setLocale, role, setRole, colorMode, toggleColorMode, t ,isAuthenticated} = useAppPreferences()
+  const { locale, setLocale, role, setRole, colorMode, toggleColorMode, t, isAuthenticated } = useAppPreferences()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [langOpen, setLangOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
@@ -53,7 +53,7 @@ export default function Header() {
         libraryLink,
       ]
     }
-    
+
     switch (role) {
       case 'admin':
         return [
@@ -119,7 +119,7 @@ export default function Header() {
     'rounded-full px-2.5 py-2 text-sm font-medium text-slate-800 no-underline outline-none ring-sky-500/0 transition hover:bg-slate-900/[0.07] hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-sky-500 lg:px-3 dark:text-slate-100 dark:hover:bg-white/10 dark:hover:text-white'
 
   return (
-      <header className="sticky top-0 z-50 -mx-4 border-b border-slate-200/80 bg-white shadow-sm backdrop-blur-md dark:border-slate-700/80 dark:bg-slate-900">
+    <header className="sticky top-0 z-50 -mx-4 border-b border-slate-200/80 bg-white shadow-sm backdrop-blur-md dark:border-slate-700/80 dark:bg-slate-900">
       <a
         href="#"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-slate-900 focus:px-4 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg"
@@ -188,7 +188,7 @@ export default function Header() {
               }}
             >
               <span aria-hidden className="w-6 h-4">
-                {locale === 'sq' ? <AL/> : <GB/>}
+                {locale === 'sq' ? <AL /> : <GB />}
               </span>
             </button>
             {langOpen ? (
@@ -233,22 +233,22 @@ export default function Header() {
           </div>
 
           {isAuthenticated ? (
-              <button
-                  onClick={() => {
-                    logout()
-                    navigate('/login') // ose window.location
-                  }}
-                  className="hidden rounded-full px-2 py-2 text-sm font-semibold text-slate-600 md:inline-flex md:px-3"
-              >
-                Logout
-              </button>
+            <button
+              onClick={() => {
+                logout()
+                navigate('/login') // ose window.location
+              }}
+              className="hidden rounded-full px-2 py-2 text-sm font-semibold text-slate-600 md:inline-flex md:px-3"
+            >
+              Logout
+            </button>
           ) : (
-              <Link
-                  to="/login"
-                  className="hidden rounded-full border-2 border-slate-300/90 bg-white/95 px-3 py-2 text-sm font-semibold text-slate-800 sm:inline-flex"
-              >
-                Login
-              </Link>
+            <Link
+              to="/login"
+              className="hidden rounded-full border-2 border-slate-300/90 bg-white/95 px-3 py-2 text-sm font-semibold text-slate-800 sm:inline-flex"
+            >
+              Login
+            </Link>
           )}
 
           <div className="relative hidden md:block" ref={profileWrapRef}>
@@ -341,11 +341,10 @@ export default function Header() {
             <button
               type="button"
               aria-label={t('header.languageSq')}
-              className={`flex flex-1 items-center justify-center rounded-xl border-2 py-4 text-4xl leading-none outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${
-                locale === 'sq'
-                  ? 'border-sky-500 bg-sky-50 text-slate-900'
-                  : 'border-slate-200 bg-white text-slate-700'
-              }`}
+              className={`flex flex-1 items-center justify-center rounded-xl border-2 py-4 text-4xl leading-none outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${locale === 'sq'
+                ? 'border-sky-500 bg-sky-50 text-slate-900'
+                : 'border-slate-200 bg-white text-slate-700'
+                }`}
               onClick={() => setLocale('sq')}
             >
               <span aria-hidden className="select-none">🇦🇱</span>
@@ -353,11 +352,10 @@ export default function Header() {
             <button
               type="button"
               aria-label={t('header.languageEn')}
-              className={`flex flex-1 items-center justify-center rounded-xl border-2 py-4 text-4xl leading-none outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${
-                locale === 'en'
-                  ? 'border-sky-500 bg-sky-50 text-slate-900'
-                  : 'border-slate-200 bg-white text-slate-700'
-              }`}
+              className={`flex flex-1 items-center justify-center rounded-xl border-2 py-4 text-4xl leading-none outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${locale === 'en'
+                ? 'border-sky-500 bg-sky-50 text-slate-900'
+                : 'border-slate-200 bg-white text-slate-700'
+                }`}
               onClick={() => setLocale('en')}
             >
               <span aria-hidden className="select-none">🇬🇧</span>
