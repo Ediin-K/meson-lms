@@ -5,6 +5,7 @@ import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
 import About from './pages/About.jsx';
 import CourseDetail from './pages/CourseDetail.jsx';
+import Contact from './pages/ContactUs.jsx';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import 'swiper/css';
 
@@ -23,6 +24,7 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/about" element={<About />} />
             <Route path="/course/:courseId" element={<CourseDetail />} />
+            <Route path="/contact" element={<Contact />} />
             <Route path="/" element={<Home />} />
           </Routes>
         </div>

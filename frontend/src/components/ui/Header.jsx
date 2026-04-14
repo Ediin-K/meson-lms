@@ -42,35 +42,42 @@ export default function Header() {
   const profileMenuId = useId()
 
   const getNavLinks = () => {
+    const contactLink = { label: t('header.navContact'), href: '/contact' }
+    const libraryLink = { label: t('header.navLibrary'), href: 'https://www.ubt-uni.net/sq/ubt/jeta-ne-kampus/ubt-biblioteka/' }
+
     if (!isAuthenticated) {
       return [
         { label: t('header.navHome'), href: '/' },
         { label: t('header.navAbout'), href: '/about' },
-        { label: t('header.navLibrary'), href: 'https://www.ubt-uni.net/sq/ubt/jeta-ne-kampus/ubt-biblioteka/' },
+        contactLink,
+        libraryLink,
       ]
     }
     
     switch (role) {
       case 'admin':
         return [
-          { label: 'Admin Dashboard', href: '/admin' },
+          { label: t('header.navAdminDashboard'), href: '/' },
           { label: 'User Management', href: '/admin/users' },
           { label: 'Settings', href: '/admin/settings' },
+          contactLink,
         ]
       case 'teacher':
         return [
-          { label: 'Dashboard', href: '/dashboard' },
+          { label: t('header.navDashboard'), href: '/' },
           { label: 'My Classes', href: '/classes' },
           { label: 'Assignments', href: '/assignments' },
-          { label: 'Library', href: 'https://www.ubt-uni.net/sq/ubt/jeta-ne-kampus/ubt-biblioteka/' },
+          contactLink,
+          libraryLink,
         ]
       case 'student':
       default:
         return [
-          { label: 'Dashboard', href: '/dashboard' },
+          { label: t('header.navDashboard'), href: '/' },
           { label: 'My Courses', href: '/courses' },
           { label: 'Assignments', href: '/assignments' },
-          { label: t('header.navLibrary'), href: 'https://www.ubt-uni.net/sq/ubt/jeta-ne-kampus/ubt-biblioteka/' },
+          contactLink,
+          libraryLink,
         ]
     }
   }
