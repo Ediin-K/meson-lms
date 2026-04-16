@@ -28,7 +28,7 @@ function ThemeToggleIcon({ dark }) {
 }
 
 export default function Header() {
-  const { locale, setLocale, role, setRole, colorMode, toggleColorMode, t, isAuthenticated } = useAppPreferences()
+  const { locale, setLocale, role, colorMode, toggleColorMode, t, isAuthenticated } = useAppPreferences()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [langOpen, setLangOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
