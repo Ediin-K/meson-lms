@@ -22,7 +22,7 @@ function readStoredRole() {
     if (['guest', 'student', 'teacher', 'parent', 'admin'].includes(v)) {
       return v
     }
-  } catch {}
+  } catch {/* ignore */ }
   return 'guest'
 }
 
@@ -98,8 +98,8 @@ export function AppPreferencesProvider({ children }) {
   }, [colorMode])
 
   const t = useCallback(
-    (path) => lookupString(locale, path),
-    [locale],
+      (path) => lookupString(locale, path),
+      [locale],
   )
 
   const value = useMemo(() => ({
@@ -128,8 +128,8 @@ export function AppPreferencesProvider({ children }) {
   ])
 
   return (
-    <AppPreferencesContext.Provider value={value}>
-      {children}
-    </AppPreferencesContext.Provider>
+      <AppPreferencesContext.Provider value={value}>
+        {children}
+      </AppPreferencesContext.Provider>
   )
 }
