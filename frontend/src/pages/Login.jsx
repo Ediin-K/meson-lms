@@ -10,7 +10,7 @@ import Checkbox from '@mui/material/Checkbox'
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined'
 
 import { useNavigate } from 'react-router-dom'
-import { login } from 'frontend/src/services/authService.js'
+import { login } from '../services/authService.js'
 import InputField from '../components/register/InputField.jsx'
 import PasswordField from '../components/register/PasswordField.jsx'
 import LoginSubmitButton from '../components/login/LoginSubmitButton.jsx'
@@ -135,6 +135,7 @@ export default function Login() {
     try {
       const data = await login(email, password)
 
+      console.log("data nga backend:", data)
       localStorage.setItem('token', data.token)
       localStorage.setItem('email', data.email)
 
@@ -142,7 +143,7 @@ export default function Login() {
 
       if (data.role) {
         setRole(data.role)
-        localStorage.setItem('role', data.role)
+        localStorage.setItem('meson-role', data.role)
       }
 
       navigate('/')

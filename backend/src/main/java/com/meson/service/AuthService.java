@@ -25,6 +25,29 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
+    public AuthResponse login(LoginRequest request) {
+
+        // 1. Gjej userin nga email
+        User user = userRepository.findByEmail(request.getEmail().toLowerCase())
+                .orElseThrow(() -> new RuntimeException("Email nuk ekziston!"));
+
+        // 2. Kontrollo passwordin
+        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+            throw new RuntimeException("Password i gabuar!");
+        }
+
+        // 3. Merr rolin e userit
+        String role = userRoleRepository.findByUser(user)
+                .stream()
+                .findFirst()
+                .map(ur -> ur.getRole().getEmertimi().toLowerCase())
+                .orElse("guest");
+
+        // 4. Gjenero token dhe kthe AuthResponse
+        String token = jwtService.generateToken(user.getEmail());
+        return new AuthResponse(token, user.getEmail(), role);
+    }
+
     public AuthResponse register(RegisterRequest request) {
 
         // 1. Kontrollo nëse email ekziston
@@ -57,22 +80,6 @@ public class AuthService {
 
         // 6. Gjenero token dhe kthe AuthResponse
         String token = jwtService.generateToken(user.getEmail());
-        return new AuthResponse(token, user.getEmail());
-    }
-
-    public AuthResponse login(LoginRequest request) {
-
-        // 1. Gjej userin nga email
-        User user = userRepository.findByEmail(request.getEmail().toLowerCase())
-                .orElseThrow(() -> new RuntimeException("Email nuk ekziston!"));
-
-        // 2. Kontrollo passwordin
-        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
-            throw new RuntimeException("Password i gabuar!");
-        }
-
-        // 3. Gjenero token dhe kthe AuthResponse
-        String token = jwtService.generateToken(user.getEmail());
-        return new AuthResponse(token, user.getEmail());
+        return new AuthResponse(token, user.getEmail(), role.getEmertimi().toLowerCase());
     }
 }

@@ -13,16 +13,11 @@ import DataObjectRounded from "@mui/icons-material/DataObjectRounded";
 import CalculateRounded from "@mui/icons-material/CalculateRounded";
 import TranslateRounded from "@mui/icons-material/TranslateRounded";
 import {useAppPreferences} from "../../context/appPreferencesContext.js";
-
-
-const STUDENT_SUBJECT_ROWS = [
-    { id: 'cs', icon: CodeRounded },
-    { id: 'discrete', icon: FunctionsRounded },
-    { id: 'signals', icon: GraphicEqRounded },
-    { id: 'algo', icon: DataObjectRounded },
-    { id: 'math', icon: CalculateRounded },
-    { id: 'english', icon: TranslateRounded },
-]
+import Footer from "../../components/ui/Footer.jsx";
+import Box from "@mui/material/Box";
+import {Link} from "react-router-dom";
+import Container from "@mui/material/Container";
+import{SpotlightCard} from "../../pages/Home.jsx";
 
 
 function StudentFacultyBanner({ t }) {
@@ -75,6 +70,15 @@ function StudentFacultyBanner({ t }) {
 export default function StudentDashboard() {
     const { t } = useAppPreferences()
     const STUDENT_TASK_KEYS = ['task1', 'task2', 'task3']
+
+    const STUDENT_SUBJECT_ROWS = [
+        { id: 'cs', icon: CodeRounded },
+        { id: 'discrete', icon: FunctionsRounded },
+        { id: 'signals', icon: GraphicEqRounded },
+        { id: 'algo', icon: DataObjectRounded },
+        { id: 'math', icon: CalculateRounded },
+        { id: 'english', icon: TranslateRounded },
+    ]
     return (
 
         <section
@@ -226,11 +230,53 @@ export default function StudentDashboard() {
                         </Button>
                     </Card>
                 </aside>
-            </div>
 
+            </div>
+            <Container maxWidth="lg" className="!px-0 sm:!px-3" sx={{ mt: 2, mb: 0 }}>
+                <Box className="mb-8 text-center md:text-left">
+                    <Typography
+                        variant="overline"
+                        className="!font-semibold !tracking-widest !text-sky-600 dark:!text-sky-400"
+                    >
+                        {t('home.student.subjects.overline')}
+                    </Typography>
+                    <Typography
+                        variant="h4"
+                        component="h2"
+                        className="!mt-1 !font-bold !text-slate-800 dark:!text-white"
+                    >
+                        {t('home.student.subjects.title')}
+                    </Typography>
+                    <Typography
+                        variant="body1"
+                        className="!mt-2 !max-w-2xl !text-slate-600 md:mx-0 mx-auto dark:!text-slate-400"
+                    >
+                        {t('home.student.subjects.body')}
+                    </Typography>
+                </Box>
+
+                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                    {STUDENT_SUBJECT_ROWS.map(({ id, icon }) => (
+                        <Link key={id} to={`/course/${id}`} className="block">
+                            <SpotlightCard
+                                title={t(`home.student.subjects.${id}.title`)}
+                                meta={t(`home.student.subjects.${id}.meta`)}
+                                icon={icon}
+                                chip={t('home.student.subjects.chipActive')}
+                                chipColor="success"
+                                actionLabel={t('home.student.subjects.openSubject')}
+                                actionExternal={false}
+                                imgLoading="lazy"
+                            />
+                        </Link>
+                    ))}
+                </div>
+            </Container>
             <Typography variant="body2" className="!mt-5 !text-slate-600 dark:!text-slate-400">
                 {t('home.student.dashboardHint')}
             </Typography>
+
+            <Footer/>
         </section>
     )
 }
