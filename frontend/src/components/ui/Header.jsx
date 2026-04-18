@@ -64,7 +64,7 @@ export default function Header() {
         ]
       case 'teacher':
         return [
-          { label: t('header.navDashboard'), href: '/' },
+          { label: t('header.navDashboard'), href: '/teacher' },
           { label: 'My Classes', href: '/classes' },
           { label: 'Assignments', href: '/assignments' },
           contactLink,
@@ -73,7 +73,7 @@ export default function Header() {
       case 'student':
       default:
         return [
-          { label: t('header.navDashboard'), href: '/' },
+          { label: t('header.navDashboard'), href: '/student' },
           { label: 'My Courses', href: '/courses' },
           { label: 'Assignments', href: '/assignments' },
           contactLink,

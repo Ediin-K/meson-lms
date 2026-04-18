@@ -135,6 +135,7 @@ export default function Login() {
     try {
       const data = await login(email, password)
 
+      console.log("data nga backend:", data)
       localStorage.setItem('token', data.token)
       localStorage.setItem('email', data.email)
 
@@ -142,7 +143,7 @@ export default function Login() {
 
       if (data.role) {
         setRole(data.role)
-        localStorage.setItem('role', data.role)
+        localStorage.setItem('meson-role', data.role)
       }
 
       navigate('/')

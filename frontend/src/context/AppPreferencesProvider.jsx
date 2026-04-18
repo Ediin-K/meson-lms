@@ -18,7 +18,7 @@ function readStoredLocale() {
 
 function readStoredRole() {
   try {
-    const v = localStorage.getItem(STORAGE_ROLE)
+    const v = localStorage.getItem(STORAGE_ROLE).toLowerCase()
     if (['guest', 'student', 'teacher', 'parent', 'admin'].includes(v)) {
       return v
     }
@@ -63,8 +63,7 @@ export function AppPreferencesProvider({ children }) {
 
   const setRole = useCallback((next) => {
     const allowed = ['guest', 'student', 'teacher', 'parent', 'admin']
-    const v = allowed.includes(next) ? next : 'guest'
-
+    const v = allowed.includes(next?.toLowerCase()) ? next.toLowerCase() : 'guest'
     setRoleState(v)
     localStorage.setItem(STORAGE_ROLE, v)
   }, [])

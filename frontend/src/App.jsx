@@ -8,6 +8,10 @@ import CourseDetail from './pages/CourseDetail.jsx';
 import Contact from './pages/ContactUs.jsx';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import 'swiper/css';
+import StudentDashboard from "./components/dashboard/StudentDashboard.jsx";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
+import TeacherDashboard from "./components/dashboard/TeacherDashboard.jsx";
+
 
 function App() {
   return (
@@ -25,7 +29,17 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/course/:courseId" element={<CourseDetail />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/student" element={ <ProtectedRoute requiredRole="student">
+              <StudentDashboard />
+            </ProtectedRoute>} />
+            <Route path="/teacher" element={
+              <ProtectedRoute requiredRole="teacher">
+                <TeacherDashboard />
+              </ProtectedRoute>
+            } />
+
             <Route path="/" element={<Home />} />
+            <Route path="/unauthorized" element={<div>Nuk ke qasje!</div>} />
           </Routes>
         </div>
       </main>
