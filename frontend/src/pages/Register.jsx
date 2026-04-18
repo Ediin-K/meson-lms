@@ -23,7 +23,7 @@ import {
   PRIVACY_POLICY,
   TERMS_OF_SERVICE,
 } from '../legal/mesonLegalDocuments.js'
-import { register } from '../../../backend/src/services/authService.js'
+import { register } from '../services/authService.js'
 
 /** Set true to require scrolling to the end before “I have read” is enabled (stricter UX). */
 const REQUIRE_SCROLL_TO_ACKNOWLEDGE_LEGAL = false

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAppPreferences } from '../../context/appPreferencesContext.js'
 import { GB, AL } from 'country-flag-icons/react/3x2'
-import { logout } from '../../../../backend/src/services/authService.js'
+import { logout } from '../../services/authService.js'
 
 function ThemeToggleIcon({ dark }) {
   if (dark) {
