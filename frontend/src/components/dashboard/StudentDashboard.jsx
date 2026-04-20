@@ -272,9 +272,6 @@ export default function StudentDashboard() {
                     ))}
                 </div>
             </Container>
-            <Typography variant="body2" className="!mt-5 !text-slate-600 dark:!text-slate-400">
-                {t('home.student.dashboardHint')}
-            </Typography>
 
             <Footer/>
         </section>

@@ -90,8 +90,7 @@ export const STRINGS = {
         assignLink: 'Shiko të gjitha detyrat',
         browseTitle: 'Eksploro kurse',
         browseBody: 'Kategori të përzgjedhura për ty.',
-        dashboardHint:
-          'Më poshtë është fakulteti ku je i regjistruar dhe lëndët e semestrit aktual.',
+
         facultyOverline: 'Regjistrimi yt',
         facultyTitle: 'Fakulteti dhe programi',
         facultyBody:
@@ -404,8 +403,6 @@ export const STRINGS = {
         assignLink: 'View all assignments',
         browseTitle: 'Explore courses',
         browseBody: 'Hand-picked categories for you.',
-        dashboardHint:
-          'Below you’ll see your enrolled faculty and this semester’s courses.',
         facultyOverline: 'Your enrolment',
         facultyTitle: 'Faculty and programme',
         facultyBody:
