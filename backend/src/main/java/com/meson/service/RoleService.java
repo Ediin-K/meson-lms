@@ -12,7 +12,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class RoleService{
-    private final RoleRepositry roleRepositry;
+    private final RoleRepository roleRepository;
 
     public List<RoleResponse> getAll(){
         return roleRepository.findAll()
@@ -21,7 +21,7 @@ public class RoleService{
                 .toList();
     }
     public RoleResponse getById(Long id){
-        Role role = roleRepositry.findById(id)
+        Role role = roleRepository.findById(id)
                 .orElseThrow(()->new RuntimeException("Roli nuk u gjet"));
         return toResponse(role);
 
@@ -36,7 +36,7 @@ public class RoleService{
     }
 
     public RoleResponse update(Long id,RoleRequest request){
-        Role role = roleRepositry.findById(id)
+        Role role = roleRepository.findById(id)
                 .orElseThrow(()->new RuntimeException("Roli nuk u gjet"));
         role.setEmertimi(request.getEmertimi());
         role.setNormalizedName(request.getNormalizedName().toUpperCase());
