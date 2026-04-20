@@ -15,6 +15,18 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    public void activate(Long id) {
+        User user = getById(id);
+        user.setStatusi("active");
+        userRepository.save(user);
+    }
+
+    public void deactivate(Long id) {
+        User user = getById(id);
+        user.setStatusi("inactive");
+        userRepository.save(user);
+    }
+
     public List<User> getAll() {
         return userRepository.findAll();
     }

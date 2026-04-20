@@ -36,7 +36,7 @@ public class User {
     private boolean emailConfirmed = false;
 
     @Column(nullable = false)
-    private boolean lockoutEnable = false;
+    private boolean lockoutEnabled = false;
 
     @Column(nullable = false)
     private int accessFailedCount = 0;
