@@ -44,6 +44,7 @@ public class RoleService{
         return toResponse(roleRepository.save(role));
     }
 
+
     public void delete(Long id) {
         Role role = roleRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Roli nuk u gjet"));
@@ -52,5 +53,15 @@ public class RoleService{
         }
         roleRepository.deleteById(id);
     }
+    private RoleResponse toResponse(Role role) {
+        RoleResponse response = new RoleResponse();
+        response.setId(role.getId());
+        response.setEmertimi(role.getEmertimi());
+        response.setNormalizedName(role.getNormalizedName());
+        response.setPershkrimi(role.getPershkrimi());
+        return response;
+    }
+
+
 
 }
