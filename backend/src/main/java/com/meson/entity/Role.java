@@ -24,6 +24,8 @@ public class Role {
     @Column(nullable = false, unique = true)
     private String normalizedName;
 
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "role", cascade = CascadeType.ALL)
     private Set<UserRole> userRoles;
 }
