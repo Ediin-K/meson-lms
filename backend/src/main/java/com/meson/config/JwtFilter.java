@@ -33,11 +33,9 @@ public class JwtFilter extends OncePerRequestFilter {
 
         // 1. Merr Authorization header
         String authHeader = request.getHeader("Authorization");
-        System.out.println("AUTH HEADER: " + authHeader);
 
         // 2. Kontrollo nëse ka token
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            System.out.println("NO TOKEN - vazhdoj pa autentifikim");
             filterChain.doFilter(request, response);
             return;
         }
@@ -47,14 +45,12 @@ public class JwtFilter extends OncePerRequestFilter {
 
         // 4. Nxjerr emailin nga token
         String email = jwtService.extractEmail(token);
-        System.out.println("EMAIL: " + email);
 
         // 5. Kontrollo nëse useri ekziston dhe nuk është autentifikuar
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
             // 6. Gjej userin nga DB
             boolean userExists = userRepository.existsByEmailIgnoreCase(email);
-            System.out.println("USER EXISTS: " + userExists);
 
             if (userExists && jwtService.isTokenValid(token, email)) {
 
@@ -75,9 +71,9 @@ public class JwtFilter extends OncePerRequestFilter {
 
                 // 9. Vendos Authentication në SecurityContext
                 SecurityContextHolder.getContext().setAuthentication(authToken);
-                System.out.println("AUTENTIFIKUAR: " + email);
             }
         }
+        //TEST PER GITHUB
 
         // 10. Vazhdo me kërkesën
         filterChain.doFilter(request, response);
