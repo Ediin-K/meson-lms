@@ -119,6 +119,7 @@ export default function Login() {
   const clearGlobalError = () => setGlobalError('')
 
   const handleSubmit = async (e) => {
+
     e.preventDefault()
 
     const errs = {
