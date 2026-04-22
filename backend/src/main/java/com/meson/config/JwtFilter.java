@@ -24,6 +24,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserRepository userRepository;
+    private final com.meson.repository.UserRoleRepository userRoleRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -50,15 +51,20 @@ public class JwtFilter extends OncePerRequestFilter {
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
             // 6. Gjej userin nga DB
-            boolean userExists = userRepository.existsByEmailIgnoreCase(email);
+            var userOptional = userRepository.findByEmail(email);
 
-            if (userExists && jwtService.isTokenValid(token, email)) {
+            if (userOptional.isPresent() && jwtService.isTokenValid(token, email)) {
+                var appUser = userOptional.get();
 
-                // 7. Krijo UserDetails
+                // 7. Merr rolet dhe krijo UserDetails
+                var authorities = userRoleRepository.findByUser(appUser).stream()
+                        .map(ur -> new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + ur.getRole().getNormalizedName().toUpperCase()))
+                        .collect(java.util.stream.Collectors.toList());
+
                 UserDetails userDetails = User.builder()
                         .username(email)
                         .password("")
-                        .authorities(new ArrayList<>())
+                        .authorities(authorities)
                         .build();
 
                 // 8. Krijo Authentication token
