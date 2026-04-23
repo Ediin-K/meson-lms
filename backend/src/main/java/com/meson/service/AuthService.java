@@ -9,6 +9,8 @@ import com.meson.entity.UserRole;
 import com.meson.repository.RoleRepository;
 import com.meson.repository.UserRepository;
 import com.meson.repository.UserRoleRepository;
+import com.meson.entity.RefreshToken;
+import com.meson.service.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,7 @@ public class AuthService {
     private final UserRoleRepository userRoleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
 
     public AuthResponse login(LoginRequest request) {
 
@@ -43,19 +46,25 @@ public class AuthService {
                 .map(ur -> ur.getRole().getEmertimi().toLowerCase())
                 .orElse("guest");
 
-        // 4. Gjenero token dhe kthe AuthResponse
+        // 4. Gjenero access token
         String token = jwtService.generateToken(user.getEmail());
-        return new AuthResponse(token, user.getEmail(), role);
+
+        // 5. Invalido token-at e vjetra
+        refreshTokenService.revokeAllUserTokens(user);
+
+        // 6. Gjenero refresh token te ri
+        RefreshToken refreshToken = refreshTokenService.generateRefreshToken(user);
+
+        // 7. Kthen AuthResponse
+        return new AuthResponse(token, user.getEmail(), role, refreshToken.getToken());
     }
 
     public AuthResponse register(RegisterRequest request) {
 
-        // 1. Kontrollo nëse email ekziston
         if (userRepository.existsByEmailIgnoreCase(request.getEmail())) {
             throw new RuntimeException("Email ekziston tashmë!");
         }
 
-        // 2. Krijo userin e ri
         User user = new User();
         user.setEmri(request.getEmri());
         user.setMbiemri(request.getMbiemri());
@@ -64,22 +73,18 @@ public class AuthService {
         user.setDataKrijimit(LocalDateTime.now());
         user.setStatusi("active");
 
-        // 3. Ruaj userin në DB
         userRepository.save(user);
 
-        // 4. Gjej rolin nga DB
         Role role = roleRepository.findByNormalizedName(
                 request.getRoli().toUpperCase()
         ).orElseThrow(() -> new RuntimeException("Roli nuk u gjet!"));
 
-        // 5. Krijo lidhjen UserRole
         UserRole userRole = new UserRole();
         userRole.setUser(user);
         userRole.setRole(role);
         userRoleRepository.save(userRole);
 
-        // 6. Gjenero token dhe kthe AuthResponse
         String token = jwtService.generateToken(user.getEmail());
-        return new AuthResponse(token, user.getEmail(), role.getEmertimi().toLowerCase());
+        return new AuthResponse(token, user.getEmail(), role.getEmertimi().toLowerCase(), null);
     }
 }

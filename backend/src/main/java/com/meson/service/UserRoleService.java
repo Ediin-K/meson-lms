@@ -64,8 +64,8 @@ public class UserRoleService {
     private UserRoleResponse toResponse (UserRole userRole){
         UserRoleResponse response = new UserRoleResponse();
         response.setId(userRole.getId());
-        response.setEmri(userRole.getUser().getEmrii());
-        response.setMbiemeri(userRole.getUser().getMbiemer());
+        response.setEmri(userRole.getUser().getEmri());
+        response.setMbiemri(userRole.getUser().getMbiemri());
         response.setEmail(userRole.getUser().getEmail());
         response.setRole(userRole.getRole().getEmertimi());
         return response;

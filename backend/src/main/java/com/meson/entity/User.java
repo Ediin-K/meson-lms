@@ -12,6 +12,7 @@ import java.util.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode(exclude = {"userRoles", "userClaims", "userTokens", "refreshTokens"})
 public class User {
 
     @Id
