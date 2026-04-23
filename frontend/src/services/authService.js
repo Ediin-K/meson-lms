@@ -13,9 +13,12 @@ export const login = async (email, password) => {
         throw new Error('Email ose password i gabuar!');
     }
 
-    return response.json();
-};
+    const data = await response.json();
+    localStorage.setItem('token', data.token)
+    localStorage.setItem('refreshToken', data.refreshToken)
 
+    return data;
+};
 export const register = async (emri, mbiemri, email, password, roli) => {
     const response = await fetch(`${API_URL}/register`, {
         method: 'POST',
@@ -33,8 +36,10 @@ export const register = async (emri, mbiemri, email, password, roli) => {
 };
 
 export const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('email');
+    localStorage.removeItem('token')
+    localStorage.removeItem('email')
+    localStorage.removeItem('refreshToken')
+    localStorage.removeItem('meson-role')
 };
 
 export const getToken = () => {
