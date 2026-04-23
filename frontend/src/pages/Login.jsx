@@ -136,8 +136,6 @@ export default function Login() {
     try {
       const data = await login(email, password)
 
-      console.log("data nga backend:", data)
-      localStorage.setItem('token', data.token)
       localStorage.setItem('email', data.email)
 
       setIsAuthenticated(true)
@@ -148,7 +146,7 @@ export default function Login() {
       }
 
       navigate('/')
-    } catch (error) {
+    }catch (error) {
       setGlobalError(error.response?.data?.message || 'Gabim në login')
     } finally {
       setLoading(false)
