@@ -2,6 +2,9 @@ package com.meson.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.util.List;
+import java.util.ArrayList;
+
 
 
 @Entity
@@ -10,7 +13,8 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CourseCategories{
+@EqualsAndHashCode(exclude = {"courses"})
+public class CourseCategory{
 
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -22,5 +26,7 @@ public class CourseCategories{
     @Column(columnDefinition = "TEXT")
     private String pershkrimi;
 
+    @OneToMany(mappedBy="category" ,fetch = FetchType.LAZY)
+    private List<Course> courses = new ArrayList<>();
 
 }

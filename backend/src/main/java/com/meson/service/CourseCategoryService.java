@@ -27,6 +27,10 @@ public class CourseCategoryService{
     }
 
     public CourseCategoryResponse create(CourseCategoryRequest request){
+
+        if (courseCategoryRepository.existsByEmertimi(request.getEmertimi())) {
+            throw new RuntimeException("Kategoria me këtë emër ekziston tashmë");
+        }
         CourseCategory courseCategory = new CourseCategory();
         courseCategory.setEmertimi(request.getEmertimi());
         courseCategory.setPershkrimi(request.getPershkrimi());
@@ -51,10 +55,10 @@ public class CourseCategoryService{
     }
 
     private CourseCategoryResponse toResponse(CourseCategory courseCategory){
-        CourseCategoryResponse response = new CourseCategoryResponse();
-        response.setId(courseCategory.getId());
-        response.setEmertimi(courseCategory.getEmertimi());
-        response.setPershkrimi(courseCategory.getPershkrimi());
-        return response;
+        return CourseCategoryResponse.builder()
+                .id(courseCategory.getId())
+                .emertimi(courseCategory.getEmertimi())
+                .pershkrimi(courseCategory.getPershkrimi())
+                .build();
     }
 }
