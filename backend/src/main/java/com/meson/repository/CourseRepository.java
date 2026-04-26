@@ -10,14 +10,9 @@ import java.util.Optional;
 @Repository
 public interface CourseRepository extends JpaRepository<Course, Long> {
     Optional<Course> findByTitulli(String titulli);
-
     List<Course> findByStatusi(CourseStatus statusi);
-
-    List<Course> findByCategoryIdAndStatusi(Long categoryId, CourseStatus statusi);
-
+    List<Course> findByCourseCategoryIdAndStatusi(Long categoryId, CourseStatus statusi);
     List<Course> findByTeacherId(Long teacherId);
-
     List<Course> findByTitulliContainingIgnoreCase(String titulli);
-
     boolean existsByTitulli(String titulli);
 }
