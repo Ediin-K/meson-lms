@@ -28,13 +28,13 @@ public class CourseCategoryController{
     }
 
     @PostMapping
-    public ResponseEntity<CourseCategoryResponse> create(@RequestBody CourseCategoryRequest request){
+    public ResponseEntity<CourseCategoryResponse> create(@Valid @RequestBody CourseCategoryRequest request){
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(courseCategoryService.create(request));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CourseCategoryResponse> update(@PathVariable Long id,
+    public ResponseEntity<CourseCategoryResponse> update(@Valid @PathVariable Long id,
                                                          @RequestBody CourseCategoryRequest request){
         return ResponseEntity.ok(courseCategoryService.update(id, request));
     }
