@@ -2,6 +2,7 @@ package com.meson.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name="courses")
@@ -40,4 +41,12 @@ public class Course{
     @Builder.Default
     @Enumerated(EnumType.STRING)
     private CourseStatus statusi= CourseStatus.DRAFT;
+
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 }

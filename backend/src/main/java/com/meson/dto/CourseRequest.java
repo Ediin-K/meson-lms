@@ -4,6 +4,7 @@ import com.meson.entity.CourseLevel;
 import com.meson.entity.CourseStatus;
 import jakarta.validation.constraints.*;
 import lombok.Data;
+import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 

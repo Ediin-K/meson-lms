@@ -26,7 +26,7 @@ public class CourseCategory{
     @Column(columnDefinition = "TEXT")
     private String pershkrimi;
 
-    @OneToMany(mappedBy="category" ,fetch = FetchType.LAZY)
+    @OneToMany(mappedBy="courseCategory" ,fetch = FetchType.LAZY)
     private List<Course> courses = new ArrayList<>();
 
 }

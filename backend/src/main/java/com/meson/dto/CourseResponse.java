@@ -1,5 +1,4 @@
-```
-        package com.meson.dto;
+ package com.meson.dto;
 
 import com.meson.entity.CourseLevel;
 import com.meson.entity.CourseStatus;
@@ -26,4 +25,3 @@ public class CourseResponse {
     private CourseStatus statusi;
     private LocalDateTime createdAt;
 }
-```
