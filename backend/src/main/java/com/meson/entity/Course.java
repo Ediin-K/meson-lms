@@ -31,6 +31,9 @@ public class Course{
     @JoinColumn(name = "category_id")
     private CourseCategory courseCategory;
 
+    @Column(nullable=false)
+    private Integer semester;
+
     @Builder.Default
     private double cmimi = 0.0;
 

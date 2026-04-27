@@ -6,6 +6,7 @@ import Register from './pages/Register.jsx';
 import About from './pages/About.jsx';
 import CourseDetail from './pages/CourseDetail.jsx';
 import Contact from './pages/ContactUs.jsx';
+import SemesterPage from './pages/SemesterPage.jsx';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import 'swiper/css';
 import StudentDashboard from "./components/dashboard/StudentDashboard.jsx";
@@ -27,6 +28,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/about" element={<About />} />
+            <Route path="/student/semester/:semesterId" element={<SemesterPage />} />
             <Route path="/course/:courseId" element={<CourseDetail />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/student" element={ <ProtectedRoute requiredRole="student">

@@ -27,6 +27,16 @@ public class CourseController{
         return ResponseEntity.ok(courseService.getById(id));
     }
 
+    @GetMapping("/filter")
+    public ResponseEntity<List<CourseResponse>> getByCategoryAndSemester(
+            @RequestParam Long categoryId,
+            @RequestParam Integer semester
+    ) {
+        return ResponseEntity.ok(
+                courseService.getByCategoryAndSemester(categoryId, semester)
+        );
+    }
+
     @PostMapping
     public ResponseEntity<CourseResponse> create(@Valid @RequestBody CourseRequest request){
         return ResponseEntity.status(HttpStatus.CREATED)
