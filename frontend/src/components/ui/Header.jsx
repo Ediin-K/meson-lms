@@ -38,8 +38,20 @@ export default function Header() {
   const profileBtnRef = useRef(null)
   const navigate = useNavigate()
 
+  const [isScrolled, setIsScrolled] = useState(false)
+
   const langMenuId = useId()
   const profileMenuId = useId()
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10)
+    }
+    window.addEventListener('scroll', handleScroll)
+    // check initially
+    handleScroll()
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   const getNavLinks = () => {
     const contactLink = { label: t('header.navContact'), href: '/contact' }
@@ -119,8 +131,13 @@ export default function Header() {
     'rounded-full px-2.5 py-2 text-sm font-medium text-slate-800 no-underline outline-none ring-sky-500/0 transition hover:bg-slate-900/[0.07] hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-sky-500 lg:px-3 dark:text-slate-100 dark:hover:bg-white/10 dark:hover:text-white'
 
   return (
-    <header className="sticky top-0 z-50 -mx-4 border-b border-slate-200/80 bg-white shadow-sm backdrop-blur-md dark:border-slate-700/80 dark:bg-slate-900">
-      <a
+    <>
+      <header className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 ${
+        isScrolled
+          ? 'border-b border-slate-200/80 bg-white/95 shadow-md backdrop-blur-xl dark:border-slate-700/80 dark:bg-slate-900/95'
+          : 'border-b border-white/40 bg-white/30 shadow-sm backdrop-blur-md dark:border-slate-700/50 dark:bg-slate-900/40'
+      }`}>
+        <a
         href="#"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-slate-900 focus:px-4 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg"
       >
@@ -415,6 +432,8 @@ export default function Header() {
           </div>
         </div>
       ) : null}
-    </header>
+      </header>
+      <div className="hidden" aria-hidden="true" />
+    </>
   )
 }
