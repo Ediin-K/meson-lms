@@ -6,7 +6,7 @@ export const STRINGS = {
       skip: 'Kalo te përmbajtja kryesore',
       mainNav: 'Navigimi kryesor',
       navHome: 'Ballina',
-      navCourses: 'Kurset e mia',
+      navCourses: 'Lendet e mia',
       navAssignments: 'Detyrat',
       navLibrary: 'Biblioteka',
       navAbout: 'Rreth nesh',
@@ -126,6 +126,12 @@ export const STRINGS = {
             extension: 'Zgjatja: 25 prill',
             progress: '15',
           },
+        },
+        semesters:{
+          overline: "PLAN STUDIMI",
+          title: "Zgjidh Semestrin",
+          body: "Zgjidh semestrin për të parë lëndët e tua",
+          semester:'Semestri '
         },
         subjects: {
           overline: 'Semestri aktual',
@@ -438,6 +444,12 @@ export const STRINGS = {
             extension: 'Extended to: 25 Apr',
             progress: '15',
           },
+        },
+        semesters:{
+          overline: "STUDY PLAN",
+          title: "Select Semester",
+          body: "Choose a semester to view your courses",
+          semester:'Semester '
         },
         subjects: {
           overline: 'Current semester',

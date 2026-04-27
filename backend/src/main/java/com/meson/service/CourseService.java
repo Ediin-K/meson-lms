@@ -52,6 +52,7 @@ public class CourseService {
         course.setStatusi(request.getStatusi());
         course.setTeacher(teacher);
         course.setCourseCategory(category);
+        course.setSemester(request.getSemester());
 
         return toResponse(courseRepository.save(course));
     }
@@ -73,6 +74,7 @@ public class CourseService {
         course.setStatusi(request.getStatusi());
         course.setTeacher(teacher);
         course.setCourseCategory(category);
+        course.setSemester(request.getSemester());
 
         return toResponse(courseRepository.save(course));
     }
@@ -93,10 +95,20 @@ public class CourseService {
                 .teacherName(course.getTeacher().getEmri())
                 .categoryId(course.getCourseCategory().getId())
                 .categoryName(course.getCourseCategory().getEmertimi())
+                .semester(course.getSemester())
                 .cmimi(course.getCmimi())
                 .niveli(course.getNiveli())
                 .statusi(course.getStatusi())
                 .createdAt(course.getCreatedAt())
                 .build();
     }
+
+    public List<CourseResponse> getByCategoryAndSemester(Long categoryId, Integer semester) {
+        return courseRepository
+                .findByCourseCategoryIdAndSemester(categoryId, semester)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
 }

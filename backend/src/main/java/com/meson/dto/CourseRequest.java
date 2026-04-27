@@ -26,6 +26,9 @@ public class CourseRequest {
     @NotNull
     private Long categoryId;
 
+    @NotNull
+    private Integer semester;
+
     @Builder.Default
     @DecimalMin(value = "0.0", message = "Cmimi nuk mund te jet negativ")
     private Double cmimi = 0.0;
