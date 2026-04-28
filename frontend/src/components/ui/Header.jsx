@@ -87,7 +87,7 @@ export default function Header() {
         return [
           { label: t('header.navDashboard'), href: '/student' },
           { label: t('header.navCourses'), href: '/courses' },
-          { label: t('header.navCourses'), href: '/assignments' },
+          { label: t('header.navAssignments'), href: '/assignments' },
           contactLink,
           libraryLink,
         ]
