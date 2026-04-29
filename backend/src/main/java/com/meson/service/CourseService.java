@@ -111,4 +111,11 @@ public class CourseService {
                 .toList();
     }
 
+    public List<CourseResponse> getBySemester(Integer semester) {
+        return courseRepository.findBySemester(semester)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
 }

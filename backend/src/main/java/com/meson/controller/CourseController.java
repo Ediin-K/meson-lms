@@ -37,6 +37,11 @@ public class CourseController {
         return ResponseEntity.ok(courseService.getById(id));
     }
 
+    @GetMapping("/by-semester/{semester}")
+    public ResponseEntity<List<CourseResponse>> getBySemester(@PathVariable Integer semester) {
+        return ResponseEntity.ok(courseService.getBySemester(semester));
+    }
+
     @PostMapping
     public ResponseEntity<CourseResponse> create(@Valid @RequestBody CourseRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
