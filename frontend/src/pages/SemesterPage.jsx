@@ -20,14 +20,7 @@ export default function SemesterPage() {
         const fetchCourses = async () => {
             try {
                 setLoading(true)
-
-                const res = await axiosInstance.get('/courses/search', {
-                    params: {
-                        categoryId: 2,   // FIXED (nga backend yt)
-                        semester: Number(semesterId)
-                    }
-                })
-
+                const res = await axiosInstance.get(`/courses/by-semester/${semesterId}`)
                 setCourses(res.data)
             } catch (err) {
                 console.log(err)
@@ -35,14 +28,13 @@ export default function SemesterPage() {
                 setLoading(false)
             }
         }
-
         fetchCourses()
     }, [semesterId])
 
     return (
         <section className="flex flex-col min-h-screen">
             <Container maxWidth="lg" className="flex-grow py-8 px-4 sm:px-6 lg:px-8 mt-4 sm:mt-8">
-                
+
                 {/* BACK BUTTON */}
                 <Button 
                     startIcon={<ArrowBackRounded />} 
@@ -86,6 +78,7 @@ export default function SemesterPage() {
                             <Link 
                                 to={`/course/${course.id}`} 
                                 key={course.id}
+                                onClick={() => localStorage.setItem('lastCourseId', course.id)}
                                 className="group block h-full focus:outline-none focus:ring-2 focus:ring-sky-500 rounded-3xl"
                             >
                                 <div className="
