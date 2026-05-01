@@ -2,7 +2,6 @@ import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAppPreferences } from '../../context/appPreferencesContext.js'
 import { GB, AL } from 'country-flag-icons/react/3x2'
-import { logout } from '../../services/authService.js'
 
 function ThemeToggleIcon({ dark }) {
   if (dark) {
@@ -28,7 +27,7 @@ function ThemeToggleIcon({ dark }) {
 }
 
 export default function Header() {
-  const { locale, setLocale, role, colorMode, toggleColorMode, t, isAuthenticated } = useAppPreferences()
+  const { locale, setLocale, role, colorMode, toggleColorMode, t, isAuthenticated, logout } = useAppPreferences()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [langOpen, setLangOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
@@ -323,14 +322,18 @@ export default function Header() {
                   </button>
                 ))}
                 <div className="my-1 h-px bg-slate-200" />
-                <Link
-                  to="/login"
+                <button
+                  type="button"
                   role="menuitem"
                   className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm font-medium text-rose-600 outline-none hover:bg-rose-50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-rose-400"
-                  onClick={() => setProfileOpen(false)}
+                  onClick={() => {
+                    setProfileOpen(false)
+                    logout()
+                    navigate('/login')
+                  }}
                 >
                   {t('header.logout')}
-                </Link>
+                </button>
               </div>
             ) : null}
           </div>
@@ -438,12 +441,16 @@ export default function Header() {
             >
               {t('header.login')}
             </Link>
-            <Link
-              to="/login"
-              className="w-full rounded-xl py-3 text-sm font-semibold text-slate-600 outline-none hover:bg-slate-900/[0.05] focus-visible:ring-2 focus-visible:ring-sky-500"
+            <button
+              type="button"
+              className="w-full text-left rounded-xl py-3 text-sm font-semibold text-slate-600 outline-none hover:bg-slate-900/[0.05] focus-visible:ring-2 focus-visible:ring-sky-500"
+              onClick={() => {
+                logout()
+                navigate('/login')
+              }}
             >
               {t('header.logout')}
-            </Link>
+            </button>
           </div>
         </div>
       ) : null}

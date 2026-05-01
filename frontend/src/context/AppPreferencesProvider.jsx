@@ -49,7 +49,10 @@ export function AppPreferencesProvider({ children }) {
   const logout = useCallback(() => {
     localStorage.removeItem('token')
     localStorage.removeItem('email')
+    localStorage.removeItem('refreshToken')
+    localStorage.removeItem(STORAGE_ROLE)
     setIsAuthenticated(false)
+    setRoleState('guest')
   }, [])
   const setLocale = useCallback((next) => {
     const v = next === 'en' ? 'en' : 'sq'
