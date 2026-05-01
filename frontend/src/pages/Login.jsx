@@ -51,19 +51,19 @@ function GoogleIcon() {
   )
 }
 
-function validateEmail(v) {
-  if (!v.trim()) return 'Email is required'
-  if (!isValidEmailFormat(v)) return 'Enter a valid email address'
+function validateEmail(v, t) {
+  if (!v.trim()) return t('auth.emailReq')
+  if (!isValidEmailFormat(v)) return t('auth.emailInv')
   return ''
 }
 
-function validatePassword(v) {
-  if (!v) return 'Password is required'
+function validatePassword(v, t) {
+  if (!v) return t('auth.passReq')
   return ''
 }
 
 export default function Login() {
-  const { setIsAuthenticated, colorMode, setRole } = useAppPreferences()
+  const { setIsAuthenticated, colorMode, setRole, t } = useAppPreferences()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [remember, setRemember] = useState(false)
@@ -105,10 +105,10 @@ export default function Login() {
 
   const errors = useMemo(
     () => ({
-      email: validateEmail(email),
-      password: validatePassword(password),
+      email: validateEmail(email, t),
+      password: validatePassword(password, t),
     }),
-    [email, password],
+    [email, password, t],
   )
 
   const getFieldError = (field) => {
@@ -123,8 +123,8 @@ export default function Login() {
     e.preventDefault()
 
     const errs = {
-      email: validateEmail(email),
-      password: validatePassword(password),
+      email: validateEmail(email, t),
+      password: validatePassword(password, t),
     }
 
     setAttemptedSubmit(true)
@@ -146,7 +146,7 @@ export default function Login() {
       }
 
       navigate('/')
-    }catch (error) {
+    } catch (error) {
       setGlobalError(error.response?.data?.message || 'Gabim në login')
     } finally {
       setLoading(false)
@@ -183,10 +183,10 @@ export default function Login() {
                 component="h1"
                 className="font-bold tracking-tight text-slate-900 dark:text-white"
               >
-                Log in to Meson
+                {t('auth.loginTitle')}
               </Typography>
               <Typography variant="body2" className="mt-2 text-slate-600 dark:text-slate-400">
-                Welcome back—continue your courses and assignments.
+                {t('auth.loginSubtitle')}
               </Typography>
 
               <form className="mt-8 space-y-5" onSubmit={handleSubmit} noValidate>
@@ -205,7 +205,7 @@ export default function Login() {
                 <div className="mb-6 sm:mb-8">
                   <InputField
                     id="email"
-                    label="Email"
+                    label={t('auth.emailLabel')}
                     value={email}
                     onChange={(e) => {
                       setEmail(e.target.value)
@@ -223,7 +223,7 @@ export default function Login() {
                 <div className="space-y-3">
                   <PasswordField
                     id="password"
-                    label="Password"
+                    label={t('auth.passwordLabel')}
                     value={password}
                     onChange={(e) => {
                       setPassword(e.target.value)
@@ -242,7 +242,7 @@ export default function Login() {
                       underline="hover"
                       className="text-sm font-medium text-indigo-600 transition-colors hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
                     >
-                      Forgot password?
+                      {t('auth.forgotPassword')}
                     </Link>
                   </div>
                 </div>
@@ -259,11 +259,11 @@ export default function Login() {
                     />
                   }
                   label={
-                    <span className="text-sm text-slate-600 dark:text-slate-400">Remember me</span>
+                    <span className="text-sm text-slate-600 dark:text-slate-400">{t('auth.rememberMe')}</span>
                   }
                 />
 
-                <LoginSubmitButton loading={loading}>Log in</LoginSubmitButton>
+                <LoginSubmitButton loading={loading}>{t('auth.loginSubmit')}</LoginSubmitButton>
 
                 <div className="flex items-center gap-3 py-1">
                   <span
@@ -271,7 +271,7 @@ export default function Login() {
                     aria-hidden
                   />
                   <span className="shrink-0 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
-                    Or continue with
+                    {t('auth.orContinueWith')}
                   </span>
                   <span
                     className="h-px flex-1 bg-slate-200 transition-colors dark:bg-slate-600"
@@ -299,13 +299,13 @@ export default function Login() {
                 </div>
 
                 <Typography variant="body2" className="text-center text-slate-600 dark:text-slate-400">
-                  Don&apos;t have an account?{' '}
+                  {t('auth.noAccount')} {' '}
                   <Link
                     component={RouterLink}
                     to="/register"
                     className="font-semibold text-indigo-600 underline-offset-2 transition-colors hover:text-indigo-500 hover:underline dark:text-indigo-400 dark:hover:text-indigo-300"
                   >
-                    Create account
+                    {t('auth.createAccount')}
                   </Link>
                 </Typography>
 

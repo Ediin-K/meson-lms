@@ -7,10 +7,12 @@ import {
 } from '@mui/material'
 import ArrowBackRounded from '@mui/icons-material/ArrowBackRounded'
 import CheckCircleRounded from '@mui/icons-material/CheckCircleRounded'
+import { useAppPreferences } from '../context/appPreferencesContext.js'
 
 export default function QuizPage() {
     const { quizId } = useParams()
     const navigate = useNavigate()
+    const { t } = useAppPreferences()
 
     const [quiz, setQuiz] = useState(null)
     const [questions, setQuestions] = useState([])
@@ -117,20 +119,20 @@ export default function QuizPage() {
                     <CardContent className="!p-8 text-center">
                         <CheckCircleRounded className="!text-6xl text-green-500 mb-4" />
                         <Typography variant="h4" className="!font-extrabold !text-slate-900 dark:!text-white">
-                            Quiz i përfunduar!
+                            {t('quiz.finished')}
                         </Typography>
                         <Typography variant="h2" className="!font-extrabold !text-sky-600 !mt-4">
                             {score?.toFixed(0)}%
                         </Typography>
                         <Typography variant="body1" className="!text-slate-600 dark:!text-slate-400 !mt-2">
-                            Rezultati juaj u ruajt
+                            {t('quiz.scoreSaved')}
                         </Typography>
                         <Button
                             variant="contained"
                             className="!mt-8 !rounded-full !bg-sky-600 !normal-case !px-8"
                             onClick={() => navigate(-1)}
                         >
-                            Kthehu te leksioni
+                            {t('quiz.backToLesson')}
                         </Button>
                     </CardContent>
                 </Card>
@@ -152,7 +154,7 @@ export default function QuizPage() {
                 onClick={() => navigate(-1)}
                 className="!mb-6 !normal-case !text-slate-600 dark:!text-slate-400 hover:!bg-sky-50 !rounded-full !px-4 !py-2"
             >
-                Kthehu te leksioni
+                {t('quiz.backToLesson')}
             </Button>
 
             {/* QUIZ HEADER */}
@@ -161,7 +163,7 @@ export default function QuizPage() {
                     {quiz?.titulli}
                 </Typography>
                 <Typography variant="body2" className="!text-slate-500 !mt-1">
-                    ⏱ {quiz?.kohezgjatjaMinuta} minuta
+                    ⏱ {quiz?.kohezgjatjaMinuta} {t('quiz.minutes')}
                 </Typography>
             </Box>
 
@@ -169,7 +171,7 @@ export default function QuizPage() {
             <Box className="mb-6">
                 <div className="flex justify-between mb-2">
                     <Typography variant="caption" className="!text-slate-500">
-                        Pyetja {currentIndex + 1} nga {questions.length}
+                        {t('quiz.question')} {currentIndex + 1} {t('quiz.from')} {questions.length}
                     </Typography>
                     <Typography variant="caption" className="!text-slate-500">
                         {progress.toFixed(0)}%
@@ -242,7 +244,7 @@ export default function QuizPage() {
                     disabled={currentIndex === 0}
                     className="!normal-case !rounded-full !border-slate-300 !text-slate-600 !px-6"
                 >
-                    Mbrapa
+                    {t('quiz.backBtn')}
                 </Button>
 
                 {isLast ? (
@@ -252,7 +254,7 @@ export default function QuizPage() {
                         disabled={!allAnswered || submitting}
                         className="!normal-case !rounded-full !bg-sky-600 !px-8"
                     >
-                        {submitting ? 'Duke dërguar...' : 'Përfundo Quiz-in'}
+                        {submitting ? t('quiz.submittingBtn') : t('quiz.submitBtn')}
                     </Button>
                 ) : (
                     <Button
@@ -261,7 +263,7 @@ export default function QuizPage() {
                         disabled={!selected[currentQuestion?.id]}
                         className="!normal-case !rounded-full !bg-sky-600 !px-6"
                     >
-                        Tjetër
+                        {t('quiz.nextBtn')}
                     </Button>
                 )}
             </div>

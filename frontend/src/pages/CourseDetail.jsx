@@ -109,13 +109,13 @@ export default function CourseDetail() {
                     </Typography>
                     <div className="mt-4 flex gap-4">
                         <span className="text-sm font-semibold text-sky-700 dark:text-sky-400">
-                            👨‍🏫 {course.teacherName}
+                            👨‍🏫 {t('courseDetail.teacher')}{course.teacherName}
                         </span>
                         <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">
-                            📚 Semestri {course.semester}
+                            📚 {t('courseDetail.semester')}{course.semester}
                         </span>
                         <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">
-                            📊 {course.niveli}
+                            📊 {t('courseDetail.level')}{course.niveli}
                         </span>
                     </div>
                 </Box>
@@ -125,7 +125,7 @@ export default function CourseDetail() {
                     <Box className="flex flex-col justify-center items-center py-20 px-4 text-center bg-white/60 dark:bg-slate-900/60 rounded-3xl border border-dashed border-slate-300 dark:border-slate-700">
                         <LibraryBooksRounded className="!text-6xl text-slate-300 dark:text-slate-600 mb-4" />
                         <Typography variant="h6" className="!font-bold !text-slate-800 dark:!text-slate-200">
-                            Nuk ka module në këtë kurs
+                            {t('courseDetail.noModules')}
                         </Typography>
                     </Box>
                 ) : (
@@ -170,7 +170,7 @@ export default function CourseDetail() {
                                         ) : lessons[module.id].length === 0 ? (
                                             <Box className="py-6 px-5">
                                                 <Typography variant="body2" className="!text-slate-500">
-                                                    Nuk ka leksione në këtë modul
+                                                    {t('courseDetail.noLessons')}
                                                 </Typography>
                                             </Box>
                                         ) : (

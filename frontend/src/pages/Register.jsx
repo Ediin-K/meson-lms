@@ -49,10 +49,10 @@ const ROLES = [
   },
 ]
 
-function roleLabelForUi(id) {
-  if (id === 'instructor') return 'Teacher'
-  if (id === 'parent') return 'Parent'
-  if (id === 'student') return 'Student'
+function roleLabelForUi(id, t) {
+  if (id === 'instructor') return t('auth.roleTeacherTitle')
+  if (id === 'parent') return t('auth.roleParentTitle')
+  if (id === 'student') return t('auth.roleStudentTitle')
   return id
 }
 
@@ -66,31 +66,31 @@ const initialValues = {
   terms: false,
 }
 
-function validateFirstName(v) {
-  if (!v.trim()) return 'First name is required'
+function validateFirstName(v, t) {
+  if (!v.trim()) return t('auth.errFirstReq')
   return ''
 }
 
-function validateLastName(v) {
-  if (!v.trim()) return 'Last name is required'
+function validateLastName(v, t) {
+  if (!v.trim()) return t('auth.errLastReq')
   return ''
 }
 
-function validateEmail(v) {
-  if (!v.trim()) return 'Email is required'
-  if (!isValidEmailFormat(v)) return 'Enter a valid email address'
+function validateEmail(v, t) {
+  if (!v.trim()) return t('auth.emailReq')
+  if (!isValidEmailFormat(v)) return t('auth.emailInv')
   return ''
 }
 
-function validatePassword(v) {
-  if (!v) return 'Password is required'
-  if (v.length < 8) return 'Use at least 8 characters'
+function validatePassword(v, t) {
+  if (!v) return t('auth.passReq')
+  if (v.length < 8) return t('auth.errPassLength')
   return ''
 }
 
-function validateConfirm(password, confirm) {
-  if (!confirm) return 'Confirm your password'
-  if (confirm !== password) return 'Passwords do not match'
+function validateConfirm(password, confirm, t) {
+  if (!confirm) return t('auth.errPassConfirm')
+  if (confirm !== password) return t('auth.errPassMatch')
   return ''
 }
 
@@ -129,7 +129,7 @@ function GoogleIcon() {
 }
 
 export default function Register() {
-  const { colorMode } = useAppPreferences()
+  const { colorMode, t } = useAppPreferences()
   const [values, setValues] = useState(initialValues)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -180,21 +180,20 @@ export default function Register() {
     let termsMsg = ''
     if (attemptedSubmit) {
       if (!termsReadAcknowledged || !privacyReadAcknowledged) {
-        termsMsg =
-          'Open the Terms of Service and Privacy Policy and tap “I have read and understood” for each.'
+        termsMsg = t('auth.errTermsMsg1')
       } else if (!values.terms) {
-        termsMsg = 'You must agree to the Terms of Service and Privacy Policy.'
+        termsMsg = t('auth.errTermsMsg2')
       }
     }
     return {
-      firstName: validateFirstName(values.firstName),
-      lastName: validateLastName(values.lastName),
-      email: validateEmail(values.email),
-      password: validatePassword(values.password),
-      confirmPassword: validateConfirm(values.password, values.confirmPassword),
+      firstName: validateFirstName(values.firstName, t),
+      lastName: validateLastName(values.lastName, t),
+      email: validateEmail(values.email, t),
+      password: validatePassword(values.password, t),
+      confirmPassword: validateConfirm(values.password, values.confirmPassword, t),
       terms: termsMsg,
     }
-  }, [values, attemptedSubmit, termsReadAcknowledged, privacyReadAcknowledged])
+  }, [values, attemptedSubmit, termsReadAcknowledged, privacyReadAcknowledged, t])
 
   const getFieldError = (field) => {
     if (!attemptedSubmit) return ''
@@ -237,11 +236,11 @@ export default function Register() {
           : ''
 
     const errs = {
-      firstName: validateFirstName(values.firstName),
-      lastName: validateLastName(values.lastName),
-      email: validateEmail(values.email),
-      password: validatePassword(values.password),
-      confirmPassword: validateConfirm(values.password, values.confirmPassword),
+      firstName: validateFirstName(values.firstName, t),
+      lastName: validateLastName(values.lastName, t),
+      email: validateEmail(values.email, t),
+      password: validatePassword(values.password, t),
+      confirmPassword: validateConfirm(values.password, values.confirmPassword, t),
       terms: termsErr,
     }
 
@@ -299,10 +298,10 @@ export default function Register() {
                   component="h1"
                   className="font-bold tracking-tight text-slate-900 dark:text-white sm:text-[2rem]"
                 >
-                  Create your account
+                  {t('auth.registerTitle')}
                 </Typography>
                 <Typography variant="body2" className="mx-auto mt-2 max-w-xl text-slate-600 dark:text-slate-400">
-                  Join Meson to start learning with structure and support—free to get started.
+                  {t('auth.registerSubtitle')}
                 </Typography>
               </div>
 
@@ -320,7 +319,7 @@ export default function Register() {
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <InputField
                       id="firstName"
-                      label="First name"
+                      label={t('auth.firstName')}
                       value={values.firstName}
                       onChange={handleChange('firstName')}
                       error={getFieldError('firstName')}
@@ -330,7 +329,7 @@ export default function Register() {
                     />
                     <InputField
                       id="lastName"
-                      label="Last name"
+                      label={t('auth.lastName')}
                       value={values.lastName}
                       onChange={handleChange('lastName')}
                       error={getFieldError('lastName')}
@@ -341,7 +340,7 @@ export default function Register() {
 
                   <InputField
                     id="email"
-                    label="School email"
+                    label={t('auth.schoolEmail')}
                     value={values.email}
                     onChange={handleChange('email')}
                     onBlur={handleEmailBlur}
@@ -357,9 +356,9 @@ export default function Register() {
                       role="status"
                     >
                       <span className="text-slate-700 dark:text-slate-200">
-                        Suggested role based on your email:{' '}
+                        {t('auth.suggestedRoleText')} {' '}
                         <strong className="text-emerald-800 dark:text-emerald-300">
-                          {roleLabelForUi(roleSuggestion)}
+                          {roleLabelForUi(roleSuggestion, t)}
                         </strong>
                       </span>
                       <div className="flex flex-wrap gap-2">
@@ -368,14 +367,14 @@ export default function Register() {
                           onClick={applySuggestedRole}
                           className="rounded-full bg-emerald-600 px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-emerald-500  focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
                         >
-                          Use suggested role
+                          {t('auth.suggestedRoleBtn')}
                         </button>
                         <button
                           type="button"
                           onClick={() => setRoleDismissed(true)}
                           className="rounded-full px-3 py-1.5 text-xs font-medium text-slate-600 underline-offset-2 hover:underline dark:text-slate-400"
                         >
-                          Dismiss
+                          {t('auth.dismissBtn')}
                         </button>
                       </div>
                     </div>
@@ -383,7 +382,7 @@ export default function Register() {
 
                   <PasswordField
                     id="password"
-                    label="Password"
+                    label={t('auth.password')}
                     value={values.password}
                     onChange={handleChange('password')}
                     error={getFieldError('password')}
@@ -395,7 +394,7 @@ export default function Register() {
 
                   <PasswordField
                     id="confirmPassword"
-                    label="Confirm password"
+                    label={t('auth.confirmPassword')}
                     value={values.confirmPassword}
                     onChange={handleChange('confirmPassword')}
                     error={getFieldError('confirmPassword')}
@@ -411,13 +410,13 @@ export default function Register() {
                       id="role-legend"
                       className="text-sm font-semibold text-slate-800 dark:text-slate-100"
                     >
-                      Choose your role
+                      {t('auth.chooseRoleTitle')}
                     </legend>
                     <p
                       id="role-field-hint"
                       className="mt-1 max-w-2xl text-xs leading-snug text-slate-600 dark:text-slate-400"
                     >
-                      Pick the role that fits you—this sets which tools you see first.
+                      {t('auth.chooseRoleHint')}
                     </p>
                     <div
                       role="radiogroup"
@@ -429,9 +428,9 @@ export default function Register() {
                         <RoleCard
                           key={r.id}
                           roleId={r.id}
-                          title={r.title}
-                          subtitle={r.subtitle}
-                          highlights={r.highlights}
+                          title={r.id === 'student' ? t('auth.roleStudentTitle') : r.id === 'instructor' ? t('auth.roleTeacherTitle') : t('auth.roleParentTitle')}
+                          subtitle={r.id === 'student' ? t('auth.roleStudentSub') : r.id === 'instructor' ? t('auth.roleTeacherSub') : t('auth.roleParentSub')}
+                          highlights={r.id === 'student' ? [t('auth.roleStudentH1'), t('auth.roleStudentH2')] : r.id === 'instructor' ? [t('auth.roleTeacherH1'), t('auth.roleTeacherH2')] : [t('auth.roleParentH1'), t('auth.roleParentH2')]}
                           selected={values.role === r.id}
                           onSelect={() => {
                             setValues((prev) => ({ ...prev, role: r.id }))
@@ -460,21 +459,21 @@ export default function Register() {
                         id="terms-description"
                         className="text-center text-sm text-slate-600 dark:text-slate-400"
                       >
-                        I agree to the{' '}
+                        {t('auth.iAgreeTo')} {' '}
                         <button
                           type="button"
                           className="font-medium text-indigo-600 underline decoration-indigo-600/50 underline-offset-2 transition-colors hover:text-indigo-500 dark:text-indigo-400 dark:decoration-indigo-400/50 dark:hover:text-indigo-300"
                           onClick={() => setTermsModalOpen(true)}
                         >
-                          Terms of Service
+                          {t('auth.termsOfService')}
                         </button>{' '}
-                        and{' '}
+                        {t('auth.and')} {' '}
                         <button
                           type="button"
                           className="font-medium text-indigo-600 underline decoration-indigo-600/50 underline-offset-2 transition-colors hover:text-indigo-500 dark:text-indigo-400 dark:decoration-indigo-400/50 dark:hover:text-indigo-300"
                           onClick={() => setPrivacyModalOpen(true)}
                         >
-                          Privacy Policy
+                          {t('auth.privacyPolicy')}
                         </button>
                       </span>
                     }
@@ -484,8 +483,7 @@ export default function Register() {
                       id="terms-legal-hint"
                       className="max-w-md text-center text-xs leading-snug text-slate-500 dark:text-slate-400"
                     >
-                      Open each document above and confirm with &quot;I have read and understood&quot; to enable
-                      the checkbox.
+                      {t('auth.termsHint')}
                     </p>
                   )}
                   {attemptedSubmit && validationErrors.terms && (
@@ -499,7 +497,7 @@ export default function Register() {
                   )}
 
                   <div className="w-full max-w-xs">
-                    <RegisterButton type="submit" disabled={loading}>Start learning</RegisterButton>
+                    <RegisterButton type="submit" disabled={loading}>{t('auth.registerSubmit')}</RegisterButton>
                   </div>
 
                   <div className="flex w-full max-w-md items-center gap-3 py-1">
@@ -508,7 +506,7 @@ export default function Register() {
                       aria-hidden
                     />
                     <span className="shrink-0 text-center text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
-                      Or continue with
+                      {t('auth.orContinueWith')}
                     </span>
                     <span
                       className="h-px flex-1 bg-slate-200 transition-colors dark:bg-slate-600"
@@ -540,13 +538,13 @@ export default function Register() {
                   variant="body2"
                   className="col-span-full text-center text-slate-600 dark:text-slate-400 md:col-span-2"
                 >
-                  Already have an account?{' '}
+                  {t('auth.alreadyHaveAccount')} {' '}
                   <Link
                     component={RouterLink}
                     to="/login"
                     className="font-semibold text-indigo-600 underline-offset-2 transition-colors hover:text-indigo-500 hover:underline dark:text-indigo-400 dark:hover:text-indigo-300"
                   >
-                    Log in
+                    {t('auth.logIn')}
                   </Link>
                 </Typography>
               </form>
