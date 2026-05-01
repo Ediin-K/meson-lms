@@ -171,4 +171,15 @@ public class QuizService {
                 .data(at.getData())
                 .build();
     }
+
+    public List<QuizAnswerStudentResponse> getAnswersByQuestionIdForStudent(Long questionId) {
+        return answerRepository.findByQuestionId(questionId)
+                .stream()
+                .map(a -> QuizAnswerStudentResponse.builder()
+                        .id(a.getId())
+                        .pergjigja(a.getPergjigja())
+                        .questionId(a.getQuestion().getId())
+                        .build())
+                .toList();
+    }
 }
