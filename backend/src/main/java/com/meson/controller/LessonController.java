@@ -28,6 +28,11 @@ public class LessonController {
         return ResponseEntity.ok(lessonService.getById(id));
     }
 
+    @GetMapping("/api/lessons/{id}")
+    public ResponseEntity<LessonResponse> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(lessonService.getById(id));
+    }
+
     @PostMapping
     public ResponseEntity<LessonResponse> create(
             @PathVariable Long moduleId,

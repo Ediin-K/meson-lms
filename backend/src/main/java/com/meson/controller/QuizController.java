@@ -32,6 +32,11 @@ public class QuizController {
         return ResponseEntity.ok(quizService.getByLessonId(lessonId));
     }
 
+    @GetMapping("/questions/{questionId}/answers/student")
+    public ResponseEntity<List<QuizAnswerStudentResponse>> getAnswersForStudent(@PathVariable Long questionId) {
+        return ResponseEntity.ok(quizService.getAnswersByQuestionIdForStudent(questionId));
+    }
+
     @PostMapping
     public ResponseEntity<QuizResponse> create(@Valid @RequestBody QuizRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(quizService.createQuiz(request));
