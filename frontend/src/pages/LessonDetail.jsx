@@ -58,14 +58,14 @@ export default function LessonDetail() {
         return (
             <Container maxWidth="lg" sx={{ mt: 6 }}>
                 <Typography variant="h5" className="!text-slate-800 dark:!text-white">
-                    Leksioni nuk u gjet
+                    {t('lessonDetail.notFound')}
                 </Typography>
                 <Button
                     startIcon={<ArrowBackRounded />}
                     onClick={() => navigate(-1)}
                     className="!mt-4 !normal-case !text-sky-600"
                 >
-                    Kthehu mbrapa
+                    {t('lessonDetail.back')}
                 </Button>
             </Container>
         )
@@ -81,7 +81,7 @@ export default function LessonDetail() {
                     onClick={() => navigate(-1)}
                     className="!mb-8 !normal-case !text-slate-600 dark:!text-slate-400 hover:!bg-sky-50 dark:hover:!bg-slate-800 !rounded-full !px-4 !py-2"
                 >
-                    Kthehu te kursi
+                    {t('lessonDetail.backToCourse')}
                 </Button>
 
                 {/* HEADER */}
@@ -111,7 +111,7 @@ export default function LessonDetail() {
                                 <CardContent className="!p-5">
                                     <Typography variant="subtitle1" className="!font-bold !text-slate-900 dark:!text-white !mb-4 flex items-center gap-2">
                                         <PlayCircleFilledRounded className="text-sky-600" fontSize="small" />
-                                        Video
+                                        {t('lessonDetail.video')}
                                     </Typography>
                                     <Box className="relative aspect-video rounded-xl overflow-hidden bg-slate-900">
                                         <iframe
@@ -131,7 +131,7 @@ export default function LessonDetail() {
                                 <CardContent className="!p-5">
                                     <Typography variant="subtitle1" className="!font-bold !text-slate-900 dark:!text-white !mb-4 flex items-center gap-2">
                                         <DescriptionRounded className="text-sky-600" fontSize="small" />
-                                        Përmbajtja
+                                        {t('lessonDetail.content')}
                                     </Typography>
                                     <Typography variant="body1" className="!text-slate-700 dark:!text-slate-300 !leading-relaxed whitespace-pre-wrap">
                                         {lesson.permbajtja}
@@ -147,7 +147,7 @@ export default function LessonDetail() {
                                     <div className="flex items-center gap-3">
                                         <LinkRounded className="text-sky-600" />
                                         <Typography variant="body2" className="!font-semibold !text-slate-800 dark:!text-white">
-                                            Material shtesë
+                                            {t('lessonDetail.extraMaterial')}
                                         </Typography>
                                     </div>
                                     <Button
@@ -157,7 +157,7 @@ export default function LessonDetail() {
                                         target="_blank"
                                         className="!normal-case !rounded-full !border-sky-300 !text-sky-600"
                                     >
-                                        Hap linkun
+                                        {t('lessonDetail.openLink')}
                                     </Button>
                                 </CardContent>
                             </Card>
@@ -172,11 +172,11 @@ export default function LessonDetail() {
                             <CardContent className="!p-5">
                                 <Typography variant="subtitle1" className="!font-bold !text-slate-900 dark:!text-white !mb-4 flex items-center gap-2">
                                     <QuizRounded className="text-sky-600" fontSize="small" />
-                                    Quizet
+                                    {t('lessonDetail.quizzes')}
                                 </Typography>
                                 {quizzes.length === 0 ? (
                                     <Typography variant="body2" className="!text-slate-500">
-                                        Nuk ka quiz në këtë leksion
+                                        {t('lessonDetail.noQuizzes')}
                                     </Typography>
                                 ) : (
                                     <div className="flex flex-col gap-3">
@@ -191,7 +191,7 @@ export default function LessonDetail() {
                                                         {quiz.titulli}
                                                     </Typography>
                                                     <Typography variant="caption" className="!text-slate-500">
-                                                        ⏱ {quiz.kohezgjatjaMinuta} minuta
+                                                        ⏱ {quiz.kohezgjatjaMinuta} {t('lessonDetail.minutes')}
                                                     </Typography>
                                                 </div>
                                                 <PlayCircleFilledRounded className="text-sky-500" fontSize="small" />
@@ -207,11 +207,11 @@ export default function LessonDetail() {
                             <CardContent className="!p-5">
                                 <Typography variant="subtitle1" className="!font-bold !text-slate-900 dark:!text-white !mb-4 flex items-center gap-2">
                                     <AssignmentRounded className="text-sky-600" fontSize="small" />
-                                    Detyrat
+                                    {t('lessonDetail.assignments')}
                                 </Typography>
                                 {assignments.length === 0 ? (
                                     <Typography variant="body2" className="!text-slate-500">
-                                        Nuk ka detyra në këtë leksion
+                                        {t('lessonDetail.noAssignments')}
                                     </Typography>
                                 ) : (
                                     <div className="flex flex-col gap-3">
@@ -225,7 +225,7 @@ export default function LessonDetail() {
                                                     {assignment.titulli}
                                                 </Typography>
                                                 <Typography variant="caption" className="!text-slate-500 !block !mt-1">
-                                                    ⏰ Deadline: {new Date(assignment.deadline).toLocaleDateString()}
+                                                    ⏰ {t('lessonDetail.deadline')} {new Date(assignment.deadline).toLocaleDateString()}
                                                 </Typography>
                                                 <Chip
                                                     label={assignment.statusi}
