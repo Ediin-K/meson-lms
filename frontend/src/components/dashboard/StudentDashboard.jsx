@@ -46,7 +46,7 @@ export default function StudentDashboard() {
                         elevation={0}
                         component="section"
                         aria-labelledby="student-news-heading"
-                        className="h-full rounded-2xl border border-slate-200/90 bg-slate-50/50 p-4 dark:!border-slate-700/90 dark:!bg-slate-900/50"
+                        className="h-full rounded-2xl border border-slate-200/90 bg-slate-50/50 p-4 flex flex-col dark:!border-slate-700/90 dark:!bg-slate-900/50"
                     >
                         <Typography
                             id="student-news-heading"
@@ -56,7 +56,7 @@ export default function StudentDashboard() {
                             <CampaignOutlined className="text-amber-700" fontSize="small" />
                             {t('home.student.announcementsTitle')}
                         </Typography>
-                        <ul className="list-none space-y-2.5 p-0">
+                        <ul className="list-none space-y-2.5 p-0 flex-1">
                             <li>
                                 <Typography variant="body2" className="!text-slate-800 dark:!text-slate-200">
                                     • {t('home.student.announcement1')}
@@ -68,6 +68,13 @@ export default function StudentDashboard() {
                                 </Typography>
                             </li>
                         </ul>
+                        <Button 
+                            onClick={() => navigate('/notifications')}
+                            size="small" 
+                            className="!mt-4 !w-full !rounded-xl !bg-white/60 !py-1.5 !font-semibold !text-amber-800 shadow-sm ring-1 ring-amber-200/50 transition-colors hover:!bg-amber-50 hover:!text-amber-900 dark:!bg-slate-800/60 dark:!text-amber-400 dark:ring-amber-900/30 dark:hover:!bg-slate-800 dark:hover:!text-amber-300"
+                        >
+                            {t('home.student.viewAllNotifications')}
+                        </Button>
                     </Card>
                 </aside>
 

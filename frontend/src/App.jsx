@@ -11,6 +11,7 @@ import SemesterPage from './pages/SemesterPage.jsx';
 import QuizPage from './pages/QuizPage.jsx';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import 'swiper/css';
+import Notifications from "./pages/Notifications.jsx";
 import StudentDashboard from "./components/dashboard/StudentDashboard.jsx";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import TeacherDashboard from "./components/dashboard/TeacherDashboard.jsx";
@@ -42,6 +43,11 @@ function App() {
               <Route path="/teacher" element={
                 <ProtectedRoute requiredRole="teacher">
                   <TeacherDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/notifications" element={
+                <ProtectedRoute>
+                  <Notifications />
                 </ProtectedRoute>
               } />
 

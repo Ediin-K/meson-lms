@@ -34,6 +34,7 @@ export const STRINGS = {
       profileSub: 'Profili',
       themeLight: 'Modalitet i çelët',
       themeDark: 'Modalitet i errët',
+      notifications: 'Njoftimet',
     },
     home: {
       brand: 'Meson LMS',
@@ -101,6 +102,8 @@ export const STRINGS = {
         announcementsTitle: 'Njoftime të shpejta',
         announcement1: 'Mbledhje kursi “Struktura diskrete” — e premte 10:00.',
         announcement2: 'Materialet e javës 7 janë publikuar në “Sisteme dhe sinjale”.',
+        viewAllNotifications: 'Shiko të gjitha',
+        noNotifications: 'Nuk keni njoftime',
         tasks: {
           panelTitle: 'Detyrat & progresi',
           panelSubtitle: 'Afate, zgjatje dhe sa për qind është përfunduar sipas lëndës.',
@@ -272,6 +275,14 @@ export const STRINGS = {
       copy: 'Të gjitha të drejtat e rezervuara.',
       helpNote: 'Ndihmë e shpejtë — përgjigje brenda 24 orëve në ditët e punës.',
     },
+    notifications: {
+      title: 'Të gjitha njoftimet',
+      subtitle: 'Qëndroni të përditësuar me ngjarjet më të fundit.',
+      unread: 'Të palexuara',
+      all: 'Të gjitha',
+      markAllRead: 'Shëno të gjitha të lexuara',
+      empty: 'Nuk ka njoftime.',
+    },
     course: {
       notFound: 'Kursi nuk u gjet.',
       backToHome: 'Kthehu në fillim',
@@ -354,6 +365,7 @@ export const STRINGS = {
       profileSub: 'Profile',
       themeLight: 'Light mode',
       themeDark: 'Dark mode',
+      notifications: 'Notifications',
     },
     home: {
       brand: 'Meson LMS',
@@ -419,6 +431,8 @@ export const STRINGS = {
         announcementsTitle: 'Quick notices',
         announcement1: 'Discrete Structures office hour — Friday 10:00.',
         announcement2: 'Week 7 materials are up in Signals and Systems.',
+        viewAllNotifications: 'View all',
+        noNotifications: 'You have no notifications',
         tasks: {
           panelTitle: 'Tasks & progress',
           panelSubtitle: 'Deadlines, extensions, and completion by module.',
@@ -589,6 +603,14 @@ export const STRINGS = {
       cookies: 'Cookies',
       copy: 'All rights reserved.',
       helpNote: 'Fast help — replies within 24 hours on business days.',
+    },
+    notifications: {
+      title: 'All Notifications',
+      subtitle: 'Stay up to date with the latest events.',
+      unread: 'Unread',
+      all: 'All',
+      markAllRead: 'Mark all as read',
+      empty: 'No notifications.',
     },
     course: {
       notFound: 'Course not found.',
