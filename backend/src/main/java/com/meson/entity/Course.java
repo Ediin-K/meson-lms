@@ -34,6 +34,9 @@ public class Course{
     @Column(nullable=false)
     private Integer semester;
 
+    @Column
+    private String enrollmentKey;
+
     @Builder.Default
     private double cmimi = 0.0;
 

@@ -56,7 +56,7 @@ public class RefreshTokenService {
                 .map(ur -> ur.getRole().getEmertimi().toLowerCase())
                 .orElse("guest");
 
-        return new AuthResponse(newAccessToken, user.getEmail(), role, newRefreshToken.getToken());
+        return new AuthResponse(newAccessToken, user.getEmail(), role, newRefreshToken.getToken(), user.getId());
     }
 
     public void logout(RefreshTokenRequest request) {

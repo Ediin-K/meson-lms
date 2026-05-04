@@ -86,7 +86,7 @@ export default function QuizPage() {
             const pikete = (correct / questions.length) * 100
 
             // Merr userId nga localStorage
-            const userId = JSON.parse(localStorage.getItem('user'))?.id
+            const userId = localStorage.getItem('userId')
 
             await axiosInstance.post('/quizzes/attempts', {
                 quizId: Number(quizId),

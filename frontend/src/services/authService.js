@@ -16,6 +16,7 @@ export const login = async (email, password) => {
     const data = await response.json();
     localStorage.setItem('token', data.token)
     localStorage.setItem('refreshToken', data.refreshToken)
+    localStorage.setItem('userId', data.userId)
 
     return data;
 };
@@ -40,6 +41,8 @@ export const logout = () => {
     localStorage.removeItem('email')
     localStorage.removeItem('refreshToken')
     localStorage.removeItem('meson-role')
+    localStorage.removeItem('userId')
+    localStorage.removeItem('lastCourseId')
 };
 
 export const getToken = () => {

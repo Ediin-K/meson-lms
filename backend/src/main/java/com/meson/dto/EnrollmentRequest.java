@@ -14,4 +14,6 @@ public class EnrollmentRequest {
 
     @NotNull(message = "CourseId nuk mund te jet bosh")
     private Long courseId;
+
+    private String enrollmentKey;
 }

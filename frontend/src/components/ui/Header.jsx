@@ -305,21 +305,24 @@ export default function Header() {
                 role="menu"
               >
                 {[
-                  t('header.profile'),
-                  t('header.accountSettings'),
-                  t('header.grades'),
-                  t('header.messages'),
-                  t('header.help'),
-                ].map((label) => (
-                  <button
-                    key={label}
-                    type="button"
-                    role="menuitem"
-                    className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm font-medium text-slate-800 outline-none hover:bg-sky-50/90 focus-visible:bg-sky-50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sky-500"
-                    onClick={() => setProfileOpen(false)}
-                  >
-                    {label}
-                  </button>
+                  { label: t('header.profile'), href: '/profile' },
+                  { label: t('header.accountSettings'), href: null },
+                  { label: t('header.grades'), href: null },
+                  { label: t('header.messages'), href: null },
+                  { label: t('header.help'), href: null },
+                ].map(({ label, href }) => (
+                    <button
+                        key={label}
+                        type="button"
+                        role="menuitem"
+                        className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm font-medium text-slate-800 outline-none hover:bg-sky-50/90 focus-visible:bg-sky-50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sky-500"
+                        onClick={() => {
+                          setProfileOpen(false)
+                          if (href) navigate(href)
+                        }}
+                    >
+                      {label}
+                    </button>
                 ))}
                 <div className="my-1 h-px bg-slate-200" />
                 <button
