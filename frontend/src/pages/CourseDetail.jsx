@@ -120,7 +120,7 @@ export default function CourseDetail() {
                 <Button
                     startIcon={<ArrowBackRounded />}
                     onClick={() => navigate(-1)}
-                    className="!mb-8 !normal-case !text-slate-600 dark:!text-slate-400 hover:!bg-sky-50 dark:hover:!bg-slate-800 !rounded-full !px-4 !py-2"
+                    className="!mb-8 !normal-case !text-slate-600 dark:!text-slate-400 hover:!bg-sky-50 dark:hover:!bg-slate-800/50 !rounded-full !px-4 !py-2"
                 >
                     {t('course.backToSubjects')}
                 </Button>
@@ -196,7 +196,7 @@ export default function CourseDetail() {
                             <Card
                                 key={module.id}
                                 elevation={0}
-                                className="rounded-2xl border border-slate-200/80 dark:!border-slate-700/80 overflow-hidden"
+                                className="rounded-2xl border border-slate-200/80 bg-white dark:!bg-slate-900/50 dark:!border-slate-700/80 overflow-hidden"
                             >
                                 <Box
                                     className="flex items-center justify-between p-5 cursor-pointer hover:bg-sky-50/50 dark:hover:bg-slate-800/50 transition-colors"
@@ -270,8 +270,8 @@ export default function CourseDetail() {
 
             {/* MODAL */}
             {showModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-                    <Card elevation={0} className="w-full max-w-md mx-4 rounded-3xl border border-slate-200/80 dark:!border-slate-700/80">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+                    <Card elevation={0} className="w-full max-w-md mx-4 rounded-3xl border border-slate-200/80 bg-white dark:!bg-slate-900/95 dark:!border-slate-700/80">
                         <CardContent className="!p-8">
                             <Typography variant="h6" className="!font-bold !text-slate-900 dark:!text-white !mb-2">
                                 Regjistrohu në kurs

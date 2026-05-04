@@ -5,7 +5,7 @@ import lombok.*;
 import java.util.Set;
 
 @Entity
-@Table(name="roles")
+@Table(name = "roles")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

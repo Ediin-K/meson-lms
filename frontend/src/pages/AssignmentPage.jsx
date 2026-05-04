@@ -103,7 +103,7 @@ export default function AssignmentPage() {
                 <Button
                     startIcon={<ArrowBackRounded />}
                     onClick={() => navigate(-1)}
-                    className="!mb-8 !normal-case !text-slate-600 dark:!text-slate-400 hover:!bg-sky-50 dark:hover:!bg-slate-800 !rounded-full !px-4 !py-2"
+                    className="!mb-8 !normal-case !text-slate-600 dark:!text-slate-400 hover:!bg-sky-50 dark:hover:!bg-slate-800/50 !rounded-full !px-4 !py-2"
                 >
                     Kthehu te leksioni
                 </Button>
@@ -141,7 +141,7 @@ export default function AssignmentPage() {
 
                     {/* PERSHKRIMI */}
                     {assignment.pershkrimi && (
-                        <Card elevation={0} className="rounded-2xl border border-slate-200/80 dark:!border-slate-700/80">
+                        <Card elevation={0} className="rounded-2xl border border-slate-200/80 bg-white dark:!bg-slate-900/50 dark:!border-slate-700/80">
                             <CardContent className="!p-5">
                                 <Typography variant="subtitle1" className="!font-bold !text-slate-900 dark:!text-white !mb-3">
                                     Instruksionet
@@ -155,7 +155,7 @@ export default function AssignmentPage() {
 
                     {/* RESOURCE URL */}
                     {assignment.resourceUrl && (
-                        <Card elevation={0} className="rounded-2xl border border-slate-200/80 dark:!border-slate-700/80">
+                        <Card elevation={0} className="rounded-2xl border border-slate-200/80 bg-white dark:!bg-slate-900/50 dark:!border-slate-700/80">
                             <CardContent className="!p-5 flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                     <LinkRounded className="text-sky-600" />
@@ -168,7 +168,7 @@ export default function AssignmentPage() {
                                     size="small"
                                     href={assignment.resourceUrl}
                                     target="_blank"
-                                    className="!normal-case !rounded-full !border-sky-300 !text-sky-600"
+                                    className="!normal-case !rounded-full !border-sky-300 dark:!border-sky-500/30 !text-sky-600 dark:!text-sky-400 hover:dark:!bg-sky-400/10"
                                 >
                                     Hap linkun
                                 </Button>
@@ -208,7 +208,7 @@ export default function AssignmentPage() {
                             </CardContent>
                         </Card>
                     ) : (
-                        <Card elevation={0} className="rounded-2xl border border-slate-200/80 dark:!border-slate-700/80">
+                        <Card elevation={0} className="rounded-2xl border border-slate-200/80 bg-white dark:!bg-slate-900/50 dark:!border-slate-700/80">
                             <CardContent className="!p-5">
                                 <Typography variant="subtitle1" className="!font-bold !text-slate-900 dark:!text-white !mb-4">
                                     Dorëzo detyrën
@@ -223,6 +223,22 @@ export default function AssignmentPage() {
                                         size="small"
                                         placeholder="https://github.com/..."
                                         disabled={isExpired}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                '& fieldset': { borderColor: 'rgba(0, 0, 0, 0.23)' },
+                                                '&:hover fieldset': { borderColor: '#0284c7' },
+                                            },
+                                            '& .MuiInputBase-input': { color: 'inherit' },
+                                            '& .MuiInputLabel-root': { color: 'inherit' },
+                                            '.dark &': {
+                                                '& .MuiOutlinedInput-root': {
+                                                    '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.2)' },
+                                                    '&:hover fieldset': { borderColor: '#38bdf8' },
+                                                },
+                                                '& .MuiInputBase-input': { color: '#fff' },
+                                                '& .MuiInputLabel-root': { color: '#94a3b8' },
+                                            }
+                                        }}
                                     />
                                     <TextField
                                         label="Përshkrim (opcionale)"
@@ -234,6 +250,22 @@ export default function AssignmentPage() {
                                         rows={3}
                                         placeholder="Shënim për mësuesin..."
                                         disabled={isExpired}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                '& fieldset': { borderColor: 'rgba(0, 0, 0, 0.23)' },
+                                                '&:hover fieldset': { borderColor: '#0284c7' },
+                                            },
+                                            '& .MuiInputBase-input': { color: 'inherit' },
+                                            '& .MuiInputLabel-root': { color: 'inherit' },
+                                            '.dark &': {
+                                                '& .MuiOutlinedInput-root': {
+                                                    '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.2)' },
+                                                    '&:hover fieldset': { borderColor: '#38bdf8' },
+                                                },
+                                                '& .MuiInputBase-input': { color: '#fff' },
+                                                '& .MuiInputLabel-root': { color: '#94a3b8' },
+                                            }
+                                        }}
                                     />
 
                                     {isExpired ? (

@@ -39,7 +39,7 @@ export default function SemesterPage() {
                 <Button 
                     startIcon={<ArrowBackRounded />} 
                     onClick={() => navigate(-1)}
-                    className="!mb-8 !normal-case !text-slate-600 dark:!text-slate-400 hover:!bg-sky-50 dark:hover:!bg-slate-800 !rounded-full !px-4 !py-2"
+                    className="!mb-8 !normal-case !text-slate-600 dark:!text-slate-400 hover:!bg-sky-50 dark:hover:!bg-slate-800/50 !rounded-full !px-4 !py-2"
                 >
                     {t('semester.back', 'Back to Dashboard')}
                 </Button>
@@ -83,7 +83,7 @@ export default function SemesterPage() {
                             >
                                 <div className="
                                     relative flex flex-col h-full overflow-hidden rounded-3xl 
-                                    bg-white dark:bg-slate-900/90 
+                                    bg-white dark:bg-slate-900/50 
                                     border border-slate-200/80 dark:border-slate-700/80
                                     shadow-sm hover:shadow-xl hover:shadow-sky-200/40 dark:hover:shadow-sky-900/20
                                     transition-all duration-300 hover:-translate-y-1.5

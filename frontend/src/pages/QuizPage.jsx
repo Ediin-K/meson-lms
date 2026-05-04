@@ -115,7 +115,7 @@ export default function QuizPage() {
     if (finished) {
         return (
             <Container maxWidth="sm" sx={{ mt: 10 }}>
-                <Card elevation={0} className="rounded-3xl border border-slate-200/80 dark:!border-slate-700/80">
+                <Card elevation={0} className="rounded-3xl border border-slate-200/80 bg-white dark:!bg-slate-900/50 dark:!border-slate-700/80">
                     <CardContent className="!p-8 text-center">
                         <CheckCircleRounded className="!text-6xl text-green-500 mb-4" />
                         <Typography variant="h4" className="!font-extrabold !text-slate-900 dark:!text-white">
@@ -152,7 +152,7 @@ export default function QuizPage() {
             <Button
                 startIcon={<ArrowBackRounded />}
                 onClick={() => navigate(-1)}
-                className="!mb-6 !normal-case !text-slate-600 dark:!text-slate-400 hover:!bg-sky-50 !rounded-full !px-4 !py-2"
+                className="!mb-6 !normal-case !text-slate-600 dark:!text-slate-400 hover:!bg-sky-50 dark:hover:!bg-slate-800/50 !rounded-full !px-4 !py-2"
             >
                 {t('quiz.backToLesson')}
             </Button>
@@ -184,6 +184,7 @@ export default function QuizPage() {
                         height: 8,
                         borderRadius: 9999,
                         backgroundColor: 'rgba(15,23,42,0.08)',
+                        '.dark &': { backgroundColor: 'rgba(255,255,255,0.05)' },
                         '& .MuiLinearProgress-bar': {
                             borderRadius: 9999,
                             backgroundColor: '#0284c7'
@@ -194,7 +195,7 @@ export default function QuizPage() {
 
             {/* QUESTION CARD */}
             {currentQuestion && (
-                <Card elevation={0} className="rounded-3xl border border-slate-200/80 dark:!border-slate-700/80 mb-6">
+                <Card elevation={0} className="rounded-3xl border border-slate-200/80 bg-white dark:!bg-slate-900/50 dark:!border-slate-700/80 mb-6">
                     <CardContent className="!p-6 sm:!p-8">
                         <Typography variant="h6" className="!font-bold !text-slate-900 dark:!text-white !mb-6">
                             {currentQuestion.pyetja}
@@ -242,7 +243,7 @@ export default function QuizPage() {
                     variant="outlined"
                     onClick={handlePrev}
                     disabled={currentIndex === 0}
-                    className="!normal-case !rounded-full !border-slate-300 !text-slate-600 !px-6"
+                    className="!normal-case !rounded-full !border-slate-300 dark:!border-slate-700 !text-slate-600 dark:!text-slate-400 !px-6 hover:dark:!bg-slate-800/50"
                 >
                     {t('quiz.backBtn')}
                 </Button>

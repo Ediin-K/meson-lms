@@ -184,11 +184,11 @@ export const STRINGS = {
             progress: '15',
           },
         },
-        semesters:{
+        semesters: {
           overline: "PLAN STUDIMI",
           title: "Zgjidh Semestrin",
           body: "Zgjidh semestrin për të parë lëndët e tua",
-          semester:'Semestri '
+          semester: 'Semestri '
         },
         subjects: {
           overline: 'Semestri aktual',
@@ -226,13 +226,42 @@ export const STRINGS = {
         overline: 'Paneli i administratorit',
         title: 'Përmbledhje e shpejtë',
         body: 'Statistika dhe veprime të shpeshta për institucionin.',
-        statUsers: 'Përdorues aktivë (30 ditë)',
-        statCourses: 'Kurse publike',
-        statAssign: 'Detyra të hapura',
-        manageCourses: 'Menaxho kurset',
-        reports: 'Raporte',
         users: 'Përdoruesit',
         browseCategories: 'Katalogu i kurseve sipas kategorisë',
+        stats: {
+          users: 'Përdorues',
+          courses: 'Kurse',
+          enrollments: 'Regjistrime'
+        },
+        services: {
+          users: {
+            title: 'Menaxhimi i Përdoruesve',
+            desc: 'Menaxho llogaritë, rolet dhe qasjen e përdoruesve në platformë.'
+          },
+          courses: {
+            title: 'Menaxhimi i Kurseve',
+            desc: 'Krijo kurse të reja, ndrysho përmbajtjen dhe organizo planin mësimor.'
+          },
+          categories: {
+            title: 'Kategoritë',
+            desc: 'Organizoni kurset në kategori dhe tema për navigim më të lehtë.'
+          },
+          enrollments: {
+            title: 'Regjistrimet',
+            desc: 'Shikoni dhe menaxhoni regjistrimet e studentëve në lëndë.'
+          },
+          certificates: {
+            title: 'Certifikatat',
+            desc: 'Menaxho lëshimin e certifikatave dhe vërteto arritjet e studentëve.'
+          },
+          reports: {
+            title: 'Raportet',
+            desc: 'Shikoni statistika të detajuara dhe raporte mbi performancën.'
+          },
+          enter: 'Hyr në shërbim',
+          comingSoon: 'Ky modul është në fazën e zhvillimit dhe do të jetë i disponueshëm së shpejti.',
+          backToPanel: 'Kthehu te Paneli'
+        }
       },
       teacher: {
         overline: 'Paneli i pedagogut',
@@ -258,6 +287,74 @@ export const STRINGS = {
         contactTeachers: 'Kontakto pedagogët',
         childrenList: 'Lista e fëmijëve',
       },
+    },
+    adminUsers: {
+      title: 'Menaxhimi i Përdoruesve',
+      subtitle: 'Menaxho llogaritë, rolet dhe statusin e përdoruesve.',
+      searchPlaceholder: 'Kërko me emër ose email...',
+      table: {
+        name: 'Emri & Mbiemri',
+        email: 'Email',
+        role: 'Roli',
+        status: 'Statusi',
+        joined: 'Anëtarësuar',
+        actions: 'Veprime'
+      },
+      status: {
+        active: 'Aktiv',
+        inactive: 'Joaktiv'
+      },
+      actions: {
+        edit: 'Ndrysho',
+        deactivate: 'Çaktivizo',
+        activate: 'Aktivizo',
+        delete: 'Fshij'
+      },
+      form: {
+        addTitle: 'Shto Përdorues të Ri',
+        editTitle: 'Ndrysho Përdoruesin',
+        firstName: 'Emri',
+        lastName: 'Mbiemri',
+        email: 'Email',
+        password: 'Fjalëkalimi',
+        role: 'Roli',
+        cancel: 'Anulo',
+        save: 'Ruaj',
+        creating: 'Duke krijuar...',
+        updating: 'Duke ruajtur...'
+      },
+      noUsers: 'Nuk u gjet asnjë përdorues.',
+      errors: {
+        fetchFailed: 'Dështoi ngarkimi i përdoruesve. Ju lutem kontrolloni serverin.'
+      },
+      confirmDelete: 'A jeni i sigurt që dëshironi ta fshini këtë përdorues?'
+    },
+    adminCourses: {
+      title: 'Menaxhimi i Kurseve',
+      subtitle: 'Krijo, ndrysho dhe menaxho kurset e platformës.',
+      searchPlaceholder: 'Kërko kurse...',
+      addTitle: 'Shto Kurs të Ri',
+      editTitle: 'Ndrysho Kursin',
+      noCourses: 'Nuk u gjet asnjë kurs.',
+      table: {
+        title: 'Titulli',
+        category: 'Kategoria',
+        semester: 'Semestri',
+        instructor: 'Instruktori',
+        actions: 'Veprime'
+      },
+      form: {
+        title: 'Titulli i Kursit',
+        description: 'Përshkrimi',
+        categoryId: 'Kategoria (ID)',
+        semester: 'Semestri',
+        imageUrl: 'URL e Fotos',
+        credits: 'Kreditet',
+        instructorId: 'ID e Instruktorit',
+        save: 'Ruaj Kursin',
+        creating: 'Duke krijuar...',
+        updating: 'Duke ruajtur...'
+      }
     },
     about: {
       heroOverline: 'Meson LMS',
@@ -614,11 +711,11 @@ export const STRINGS = {
             progress: '15',
           },
         },
-        semesters:{
+        semesters: {
           overline: "STUDY PLAN",
           title: "Select Semester",
           body: "Choose a semester to view your courses",
-          semester:'Semester '
+          semester: 'Semester '
         },
         subjects: {
           overline: 'Current semester',
@@ -656,13 +753,42 @@ export const STRINGS = {
         overline: 'Admin',
         title: 'Quick overview',
         body: 'Key numbers and shortcuts for your institution.',
-        statUsers: 'Active users (30 days)',
-        statCourses: 'Published courses',
-        statAssign: 'Open assignments',
-        manageCourses: 'Manage courses',
-        reports: 'Reports',
         users: 'Users',
         browseCategories: 'Course catalog by category',
+        stats: {
+          users: 'Users',
+          courses: 'Courses',
+          enrollments: 'Enrollments'
+        },
+        services: {
+          users: {
+            title: 'User Management',
+            desc: 'Manage user accounts, roles, and platform access.'
+          },
+          courses: {
+            title: 'Course Management',
+            desc: 'Create new courses, edit content, and organize curricula.'
+          },
+          categories: {
+            title: 'Categories',
+            desc: 'Organize courses into categories and topics for easier navigation.'
+          },
+          enrollments: {
+            title: 'Enrollments',
+            desc: 'View and manage student enrollments in various subjects.'
+          },
+          certificates: {
+            title: 'Certificates',
+            desc: 'Manage certificate issuance and verify student achievements.'
+          },
+          reports: {
+            title: 'Reports',
+            desc: 'View detailed statistics and reports on platform performance.'
+          },
+          enter: 'Enter service',
+          comingSoon: 'This module is under development and will be available soon.',
+          backToPanel: 'Back to Panel'
+        }
       },
       teacher: {
         overline: 'Teacher Panel',
@@ -688,6 +814,74 @@ export const STRINGS = {
         contactTeachers: 'Contact Teachers',
         childrenList: 'Children List',
       },
+    },
+    adminUsers: {
+      title: 'User Management',
+      subtitle: 'Manage user accounts, roles, and status.',
+      searchPlaceholder: 'Search by name or email...',
+      table: {
+        name: 'Name & Surname',
+        email: 'Email',
+        role: 'Role',
+        status: 'Status',
+        joined: 'Joined',
+        actions: 'Actions'
+      },
+      status: {
+        active: 'Active',
+        inactive: 'Inactive'
+      },
+      actions: {
+        edit: 'Edit',
+        deactivate: 'Deactivate',
+        activate: 'Activate',
+        delete: 'Delete'
+      },
+      form: {
+        addTitle: 'Add New User',
+        editTitle: 'Edit User',
+        firstName: 'First Name',
+        lastName: 'Last Name',
+        email: 'Email',
+        password: 'Password',
+        role: 'Role',
+        cancel: 'Cancel',
+        save: 'Save',
+        creating: 'Creating...',
+        updating: 'Saving...'
+      },
+      noUsers: 'No users found.',
+      errors: {
+        fetchFailed: 'Failed to load users. Please check the server.'
+      },
+      confirmDelete: 'Are you sure you want to delete this user?'
+    },
+    adminCourses: {
+      title: 'Course Management',
+      subtitle: 'Create, edit, and manage platform courses.',
+      searchPlaceholder: 'Search courses...',
+      addTitle: 'Add New Course',
+      editTitle: 'Edit Course',
+      noCourses: 'No courses found.',
+      table: {
+        title: 'Title',
+        category: 'Category',
+        semester: 'Semester',
+        instructor: 'Instructor',
+        actions: 'Actions'
+      },
+      form: {
+        title: 'Course Title',
+        description: 'Description',
+        categoryId: 'Category (ID)',
+        semester: 'Semester',
+        imageUrl: 'Image URL',
+        credits: 'Credits',
+        instructorId: 'Instructor ID',
+        save: 'Save Course',
+        creating: 'Creating...',
+        updating: 'Saving...'
+      }
     },
     about: {
       heroOverline: 'Meson LMS',
