@@ -18,6 +18,12 @@ import TeacherDashboard from "./components/dashboard/TeacherDashboard.jsx";
 import AssignmentPage from './pages/AssignmentPage.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
 import AdminDashboard from './components/dashboard/AdminDashboard.jsx';
+import AdminUsers from './pages/AdminUsers.jsx';
+import AdminCourses from './pages/AdminCourses.jsx';
+import AdminCategories from './pages/AdminCategories.jsx';
+import AdminEnrollments from './pages/AdminEnrollments.jsx';
+import AdminCertificates from './pages/AdminCertificates.jsx';
+import AdminReports from './pages/AdminReports.jsx';
 
 
 
@@ -26,7 +32,7 @@ function App() {
   return (
     <BrowserRouter>
       <div className="flex min-h-dvh flex-col bg-gradient-to-b from-sky-50 via-[#f0f7fb] to-[#d8e8f2] transition-colors dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
-        <Header/>
+        <Header />
         <main className="flex flex-col flex-grow">
           <div
             id="main-content"
@@ -49,7 +55,37 @@ function App() {
                   <AdminDashboard />
                 </ProtectedRoute>
               } />
-              <Route path="/student" element={ <ProtectedRoute requiredRole="student">
+              <Route path="/admin/users" element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminUsers />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/courses" element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminCourses />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/categories" element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminCategories />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/enrollments" element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminEnrollments />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/certificates" element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminCertificates />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/reports" element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminReports />
+                </ProtectedRoute>
+              } />
+              <Route path="/student" element={<ProtectedRoute requiredRole="student">
                 <StudentDashboard />
               </ProtectedRoute>} />
               <Route path="/teacher" element={

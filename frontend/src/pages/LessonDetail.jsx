@@ -79,7 +79,7 @@ export default function LessonDetail() {
                 <Button
                     startIcon={<ArrowBackRounded />}
                     onClick={() => navigate(-1)}
-                    className="!mb-8 !normal-case !text-slate-600 dark:!text-slate-400 hover:!bg-sky-50 dark:hover:!bg-slate-800 !rounded-full !px-4 !py-2"
+                    className="!mb-8 !normal-case !text-slate-600 dark:!text-slate-400 hover:!bg-sky-50 dark:hover:!bg-slate-800/50 !rounded-full !px-4 !py-2"
                 >
                     {t('lessonDetail.backToCourse')}
                 </Button>
@@ -107,7 +107,7 @@ export default function LessonDetail() {
 
                         {/* VIDEO */}
                         {lesson.videoUrl && (
-                            <Card elevation={0} className="rounded-2xl border border-slate-200/80 dark:!border-slate-700/80">
+                            <Card elevation={0} className="rounded-2xl border border-slate-200/80 bg-white dark:!bg-slate-900/50 dark:!border-slate-700/80">
                                 <CardContent className="!p-5">
                                     <Typography variant="subtitle1" className="!font-bold !text-slate-900 dark:!text-white !mb-4 flex items-center gap-2">
                                         <PlayCircleFilledRounded className="text-sky-600" fontSize="small" />
@@ -127,7 +127,7 @@ export default function LessonDetail() {
 
                         {/* PERMBAJTJA */}
                         {lesson.permbajtja && (
-                            <Card elevation={0} className="rounded-2xl border border-slate-200/80 dark:!border-slate-700/80">
+                            <Card elevation={0} className="rounded-2xl border border-slate-200/80 bg-white dark:!bg-slate-900/50 dark:!border-slate-700/80">
                                 <CardContent className="!p-5">
                                     <Typography variant="subtitle1" className="!font-bold !text-slate-900 dark:!text-white !mb-4 flex items-center gap-2">
                                         <DescriptionRounded className="text-sky-600" fontSize="small" />
@@ -142,7 +142,7 @@ export default function LessonDetail() {
 
                         {/* RESOURCE URL */}
                         {lesson.resourceUrl && (
-                            <Card elevation={0} className="rounded-2xl border border-slate-200/80 dark:!border-slate-700/80">
+                            <Card elevation={0} className="rounded-2xl border border-slate-200/80 bg-white dark:!bg-slate-900/50 dark:!border-slate-700/80">
                                 <CardContent className="!p-5 flex items-center justify-between">
                                     <div className="flex items-center gap-3">
                                         <LinkRounded className="text-sky-600" />
@@ -168,7 +168,7 @@ export default function LessonDetail() {
                     <div className="flex flex-col gap-6">
 
                         {/* QUIZZES */}
-                        <Card elevation={0} className="rounded-2xl border border-slate-200/80 dark:!border-slate-700/80">
+                        <Card elevation={0} className="rounded-2xl border border-slate-200/80 bg-white dark:!bg-slate-900/50 dark:!border-slate-700/80">
                             <CardContent className="!p-5">
                                 <Typography variant="subtitle1" className="!font-bold !text-slate-900 dark:!text-white !mb-4 flex items-center gap-2">
                                     <QuizRounded className="text-sky-600" fontSize="small" />
@@ -203,7 +203,7 @@ export default function LessonDetail() {
                         </Card>
 
                         {/* ASSIGNMENTS */}
-                        <Card elevation={0} className="rounded-2xl border border-slate-200/80 dark:!border-slate-700/80">
+                        <Card elevation={0} className="rounded-2xl border border-slate-200/80 bg-white dark:!bg-slate-900/50 dark:!border-slate-700/80">
                             <CardContent className="!p-5">
                                 <Typography variant="subtitle1" className="!font-bold !text-slate-900 dark:!text-white !mb-4 flex items-center gap-2">
                                     <AssignmentRounded className="text-sky-600" fontSize="small" />

@@ -7,29 +7,29 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 @Entity
-@Table(name="users")
+@Table(name = "users")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(exclude = {"userRoles", "userClaims", "userTokens", "refreshTokens"})
+@EqualsAndHashCode(exclude = { "userRoles", "userClaims", "userTokens", "refreshTokens" })
 public class User {
 
     @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     private String emri;
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     private String mbiemri;
 
-    @Column(nullable=false, unique=true)
+    @Column(nullable = false, unique = true)
     private String email;
 
     @JsonIgnore
-    @Column(nullable=false)
+    @Column(nullable = false)
     private String passwordHash;
 
     private String phoneNumber;
@@ -43,7 +43,7 @@ public class User {
     @Column(nullable = false)
     private int accessFailedCount = 0;
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     private LocalDateTime dataKrijimit = LocalDateTime.now();
 
     @Column(nullable = false)
