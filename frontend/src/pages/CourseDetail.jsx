@@ -11,6 +11,7 @@ import LibraryBooksRounded from '@mui/icons-material/LibraryBooksRounded'
 import PlayCircleFilledRounded from '@mui/icons-material/PlayCircleFilledRounded'
 import ExpandMoreRounded from '@mui/icons-material/ExpandMoreRounded'
 import ExpandLessRounded from '@mui/icons-material/ExpandLessRounded'
+import LockRounded from '@mui/icons-material/LockRounded'
 
 export default function CourseDetail() {
     const { courseId } = useParams()
@@ -22,27 +23,55 @@ export default function CourseDetail() {
     const [lessons, setLessons] = useState({})
     const [expandedModule, setExpandedModule] = useState(null)
     const [loading, setLoading] = useState(true)
+    const [isEnrolled, setIsEnrolled] = useState(false)
+    const [enrolling, setEnrolling] = useState(false)
+    const [showModal, setShowModal] = useState(false)
+    const [enrollmentKey, setEnrollmentKey] = useState('')
+    const [enrollError, setEnrollError] = useState('')
+    const userId = localStorage.getItem('userId')
 
     useEffect(() => {
-        const fetchCourse = async () => {
+        const fetchData = async () => {
             try {
                 setLoading(true)
-                const [courseRes, modulesRes] = await Promise.all([
+                const [courseRes, modulesRes, enrollmentRes] = await Promise.all([
                     axiosInstance.get(`/courses/${courseId}`),
-                    axiosInstance.get(`/courses/${courseId}/modules`)
+                    axiosInstance.get(`/courses/${courseId}/modules`),
+                    axiosInstance.get(`/enrollments/user/${userId}`)
                 ])
                 setCourse(courseRes.data)
                 setModules(modulesRes.data)
+                const enrolled = enrollmentRes.data.some(e => e.courseId === Number(courseId))
+                setIsEnrolled(enrolled)
             } catch (err) {
                 console.error(err)
             } finally {
                 setLoading(false)
             }
         }
-        fetchCourse()
-    }, [courseId])
+        fetchData()
+    }, [courseId, userId])
+
+    const handleEnroll = async () => {
+        try {
+            setEnrolling(true)
+            setEnrollError('')
+            await axiosInstance.post('/enrollments', {
+                userId: Number(userId),
+                courseId: Number(courseId),
+                enrollmentKey: enrollmentKey
+            })
+            setIsEnrolled(true)
+            setShowModal(false)
+        } catch (err) {
+            setEnrollError('Kodi i regjistrimit është i gabuar')
+        } finally {
+            setEnrolling(false)
+        }
+    }
 
     const toggleModule = async (moduleId) => {
+        if (!isEnrolled) return
         if (expandedModule === moduleId) {
             setExpandedModule(null)
             return
@@ -97,7 +126,7 @@ export default function CourseDetail() {
                 </Button>
 
                 {/* HEADER */}
-                <Box className="mb-10">
+                <Box className="mb-8">
                     <Typography variant="overline" className="!font-bold !tracking-widest !text-sky-600 dark:!text-sky-400">
                         {course.categoryName}
                     </Typography>
@@ -107,25 +136,58 @@ export default function CourseDetail() {
                     <Typography variant="body1" className="!mt-3 !max-w-2xl !text-slate-600 dark:!text-slate-400">
                         {course.pershkrimi}
                     </Typography>
-                    <div className="mt-4 flex gap-4">
+                    <div className="mt-4 flex flex-wrap gap-4">
                         <span className="text-sm font-semibold text-sky-700 dark:text-sky-400">
-                            👨‍🏫 {t('courseDetail.teacher')}{course.teacherName}
+                            👨‍🏫 {course.teacherName}
                         </span>
                         <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">
-                            📚 {t('courseDetail.semester')}{course.semester}
+                            📚 Semestri {course.semester}
                         </span>
                         <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">
-                            📊 {t('courseDetail.level')}{course.niveli}
+                            📊 {course.niveli}
                         </span>
                     </div>
                 </Box>
 
+                {/* ENROLLMENT BANNER */}
+                {!isEnrolled && (
+                    <Card elevation={0} className="rounded-2xl border border-amber-200/80 bg-amber-50/50 dark:!border-amber-700/40 dark:!bg-amber-900/10 mb-6">
+                        <CardContent className="!p-5 flex items-center justify-between flex-wrap gap-4">
+                            <div>
+                                <Typography variant="subtitle1" className="!font-bold !text-amber-800 dark:!text-amber-300">
+                                    Nuk je i regjistruar në këtë kurs
+                                </Typography>
+                                <Typography variant="body2" className="!text-amber-700 dark:!text-amber-400">
+                                    Fut kodin e regjistrimit për të pasur qasje
+                                </Typography>
+                            </div>
+                            <Button
+                                variant="contained"
+                                onClick={() => setShowModal(true)}
+                                className="!normal-case !rounded-full !bg-amber-500 hover:!bg-amber-600 !px-6"
+                            >
+                                Regjistrohu
+                            </Button>
+                        </CardContent>
+                    </Card>
+                )}
+
                 {/* MODULES */}
-                {modules.length === 0 ? (
+                {!isEnrolled ? (
+                    <Box className="flex flex-col justify-center items-center py-20 px-4 text-center bg-white/60 dark:bg-slate-900/60 rounded-3xl border border-dashed border-slate-300 dark:border-slate-700">
+                        <LockRounded className="!text-6xl text-slate-300 dark:text-slate-600 mb-4" />
+                        <Typography variant="h6" className="!font-bold !text-slate-800 dark:!text-slate-200">
+                            Regjistrohu për të parë modulet
+                        </Typography>
+                        <Typography variant="body2" className="!mt-2 !text-slate-500 dark:!text-slate-400">
+                            Fut kodin e regjistrimit për të pasur qasje në përmbajtje
+                        </Typography>
+                    </Box>
+                ) : modules.length === 0 ? (
                     <Box className="flex flex-col justify-center items-center py-20 px-4 text-center bg-white/60 dark:bg-slate-900/60 rounded-3xl border border-dashed border-slate-300 dark:border-slate-700">
                         <LibraryBooksRounded className="!text-6xl text-slate-300 dark:text-slate-600 mb-4" />
                         <Typography variant="h6" className="!font-bold !text-slate-800 dark:!text-slate-200">
-                            {t('courseDetail.noModules')}
+                            Nuk ka module në këtë kurs
                         </Typography>
                     </Box>
                 ) : (
@@ -136,7 +198,6 @@ export default function CourseDetail() {
                                 elevation={0}
                                 className="rounded-2xl border border-slate-200/80 dark:!border-slate-700/80 overflow-hidden"
                             >
-                                {/* MODULE HEADER */}
                                 <Box
                                     className="flex items-center justify-between p-5 cursor-pointer hover:bg-sky-50/50 dark:hover:bg-slate-800/50 transition-colors"
                                     onClick={() => toggleModule(module.id)}
@@ -160,7 +221,6 @@ export default function CourseDetail() {
                                     }
                                 </Box>
 
-                                {/* LESSONS */}
                                 {expandedModule === module.id && (
                                     <Box className="border-t border-slate-100 dark:border-slate-800">
                                         {!lessons[module.id] ? (
@@ -170,7 +230,7 @@ export default function CourseDetail() {
                                         ) : lessons[module.id].length === 0 ? (
                                             <Box className="py-6 px-5">
                                                 <Typography variant="body2" className="!text-slate-500">
-                                                    {t('courseDetail.noLessons')}
+                                                    Nuk ka leksione në këtë modul
                                                 </Typography>
                                             </Box>
                                         ) : (
@@ -207,6 +267,60 @@ export default function CourseDetail() {
                 )}
             </Container>
             <Footer />
+
+            {/* MODAL */}
+            {showModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                    <Card elevation={0} className="w-full max-w-md mx-4 rounded-3xl border border-slate-200/80 dark:!border-slate-700/80">
+                        <CardContent className="!p-8">
+                            <Typography variant="h6" className="!font-bold !text-slate-900 dark:!text-white !mb-2">
+                                Regjistrohu në kurs
+                            </Typography>
+                            <Typography variant="body2" className="!text-slate-500 dark:!text-slate-400 !mb-6">
+                                Fut kodin e regjistrimit që të ka dhënë mësuesi
+                            </Typography>
+
+                            <input
+                                type="text"
+                                value={enrollmentKey}
+                                onChange={(e) => setEnrollmentKey(e.target.value)}
+                                placeholder="Kodi i regjistrimit..."
+                                className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3 text-slate-800 dark:text-white outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100 dark:focus:ring-sky-900 transition mb-3"
+                            />
+
+                            {enrollError && (
+                                <Typography variant="body2" className="!text-red-500 !mb-3">
+                                    {enrollError}
+                                </Typography>
+                            )}
+
+                            <div className="flex gap-3 mt-2">
+                                <Button
+                                    fullWidth
+                                    variant="outlined"
+                                    onClick={() => {
+                                        setShowModal(false)
+                                        setEnrollError('')
+                                        setEnrollmentKey('')
+                                    }}
+                                    className="!normal-case !rounded-full !border-slate-300 !text-slate-600"
+                                >
+                                    Anulo
+                                </Button>
+                                <Button
+                                    fullWidth
+                                    variant="contained"
+                                    onClick={handleEnroll}
+                                    disabled={!enrollmentKey.trim() || enrolling}
+                                    className="!normal-case !rounded-full !bg-sky-600"
+                                >
+                                    {enrolling ? 'Duke u regjistruar...' : 'Regjistrohu'}
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            )}
         </section>
     )
 }

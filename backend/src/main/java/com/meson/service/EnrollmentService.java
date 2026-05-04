@@ -49,11 +49,17 @@ public class EnrollmentService {
             throw new RuntimeException("Studenti eshte tashme i regjistruar ne kete kurs");
         }
 
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("Perdoruesi nuk u gjet"));
-
         Course course = courseRepository.findById(request.getCourseId())
                 .orElseThrow(() -> new RuntimeException("Kursi nuk u gjet"));
+
+        if (course.getEnrollmentKey() != null && !course.getEnrollmentKey().isEmpty()) {
+            if (!course.getEnrollmentKey().equals(request.getEnrollmentKey())) {
+                throw new RuntimeException("Kodi i regjistrimit është i gabuar");
+            }
+        }
+
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new RuntimeException("Perdoruesi nuk u gjet"));
 
         Enrollment enrollment = new Enrollment();
         enrollment.setUser(user);

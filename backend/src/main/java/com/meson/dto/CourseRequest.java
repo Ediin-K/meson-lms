@@ -29,6 +29,8 @@ public class CourseRequest {
     @NotNull
     private Integer semester;
 
+    private String enrollmentKey;
+
     @Builder.Default
     @DecimalMin(value = "0.0", message = "Cmimi nuk mund te jet negativ")
     private Double cmimi = 0.0;

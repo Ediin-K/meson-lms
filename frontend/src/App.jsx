@@ -15,6 +15,11 @@ import Notifications from "./pages/Notifications.jsx";
 import StudentDashboard from "./components/dashboard/StudentDashboard.jsx";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import TeacherDashboard from "./components/dashboard/TeacherDashboard.jsx";
+import AssignmentPage from './pages/AssignmentPage.jsx';
+import ProfilePage from './pages/ProfilePage.jsx';
+import AdminDashboard from './components/dashboard/AdminDashboard.jsx';
+
+
 
 
 function App() {
@@ -36,7 +41,14 @@ function App() {
               <Route path="/course/:courseId" element={<CourseDetail />} />
               <Route path="/lesson/:lessonId" element={<LessonDetail />} />
               <Route path="/quiz/:quizId" element={<QuizPage />} />
+              <Route path="/assignment/:assignmentId" element={<AssignmentPage />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/admin" element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminDashboard />
+                </ProtectedRoute>
+              } />
               <Route path="/student" element={ <ProtectedRoute requiredRole="student">
                 <StudentDashboard />
               </ProtectedRoute>} />

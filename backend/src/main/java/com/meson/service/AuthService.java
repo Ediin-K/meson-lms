@@ -56,7 +56,7 @@ public class AuthService {
         RefreshToken refreshToken = refreshTokenService.generateRefreshToken(user);
 
         // 7. Kthen AuthResponse
-        return new AuthResponse(token, user.getEmail(), role, refreshToken.getToken());
+        return new AuthResponse(token, user.getEmail(), role, refreshToken.getToken(), user.getId());
     }
 
     public AuthResponse register(RegisterRequest request) {
@@ -85,6 +85,6 @@ public class AuthService {
         userRoleRepository.save(userRole);
 
         String token = jwtService.generateToken(user.getEmail());
-        return new AuthResponse(token, user.getEmail(), role.getEmertimi().toLowerCase(), null);
+        return new AuthResponse(token, user.getEmail(), role.getEmertimi().toLowerCase(), null, user.getId());
     }
 }
