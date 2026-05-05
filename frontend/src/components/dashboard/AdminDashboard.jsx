@@ -124,7 +124,7 @@ export default function AdminDashboard() {
                 <Grid container spacing={3} className="mt-10">
                     {adminServices.map((service) => (
                         <Grid item xs={12} sm={6} md={4} key={service.title}>
-                            <Card 
+                            <Card
                                 elevation={0}
                                 className="h-full rounded-2xl border border-slate-200/80 bg-white dark:!bg-slate-900/40 dark:!border-slate-700/80 hover:-translate-y-1.5 transition-all duration-300 hover:shadow-xl hover:shadow-sky-500/10 group cursor-pointer"
                                 onClick={() => navigate(service.path)}
