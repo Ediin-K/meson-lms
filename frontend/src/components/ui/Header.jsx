@@ -295,7 +295,9 @@ export default function Header() {
                   setLangOpen(false)
                 }}
               >
-                S
+                {role?.toLowerCase() === 'admin' ? 'A' : 
+                 role?.toLowerCase() === 'teacher' ? 'T' : 
+                 role?.toLowerCase() === 'student' ? 'S' : 'G'}
               </button>
               {profileOpen ? (
                 <div
@@ -422,7 +424,9 @@ export default function Header() {
             <div className="mt-4 flex flex-col gap-2 border-t border-slate-200/80 pt-4">
               <div className="flex items-center gap-3 rounded-xl bg-sky-50/70 px-3 py-2 ring-1 ring-slate-200/60">
                 <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-indigo-700 text-sm font-bold text-white shadow-sm">
-                  S
+                  {role?.toLowerCase() === 'admin' ? 'A' : 
+                   role?.toLowerCase() === 'teacher' ? 'T' : 
+                   role?.toLowerCase() === 'student' ? 'S' : 'G'}
                 </span>
                 <div>
                   <p className="text-sm font-semibold text-slate-800">

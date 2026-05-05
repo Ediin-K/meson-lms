@@ -136,6 +136,37 @@ export const STRINGS = {
       chipOffer: 'Ofertë',
       chipSoon: 'Së shpejti',
       chipNew: 'E re',
+      searchPlaceholder: 'Kërko kurse, tema ose universitete...',
+      stats: {
+        students: 'Studentë aktivë',
+        courses: 'Kurse online',
+        mentors: 'Mentorë ekspertë',
+        satisfaction: 'Kënaqësi'
+      },
+      features: {
+        overline: 'Pse ne?',
+        title: 'Çfarë e bën Meson ndryshe',
+        f1Title: 'Mësim i strukturuar',
+        f1Desc: 'Gjithçka e organizuar sipas semestrave dhe moduleve.',
+        f2Title: 'Qasje nga kudo',
+        f2Desc: 'Mëso nga telefoni, tableti ose kompjuteri yt.',
+        f3Title: 'Sistemi i notave',
+        f3Desc: 'Ndjekje e detajuar e progresit dhe vlerësimeve.'
+      },
+      testimonials: {
+        title: 'Çfarë thonë përdoruesit tanë',
+        items: [
+          { name: 'Ardi Shala', role: 'Student, UBT', text: 'Meson më ka ndihmuar shumë në organizimin e kohës dhe materialeve.' },
+          { name: 'Dr. Elena Berisha', role: 'Pedagoge, UP', text: 'Një platformë shumë intuitive dhe e lehtë për t’u përdorur për ne dhe studentët.' },
+          { name: 'Luan Krasniqi', role: 'Student, UT', text: 'Dizajni është i mrekullueshëm dhe njoftimet vijnë gjithmonë në kohë.' }
+        ]
+      },
+      ctaFinal: {
+        title: 'Gati për të filluar rrugëtimin tënd?',
+        subtitle: 'Bashkohu me mijëra studentë dhe pedagogë në platformën më moderne të mësimit.',
+        btn: 'Krijo llogari falas'
+      },
+      partnersTitle: 'Institucionet që na besojnë',
       student: {
         overline: 'Pulti yt',
         welcome: 'Mirë se erdhe përsëri',
@@ -664,6 +695,37 @@ export const STRINGS = {
       chipOffer: 'Sale',
       chipSoon: 'Soon',
       chipNew: 'New',
+      searchPlaceholder: 'Search courses, topics or universities...',
+      stats: {
+        students: 'Active students',
+        courses: 'Online courses',
+        mentors: 'Expert mentors',
+        satisfaction: 'Satisfaction'
+      },
+      features: {
+        overline: 'Why us?',
+        title: 'What makes Meson different',
+        f1Title: 'Structured learning',
+        f1Desc: 'Everything organized by semesters and modules.',
+        f2Title: 'Access anywhere',
+        f2Desc: 'Learn from your phone, tablet or computer.',
+        f3Title: 'Grading system',
+        f3Desc: 'Detailed tracking of progress and assessments.'
+      },
+      testimonials: {
+        title: 'What our users say',
+        items: [
+          { name: 'Ardi Shala', role: 'Student, UBT', text: 'Meson helped me a lot in organizing my time and study materials.' },
+          { name: 'Dr. Elena Berisha', role: 'Professor, UP', text: 'A very intuitive platform, easy to use for both us and the students.' },
+          { name: 'Luan Krasniqi', role: 'Student, UT', text: 'The design is wonderful and notifications always arrive on time.' }
+        ]
+      },
+      ctaFinal: {
+        title: 'Ready to start your journey?',
+        subtitle: 'Join thousands of students and teachers on the most modern learning platform.',
+        btn: 'Create free account'
+      },
+      partnersTitle: 'Institutions that trust us',
       student: {
         overline: 'Your dashboard',
         welcome: 'Welcome back',
