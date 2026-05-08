@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Link as RouterLink } from 'react-router-dom'
+import { Link as RouterLink, useNavigate } from 'react-router-dom'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import Typography from '@mui/material/Typography'
@@ -20,10 +20,11 @@ import {
 import { useAppPreferences } from '../context/appPreferencesContext.js'
 import LegalDocumentModal from '../components/legal/LegalDocumentModal.jsx'
 import {
-  LEGAL_DOCUMENT_VERSION,
   PRIVACY_POLICY,
   TERMS_OF_SERVICE,
+  COOKIE_POLICY,
 } from '../legal/mesonLegalDocuments.js'
+import { register } from '../services/authService.js'
 
 /** Set true to require scrolling to the end before “I have read” is enabled (stricter UX). */
 const REQUIRE_SCROLL_TO_ACKNOWLEDGE_LEGAL = false
@@ -49,10 +50,10 @@ const ROLES = [
   },
 ]
 
-function roleLabelForUi(id) {
-  if (id === 'instructor') return 'Teacher'
-  if (id === 'parent') return 'Parent'
-  if (id === 'student') return 'Student'
+function roleLabelForUi(id, t) {
+  if (id === 'instructor') return t('auth.roleTeacherTitle')
+  if (id === 'parent') return t('auth.roleParentTitle')
+  if (id === 'student') return t('auth.roleStudentTitle')
   return id
 }
 
@@ -66,31 +67,31 @@ const initialValues = {
   terms: false,
 }
 
-function validateFirstName(v) {
-  if (!v.trim()) return 'First name is required'
+function validateFirstName(v, t) {
+  if (!v.trim()) return t('auth.errFirstReq')
   return ''
 }
 
-function validateLastName(v) {
-  if (!v.trim()) return 'Last name is required'
+function validateLastName(v, t) {
+  if (!v.trim()) return t('auth.errLastReq')
   return ''
 }
 
-function validateEmail(v) {
-  if (!v.trim()) return 'Email is required'
-  if (!isValidEmailFormat(v)) return 'Enter a valid email address'
+function validateEmail(v, t) {
+  if (!v.trim()) return t('auth.emailReq')
+  if (!isValidEmailFormat(v)) return t('auth.emailInv')
   return ''
 }
 
-function validatePassword(v) {
-  if (!v) return 'Password is required'
-  if (v.length < 8) return 'Use at least 8 characters'
+function validatePassword(v, t) {
+  if (!v) return t('auth.passReq')
+  if (v.length < 8) return t('auth.errPassLength')
   return ''
 }
 
-function validateConfirm(password, confirm) {
-  if (!confirm) return 'Confirm your password'
-  if (confirm !== password) return 'Passwords do not match'
+function validateConfirm(password, confirm, t) {
+  if (!confirm) return t('auth.errPassConfirm')
+  if (confirm !== password) return t('auth.errPassMatch')
   return ''
 }
 
@@ -129,7 +130,7 @@ function GoogleIcon() {
 }
 
 export default function Register() {
-  const { colorMode } = useAppPreferences()
+  const { colorMode, t, locale } = useAppPreferences()
   const [values, setValues] = useState(initialValues)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -138,8 +139,13 @@ export default function Register() {
   const [roleDismissed, setRoleDismissed] = useState(false)
   const [termsModalOpen, setTermsModalOpen] = useState(false)
   const [privacyModalOpen, setPrivacyModalOpen] = useState(false)
+  const [cookieModalOpen, setCookieModalOpen] = useState(false)
   const [termsReadAcknowledged, setTermsReadAcknowledged] = useState(false)
   const [privacyReadAcknowledged, setPrivacyReadAcknowledged] = useState(false)
+  const [cookieReadAcknowledged, setCookieReadAcknowledged] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [globalError, setGlobalError] = useState('')
+  const navigate = useNavigate()
 
   const theme = useMemo(
     () =>
@@ -176,22 +182,21 @@ export default function Register() {
   const validationErrors = useMemo(() => {
     let termsMsg = ''
     if (attemptedSubmit) {
-      if (!termsReadAcknowledged || !privacyReadAcknowledged) {
-        termsMsg =
-          'Open the Terms of Service and Privacy Policy and tap “I have read and understood” for each.'
+      if (!termsReadAcknowledged || !privacyReadAcknowledged || !cookieReadAcknowledged) {
+        termsMsg = t('auth.errTermsMsg1')
       } else if (!values.terms) {
-        termsMsg = 'You must agree to the Terms of Service and Privacy Policy.'
+        termsMsg = t('auth.errTermsMsg2')
       }
     }
     return {
-      firstName: validateFirstName(values.firstName),
-      lastName: validateLastName(values.lastName),
-      email: validateEmail(values.email),
-      password: validatePassword(values.password),
-      confirmPassword: validateConfirm(values.password, values.confirmPassword),
+      firstName: validateFirstName(values.firstName, t),
+      lastName: validateLastName(values.lastName, t),
+      email: validateEmail(values.email, t),
+      password: validatePassword(values.password, t),
+      confirmPassword: validateConfirm(values.password, values.confirmPassword, t),
       terms: termsMsg,
     }
-  }, [values, attemptedSubmit, termsReadAcknowledged, privacyReadAcknowledged])
+  }, [values, attemptedSubmit, termsReadAcknowledged, privacyReadAcknowledged, cookieReadAcknowledged, t])
 
   const getFieldError = (field) => {
     if (!attemptedSubmit) return ''
@@ -223,32 +228,49 @@ export default function Register() {
     setRoleDismissed(true)
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+
     const termsErr =
       !termsReadAcknowledged || !privacyReadAcknowledged
         ? 'ack'
         : !values.terms
           ? 'tick'
           : ''
+
     const errs = {
-      firstName: validateFirstName(values.firstName),
-      lastName: validateLastName(values.lastName),
-      email: validateEmail(values.email),
-      password: validatePassword(values.password),
-      confirmPassword: validateConfirm(values.password, values.confirmPassword),
+      firstName: validateFirstName(values.firstName, t),
+      lastName: validateLastName(values.lastName, t),
+      email: validateEmail(values.email, t),
+      password: validatePassword(values.password, t),
+      confirmPassword: validateConfirm(values.password, values.confirmPassword, t),
       terms: termsErr,
     }
+
     setAttemptedSubmit(true)
     if (Object.values(errs).some(Boolean)) return
-    console.info('Register payload (demo)', {
-      firstName: values.firstName.trim(),
-      lastName: values.lastName.trim(),
-      email: values.email.trim(),
-      role: values.role,
-      termsAccepted: true,
-      termsVersion: LEGAL_DOCUMENT_VERSION,
-    })
+
+    setLoading(true)
+    setGlobalError('')
+
+    try {
+      await register(
+        values.firstName,
+        values.lastName,
+        values.email,
+        values.password,
+        values.role
+      )
+
+      navigate('/login')
+
+    } catch (error) {
+      setGlobalError(
+        error.message || t('auth.registerError')
+      )
+    } finally {
+      setLoading(false)
+    }
   }
 
   const showRoleHint =
@@ -279,10 +301,10 @@ export default function Register() {
                   component="h1"
                   className="font-bold tracking-tight text-slate-900 dark:text-white sm:text-[2rem]"
                 >
-                  Create your account
+                  {t('auth.registerTitle')}
                 </Typography>
                 <Typography variant="body2" className="mx-auto mt-2 max-w-xl text-slate-600 dark:text-slate-400">
-                  Join Meson to start learning with structure and support—free to get started.
+                  {t('auth.registerSubtitle')}
                 </Typography>
               </div>
 
@@ -291,239 +313,251 @@ export default function Register() {
                 onSubmit={handleSubmit}
                 noValidate
               >
+                {globalError && (
+                  <p className="text-red-500 text-sm text-center">
+                    {globalError}
+                  </p>
+                )}
                 <div className="flex min-w-0 flex-col gap-5">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <InputField
-                id="firstName"
-                label="First name"
-                value={values.firstName}
-                onChange={handleChange('firstName')}
-                error={getFieldError('firstName')}
-                autoFocus
-                autoComplete="given-name"
-                startIcon={PersonOutlineIcon}
-              />
-              <InputField
-                id="lastName"
-                label="Last name"
-                value={values.lastName}
-                onChange={handleChange('lastName')}
-                error={getFieldError('lastName')}
-                autoComplete="family-name"
-                startIcon={PersonOutlineIcon}
-              />
-            </div>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <InputField
+                      id="firstName"
+                      label={t('auth.firstName')}
+                      value={values.firstName}
+                      onChange={handleChange('firstName')}
+                      error={getFieldError('firstName')}
+                      autoFocus
+                      autoComplete="given-name"
+                      startIcon={PersonOutlineIcon}
+                    />
+                    <InputField
+                      id="lastName"
+                      label={t('auth.lastName')}
+                      value={values.lastName}
+                      onChange={handleChange('lastName')}
+                      error={getFieldError('lastName')}
+                      autoComplete="family-name"
+                      startIcon={PersonOutlineIcon}
+                    />
+                  </div>
 
-            <InputField
-              id="email"
-              label="School email"
-              value={values.email}
-              onChange={handleChange('email')}
-              onBlur={handleEmailBlur}
-              error={getFieldError('email')}
-              type="email"
-              autoComplete="email"
-              startIcon={EmailOutlinedIcon}
-            />
+                  <InputField
+                    id="email"
+                    label={t('auth.schoolEmail')}
+                    value={values.email}
+                    onChange={handleChange('email')}
+                    onBlur={handleEmailBlur}
+                    error={getFieldError('email')}
+                    type="email"
+                    autoComplete="email"
+                    startIcon={EmailOutlinedIcon}
+                  />
 
-            {showRoleHint && (
-              <div
-                className="flex flex-col gap-2 rounded-2xl border border-emerald-200 bg-emerald-50/90 px-4 py-3 text-sm dark:border-emerald-900/60 dark:bg-emerald-950/40"
-                role="status"
-              >
-                <span className="text-slate-700 dark:text-slate-200">
-                  Suggested role based on your email:{' '}
-                  <strong className="text-emerald-800 dark:text-emerald-300">
-                    {roleLabelForUi(roleSuggestion)}
-                  </strong>
-                </span>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={applySuggestedRole}
-                    className="rounded-full bg-emerald-600 px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
-                  >
-                    Use suggested role
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setRoleDismissed(true)}
-                    className="rounded-full px-3 py-1.5 text-xs font-medium text-slate-600 underline-offset-2 hover:underline dark:text-slate-400"
-                  >
-                    Dismiss
-                  </button>
-                </div>
-              </div>
-            )}
+                  {showRoleHint && (
+                    <div
+                      className="flex flex-col gap-2 rounded-2xl border border-emerald-200 bg-emerald-50/90 px-4 py-3 text-sm dark:border-emerald-900/60 dark:bg-emerald-950/40"
+                      role="status"
+                    >
+                      <span className="text-slate-700 dark:text-slate-200">
+                        {t('auth.suggestedRoleText')} {' '}
+                        <strong className="text-emerald-800 dark:text-emerald-300">
+                          {roleLabelForUi(roleSuggestion, t)}
+                        </strong>
+                      </span>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={applySuggestedRole}
+                          className="rounded-full bg-emerald-600 px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-emerald-500  focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
+                        >
+                          {t('auth.suggestedRoleBtn')}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setRoleDismissed(true)}
+                          className="rounded-full px-3 py-1.5 text-xs font-medium text-slate-600 underline-offset-2 hover:underline dark:text-slate-400"
+                        >
+                          {t('auth.dismissBtn')}
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
-            <PasswordField
-              id="password"
-              label="Password"
-              value={values.password}
-              onChange={handleChange('password')}
-              error={getFieldError('password')}
-              showPassword={showPassword}
-              onToggleVisibility={() => setShowPassword((s) => !s)}
-              strength={passwordStrength}
-              showStrength
-            />
+                  <PasswordField
+                    id="password"
+                    label={t('auth.password')}
+                    value={values.password}
+                    onChange={handleChange('password')}
+                    error={getFieldError('password')}
+                    showPassword={showPassword}
+                    onToggleVisibility={() => setShowPassword((s) => !s)}
+                    strength={passwordStrength}
+                    showStrength
+                  />
 
-            <PasswordField
-              id="confirmPassword"
-              label="Confirm password"
-              value={values.confirmPassword}
-              onChange={handleChange('confirmPassword')}
-              error={getFieldError('confirmPassword')}
-              showPassword={showConfirmPassword}
-              onToggleVisibility={() => setShowConfirmPassword((s) => !s)}
-              showStrength={false}
-            />
+                  <PasswordField
+                    id="confirmPassword"
+                    label={t('auth.confirmPassword')}
+                    value={values.confirmPassword}
+                    onChange={handleChange('confirmPassword')}
+                    error={getFieldError('confirmPassword')}
+                    showPassword={showConfirmPassword}
+                    onToggleVisibility={() => setShowConfirmPassword((s) => !s)}
+                    showStrength={false}
+                  />
                 </div>
 
                 <div className="flex min-w-0 flex-col gap-5">
-            <fieldset className="min-w-0 border-0 p-0">
-              <legend
-                id="role-legend"
-                className="text-sm font-semibold text-slate-800 dark:text-slate-100"
-              >
-                Choose your role
-              </legend>
-              <p
-                id="role-field-hint"
-                className="mt-1 max-w-2xl text-xs leading-snug text-slate-600 dark:text-slate-400"
-              >
-                Pick the role that fits you—this sets which tools you see first.
-              </p>
-              <div
-                role="radiogroup"
-                aria-labelledby="role-legend"
-                aria-describedby="role-field-hint"
-                className="mt-3 grid grid-cols-3 gap-2.5 max-[340px]:grid-cols-1 sm:gap-3 sm:items-stretch"
-              >
-                {ROLES.map((r) => (
-                  <RoleCard
-                    key={r.id}
-                    roleId={r.id}
-                    title={r.title}
-                    subtitle={r.subtitle}
-                    highlights={r.highlights}
-                    selected={values.role === r.id}
-                    onSelect={() => {
-                      setValues((prev) => ({ ...prev, role: r.id }))
-                      setRoleDismissed(true)
-                    }}
-                  />
-                ))}
-              </div>
-            </fieldset>
+                  <fieldset className="min-w-0 border-0 p-0">
+                    <legend
+                      id="role-legend"
+                      className="text-sm font-semibold text-slate-800 dark:text-slate-100"
+                    >
+                      {t('auth.chooseRoleTitle')}
+                    </legend>
+                    <p
+                      id="role-field-hint"
+                      className="mt-1 max-w-2xl text-xs leading-snug text-slate-600 dark:text-slate-400"
+                    >
+                      {t('auth.chooseRoleHint')}
+                    </p>
+                    <div
+                      role="radiogroup"
+                      aria-labelledby="role-legend"
+                      aria-describedby="role-field-hint"
+                      className="mt-3 grid grid-cols-3 gap-2.5 max-[340px]:grid-cols-1 sm:gap-3 sm:items-stretch"
+                    >
+                      {ROLES.map((r) => (
+                        <RoleCard
+                          key={r.id}
+                          roleId={r.id}
+                          title={r.id === 'student' ? t('auth.roleStudentTitle') : r.id === 'instructor' ? t('auth.roleTeacherTitle') : t('auth.roleParentTitle')}
+                          subtitle={r.id === 'student' ? t('auth.roleStudentSub') : r.id === 'instructor' ? t('auth.roleTeacherSub') : t('auth.roleParentSub')}
+                          highlights={r.id === 'student' ? [t('auth.roleStudentH1'), t('auth.roleStudentH2')] : r.id === 'instructor' ? [t('auth.roleTeacherH1'), t('auth.roleTeacherH2')] : [t('auth.roleParentH1'), t('auth.roleParentH2')]}
+                          selected={values.role === r.id}
+                          onSelect={() => {
+                            setValues((prev) => ({ ...prev, role: r.id }))
+                            setRoleDismissed(true)
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </fieldset>
                 </div>
 
-            <div className="col-span-full flex flex-col items-center gap-4 border-t border-slate-200/90 pt-6 dark:border-slate-600/80 md:col-span-2 md:pt-7">
-              <FormControlLabel
-                className="m-0"
-                control={
-                  <Checkbox
-                    checked={values.terms}
-                    onChange={handleChange('terms')}
-                    color="primary"
-                    disabled={!termsReadAcknowledged || !privacyReadAcknowledged}
-                    aria-describedby="terms-description terms-legal-hint"
+                <div className="col-span-full flex flex-col items-center gap-4 border-t border-slate-200/90 pt-6 dark:border-slate-600/80 md:col-span-2 md:pt-7">
+                  <FormControlLabel
+                    className="m-0"
+                    control={
+                      <Checkbox
+                        checked={values.terms}
+                        onChange={handleChange('terms')}
+                        color="primary"
+                        disabled={!termsReadAcknowledged || !privacyReadAcknowledged || !cookieReadAcknowledged}
+                        aria-describedby="terms-description terms-legal-hint"
+                      />
+                    }
+                    label={
+                      <span
+                        id="terms-description"
+                        className="text-center text-sm text-slate-600 dark:text-slate-400"
+                      >
+                        {t('auth.iAgreeTo')} {' '}
+                        <button
+                          type="button"
+                          className="font-medium text-indigo-600 underline decoration-indigo-600/50 underline-offset-2 transition-colors hover:text-indigo-500 dark:text-indigo-400 dark:decoration-indigo-400/50 dark:hover:text-indigo-300"
+                          onClick={() => setTermsModalOpen(true)}
+                        >
+                          {t('auth.termsOfService')}
+                        </button>{' '}
+                        {t('auth.and')} {' '}
+                        <button
+                          type="button"
+                          className="font-medium text-indigo-600 underline decoration-indigo-600/50 underline-offset-2 transition-colors hover:text-indigo-500 dark:text-indigo-400 dark:decoration-indigo-400/50 dark:hover:text-indigo-300"
+                          onClick={() => setPrivacyModalOpen(true)}
+                        >
+                          {t('auth.privacyPolicy')}
+                        </button>{' '}
+                        {t('auth.and')} {' '}
+                        <button
+                          type="button"
+                          className="font-medium text-indigo-600 underline decoration-indigo-600/50 underline-offset-2 transition-colors hover:text-indigo-500 dark:text-indigo-400 dark:decoration-indigo-400/50 dark:hover:text-indigo-300"
+                          onClick={() => setCookieModalOpen(true)}
+                        >
+                          {t('auth.cookiePolicy')}
+                        </button>
+                      </span>
+                    }
                   />
-                }
-                label={
-                  <span
-                    id="terms-description"
-                    className="text-center text-sm text-slate-600 dark:text-slate-400"
-                  >
-                    I agree to the{' '}
+                  {(!termsReadAcknowledged || !privacyReadAcknowledged) && (
+                    <p
+                      id="terms-legal-hint"
+                      className="max-w-md text-center text-xs leading-snug text-slate-500 dark:text-slate-400"
+                    >
+                      {t('auth.termsHint')}
+                    </p>
+                  )}
+                  {attemptedSubmit && validationErrors.terms && (
+                    <p
+                      className="flex items-center justify-center gap-1 text-center text-sm text-red-600 dark:text-red-400"
+                      role="alert"
+                    >
+                      <span aria-hidden className="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-red-500" />
+                      {validationErrors.terms}
+                    </p>
+                  )}
+
+                  <div className="w-full max-w-xs">
+                    <RegisterButton type="submit" disabled={loading}>{t('auth.registerSubmit')}</RegisterButton>
+                  </div>
+
+                  <div className="flex w-full max-w-md items-center gap-3 py-1">
+                    <span
+                      className="h-px flex-1 bg-slate-200 transition-colors dark:bg-slate-600"
+                      aria-hidden
+                    />
+                    <span className="shrink-0 text-center text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
+                      {t('auth.orContinueWith')}
+                    </span>
+                    <span
+                      className="h-px flex-1 bg-slate-200 transition-colors dark:bg-slate-600"
+                      aria-hidden
+                    />
+                  </div>
+
+                  <div className="grid w-full max-w-md grid-cols-1 gap-3 sm:grid-cols-2">
                     <button
                       type="button"
-                      className="font-medium text-indigo-600 underline decoration-indigo-600/50 underline-offset-2 transition-colors hover:text-indigo-500 dark:text-indigo-400 dark:decoration-indigo-400/50 dark:hover:text-indigo-300"
-                      onClick={() => setTermsModalOpen(true)}
+                      className="flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-white py-3 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:scale-[1.01] hover:border-slate-300 hover:shadow-md dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500"
+                      aria-label="Continue with Google"
                     >
-                      Terms of Service
-                    </button>{' '}
-                    and{' '}
-                    <button
-                      type="button"
-                      className="font-medium text-indigo-600 underline decoration-indigo-600/50 underline-offset-2 transition-colors hover:text-indigo-500 dark:text-indigo-400 dark:decoration-indigo-400/50 dark:hover:text-indigo-300"
-                      onClick={() => setPrivacyModalOpen(true)}
-                    >
-                      Privacy Policy
+                      <GoogleIcon />
+                      Google
                     </button>
-                  </span>
-                }
-              />
-              {(!termsReadAcknowledged || !privacyReadAcknowledged) && (
-                <p
-                  id="terms-legal-hint"
-                  className="max-w-md text-center text-xs leading-snug text-slate-500 dark:text-slate-400"
-                >
-                  Open each document above and confirm with &quot;I have read and understood&quot; to enable
-                  the checkbox.
-                </p>
-              )}
-              {attemptedSubmit && validationErrors.terms && (
-                <p
-                  className="flex items-center justify-center gap-1 text-center text-sm text-red-600 dark:text-red-400"
-                  role="alert"
-                >
-                  <span aria-hidden className="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-red-500" />
-                  {validationErrors.terms}
-                </p>
-              )}
+                    <button
+                      type="button"
+                      className="flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-white py-3 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:scale-[1.01] hover:border-slate-300 hover:shadow-md dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500"
+                      aria-label="Continue with Microsoft"
+                    >
+                      <MicrosoftIcon />
+                      Microsoft
+                    </button>
+                  </div>
+                </div>
 
-              <div className="w-full max-w-xs">
-                <RegisterButton type="submit">Start learning</RegisterButton>
-              </div>
-
-              <div className="flex w-full max-w-md items-center gap-3 py-1">
-                <span
-                  className="h-px flex-1 bg-slate-200 transition-colors dark:bg-slate-600"
-                  aria-hidden
-                />
-                <span className="shrink-0 text-center text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
-                  Or continue with
-                </span>
-                <span
-                  className="h-px flex-1 bg-slate-200 transition-colors dark:bg-slate-600"
-                  aria-hidden
-                />
-              </div>
-
-              <div className="grid w-full max-w-md grid-cols-1 gap-3 sm:grid-cols-2">
-                <button
-                  type="button"
-                  className="flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-white py-3 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:scale-[1.01] hover:border-slate-300 hover:shadow-md dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500"
-                  aria-label="Continue with Google"
+                <Typography
+                  variant="body2"
+                  className="col-span-full text-center text-slate-600 dark:text-slate-400 md:col-span-2"
                 >
-                  <GoogleIcon />
-                  Google
-                </button>
-                <button
-                  type="button"
-                  className="flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-white py-3 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:scale-[1.01] hover:border-slate-300 hover:shadow-md dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500"
-                  aria-label="Continue with Microsoft"
-                >
-                  <MicrosoftIcon />
-                  Microsoft
-                </button>
-              </div>
-            </div>
-
-            <Typography
-              variant="body2"
-              className="col-span-full text-center text-slate-600 dark:text-slate-400 md:col-span-2"
-            >
-              Already have an account?{' '}
-              <Link
-                component={RouterLink}
-                to="/login"
-                className="font-semibold text-indigo-600 underline-offset-2 transition-colors hover:text-indigo-500 hover:underline dark:text-indigo-400 dark:hover:text-indigo-300"
-              >
-                Log in
-              </Link>
-            </Typography>
+                  {t('auth.alreadyHaveAccount')} {' '}
+                  <Link
+                    component={RouterLink}
+                    to="/login"
+                    className="font-semibold text-indigo-600 underline-offset-2 transition-colors hover:text-indigo-500 hover:underline dark:text-indigo-400 dark:hover:text-indigo-300"
+                  >
+                    {t('auth.logIn')}
+                  </Link>
+                </Typography>
               </form>
             </div>
           </div>
@@ -532,15 +566,22 @@ export default function Register() {
       <LegalDocumentModal
         open={termsModalOpen}
         onClose={() => setTermsModalOpen(false)}
-        document={TERMS_OF_SERVICE}
+        document={TERMS_OF_SERVICE[locale]}
         onAcknowledge={() => setTermsReadAcknowledged(true)}
         requireScrollToAcknowledge={REQUIRE_SCROLL_TO_ACKNOWLEDGE_LEGAL}
       />
       <LegalDocumentModal
         open={privacyModalOpen}
         onClose={() => setPrivacyModalOpen(false)}
-        document={PRIVACY_POLICY}
+        document={PRIVACY_POLICY[locale]}
         onAcknowledge={() => setPrivacyReadAcknowledged(true)}
+        requireScrollToAcknowledge={REQUIRE_SCROLL_TO_ACKNOWLEDGE_LEGAL}
+      />
+      <LegalDocumentModal
+        open={cookieModalOpen}
+        onClose={() => setCookieModalOpen(false)}
+        document={COOKIE_POLICY[locale]}
+        onAcknowledge={() => setCookieReadAcknowledged(true)}
         requireScrollToAcknowledge={REQUIRE_SCROLL_TO_ACKNOWLEDGE_LEGAL}
       />
     </ThemeProvider>

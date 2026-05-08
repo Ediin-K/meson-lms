@@ -2,14 +2,21 @@
 
 export const STRINGS = {
   sq: {
+    months: {
+      jan: 'Jan', feb: 'Shk', mar: 'Mar', apr: 'Prill', may: 'Maj', jun: 'Qersh',
+      jul: 'Korr', aug: 'Gush', sep: 'Shtat', oct: 'Tet', nov: 'Nënt', dec: 'Dhjet'
+    },
     header: {
       skip: 'Kalo te përmbajtja kryesore',
       mainNav: 'Navigimi kryesor',
       navHome: 'Ballina',
-      navCourses: 'Kurset e mia',
+      navCourses: 'Lendet e mia',
       navAssignments: 'Detyrat',
       navLibrary: 'Biblioteka',
       navAbout: 'Rreth nesh',
+      navContact: 'Na kontaktoni',
+      navDashboard: 'Pulti',
+      navAdminDashboard: 'Administratori',
       login: 'Hyr',
       logout: 'Dil',
       profileMenu: 'Hap menunë e profilit',
@@ -21,6 +28,7 @@ export const STRINGS = {
       roleLabel: 'Roli (demo)',
       roleGuest: 'Vizitor',
       roleStudent: 'Student',
+
       roleAdmin: 'Administrator',
       profile: 'Profili',
       accountSettings: 'Cilësimet e llogarisë',
@@ -31,6 +39,72 @@ export const STRINGS = {
       profileSub: 'Profili',
       themeLight: 'Modalitet i çelët',
       themeDark: 'Modalitet i errët',
+      notifications: 'Njoftimet',
+    },
+    auth: {
+      loginTitle: 'Hyr në Meson',
+      loginSubtitle: 'Mirë se u ktheve—vazhdo me kurset dhe detyrat e tua.',
+      emailLabel: 'Email',
+      passwordLabel: 'Fjalëkalimi',
+      forgotPassword: 'Ke harruar fjalëkalimin?',
+      rememberMe: 'Më mbaj mend',
+      loginSubmit: 'Hyr',
+      orContinueWith: 'Ose vazhdo me',
+      noAccount: 'Nuk keni llogari?',
+      createAccount: 'Krijo llogari',
+      emailReq: 'Emaili është i detyrueshëm',
+      emailInv: 'Jepni një adresë emaili të vlefshme',
+      passReq: 'Fjalëkalimi është i detyrueshëm',
+      registerTitle: 'Krijo llogarinë tënde',
+      registerSubtitle: 'Bashkohu në Meson për të nisur mësimin—falas për të filluar.',
+      firstName: 'Emri',
+      lastName: 'Mbiemri',
+      schoolEmail: 'Emaili i shkollës',
+      confirmPassword: 'Konfirmo fjalëkalimin',
+      chooseRoleTitle: 'Zgjidh rolin tënd',
+      chooseRoleHint: 'Zgjidh rolin që të përshtatet—kjo përcakton se çfarë mjetesh shikon.',
+      roleStudentTitle: 'Student',
+      roleStudentSub: 'Ndiq kurse dhe dorëzo detyra.',
+      roleStudentH1: 'Kurse & leksione',
+      roleStudentH2: 'Detyra & nota',
+      roleTeacherTitle: 'Pedagog',
+      roleTeacherSub: 'Mëso klasat dhe vlerëso.',
+      roleTeacherH1: 'Leksione & vlerësime',
+      roleTeacherH2: 'Klasa & feedback',
+      roleParentTitle: 'Prind',
+      roleParentSub: 'Ndiq progresin e fëmijës.',
+      roleParentH1: 'Progresi & lajme',
+      roleParentH2: 'Orari & njoftime',
+      suggestedRoleText: 'Roli i sugjeruar bazuar në emailin tuaj:',
+      suggestedRoleBtn: 'Përdor rolin',
+      dismissBtn: 'Hiqe',
+      iAgreeTo: 'Pajtohem me',
+      termsOfService: 'Kushtet e Shërbimit',
+      and: 'dhe',
+      privacyPolicy: 'Politikën e Privatësisë',
+      termsHint: 'Hap dokumentet më sipër dhe konfirmo me "Lexova dhe kuptova" për të aktivizuar kutinë.',
+      registerSubmit: 'Fillo mësimin',
+      alreadyHaveAccount: 'Keni tashmë llogari?',
+      logIn: 'Hyr',
+      errFirstReq: 'Emri është i detyrueshëm',
+      errLastReq: 'Mbiemri është i detyrueshëm',
+      errPassLength: 'Përdorni të paktën 8 karaktere',
+      errPassConfirm: 'Konfirmoni fjalëkalimin',
+      errPassMatch: 'Fjalëkalimet nuk përputhen',
+      errTermsMsg1: 'Hapni Kushtet e Shërbimit, Politikën e Privatësisë dhe Rregullat e Cookies dhe shtypni "Lexova dhe kuptova" për secilën.',
+      errTermsMsg2: 'Duhet të pranoni Kushtet, Privatësinë dhe Cookies për të vazhduar.',
+      cookiePolicy: 'Rregullat e Cookies',
+      registerError: 'Regjistrimi dështoi'
+    },
+    cookies: {
+      title: 'Privatësia & Cookies',
+      bannerText: 'Ne përdorim cookies për të përmirësuar përvojën tuaj. Duke vazhduar, ju pranoni',
+      rulesLink: 'rregullat tona',
+      privacySuffix: 'të privatësisë.',
+      acceptAll: 'Prano të gjitha',
+      reject: 'Refuzo',
+      manage: 'Menaxho',
+      gdpr: 'Platformë e përputhur me GDPR'
     },
     home: {
       brand: 'Meson LMS',
@@ -78,6 +152,37 @@ export const STRINGS = {
       chipOffer: 'Ofertë',
       chipSoon: 'Së shpejti',
       chipNew: 'E re',
+      searchPlaceholder: 'Kërko kurse, tema ose universitete...',
+      stats: {
+        students: 'Studentë aktivë',
+        courses: 'Kurse online',
+        mentors: 'Mentorë ekspertë',
+        satisfaction: 'Kënaqësi'
+      },
+      features: {
+        overline: 'Pse ne?',
+        title: 'Çfarë e bën Meson ndryshe',
+        f1Title: 'Mësim i strukturuar',
+        f1Desc: 'Gjithçka e organizuar sipas semestrave dhe moduleve.',
+        f2Title: 'Qasje nga kudo',
+        f2Desc: 'Mëso nga telefoni, tableti ose kompjuteri yt.',
+        f3Title: 'Sistemi i notave',
+        f3Desc: 'Ndjekje e detajuar e progresit dhe vlerësimeve.'
+      },
+      testimonials: {
+        title: 'Çfarë thonë përdoruesit tanë',
+        items: [
+          { name: 'Ardi Shala', role: 'Student, UBT', text: 'Meson më ka ndihmuar shumë në organizimin e kohës dhe materialeve.' },
+          { name: 'Dr. Elena Berisha', role: 'Pedagoge, UP', text: 'Një platformë shumë intuitive dhe e lehtë për t’u përdorur për ne dhe studentët.' },
+          { name: 'Luan Krasniqi', role: 'Student, UT', text: 'Dizajni është i mrekullueshëm dhe njoftimet vijnë gjithmonë në kohë.' }
+        ]
+      },
+      ctaFinal: {
+        title: 'Gati për të filluar rrugëtimin tënd?',
+        subtitle: 'Bashkohu me mijëra studentë dhe pedagogë në platformën më moderne të mësimit.',
+        btn: 'Krijo llogari falas'
+      },
+      partnersTitle: 'Institucionet që na besojnë',
       student: {
         overline: 'Pulti yt',
         welcome: 'Mirë se erdhe përsëri',
@@ -87,8 +192,7 @@ export const STRINGS = {
         assignLink: 'Shiko të gjitha detyrat',
         browseTitle: 'Eksploro kurse',
         browseBody: 'Kategori të përzgjedhura për ty.',
-        dashboardHint:
-          'Më poshtë është fakulteti ku je i regjistruar dhe lëndët e semestrit aktual.',
+
         facultyOverline: 'Regjistrimi yt',
         facultyTitle: 'Fakulteti dhe programi',
         facultyBody:
@@ -99,6 +203,8 @@ export const STRINGS = {
         announcementsTitle: 'Njoftime të shpejta',
         announcement1: 'Mbledhje kursi “Struktura diskrete” — e premte 10:00.',
         announcement2: 'Materialet e javës 7 janë publikuar në “Sisteme dhe sinjale”.',
+        viewAllNotifications: 'Shiko të gjitha',
+        noNotifications: 'Nuk keni njoftime',
         tasks: {
           panelTitle: 'Detyrat & progresi',
           panelSubtitle: 'Afate, zgjatje dhe sa për qind është përfunduar sipas lëndës.',
@@ -124,6 +230,12 @@ export const STRINGS = {
             extension: 'Zgjatja: 25 prill',
             progress: '15',
           },
+        },
+        semesters: {
+          overline: "PLAN STUDIMI",
+          title: "Zgjidh Semestrin",
+          body: "Zgjidh semestrin për të parë lëndët e tua",
+          semester: 'Semestri '
         },
         subjects: {
           overline: 'Semestri aktual',
@@ -161,14 +273,162 @@ export const STRINGS = {
         overline: 'Paneli i administratorit',
         title: 'Përmbledhje e shpejtë',
         body: 'Statistika dhe veprime të shpeshta për institucionin.',
-        statUsers: 'Përdorues aktivë (30 ditë)',
-        statCourses: 'Kurse publike',
-        statAssign: 'Detyra të hapura',
-        manageCourses: 'Menaxho kurset',
-        reports: 'Raporte',
         users: 'Përdoruesit',
         browseCategories: 'Katalogu i kurseve sipas kategorisë',
+        stats: {
+          users: 'Përdorues',
+          courses: 'Kurse',
+          enrollments: 'Regjistrime'
+        },
+        services: {
+          title: 'Shërbimet e Disponueshme',
+          users: {
+            title: 'Menaxhimi i Përdoruesve',
+            desc: 'Menaxho llogaritë, rolet dhe qasjen e përdoruesve në platformë.'
+          },
+          courses: {
+            title: 'Menaxhimi i Kurseve',
+            desc: 'Krijo kurse të reja, ndrysho përmbajtjen dhe organizo planin mësimor.'
+          },
+          categories: {
+            title: 'Kategoritë',
+            desc: 'Organizoni kurset në kategori dhe tema për navigim më të lehtë.'
+          },
+          enrollments: {
+            title: 'Regjistrimet',
+            desc: 'Shikoni dhe menaxhoni regjistrimet e studentëve në lëndë.'
+          },
+          certificates: {
+            title: 'Certifikatat',
+            desc: 'Menaxho lëshimin e certifikatave dhe vërteto arritjet e studentëve.'
+          },
+          reports: {
+            title: 'Raportet',
+            desc: 'Shikoni statistika të detajuara dhe raporte mbi performancën.'
+          },
+          enter: 'Hyr në shërbim',
+          comingSoon: 'Ky modul është në fazën e zhvillimit dhe do të jetë i disponueshëm së shpejti.',
+          backToPanel: 'Kthehu te Paneli',
+          charts: {
+            registrations: 'Trendi i Regjistrimeve',
+            categories: 'Shpërndarja sipas Kategorisë',
+            enrollments: 'Gjendja e Regjistrimeve',
+            students: 'Studentë',
+            courses: 'Kurse',
+            month: 'Muaji',
+            total: 'Gjithsej',
+            active: 'Aktive',
+            completed: 'Përfunduara',
+            pending: 'Në pritje',
+            prog: 'Programim',
+            design: 'Dizajn',
+            biz: 'Biznes',
+            lang: 'Gjuhë'
+          }
+        }
       },
+      teacher: {
+        overline: 'Paneli i pedagogut',
+        title: 'Mirë se erdhe, Profesor',
+        body: 'Menaxhoni klasat tuaja dhe ndiqni progresin e studentëve.',
+        statClasses: 'Klasat aktive',
+        statStudents: 'Studentë gjithsej',
+        statPending: 'Detyra për vlerësim',
+        manageClasses: 'Menaxho klasat',
+        grading: 'Vlerësimet',
+        schedule: 'Orari im',
+        announcementsTitle: 'Njoftimet e mia',
+        announcement1: 'Provimi i ndërmjetëm në "Programim" është caktuar më 20 prill.',
+      },
+      parent: {
+        overline: 'Paneli i prindit',
+        title: 'Progresi i fëmijëve',
+        body: 'Ndiqni arritjet akademike dhe frekuentimin e fëmijëve tuaj.',
+        statChildren: 'Fëmijë në sistem',
+        statAverage: 'Mesatarja e përgjithshme',
+        statAttendance: 'Frekuentimi',
+        viewGrades: 'Shiko notat',
+        contactTeachers: 'Kontakto pedagogët',
+        childrenList: 'Lista e fëmijëve',
+      },
+    },
+    adminUsers: {
+      overline: 'MENAXHIMI I SISTEMIT',
+      title: 'Menaxhimi i Përdoruesve',
+      subtitle: 'Menaxho llogaritë, rolet dhe statusin e përdoruesve.',
+      searchPlaceholder: 'Kërko me emër ose email...',
+      table: {
+        name: 'Emri & Mbiemri',
+        email: 'Email',
+        role: 'Roli',
+        status: 'Statusi',
+        joined: 'Anëtarësuar',
+        actions: 'Veprime'
+      },
+      status: {
+        active: 'Aktiv',
+        inactive: 'Joaktiv'
+      },
+      actions: {
+        edit: 'Ndrysho',
+        deactivate: 'Çaktivizo',
+        activate: 'Aktivizo',
+        delete: 'Fshij'
+      },
+      form: {
+        addTitle: 'Shto Përdorues të Ri',
+        editTitle: 'Ndrysho Përdoruesin',
+        firstName: 'Emri',
+        lastName: 'Mbiemri',
+        email: 'Email',
+        password: 'Fjalëkalimi',
+        role: 'Roli',
+        cancel: 'Anulo',
+        save: 'Ruaj',
+        creating: 'Duke krijuar...',
+        updating: 'Duke ruajtur...'
+      },
+      noUsers: 'Nuk u gjet asnjë përdorues.',
+      errors: {
+        fetchFailed: 'Dështoi ngarkimi i përdoruesve. Ju lutem kontrolloni serverin.'
+      },
+      confirmDelete: 'A jeni i sigurt që dëshironi ta fshini këtë përdorues?'
+    },
+    adminCourses: {
+      overline: 'KURIKULA AKADEMIKE',
+      title: 'Lëndët',
+      subtitle: 'Menaxhoni planin mësimor, kreditet ECTS dhe instruktorët për çdo lëndë.',
+      searchPlaceholder: 'Kërko lëndët...',
+      addTitle: 'Shto Lëndë',
+      editTitle: 'Ndrysho Lëndën',
+      noCourses: 'Nuk u gjet asnjë lëndë',
+      stats: {
+        total: 'Gjithsej Lëndë',
+        credits: 'Kreditet Totale',
+        categories: 'Kategori',
+        average: 'Mesatarja ECTS',
+        active: 'Semestri Aktiv'
+      },
+      catalogTitle: 'Katalogu i Lëndëve',
+      table: {
+        title: 'Lënda',
+        category: 'Kategoria',
+        semester: 'Semestri',
+        credits: 'ECTS',
+        instructor: 'Instruktori',
+        actions: 'Veprime'
+      },
+      form: {
+        title: 'Titulli i Lëndës',
+        description: 'Përshkrimi i Shkurtër',
+        categoryId: 'Kategoria',
+        semester: 'Semestri',
+        credits: 'Kreditet (ECTS)',
+        instructorId: 'Instruktori',
+        save: 'Ruaj Lëndën',
+        creating: 'Duke ruajtur...',
+        cancel: 'Anulo'
+      }
     },
     about: {
       heroOverline: 'Meson LMS',
@@ -240,8 +500,115 @@ export const STRINGS = {
       copy: 'Të gjitha të drejtat e rezervuara.',
       helpNote: 'Ndihmë e shpejtë — përgjigje brenda 24 orëve në ditët e punës.',
     },
+    notifications: {
+      title: 'Të gjitha njoftimet',
+      subtitle: 'Qëndroni të përditësuar me ngjarjet më të fundit.',
+      unread: 'Të palexuara',
+      all: 'Të gjitha',
+      markAllRead: 'Shëno të gjitha të lexuara',
+      empty: 'Nuk ka njoftime.',
+    },
+    semester: {
+      back: 'Kthehu te pulti',
+      overline: 'LËNDËT E SEMESTRIT',
+      title: 'Semestri',
+      subtitle: 'Eksploroni dhe menaxhoni lëndët ku jeni të regjistruar për këtë semestër.',
+      empty: {
+        title: 'Nuk u gjetën lëndë',
+        desc: 'Nuk gjetëm lëndë aktive për këtë semestër. Ju lutem kontrolloni më vonë ose kontaktoni administratorin.',
+      },
+      courseBadge: 'Lënda',
+      noDescription: 'Nuk ka përshkrim për këtë lëndë.',
+      viewCourse: 'Shiko Kursin',
+    },
+    courseDetail: {
+      noModules: 'Nuk ka module në këtë kurs',
+      noLessons: 'Nuk ka leksione në këtë modul',
+      teacher: '',
+      semester: 'Semestri ',
+      level: 'Niveli ',
+    },
+    lessonDetail: {
+      notFound: 'Leksioni nuk u gjet',
+      back: 'Kthehu mbrapa',
+      backToCourse: 'Kthehu te kursi',
+      video: 'Video',
+      content: 'Përmbajtja',
+      extraMaterial: 'Material shtesë',
+      openLink: 'Hap linkun',
+      quizzes: 'Quizet',
+      noQuizzes: 'Nuk ka quiz në këtë leksion',
+      minutes: 'minuta',
+      assignments: 'Detyrat',
+      noAssignments: 'Nuk ka detyra në këtë leksion',
+      deadline: 'Afati: ',
+    },
+    quiz: {
+      finished: 'Quiz i përfunduar!',
+      scoreSaved: 'Rezultati juaj u ruajt',
+      backToLesson: 'Kthehu te leksioni',
+      question: 'Pyetja',
+      from: 'nga',
+      backBtn: 'Mbrapa',
+      submittingBtn: 'Duke dërguar...',
+      submitBtn: 'Përfundo Quiz-in',
+      nextBtn: 'Tjetër',
+      minutes: 'minuta',
+    },
+    course: {
+      notFound: 'Kursi nuk u gjet.',
+      backToHome: 'Kthehu në fillim',
+      backToSubjects: 'Kthehu te lëndët',
+      subjectDetail: 'Detajet e lëndës',
+      files: 'skedarë',
+      viewLesson: 'Shiko ligjeratën',
+      lessons: 'Ligjerata',
+      addLesson: 'Shto Ligjeratë',
+      addNewLesson: 'Shto Ligjeratë të Re',
+      editLesson: 'Ndrysho Ligjeratën',
+      lessonTitle: 'Titull Ligjerata',
+      lessonDescription: 'Përshkrim',
+      completed: 'Përfunduar',
+      markComplete: 'Shëno përfunduar',
+      progress: 'Përparimi',
+      noLessons: 'Nuk ka ligjerata në këtë lëndë. Filloni duke shtuar njërën!',
+      enterTitle: 'Ju lutem futni titullin',
+      confirmDelete: 'Jeni i sigurt?',
+      cancel: 'Anulo',
+      save: 'Ruaj',
+    },
+    contact: {
+      title: 'Na kontaktoni',
+      header: 'Keni pyetje apo nevojë për ndihmë? Na dërgoni një mesazh.',
+      name: 'Emri i plotë',
+      email: 'Email adresa',
+      role: {
+        r: 'Roli juaj',
+        r1: 'Student',
+        r2: 'Pedagog',
+        r3: 'Prind',
+      },
+      topic: {
+        t: 'Tema',
+        t1: 'Probleme me qasjen',
+        t2: 'Pyetje për kurset',
+        t3: 'Pyetje për notat',
+        t4: 'Ndihmë teknike',
+        t5: 'Pagesat / Faturimi',
+        t6: 'Tjetër',
+      },
+      message: 'Mesazhi juaj',
+      btn: 'Dërgo mesazhin',
+      clr: 'Pastro',
+      alert: 'Mesazhi u dërgua me sukses!',
+      link: 'Apo na shkruani direkt në: ',
+    },
   },
   en: {
+    months: {
+      jan: 'Jan', feb: 'Feb', mar: 'Mar', apr: 'Apr', may: 'May', jun: 'Jun',
+      jul: 'Jul', aug: 'Aug', sep: 'Sep', oct: 'Oct', nov: 'Nov', dec: 'Dec'
+    },
     header: {
       skip: 'Skip to main content',
       mainNav: 'Main navigation',
@@ -250,6 +617,9 @@ export const STRINGS = {
       navAssignments: 'Assignments',
       navLibrary: 'Library',
       navAbout: 'About',
+      navContact: 'Contact Us',
+      navDashboard: 'Dashboard',
+      navAdminDashboard: 'Admin Dashboard',
       login: 'Log in',
       logout: 'Log out',
       profileMenu: 'Open profile menu',
@@ -261,6 +631,7 @@ export const STRINGS = {
       roleLabel: 'Role (demo)',
       roleGuest: 'Guest',
       roleStudent: 'Student',
+
       roleAdmin: 'Admin',
       profile: 'Profile',
       accountSettings: 'Account settings',
@@ -271,6 +642,72 @@ export const STRINGS = {
       profileSub: 'Profile',
       themeLight: 'Light mode',
       themeDark: 'Dark mode',
+      notifications: 'Notifications',
+    },
+    auth: {
+      loginTitle: 'Log in to Meson',
+      loginSubtitle: 'Welcome back—continue your courses and assignments.',
+      emailLabel: 'Email',
+      passwordLabel: 'Password',
+      forgotPassword: 'Forgot password?',
+      rememberMe: 'Remember me',
+      loginSubmit: 'Log in',
+      orContinueWith: 'Or continue with',
+      noAccount: 'Don\'t have an account?',
+      createAccount: 'Create account',
+      emailReq: 'Email is required',
+      emailInv: 'Enter a valid email address',
+      passReq: 'Password is required',
+      registerTitle: 'Create your account',
+      registerSubtitle: 'Join Meson to start learning with structure and support—free to get started.',
+      firstName: 'First name',
+      lastName: 'Last name',
+      schoolEmail: 'School email',
+      confirmPassword: 'Confirm password',
+      chooseRoleTitle: 'Choose your role',
+      chooseRoleHint: 'Pick the role that fits you—this sets which tools you see first.',
+      roleStudentTitle: 'Student',
+      roleStudentSub: 'Take classes and submit work.',
+      roleStudentH1: 'Courses & lessons',
+      roleStudentH2: 'Assignments & grades',
+      roleTeacherTitle: 'Teacher',
+      roleTeacherSub: 'Teach classes and grade work.',
+      roleTeacherH1: 'Lessons & assessments',
+      roleTeacherH2: 'Classes & feedback',
+      roleParentTitle: 'Parent',
+      roleParentSub: 'Follow your child’s progress.',
+      roleParentH1: 'Progress & news',
+      roleParentH2: 'Schedules & updates',
+      suggestedRoleText: 'Suggested role based on your email:',
+      suggestedRoleBtn: 'Use suggested role',
+      dismissBtn: 'Dismiss',
+      iAgreeTo: 'I agree to the',
+      termsOfService: 'Terms of Service',
+      and: 'and',
+      privacyPolicy: 'Privacy Policy',
+      termsHint: 'Open each document above and confirm with "I have read and understood" to enable the checkbox.',
+      registerSubmit: 'Start learning',
+      alreadyHaveAccount: 'Already have an account?',
+      logIn: 'Log in',
+      errFirstReq: 'First name is required',
+      errLastReq: 'Last name is required',
+      errPassLength: 'Use at least 8 characters',
+      errPassConfirm: 'Confirm your password',
+      errPassMatch: 'Passwords do not match',
+      errTermsMsg1: 'Open the Terms of Service, Privacy Policy, and Cookie Policy and tap "I have read and understood" for each.',
+      errTermsMsg2: 'You must agree to the Terms, Privacy, and Cookie Policy to continue.',
+      cookiePolicy: 'Cookie Policy',
+      registerError: 'Registration failed'
+    },
+    cookies: {
+      title: 'Privacy & Cookies',
+      bannerText: 'We use cookies to enhance your experience. By continuing, you agree to',
+      rulesLink: 'our rules',
+      privacySuffix: 'regarding privacy.',
+      acceptAll: 'Accept All',
+      reject: 'Reject',
+      manage: 'Manage',
+      gdpr: 'GDPR Compliant Platform'
     },
     home: {
       brand: 'Meson LMS',
@@ -317,6 +754,37 @@ export const STRINGS = {
       chipOffer: 'Sale',
       chipSoon: 'Soon',
       chipNew: 'New',
+      searchPlaceholder: 'Search courses, topics or universities...',
+      stats: {
+        students: 'Active students',
+        courses: 'Online courses',
+        mentors: 'Expert mentors',
+        satisfaction: 'Satisfaction'
+      },
+      features: {
+        overline: 'Why us?',
+        title: 'What makes Meson different',
+        f1Title: 'Structured learning',
+        f1Desc: 'Everything organized by semesters and modules.',
+        f2Title: 'Access anywhere',
+        f2Desc: 'Learn from your phone, tablet or computer.',
+        f3Title: 'Grading system',
+        f3Desc: 'Detailed tracking of progress and assessments.'
+      },
+      testimonials: {
+        title: 'What our users say',
+        items: [
+          { name: 'Ardi Shala', role: 'Student, UBT', text: 'Meson helped me a lot in organizing my time and study materials.' },
+          { name: 'Dr. Elena Berisha', role: 'Professor, UP', text: 'A very intuitive platform, easy to use for both us and the students.' },
+          { name: 'Luan Krasniqi', role: 'Student, UT', text: 'The design is wonderful and notifications always arrive on time.' }
+        ]
+      },
+      ctaFinal: {
+        title: 'Ready to start your journey?',
+        subtitle: 'Join thousands of students and teachers on the most modern learning platform.',
+        btn: 'Create free account'
+      },
+      partnersTitle: 'Institutions that trust us',
       student: {
         overline: 'Your dashboard',
         welcome: 'Welcome back',
@@ -326,8 +794,6 @@ export const STRINGS = {
         assignLink: 'View all assignments',
         browseTitle: 'Explore courses',
         browseBody: 'Hand-picked categories for you.',
-        dashboardHint:
-          'Below you’ll see your enrolled faculty and this semester’s courses.',
         facultyOverline: 'Your enrolment',
         facultyTitle: 'Faculty and programme',
         facultyBody:
@@ -338,6 +804,8 @@ export const STRINGS = {
         announcementsTitle: 'Quick notices',
         announcement1: 'Discrete Structures office hour — Friday 10:00.',
         announcement2: 'Week 7 materials are up in Signals and Systems.',
+        viewAllNotifications: 'View all',
+        noNotifications: 'You have no notifications',
         tasks: {
           panelTitle: 'Tasks & progress',
           panelSubtitle: 'Deadlines, extensions, and completion by module.',
@@ -363,6 +831,12 @@ export const STRINGS = {
             extension: 'Extended to: 25 Apr',
             progress: '15',
           },
+        },
+        semesters: {
+          overline: "STUDY PLAN",
+          title: "Select Semester",
+          body: "Choose a semester to view your courses",
+          semester: 'Semester '
         },
         subjects: {
           overline: 'Current semester',
@@ -400,14 +874,162 @@ export const STRINGS = {
         overline: 'Admin',
         title: 'Quick overview',
         body: 'Key numbers and shortcuts for your institution.',
-        statUsers: 'Active users (30 days)',
-        statCourses: 'Published courses',
-        statAssign: 'Open assignments',
-        manageCourses: 'Manage courses',
-        reports: 'Reports',
         users: 'Users',
         browseCategories: 'Course catalog by category',
+        stats: {
+          users: 'Users',
+          courses: 'Courses',
+          enrollments: 'Enrollments'
+        },
+        services: {
+          title: 'Available Services',
+          users: {
+            title: 'User Management',
+            desc: 'Manage user accounts, roles, and platform access.'
+          },
+          courses: {
+            title: 'Course Management',
+            desc: 'Create new courses, edit content, and organize curricula.'
+          },
+          categories: {
+            title: 'Categories',
+            desc: 'Organize courses into categories and topics for easier navigation.'
+          },
+          enrollments: {
+            title: 'Enrollments',
+            desc: 'View and manage student enrollments in various subjects.'
+          },
+          certificates: {
+            title: 'Certificates',
+            desc: 'Manage certificate issuance and verify student achievements.'
+          },
+          reports: {
+            title: 'Reports',
+            desc: 'View detailed statistics and reports on platform performance.'
+          },
+          enter: 'Enter service',
+          comingSoon: 'This module is under development and will be available soon.',
+          backToPanel: 'Back to Panel',
+          charts: {
+            registrations: 'Registration Trends',
+            categories: 'Category Distribution',
+            enrollments: 'Enrollment Status',
+            students: 'Students',
+            courses: 'Courses',
+            month: 'Month',
+            total: 'Total',
+            active: 'Active',
+            completed: 'Completed',
+            pending: 'Pending',
+            prog: 'Programming',
+            design: 'Design',
+            biz: 'Business',
+            lang: 'Languages'
+          }
+        }
       },
+      teacher: {
+        overline: 'Teacher Panel',
+        title: 'Welcome, Professor',
+        body: 'Manage your classes and track student progress.',
+        statClasses: 'Active Classes',
+        statStudents: 'Total Students',
+        statPending: 'Pending Grading',
+        manageClasses: 'Manage Classes',
+        grading: 'Grading',
+        schedule: 'My Schedule',
+        announcementsTitle: 'My Announcements',
+        announcement1: 'Midterm exam for "Programming" scheduled for April 20th.',
+      },
+      parent: {
+        overline: 'Parent Panel',
+        title: "Children's Progress",
+        body: "Track your children's academic achievements and attendance.",
+        statChildren: 'Children in system',
+        statAverage: 'Overall Average',
+        statAttendance: 'Attendance',
+        viewGrades: 'View Grades',
+        contactTeachers: 'Contact Teachers',
+        childrenList: 'Children List',
+      },
+    },
+    adminUsers: {
+      overline: 'SYSTEM MANAGEMENT',
+      title: 'User Management',
+      subtitle: 'Manage user accounts, roles, and status.',
+      searchPlaceholder: 'Search by name or email...',
+      table: {
+        name: 'Name & Surname',
+        email: 'Email',
+        role: 'Role',
+        status: 'Status',
+        joined: 'Joined',
+        actions: 'Actions'
+      },
+      status: {
+        active: 'Active',
+        inactive: 'Inactive'
+      },
+      actions: {
+        edit: 'Edit',
+        deactivate: 'Deactivate',
+        activate: 'Activate',
+        delete: 'Delete'
+      },
+      form: {
+        addTitle: 'Add New User',
+        editTitle: 'Edit User',
+        firstName: 'First Name',
+        lastName: 'Last Name',
+        email: 'Email',
+        password: 'Password',
+        role: 'Role',
+        cancel: 'Cancel',
+        save: 'Save',
+        creating: 'Creating...',
+        updating: 'Saving...'
+      },
+      noUsers: 'No users found.',
+      errors: {
+        fetchFailed: 'Failed to load users. Please check the server.'
+      },
+      confirmDelete: 'Are you sure you want to delete this user?'
+    },
+    adminCourses: {
+      overline: 'ACADEMIC CURRICULUM',
+      title: 'Subjects',
+      subtitle: 'Manage the curriculum, ECTS credits, and instructors for each subject.',
+      searchPlaceholder: 'Search subjects...',
+      addTitle: 'Add Subject',
+      editTitle: 'Edit Subject',
+      noCourses: 'No subjects found',
+      stats: {
+        total: 'Total Subjects',
+        credits: 'Total Credits',
+        categories: 'Categories',
+        average: 'Average ECTS',
+        active: 'Active Semester'
+      },
+      catalogTitle: 'Subject Catalog',
+      table: {
+        title: 'Subject',
+        category: 'Category',
+        semester: 'Semester',
+        credits: 'ECTS',
+        instructor: 'Instructor',
+        actions: 'Actions'
+      },
+      form: {
+        title: 'Subject Title',
+        description: 'Short Description',
+        categoryId: 'Category',
+        semester: 'Semester',
+        credits: 'Credits (ECTS)',
+        instructorId: 'Instructor',
+        save: 'Save Subject',
+        creating: 'Saving...',
+        cancel: 'Cancel'
+      }
     },
     about: {
       heroOverline: 'Meson LMS',
@@ -478,6 +1100,109 @@ export const STRINGS = {
       cookies: 'Cookies',
       copy: 'All rights reserved.',
       helpNote: 'Fast help — replies within 24 hours on business days.',
+    },
+    notifications: {
+      title: 'All Notifications',
+      subtitle: 'Stay up to date with the latest events.',
+      unread: 'Unread',
+      all: 'All',
+      markAllRead: 'Mark all as read',
+      empty: 'No notifications.',
+    },
+    semester: {
+      back: 'Back to Dashboard',
+      overline: 'COURSE BROWSER',
+      title: 'Semester',
+      subtitle: 'Explore and manage your enrolled subjects for this semester.',
+      empty: {
+        title: 'No Courses Found',
+        desc: 'We couldn\'t find any active courses for this semester. Please check back later or contact your administrator.',
+      },
+      courseBadge: 'Subject',
+      noDescription: 'No description provided for this course.',
+      viewCourse: 'View Course',
+    },
+    courseDetail: {
+      noModules: 'No modules in this course',
+      noLessons: 'No lessons in this module',
+      teacher: '',
+      semester: 'Semester ',
+      level: 'Level ',
+    },
+    lessonDetail: {
+      notFound: 'Lesson not found',
+      back: 'Go back',
+      backToCourse: 'Back to course',
+      video: 'Video',
+      content: 'Content',
+      extraMaterial: 'Extra material',
+      openLink: 'Open link',
+      quizzes: 'Quizzes',
+      noQuizzes: 'No quizzes in this lesson',
+      minutes: 'minutes',
+      assignments: 'Assignments',
+      noAssignments: 'No assignments in this lesson',
+      deadline: 'Deadline: ',
+    },
+    quiz: {
+      finished: 'Quiz finished!',
+      scoreSaved: 'Your score was saved',
+      backToLesson: 'Back to lesson',
+      question: 'Question',
+      from: 'of',
+      backBtn: 'Back',
+      submittingBtn: 'Submitting...',
+      submitBtn: 'Finish Quiz',
+      nextBtn: 'Next',
+      minutes: 'minutes',
+    },
+    course: {
+      notFound: 'Course not found.',
+      backToHome: 'Back to home',
+      backToSubjects: 'Back to subjects',
+      subjectDetail: 'Subject details',
+      files: 'files',
+      viewLesson: 'View lesson',
+      lessons: 'Lessons',
+      addLesson: 'Add Lesson',
+      addNewLesson: 'Add New Lesson',
+      editLesson: 'Edit Lesson',
+      lessonTitle: 'Lesson Title',
+      lessonDescription: 'Description',
+      completed: 'Completed',
+      markComplete: 'Mark as complete',
+      progress: 'Progress',
+      noLessons: 'No lessons in this subject. Start by adding one!',
+      enterTitle: 'Please enter the title',
+      confirmDelete: 'Are you sure?',
+      cancel: 'Cancel',
+      save: 'Save',
+    },
+    contact: {
+      title: 'Contact Us',
+      header: 'Have questions or need help? Send us a message.',
+      name: 'Full name',
+      email: 'Email address',
+      role: {
+        r: 'Your role',
+        r1: 'Student',
+        r2: 'Teacher',
+        r3: 'Parent',
+      },
+      topic: {
+        t: 'Topic',
+        t1: 'Access issues',
+        t2: 'Course questions',
+        t3: 'Grade questions',
+        t4: 'Technical support',
+        t5: 'Billing / Payments',
+        t6: 'Other',
+      },
+      message: 'Your message',
+      btn: 'Send message',
+      clr: 'Clear',
+      alert: 'Message sent successfully!',
+      link: 'Or write to us directly at: ',
     },
   },
 }

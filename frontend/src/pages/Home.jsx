@@ -1,8 +1,9 @@
-import { createElement, useMemo, useRef } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Swiper, SwiperSlide } from 'swiper/react'
-import { Autoplay, Pagination, EffectFade } from 'swiper/modules'
+import { Autoplay, Pagination, EffectFade, Navigation } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/pagination'
+import 'swiper/css/navigation'
 import 'swiper/css/effect-fade'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
@@ -11,11 +12,12 @@ import CardContent from '@mui/material/CardContent'
 import Chip from '@mui/material/Chip'
 import Container from '@mui/material/Container'
 import IconButton from '@mui/material/IconButton'
-import LinearProgress from '@mui/material/LinearProgress'
 import Typography from '@mui/material/Typography'
+import InputBase from '@mui/material/InputBase'
+import Paper from '@mui/material/Paper'
+import Avatar from '@mui/material/Avatar'
 
 import ArrowForwardRounded from '@mui/icons-material/ArrowForwardRounded'
-import MenuBookRounded from '@mui/icons-material/MenuBookRounded'
 import PaletteRounded from '@mui/icons-material/PaletteRounded'
 import CodeRounded from '@mui/icons-material/CodeRounded'
 import GraphicEqRounded from '@mui/icons-material/GraphicEqRounded'
@@ -24,22 +26,21 @@ import ViewQuiltRounded from '@mui/icons-material/ViewQuiltRounded'
 import ThreeDRotationRounded from '@mui/icons-material/ThreeDRotationRounded'
 import CampaignRounded from '@mui/icons-material/CampaignRounded'
 import SchoolRounded from '@mui/icons-material/SchoolRounded'
-import OpenInNewRounded from '@mui/icons-material/OpenInNewRounded'
 import ChevronLeftRounded from '@mui/icons-material/ChevronLeftRounded'
 import ChevronRightRounded from '@mui/icons-material/ChevronRightRounded'
-import AssignmentTurnedInRounded from '@mui/icons-material/AssignmentTurnedInRounded'
-import AdminPanelSettingsRounded from '@mui/icons-material/AdminPanelSettingsRounded'
-import PeopleAltRounded from '@mui/icons-material/PeopleAltRounded'
-import MenuBookOutlined from '@mui/icons-material/MenuBookOutlined'
-import FunctionsRounded from '@mui/icons-material/FunctionsRounded'
-import CalculateRounded from '@mui/icons-material/CalculateRounded'
-import DataObjectRounded from '@mui/icons-material/DataObjectRounded'
-import CampaignOutlined from '@mui/icons-material/CampaignOutlined'
+import SearchRounded from '@mui/icons-material/SearchRounded'
+import StarRounded from '@mui/icons-material/StarRounded'
+import GroupsRounded from '@mui/icons-material/GroupsRounded'
+import CastForEducationRounded from '@mui/icons-material/CastForEducationRounded'
+import AssignmentRounded from '@mui/icons-material/AssignmentRounded'
+import FormatQuoteRounded from '@mui/icons-material/FormatQuoteRounded'
+import CheckCircleRounded from '@mui/icons-material/CheckCircleRounded'
 
 import { useAppPreferences } from '../context/appPreferencesContext.js'
 import { STRINGS } from '../lib/mesonStrings.js'
 import Footer from '../components/ui/Footer.jsx'
 import heroImg from '../assets/images/ubt.webp'
+import { useNavigate } from 'react-router-dom'
 
 const SLIDE_ACCENTS = [
   'from-sky-600/90 via-cyan-600/75 to-indigo-800/85',
@@ -48,506 +49,189 @@ const SLIDE_ACCENTS = [
   'from-slate-800/90 via-sky-800/75 to-indigo-900/88',
 ]
 
-const CHIP_KEYS = {
-  partner: 'home.chipPartner',
-  offer: 'home.chipOffer',
-  soon: 'home.chipSoon',
-  new: 'home.chipNew',
-}
-
-function chipLabel(chipKey, t) {
-  if (!chipKey) return null
-  const path = CHIP_KEYS[chipKey]
-  return path ? t(path) : null
-}
-
 const universities = [
-  {
-    title: 'Universiteti UBT',
-    meta: 'Prishtinë · Kosovë',
-    chipKey: 'partner',
-    chipColor: 'primary',
-    icon: SchoolRounded,
-  },
-  {
-    title: 'Universiteti i Prishtinës',
-    meta: 'Prishtinë · Kosovë',
-    chipKey: null,
-    chipColor: 'default',
-    icon: SchoolRounded,
-  },
-  {
-    title: 'Universiteti i Tiranës',
-    meta: 'Tiranë · Shqipëri',
-    chipKey: null,
-    chipColor: 'default',
-    icon: SchoolRounded,
-  },
-  {
-    title: 'Universiteti Politeknik i Tiranës',
-    meta: 'Tiranë · Shqipëri',
-    chipKey: null,
-    chipColor: 'default',
-    icon: SchoolRounded,
-  },
-  {
-    title: 'Universiteti i Shkodrës',
-    meta: 'Shkodër · Shqipëri',
-    chipKey: null,
-    chipColor: 'default',
-    icon: SchoolRounded,
-  },
-  {
-    title: 'Universiteti i Prizrenit',
-    meta: 'Prizren · Kosovë',
-    chipKey: null,
-    chipColor: 'default',
-    icon: SchoolRounded,
-  },
-  {
-    title: 'Kolegji AAB',
-    meta: 'Prishtinë · Kosovë',
-    chipKey: null,
-    chipColor: 'default',
-    icon: SchoolRounded,
-  },
-  {
-    title: 'Universiteti i Elbasanit',
-    meta: 'Elbasan · Shqipëri',
-    chipKey: null,
-    chipColor: 'default',
-    icon: SchoolRounded,
-  },
+  { title: 'Universiteti UBT', meta: 'Prishtinë · Kosovë', icon: SchoolRounded },
+  { title: 'Universiteti i Prishtinës', meta: 'Prishtinë · Kosovë', icon: SchoolRounded },
+  { title: 'Universiteti i Tiranës', meta: 'Tiranë · Shqipëri', icon: SchoolRounded },
+  { title: 'Universiteti Politeknik i Tiranës', meta: 'Tiranë · Shqipëri', icon: SchoolRounded },
+  { title: 'Universiteti i Shkodrës', meta: 'Shkodër · Shqipëri', icon: SchoolRounded },
+  { title: 'Universiteti i Prizrenit', meta: 'Prizren · Kosovë', icon: SchoolRounded },
 ]
 
 const categories = [
-  {
-    title: 'Histori e artit',
-    meta: '-50% · 3 kurse',
-    icon: PaletteRounded,
-    chipKey: 'offer',
-    chipColor: 'error',
-  },
-  {
-    title: 'UI & UX',
-    meta: 'Së shpejti · 16 kurse',
-    icon: ViewQuiltRounded,
-    chipKey: 'soon',
-    chipColor: 'default',
-  },
-  {
-    title: 'Dizajn 3D',
-    meta: '4 kurse',
-    icon: ThreeDRotationRounded,
-    chipKey: null,
-    chipColor: 'default',
-  },
-  {
-    title: 'Media & PR',
-    meta: '9 kurse',
-    icon: CampaignRounded,
-    chipKey: null,
-    chipColor: 'default',
-  },
-  {
-    title: 'Programim',
-    meta: 'E re · 2 kurse',
-    icon: CodeRounded,
-    chipKey: 'new',
-    chipColor: 'success',
-  },
-  {
-    title: 'Muzikë',
-    meta: '6 kurse',
-    icon: GraphicEqRounded,
-    chipKey: null,
-    chipColor: 'default',
-  },
-  {
-    title: 'Gjuhë',
-    meta: '3 kurse',
-    icon: TranslateRounded,
-    chipKey: null,
-    chipColor: 'default',
-  },
+  { title: 'Histori e artit', meta: '-50% · 3 kurse', icon: PaletteRounded, chipKey: 'offer', chipColor: 'error' },
+  { title: 'UI & UX', meta: 'Së shpejti · 16 kurse', icon: ViewQuiltRounded, chipKey: 'soon', chipColor: 'default' },
+  { title: 'Programim', meta: 'E re · 2 kurse', icon: CodeRounded, chipKey: 'new', chipColor: 'success' },
+  { title: 'Dizajn 3D', meta: '4 kurse', icon: ThreeDRotationRounded, chipKey: null, chipColor: 'default' },
 ]
 
-const cardShell =
-  'group overflow-hidden rounded-[1.35rem] border border-sky-100/90 bg-white/90 shadow-md shadow-sky-100/40 transition duration-300 hover:-translate-y-1 hover:border-sky-200 hover:shadow-lg hover:shadow-sky-200/50'
-
-const mediaShell = 'relative aspect-[16/10] overflow-hidden rounded-t-[1.35rem] bg-slate-100'
-
-function SpotlightCard({
-  title,
-  meta,
-  icon,
-  chip,
-  chipColor,
-  actionLabel,
-  actionExternal,
-  imgLoading,
-}) {
+export function SpotlightCard({ title, meta, icon, chip, chipColor, imgLoading }) {
   const IconGlyph = icon
   return (
-    <Card elevation={0} className={cardShell}>
-
-      <Box className={mediaShell}>
-        <img
-          src={heroImg}
-          alt=""
-          loading={imgLoading ?? 'lazy'}
-          decoding="async"
-          className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/75 via-slate-900/15 to-sky-500/10" />
-        {chip ? (
-          <div className="absolute left-3 top-3 flex items-center gap-2">
-            <Chip
-              label={chip}
-              size="small"
-              color={chipColor === 'default' ? 'default' : chipColor}
-              className={
-                chipColor === 'default'
-                  ? '!bg-white/90 !font-semibold !text-slate-700'
-                  : chipColor === 'primary'
-                    ? '!bg-sky-600 !font-semibold !text-white'
-                    : '!font-semibold'
-              }
-            />
+      <Card elevation={0} className="group overflow-hidden rounded-[2rem] border border-sky-100/90 bg-white/90 shadow-md shadow-sky-100/40 transition-all duration-500 hover:-translate-y-2 hover:border-sky-300 hover:shadow-2xl hover:shadow-sky-200/50 dark:!border-slate-700 dark:!bg-slate-800 dark:!shadow-black/50 dark:hover:!border-slate-500 dark:hover:!shadow-black/60">
+        <Box className="relative aspect-[16/10] overflow-hidden rounded-t-[2rem] bg-slate-100 dark:bg-slate-800">
+          <img
+              src={heroImg}
+              alt=""
+              loading={imgLoading ?? 'lazy'}
+              className="h-full w-full object-cover transition duration-1000 group-hover:scale-110"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/10 to-transparent" />
+          {chip ? (
+              <div className="absolute left-4 top-4">
+                <Chip
+                    label={chip}
+                    size="small"
+                    color={chipColor === 'default' ? 'default' : chipColor}
+                    className="!font-black !px-2 shadow-lg"
+                />
+              </div>
+          ) : null}
+          <div className="absolute bottom-4 left-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/95 text-sky-600 shadow-xl backdrop-blur-md transition-all duration-500 group-hover:scale-110 dark:bg-slate-800/95 dark:text-sky-400">
+            <IconGlyph fontSize="medium" />
           </div>
-        ) : null}
-        <div className="absolute bottom-3 left-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-white/95 text-sky-600 shadow-md backdrop-blur-sm">
-          <IconGlyph fontSize="medium" />
-        </div>
-      </Box>
-      <CardContent className="!rounded-b-[1.35rem] !p-4 !pt-3">
-        <Typography variant="h6" component="h3" className="!font-bold !text-slate-800">
-          {title}
-        </Typography>
-        <Typography variant="body2" className="!mt-0.5 !text-slate-500">
-          {meta}
-        </Typography>
-        <Button
-          size="small"
-          endIcon={
-            actionExternal ? (
-              <OpenInNewRounded sx={{ fontSize: 18 }} />
-            ) : (
-              <MenuBookRounded sx={{ fontSize: 18 }} />
-            )
-          }
-          className="!mt-3 !-ml-2 !rounded-full !font-semibold !text-sky-700 hover:!bg-sky-50"
-        >
-          {actionLabel}
-        </Button>
-      </CardContent>
-    </Card>
+        </Box>
+        <CardContent className="!p-6">
+          <Typography variant="h6" className="!font-black !text-slate-800 dark:!text-white group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
+            {title}
+          </Typography>
+          <Typography variant="body2" className="!mt-1 !font-medium !text-slate-500 dark:!text-slate-400">
+            {meta}
+          </Typography>
+        </CardContent>
+      </Card>
   )
 }
 
-const STUDENT_SUBJECT_ROWS = [
-  { id: 'cs', icon: CodeRounded },
-  { id: 'discrete', icon: FunctionsRounded },
-  { id: 'signals', icon: GraphicEqRounded },
-  { id: 'algo', icon: DataObjectRounded },
-  { id: 'math', icon: CalculateRounded },
-  { id: 'english', icon: TranslateRounded },
-]
+function StatsSection({ t }) {
+  const stats = [
+    { label: t('home.stats.students'), value: '12k+', icon: GroupsRounded, color: 'text-blue-600' },
+    { label: t('home.stats.courses'), value: '500+', icon: CastForEducationRounded, color: 'text-indigo-600' },
+    { label: t('home.stats.mentors'), value: '300+', icon: SchoolRounded, color: 'text-sky-600' },
+    { label: t('home.stats.satisfaction'), value: '98%', icon: StarRounded, color: 'text-amber-500' },
+  ]
 
-const STUDENT_TASK_KEYS = ['task1', 'task2', 'task3']
-
-function StudentFacultyBanner({ t }) {
   return (
-
-    <section
-      className="mb-6 rounded-2xl border border-sky-200/70 bg-gradient-to-br from-sky-50/90 via-white to-slate-50 p-5 shadow-sm ring-1 ring-sky-100/60 sm:p-6"
-      aria-labelledby="student-faculty-heading"
-    >
-      <Typography
-        variant="overline"
-        className="!font-semibold !tracking-widest !text-sky-600"
-      >
-        {t('home.student.facultyOverline')}
-      </Typography>
-      <Typography
-        id="student-faculty-heading"
-        variant="h5"
-        component="h2"
-        className="!mt-1 !font-bold !text-slate-900"
-      >
-        {t('home.student.facultyTitle')}
-      </Typography>
-      <Typography variant="body2" className="!mt-2 !max-w-2xl !text-slate-600">
-        {t('home.student.facultyBody')}
-      </Typography>
-      <div className="mt-4 flex flex-col gap-3 rounded-xl border border-sky-100/80 bg-white/90 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-start gap-3">
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-sky-100 text-sky-700">
-            <SchoolRounded />
-          </span>
-          <div>
-            <Typography variant="subtitle1" className="!font-bold !text-slate-900">
-              {t('home.student.facultyName')}
-            </Typography>
-            <Typography variant="body2" className="!text-slate-600">
-              {t('home.student.facultyMeta')}
-            </Typography>
-            <Typography variant="caption" className="!mt-1 !block !text-slate-500">
-              {t('home.student.facultyProgram')}
-            </Typography>
+    <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-8 animate-fadeIn">
+      {stats.map((s, i) => (
+        <div key={i} className="flex flex-col items-center p-6 rounded-[2.5rem] bg-white/60 border border-white/60 dark:bg-slate-800/60 dark:border-slate-700/60 backdrop-blur-sm shadow-xl transition-transform hover:scale-105">
+          <div className={`mb-3 rounded-2xl bg-white p-3 shadow-md dark:bg-slate-700 ${s.color}`}>
+            <s.icon fontSize="medium" />
           </div>
+          <Typography variant="h4" className="!font-black !text-slate-800 dark:!text-white">
+            {s.value}
+          </Typography>
+          <Typography variant="caption" className="!font-bold !uppercase !tracking-widest !text-slate-500 dark:!text-slate-400">
+            {s.label}
+          </Typography>
         </div>
-      </div>
-    </section>
+      ))}
+    </div>
   )
 }
 
-function StudentDashboard({ t }) {
+function PartnersSection({ t }) {
+  const partners = ['UBT', 'UP', 'UT', 'UPT', 'UNISHK', 'Kolegji AAB', 'Univ. i Korçës', 'Univ. i Vlorës', 'Univ. i Prizrenit', 'Univ. i Gjakovës']
+  // Double the list for infinite effect
+  const marqueeItems = [...partners, ...partners]
+
   return (
-
-    <section
-      className="mb-6 rounded-2xl border border-sky-200/60 bg-white/90 p-4 shadow-sm ring-1 ring-sky-100/50 sm:p-6"
-      aria-labelledby="student-dash-heading"
-    >
-      <Typography
-        id="student-dash-heading"
-        variant="overline"
-        className="!font-semibold !tracking-widest !text-sky-600"
-      >
-        {t('home.student.overline')}
+    <Box className="mt-24 text-center animate-fadeIn overflow-hidden">
+      <Typography variant="caption" className="!font-black !uppercase !tracking-[0.4em] !text-slate-400 dark:!text-slate-500">
+        {t('home.partnersTitle')}
       </Typography>
-      <Typography variant="h5" component="h2" className="!mt-1 !font-bold !text-slate-800">
-        {t('home.student.welcome')}
-      </Typography>
-
-      <div className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-5 lg:items-stretch">
-        {/* Majtas: njoftime të shpejta */}
-        <aside className="order-2 flex flex-col lg:order-1 lg:col-span-3">
-          <Card
-            elevation={0}
-            component="section"
-            aria-labelledby="student-news-heading"
-            className="h-full rounded-2xl border border-amber-200/55 bg-amber-50/35 p-4 ring-1 ring-amber-100/60"
-          >
-            <Typography
-              id="student-news-heading"
-              variant="subtitle2"
-              className="!mb-3 !flex !items-center !gap-2 !font-bold !text-amber-950"
-            >
-              <CampaignOutlined className="text-amber-700" fontSize="small" />
-              {t('home.student.announcementsTitle')}
+      <div className="mt-12 relative flex overflow-hidden py-4 border-y border-slate-200/40 dark:border-slate-800/40 bg-white/30 dark:bg-slate-900/30 backdrop-blur-sm">
+        <div className="animate-marquee whitespace-nowrap flex">
+          {marqueeItems.map((p, i) => (
+            <Typography key={i} variant="h3" className="!font-black !text-slate-300 dark:!text-slate-700 hover:!text-sky-600 transition-colors cursor-default px-12 inline-block">
+              {p}
             </Typography>
-            <ul className="list-none space-y-2.5 p-0">
-              <li>
-                <Typography variant="body2" className="!text-slate-800">
-                  • {t('home.student.announcement1')}
-                </Typography>
-              </li>
-              <li>
-                <Typography variant="body2" className="!text-slate-800">
-                  • {t('home.student.announcement2')}
-                </Typography>
-              </li>
-            </ul>
-          </Card>
-        </aside>
-
-        {/* Mes: vazhdo ku e le */}
-        <div className="order-1 lg:order-2 lg:col-span-6">
-          <Card
-            elevation={0}
-            className="flex h-full min-h-[220px] flex-col justify-center rounded-2xl border border-sky-200/80 bg-gradient-to-br from-sky-50/90 via-white to-sky-50/40 p-5 sm:min-h-[260px] sm:p-6"
-          >
-            <Typography variant="subtitle1" className="!font-bold !text-slate-900">
-              {t('home.student.continueTitle')}
+          ))}
+          {/* Third copy for ultra-long screens if needed */}
+          {marqueeItems.map((p, i) => (
+            <Typography key={`dup-${i}`} variant="h3" className="!font-black !text-slate-300 dark:!text-slate-700 hover:!text-sky-600 transition-colors cursor-default px-12 inline-block">
+              {p}
             </Typography>
-            <Typography variant="body2" className="!mt-2 !text-slate-600">
-              {t('home.student.continueCourse')}
-            </Typography>
-            <Button
-              variant="contained"
-              size="large"
-              className="!mt-5 !w-full !rounded-full !bg-sky-600 !py-2.5 !font-semibold !normal-case hover:!bg-sky-700 sm:!mt-6 sm:!w-auto"
-              startIcon={<MenuBookOutlined />}
-            >
-              {t('home.student.continueBtn')}
-            </Button>
-          </Card>
-        </div>
-
-        {/* Djathtas: detyra, afate, zgjatje, % sipas lëndës */}
-        <aside className="order-3 lg:col-span-3">
-          <Card
-            elevation={0}
-            component="section"
-            aria-labelledby="student-tasks-heading"
-            className="h-full rounded-2xl border border-slate-200/90 bg-slate-50/50 p-4"
-          >
-            <Typography
-              id="student-tasks-heading"
-              variant="subtitle2"
-              className="!flex !items-center !gap-2 !font-bold !text-slate-900"
-            >
-              <AssignmentTurnedInRounded className="text-sky-600" fontSize="small" />
-              {t('home.student.tasks.panelTitle')}
-            </Typography>
-            <Typography variant="caption" className="!mt-1 !mb-3 !block !text-slate-500">
-              {t('home.student.tasks.panelSubtitle')}
-            </Typography>
-            <div className="flex flex-col gap-3">
-              {STUDENT_TASK_KEYS.map((key) => {
-                const pct = Math.min(
-                  100,
-                  Math.max(0, parseInt(t(`home.student.tasks.${key}.progress`), 10) || 0),
-                )
-                return (
-                  <div
-                    key={key}
-                    className="rounded-xl border border-slate-200/80 bg-white px-3 py-3 shadow-sm"
-                  >
-                    <Typography variant="body2" className="!font-semibold !text-slate-900">
-                      {t(`home.student.tasks.${key}.name`)}
-                    </Typography>
-                    <Typography variant="caption" className="!mt-0.5 !block !font-medium !text-sky-700">
-                      {t(`home.student.tasks.${key}.course`)}
-                    </Typography>
-                    <Typography variant="caption" className="!mt-1.5 !block !text-slate-600">
-                      {t(`home.student.tasks.${key}.due`)}
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      className="!mt-0.5 !block !text-amber-900/90"
-                    >
-                      {t(`home.student.tasks.${key}.extension`)}
-                    </Typography>
-                    <div className="mt-2.5 flex items-center gap-2">
-                      <LinearProgress
-                        variant="determinate"
-                        value={pct}
-                        className="!h-2 !flex-1 !rounded-full"
-                        sx={{
-                          height: 8,
-                          borderRadius: 9999,
-                          backgroundColor: 'rgba(15, 23, 42, 0.08)',
-                          '& .MuiLinearProgress-bar': {
-                            borderRadius: 9999,
-                            backgroundColor: '#0284c7',
-                          },
-                        }}
-                      />
-                      <Typography
-                        variant="caption"
-                        className="!shrink-0 !font-bold !tabular-nums !text-slate-700"
-                      >
-                        {pct}% {t('home.student.tasks.progressLabel')}
-                      </Typography>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-            <Button
-              size="small"
-              className="!mt-3 !w-full !font-semibold !text-sky-700 hover:!bg-sky-50"
-            >
-              {t('home.student.assignLink')}
-            </Button>
-          </Card>
-        </aside>
-      </div>
-
-      <Typography variant="body2" className="!mt-5 !text-slate-600">
-        {t('home.student.dashboardHint')}
-      </Typography>
-    </section>
-  )
-}
-
-function AdminOverview({ t }) {
-  return (
-    <section
-      className="relative mb-6 min-h-[min(72vw,380px)] overflow-hidden rounded-3xl border border-slate-700/50 bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 shadow-xl sm:min-h-[420px]"
-      aria-labelledby="admin-overview-heading"
-    >
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(56,189,248,0.12),_transparent_50%)]" />
-      <div className="relative z-[1] flex h-full flex-col justify-between gap-6 p-6 sm:p-8">
-        <div>
-          <Typography
-            variant="overline"
-            className="!font-semibold !tracking-widest !text-sky-300/90"
-          >
-            {t('home.admin.overline')}
-          </Typography>
-          <Typography
-            id="admin-overview-heading"
-            variant="h4"
-            component="h1"
-            className="!mt-2 !font-bold !text-white"
-          >
-            {t('home.admin.title')}
-          </Typography>
-          <Typography variant="body1" className="!mt-2 !max-w-xl !text-slate-300">
-            {t('home.admin.body')}
-          </Typography>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-3">
-          {[
-            { label: t('home.admin.statUsers'), value: '1.2k', icon: PeopleAltRounded },
-            { label: t('home.admin.statCourses'), value: '48', icon: MenuBookOutlined },
-            { label: t('home.admin.statAssign'), value: '126', icon: AssignmentTurnedInRounded },
-          ].map(({ label, value, icon }) => (
-            <div
-              key={label}
-              className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-sm"
-            >
-              {createElement(icon, {
-                className: 'text-sky-400',
-                fontSize: 'small',
-              })}
-              <Typography variant="h5" className="!mt-2 !font-bold !text-white">
-                {value}
-              </Typography>
-              <Typography variant="caption" className="!text-slate-400">
-                {label}
-              </Typography>
-            </div>
           ))}
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button
-            variant="contained"
-            size="medium"
-            startIcon={<AdminPanelSettingsRounded />}
-            className="!rounded-full !bg-sky-500 !font-semibold !text-white hover:!bg-sky-400"
-          >
-            {t('home.admin.manageCourses')}
-          </Button>
-          <Button
-            variant="outlined"
-            size="medium"
-            className="!rounded-full !border-white/50 !font-semibold !text-white hover:!border-white hover:!bg-white/10"
-          >
-            {t('home.admin.reports')}
-          </Button>
-          <Button
-            variant="outlined"
-            size="medium"
-            className="!rounded-full !border-white/50 !font-semibold !text-white hover:!border-white hover:!bg-white/10"
-          >
-            {t('home.admin.users')}
-          </Button>
-        </div>
       </div>
-    </section>
+    </Box>
   )
 }
 
-const heroNavBtnClass =
-  '!absolute !top-1/2 !z-20 !-translate-y-1/2 !cursor-pointer !border !border-white/40 !bg-white/15 !text-white !shadow-lg !backdrop-blur-md transition-[transform,background-color,box-shadow,border-color] duration-200 ease-out hover:!scale-110 hover:!border-white/70 hover:!bg-white/28 hover:!shadow-xl hover:!shadow-white/10 active:!scale-[0.92] active:!bg-white/35 focus-visible:!outline focus-visible:!outline-2 focus-visible:!outline-offset-2 focus-visible:!outline-white'
+
+
+
+function TestimonialsSection({ t }) {
+  return (
+    <Container maxWidth="lg" className="mt-32 animate-fadeIn">
+      <Box className="text-center mb-16">
+        <Typography variant="overline" className="!font-black !text-sky-600 dark:!text-sky-400 !tracking-widest">
+          FEEDBACK
+        </Typography>
+        <Typography variant="h3" className="!font-black !text-slate-800 dark:!text-white !mt-2">
+          {t('home.testimonials.title')}
+        </Typography>
+      </Box>
+      <div className="grid md:grid-cols-3 gap-8">
+        {[0, 1, 2].map((i) => (
+          <Card key={i} className="!rounded-[2.5rem] !p-8 !border-none !bg-white/50 dark:!bg-slate-800/50 backdrop-blur-xl shadow-xl hover:shadow-2xl transition-all group">
+            <FormatQuoteRounded className="!text-sky-200 dark:!text-sky-800 !text-6xl mb-4 group-hover:scale-110 transition-transform" />
+            <Typography variant="body1" className="!italic !text-slate-700 dark:!text-slate-300 !leading-relaxed !text-lg">
+              "{t(`home.testimonials.items.${i}.text`)}"
+            </Typography>
+            <div className="mt-8 flex items-center gap-4">
+              <Avatar className="!bg-sky-600 !font-black shadow-lg">
+                {t(`home.testimonials.items.${i}.name`)?.[0] || 'U'}
+              </Avatar>
+              <div>
+                <Typography variant="subtitle1" className="!font-black !text-slate-800 dark:!text-white">
+                  {t(`home.testimonials.items.${i}.name`)}
+                </Typography>
+                <Typography variant="caption" className="!font-bold !text-sky-600 dark:!text-sky-400 uppercase tracking-tighter">
+                  {t(`home.testimonials.items.${i}.role`)}
+                </Typography>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+    </Container>
+  )
+}
+
+function FinalCtaSection({ t, navigate }) {
+  return (
+    <Container maxWidth="lg" className="mt-32 mb-16 animate-fadeIn">
+      <Box className="relative overflow-hidden rounded-[3rem] bg-gradient-to-br from-sky-600 via-indigo-700 to-slate-900 p-12 md:p-20 text-center shadow-2xl shadow-sky-900/30">
+        <Box className="relative z-10">
+           <Typography variant="h2" className="!font-black !text-white !leading-tight md:!text-5xl lg:!text-6xl">
+             {t('home.ctaFinal.title')}
+           </Typography>
+           <Typography variant="h6" className="!mt-6 !text-sky-100/80 !max-w-2xl mx-auto !font-medium">
+             {t('home.ctaFinal.subtitle')}
+           </Typography>
+           <div className="mt-12">
+             <Button
+                variant="contained"
+                size="large"
+                onClick={() => navigate('/register')}
+                endIcon={<ArrowForwardRounded />}
+                className="!rounded-full !bg-white !px-12 !py-5 !font-black !text-sky-800 shadow-2xl hover:!scale-105 hover:!bg-sky-50 transition-all active:!scale-95"
+             >
+               {t('home.ctaFinal.btn')}
+             </Button>
+           </div>
+        </Box>
+      </Box>
+    </Container>
+  )
+}
 
 export default function Home() {
   const swiperRef = useRef(null)
-  const { locale, role, t } = useAppPreferences()
+  const navigate = useNavigate()
+  const { locale, t, isAuthenticated, role } = useAppPreferences()
 
   const slides = useMemo(() => {
     const copy = STRINGS[locale]?.home?.slides ?? STRINGS.sq.home.slides
@@ -557,267 +241,213 @@ export default function Home() {
     }))
   }, [locale])
 
-  const showMarketingHero = role === 'guest'
-  const showStudentDash = role === 'student'
+  const handleCtaClick = (ctaText) => {
+    const text = ctaText?.toLowerCase() || ''
+    if (text.includes('regjistrohu') || text.includes('sign up') || text.includes('fillo')) {
+      navigate('/register')
+    } else if (text.includes('hyr') || text.includes('login') || text.includes('open')) {
+      navigate('/login')
+    } else {
+      navigate('/register')
+    }
+  }
 
   return (
-    <div className="flex w-full min-h-0 flex-1 flex-col">
-      <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-sky-200/45 bg-gradient-to-b from-white via-sky-50/35 to-slate-50 px-2 py-5 shadow-[0_1px_3px_rgba(15,23,42,0.04)] ring-1 ring-sky-100/40 sm:px-4 sm:py-7">
-        {showStudentDash ? <StudentDashboard t={t} /> : null}
-        {showStudentDash ? <StudentFacultyBanner t={t} /> : null}
+      <div className="flex w-full min-h-0 flex-1 flex-col animate-fadeIn">
+        <div className="flex min-h-0 flex-1 flex-col px-2 py-5 sm:px-4 sm:py-7">
 
-        {role === 'admin' ? <AdminOverview t={t} /> : null}
+          {/* Lobby Greeting / Admin Command Center */}
+          {isAuthenticated && (
+            <Box className="mb-12 animate-fadeIn">
+              {role === 'admin' ? (
+                /* ADMIN COMMAND CENTER */
+                <Box className="glass-panel rounded-[3rem] p-8 shadow-2xl shadow-sky-900/10 border-sky-200/50">
+                  <div className="flex flex-col lg:flex-row gap-8 items-center justify-between">
+                    <div className="flex items-center gap-6">
+                      <Avatar className="!h-20 !w-20 !bg-slate-900 !text-3xl !font-black shadow-xl ring-4 ring-sky-500">A</Avatar>
+                      <div>
+                        <Typography variant="h4" className="!font-black !text-slate-900 dark:!text-white">
+                          Sistemi Meson <Chip label="ADMIN" size="small" className="!bg-sky-600 !text-white !font-black !ml-2" />
+                        </Typography>
+                        <Typography variant="body1" className="!text-slate-500 dark:!text-slate-400 !font-medium">
+                          Mirë se erdhe përsëri në qendrën e kontrollit.
+                        </Typography>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-3">
+                      <Button onClick={() => navigate('/admin/users')} variant="outlined" startIcon={<GroupsRounded />} className="!rounded-2xl !border-slate-200 !text-slate-700 !font-bold hover:!bg-sky-50 transition-all">{t('home.admin.services.users.title')}</Button>
+                      <Button onClick={() => navigate('/admin/courses')} variant="outlined" startIcon={<CastForEducationRounded />} className="!rounded-2xl !border-slate-200 !text-slate-700 !font-bold hover:!bg-sky-50 transition-all">{t('home.admin.services.courses.title')}</Button>
+                      <Button onClick={() => navigate('/admin/reports')} variant="contained" startIcon={<ArrowForwardRounded />} className="!rounded-2xl !bg-sky-600 !font-black shadow-lg shadow-sky-200/40">{t('header.navAdminDashboard')}</Button>
+                    </div>
+                  </div>
 
-        {showMarketingHero ? (
-          <section className="relative overflow-hidden rounded-3xl border border-sky-100/80 bg-slate-900 shadow-xl shadow-sky-200/30">
-            <IconButton
-              type="button"
-              aria-label={t('home.heroPrev')}
-              className={`${heroNavBtnClass} !left-2 sm:!left-3`}
-              size="large"
-              onClick={() => swiperRef.current?.slidePrev()}
-            >
+                  <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {[
+                      { label: 'Përdorues të rinj', value: '+12', color: 'bg-emerald-50 text-emerald-600' },
+                      { label: 'Kërkesa certifikatash', value: '5', color: 'bg-amber-50 text-amber-600' },
+                      { label: 'Kurse në pritje', value: '2', color: 'bg-sky-50 text-sky-600' },
+                      { label: 'Server Status', value: 'Online', color: 'bg-blue-50 text-blue-600' },
+                    ].map((m, i) => (
+                      <div key={i} className={`p-4 rounded-3xl ${m.color} flex flex-col items-center justify-center border border-current/10`}>
+                         <Typography variant="h5" className="!font-black">{m.value}</Typography>
+                         <Typography variant="caption" className="!font-bold !uppercase !tracking-tighter opacity-80">{m.label}</Typography>
+                      </div>
+                    ))}
+                  </div>
+                </Box>
+              ) : (
+                /* STUDENT LOBBY (Existing) */
+                <Box className="px-6 py-8 glass-panel rounded-[2.5rem] flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl shadow-sky-200/20">
+                  <div className="flex items-center gap-6">
+                    <Avatar className="!h-20 !w-20 !bg-gradient-to-tr !from-sky-500 !to-indigo-600 !text-3xl !font-black shadow-xl ring-4 ring-white/50">
+                      {role?.toLowerCase() === 'teacher' ? 'T' : 'S'}
+                    </Avatar>
+                    <div>
+                      <Typography variant="h4" className="!font-black !text-slate-800 dark:!text-white">
+                        {t('home.student.welcome')}, {role}!
+                      </Typography>
+                      <Typography variant="body1" className="!text-slate-500 dark:!text-slate-400 !font-medium">
+                        {t('home.student.continueTitle')}
+                      </Typography>
+                    </div>
+                  </div>
+                  <Button
+                    variant="contained"
+                    size="large"
+                    onClick={() => navigate(role === 'admin' ? '/admin' : '/student')}
+                    endIcon={<ArrowForwardRounded />}
+                    className="!rounded-full !bg-sky-600 !px-10 !py-4 !font-black shadow-xl shadow-sky-200/50 hover:!bg-sky-700 hover:!shadow-2xl transition-all"
+                  >
+                    {t('header.navDashboard')}
+                  </Button>
+                </Box>
+              )}
+            </Box>
+          )}
+
+
+          {/* Hero Slider */}
+          <section className="relative overflow-hidden rounded-[3rem] border border-white/20 bg-slate-900 shadow-2xl shadow-sky-900/15">
+            <IconButton className="!absolute !left-6 !top-1/2 !z-20 !-translate-y-1/2 !bg-white/10 !text-white !backdrop-blur-md" onClick={() => swiperRef.current?.slidePrev()}>
               <ChevronLeftRounded />
             </IconButton>
-            <IconButton
-              type="button"
-              aria-label={t('home.heroNext')}
-              className={`${heroNavBtnClass} !right-2 sm:!right-3`}
-              size="large"
-              onClick={() => swiperRef.current?.slideNext()}
-            >
+            <IconButton className="!absolute !right-6 !top-1/2 !z-20 !-translate-y-1/2 !bg-white/10 !text-white !backdrop-blur-md" onClick={() => swiperRef.current?.slideNext()}>
               <ChevronRightRounded />
             </IconButton>
 
             <Swiper
-              modules={[Autoplay, Pagination, EffectFade]}
-              effect="fade"
-              fadeEffect={{ crossFade: true }}
-              speed={900}
-              loop
-              autoplay={{ delay: 6000, disableOnInteraction: false }}
-              pagination={{ clickable: true, dynamicBullets: true }}
-              onSwiper={(swiper) => {
-                swiperRef.current = swiper
-              }}
-              className="hero-swiper min-h-[min(72vw,420px)] sm:min-h-[440px] md:min-h-[500px]"
+                modules={[Autoplay, Pagination, EffectFade]}
+                effect="fade"
+                speed={1200}
+                loop
+                autoplay={{ delay: 8000, disableOnInteraction: false }}
+                pagination={{ clickable: true, dynamicBullets: true }}
+                onSwiper={(s) => { swiperRef.current = s }}
+                className="hero-swiper min-h-[450px] md:min-h-[550px]"
             >
-              {slides.map((slide, slideIndex) => (
-                <SwiperSlide key={`slide-${slideIndex}`}>
-                  <div className="relative grid min-h-[min(72vw,420px)] sm:min-h-[440px] md:min-h-[500px] md:grid-cols-12">
-                    <div className="relative md:col-span-7 lg:col-span-8">
-                      <img
-                        src={heroImg}
-                        alt=""
-                        loading={slideIndex === 0 ? 'eager' : 'lazy'}
-                        fetchPriority={slideIndex === 0 ? 'high' : 'low'}
-                        decoding="async"
-                        className="absolute inset-0 h-full w-full object-cover"
-                      />
-                      <div
-                        className={`absolute inset-0 bg-gradient-to-br ${slide.accent} mix-blend-multiply`}
-                        aria-hidden
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/25 to-transparent md:bg-gradient-to-r md:from-slate-950/70 md:via-slate-950/20 md:to-transparent" />
-                    </div>
-
-                    <div className="relative z-[1] flex flex-col justify-end gap-4 p-6 sm:p-8 md:col-span-5 md:justify-center lg:col-span-4 md:pr-10 md:pl-2">
-                      <Typography
-                        variant="overline"
-                        className="!tracking-[0.2em] !text-sky-200/90"
-                      >
-                        {t('home.brand')}
-                      </Typography>
-                      <Typography
-                        variant="h3"
-                        component="h1"
-                        className="!font-bold !leading-tight !text-white drop-shadow-sm sm:!text-4xl md:!text-[2.15rem] lg:!text-4xl"
-                      >
-                        {slide.title}
-                      </Typography>
-                      <Typography
-                        variant="body1"
-                        className="!text-slate-100/95 !leading-relaxed md:!text-[1.02rem]"
-                      >
-                        {slide.subtitle}
-                      </Typography>
-                      <div className="flex flex-wrap gap-3 pt-1">
-                        <Button
-                          variant="contained"
-                          size="large"
-                          endIcon={<ArrowForwardRounded />}
-                          className="!cursor-pointer !rounded-full !bg-white !px-6 !font-semibold !text-sky-800 !shadow-lg transition hover:!scale-[1.02] hover:!bg-sky-50 hover:!shadow-xl active:!scale-[0.98]"
-                        >
-                          {slide.cta}
-                        </Button>
-                        {slide.secondary ? (
-                          <Button
-                            variant="outlined"
-                            size="large"
-                            className="!cursor-pointer !rounded-full !border-white/70 !px-5 !font-semibold !text-white transition hover:!scale-[1.02] hover:!border-white hover:!bg-white/10 active:!scale-[0.98]"
-                          >
-                            {slide.secondary}
-                          </Button>
-                        ) : null}
+              {slides.map((slide, i) => (
+                  <SwiperSlide key={i}>
+                    <div className="relative flex min-h-[450px] md:min-h-[550px] items-center justify-center text-center p-8">
+                      <div className="absolute inset-0">
+                        <img src={heroImg} alt="" className="h-full w-full object-cover" />
+                        <div className={`absolute inset-0 bg-gradient-to-br ${slide.accent} mix-blend-multiply opacity-80`} />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+                      </div>
+                      <div className="relative z-[1]">
+                        <Typography variant="overline" className="!tracking-[0.5em] !text-sky-300 !font-black !mb-4 drop-shadow-md">{t('home.brand')}</Typography>
+                        <Typography variant="h1" className="!font-black !leading-tight !text-white drop-shadow-2xl !text-5xl md:!text-7xl !max-w-5xl">{slide.title}</Typography>
+                        <Typography variant="h6" className="!mt-6 !max-w-3xl !text-slate-100/90 !font-medium md:!text-2xl">{slide.subtitle}</Typography>
+                        <div className="mt-12">
+                          <Button variant="contained" size="large" onClick={() => handleCtaClick(slide.cta)} className="!rounded-full !bg-white !px-12 !py-5 !font-black !text-sky-800 shadow-2xl hover:!bg-sky-50 transition-all">{slide.cta}</Button>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  </SwiperSlide>
+              ))}
+            </Swiper>
+          </section>
+
+          {/* Search Section */}
+          <Container maxWidth="md" className="relative -mt-12 z-30">
+            <Paper elevation={0} className="flex w-full items-center rounded-[2.5rem] border border-sky-100 bg-white/95 p-3 shadow-2xl shadow-sky-200/50 backdrop-blur-xl dark:border-slate-700 dark:bg-slate-900/95 dark:shadow-black/50">
+              <div className="flex pl-4 items-center justify-center text-sky-600 dark:text-sky-400"><SearchRounded fontSize="large" /></div>
+              <InputBase
+                inputProps={{ style: { color: '#0f172a', fontWeight: 800 } }}
+                sx={{ ml: 2, flex: 1, fontSize: '1.2rem', '& input::placeholder': { color: 'rgba(15, 23, 42, 0.4)', opacity: 1 } }}
+                placeholder={t('home.searchPlaceholder')}
+              />
+              <Button variant="contained" size="large" onClick={() => navigate('/login')} className="!rounded-[1.75rem] !bg-sky-600 !px-10 !py-4 !font-black shadow-lg hover:!bg-sky-700 sm:!flex !hidden">{t('auth.loginSubmit')}</Button>
+            </Paper>
+          </Container>
+
+          <PartnersSection t={t} />
+
+          <Container maxWidth="lg" className="mt-20"><StatsSection t={t} /></Container>
+
+          {/* Features Section */}
+          <Container maxWidth="lg" className="mt-32">
+            <Box className="text-center mb-16">
+              <Typography variant="overline" className="!font-black !text-sky-600 dark:!text-sky-400 !tracking-widest">{t('home.features.overline')}</Typography>
+              <Typography variant="h3" className="!font-black !text-slate-800 dark:!text-white !mt-2">{t('home.features.title')}</Typography>
+            </Box>
+            <div className="grid md:grid-cols-3 gap-8">
+               {[
+                 { title: t('home.features.f1Title'), desc: t('home.features.f1Desc'), icon: AssignmentRounded },
+                 { title: t('home.features.f2Title'), desc: t('home.features.f2Desc'), icon: CastForEducationRounded },
+                 { title: t('home.features.f3Title'), desc: t('home.features.f3Desc'), icon: StarRounded },
+               ].map((f, i) => (
+                 <div key={i} className="p-10 rounded-[3rem] glass-panel hover:border-sky-400 hover:shadow-2xl transition-all group">
+                   <div className="h-16 w-16 rounded-3xl bg-sky-100 dark:bg-sky-900/50 text-sky-600 dark:text-sky-400 flex items-center justify-center mb-8 group-hover:scale-110 group-hover:bg-sky-600 group-hover:text-white transition-all"><f.icon fontSize="large" /></div>
+                   <Typography variant="h5" className="!font-black !text-slate-800 dark:!text-white mb-4">{f.title}</Typography>
+                   <Typography variant="body1" className="!text-slate-500 dark:!text-slate-400 !text-lg !leading-relaxed">{f.desc}</Typography>
+                 </div>
+               ))}
+            </div>
+          </Container>
+
+          {/* Universities (Slider) */}
+          <Container maxWidth="lg" className="mt-32">
+            <Box className="mb-12 flex items-end justify-between">
+              <div>
+                <Typography variant="overline" className="!font-black !tracking-widest !text-sky-600 dark:!text-sky-400">{t('home.univOverline')}</Typography>
+                <Typography variant="h3" className="!font-black !text-slate-800 dark:!text-white">{t('home.univTitle')}</Typography>
+              </div>
+            </Box>
+            <Swiper
+              modules={[Navigation, Autoplay]}
+              spaceBetween={24}
+              slidesPerView={1}
+              breakpoints={{ 640: { slidesPerView: 2 }, 1024: { slidesPerView: 4 } }}
+              autoplay={{ delay: 5000 }}
+              className="!pb-4"
+            >
+              {universities.map((u, i) => (
+                <SwiperSlide key={i}>
+                  <SpotlightCard title={u.title} meta={u.meta} icon={u.icon} chip={t('home.chipPartner')} chipColor="primary" />
                 </SwiperSlide>
               ))}
             </Swiper>
+          </Container>
 
-            <style>{`
-          .hero-swiper .swiper-pagination {
-            bottom: 1.25rem !important;
-            left: 50% !important;
-            transform: translateX(-50%);
-            width: auto !important;
-          }
-          .hero-swiper .swiper-pagination-bullet {
-            width: 10px;
-            height: 10px;
-            background: rgba(255,255,255,0.45);
-            opacity: 1;
-            transition: transform 0.25s ease, background 0.25s ease;
-          }
-          .hero-swiper .swiper-pagination-bullet-active {
-            background: #fff;
-            transform: scale(1.25);
-          }
-        `}</style>
-          </section>
-        ) : null}
+          <TestimonialsSection t={t} />
 
-        {role === 'guest' ? (
-          <Container maxWidth="lg" className="!px-0 sm:!px-3" sx={{ mt: 6, mb: 1 }}>
-            <Box className="mb-8 text-center md:text-left">
-              <Typography
-                variant="overline"
-                className="!font-semibold !tracking-widest !text-sky-600"
-              >
-                {t('home.univOverline')}
-              </Typography>
-              <Typography
-                variant="h4"
-                component="h2"
-                className="!mt-1 !font-bold !text-slate-800"
-              >
-                {t('home.univTitle')}
-              </Typography>
-              <Typography
-                variant="body1"
-                className="!mt-2 !max-w-2xl !text-slate-600 md:mx-0 mx-auto"
-              >
-                {t('home.univBody')}
-              </Typography>
+          {/* Kategorite */}
+          <Container maxWidth="lg" className="mt-32">
+            <Box className="mb-12">
+              <Typography variant="overline" className="!font-black !tracking-widest !text-sky-600 dark:!text-sky-400">{t('home.catOverline')}</Typography>
+              <Typography variant="h3" className="!font-black !text-slate-800 dark:!text-white">{t('home.catTitle')}</Typography>
             </Box>
-
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {universities.map((u) => (
-                <SpotlightCard
-                  key={u.title}
-                  title={u.title}
-                  meta={u.meta}
-                  icon={u.icon}
-                  chip={chipLabel(u.chipKey, t)}
-                  chipColor={u.chipColor}
-                  actionLabel={t('home.viewCampuses')}
-                  actionExternal
-                  imgLoading="lazy"
-                />
+            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+              {categories.map((c, i) => (
+                <SpotlightCard key={i} title={c.title} meta={c.meta} icon={c.icon} chip={c.chipKey ? t(`home.chip${c.chipKey[0].toUpperCase() + c.chipKey.slice(1)}`) : null} chipColor={c.chipColor} />
               ))}
             </div>
           </Container>
-        ) : null}
 
-        {role === 'student' ? (
-          <Container maxWidth="lg" className="!px-0 sm:!px-3" sx={{ mt: 2, mb: 0 }}>
-            <Box className="mb-8 text-center md:text-left">
-              <Typography
-                variant="overline"
-                className="!font-semibold !tracking-widest !text-sky-600"
-              >
-                {t('home.student.subjects.overline')}
-              </Typography>
-              <Typography
-                variant="h4"
-                component="h2"
-                className="!mt-1 !font-bold !text-slate-800"
-              >
-                {t('home.student.subjects.title')}
-              </Typography>
-              <Typography
-                variant="body1"
-                className="!mt-2 !max-w-2xl !text-slate-600 md:mx-0 mx-auto"
-              >
-                {t('home.student.subjects.body')}
-              </Typography>
-            </Box>
+          <FinalCtaSection t={t} navigate={navigate} />
 
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {STUDENT_SUBJECT_ROWS.map(({ id, icon }) => (
-                <SpotlightCard
-                  key={id}
-                  title={t(`home.student.subjects.${id}.title`)}
-                  meta={t(`home.student.subjects.${id}.meta`)}
-                  icon={icon}
-                  chip={t('home.student.subjects.chipActive')}
-                  chipColor="success"
-                  actionLabel={t('home.student.subjects.openSubject')}
-                  actionExternal={false}
-                  imgLoading="lazy"
-                />
-              ))}
-            </div>
-          </Container>
-        ) : null}
-
-        {role === 'guest' || role === 'admin' ? (
-          <Container maxWidth="lg" className="!px-0 sm:!px-3" sx={{ mt: role === 'admin' ? 6 : 10, mb: 0 }}>
-            <Box className="mb-8 text-center md:text-left">
-              <Typography
-                variant="overline"
-                className="!font-semibold !tracking-widest !text-sky-600"
-              >
-                {role === 'admin' ? t('home.admin.overline') : t('home.catOverline')}
-              </Typography>
-              <Typography
-                variant="h4"
-                component="h2"
-                className="!mt-1 !font-bold !text-slate-800"
-              >
-                {role === 'admin' ? t('home.admin.browseCategories') : t('home.catTitle')}
-              </Typography>
-              <Typography
-                variant="body1"
-                className="!mt-2 !max-w-2xl !text-slate-600 md:mx-0 mx-auto"
-              >
-                {t('home.catBody')}
-              </Typography>
-            </Box>
-
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {categories.map((c) => (
-                <SpotlightCard
-                  key={c.title}
-                  title={c.title}
-                  meta={c.meta}
-                  icon={c.icon}
-                  chip={chipLabel(c.chipKey, t)}
-                  chipColor={c.chipColor}
-                  actionLabel={t('home.viewCourses')}
-                  actionExternal={false}
-                  imgLoading="lazy"
-                />
-              ))}
-            </div>
-          </Container>
-        ) : null}
-      </div>
-
-      <div className="relative z-0 mt-12 w-screen max-w-none flex-shrink-0 ml-[calc(50%-50vw)] mr-[calc(50%-50vw)] sm:mt-14">
+        </div>
         <Footer />
       </div>
-    </div>
   )
 }
