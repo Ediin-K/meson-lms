@@ -1,6 +1,8 @@
 package com.meson.service;
 
 import com.meson.dto.UserDTO;
+import com.meson.dto.CreateUserDTO;
+import com.meson.dto.UpdateUserDTO;
 import com.meson.entity.Role;
 import com.meson.entity.User;
 import com.meson.entity.UserRole;
@@ -65,18 +67,26 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User nuk u gjet"));
     }
 
-    public User create(User user) {
-        if (userRepository.existsByEmailIgnoreCase(user.getEmail())) {
+    public User create(CreateUserDTO dto) {
+        if (userRepository.existsByEmailIgnoreCase(dto.getEmail())) {
             throw new RuntimeException("Email ekziston tashmë");
         }
-        user.setPasswordHash(passwordEncoder.encode(user.getPasswordHash()));
+        if (dto.getPassword() == null || dto.getPassword().isEmpty()) {
+            throw new RuntimeException("Fjalëkalimi nuk mund të jetë bosh");
+        }
+
+        User user = new User();
+        user.setEmri(dto.getEmri());
+        user.setMbiemri(dto.getMbiemri());
+        user.setEmail(dto.getEmail());
+        user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         user.setDataKrijimit(LocalDateTime.now());
-        user.setStatusi("active");
+        user.setStatusi(dto.getStatusi() != null ? dto.getStatusi() : "active");
+        user.setLockoutEnabled(false);
         User savedUser = userRepository.save(user);
 
-        // Assign role if provided
-        if (user.getRole() != null && !user.getRole().isEmpty()) {
-            String dbRole = normalizeRoleForDB(user.getRole());
+        if (dto.getRole() != null && !dto.getRole().isEmpty()) {
+            String dbRole = normalizeRoleForDB(dto.getRole());
             Role role = roleRepository.findByEmertimi(dbRole)
                     .orElseThrow(() -> new RuntimeException("Role nuk u gjet: " + dbRole));
             UserRole userRole = UserRole.builder()
@@ -89,20 +99,26 @@ public class UserService {
         return savedUser;
     }
 
-    public User update(Long id, User updated) {
+    public User update(Long id, UpdateUserDTO dto) {
         User user = getById(id);
-        user.setEmri(updated.getEmri());
-        user.setMbiemri(updated.getMbiemri());
-        user.setPhoneNumber(updated.getPhoneNumber());
-        user.setStatusi(updated.getStatusi());
 
-        // Update role if provided
-        if (updated.getRole() != null && !updated.getRole().isEmpty()) {
-            // Remove existing roles
+
+        if (dto.getEmail() != null && !dto.getEmail().equals(user.getEmail())) {
+            if (userRepository.existsByEmailIgnoreCase(dto.getEmail())) {
+                throw new RuntimeException("Email ekziston tashmë");
+            }
+            user.setEmail(dto.getEmail());
+        }
+
+        user.setEmri(dto.getEmri());
+        user.setMbiemri(dto.getMbiemri());
+        user.setPhoneNumber(dto.getPhoneNumber());
+        user.setStatusi(dto.getStatusi());
+
+        if (dto.getRole() != null && !dto.getRole().isEmpty()) {
             userRoleRepository.deleteAll(user.getUserRoles());
 
-            // Add new role
-            String dbRole = normalizeRoleForDB(updated.getRole());
+            String dbRole = normalizeRoleForDB(dto.getRole());
             Role role = roleRepository.findByEmertimi(dbRole)
                     .orElseThrow(() -> new RuntimeException("Role nuk u gjet: " + dbRole));
             UserRole userRole = UserRole.builder()

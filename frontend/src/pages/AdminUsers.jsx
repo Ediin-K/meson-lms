@@ -64,7 +64,7 @@ const EMPTY_FORM = {
   emri: "",
   mbiemri: "",
   email: "",
-  passwordHash: "",
+  password: "",
   role: "student",
   statusi: "active",
 };
@@ -143,9 +143,27 @@ export default function AdminUsers() {
   const handleSubmit = async () => {
     const token = localStorage.getItem("token");
     const url = isEdit
-      ? `http://localhost:8080/api/users/${selectedUser.id}`
-      : "http://localhost:8080/api/users";
+        ? `http://localhost:8080/api/users/${selectedUser.id}`
+        : "http://localhost:8080/api/users";
     const method = isEdit ? "PUT" : "POST";
+
+    const body = isEdit
+        ? {
+          emri: formData.emri,
+          mbiemri: formData.mbiemri,
+          email: formData.email,
+          phoneNumber: formData.phoneNumber || "",
+          statusi: formData.statusi,
+          role: formData.role,
+        }
+        : {
+          emri: formData.emri,
+          mbiemri: formData.mbiemri,
+          email: formData.email,
+          password: formData.password,
+          statusi: formData.statusi,
+          role: formData.role,
+        };
 
     try {
       const response = await fetch(url, {
@@ -154,7 +172,7 @@ export default function AdminUsers() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(body),
       });
 
       if (!response.ok) {
@@ -162,9 +180,7 @@ export default function AdminUsers() {
         throw new Error(msg || "Error saving user");
       }
 
-      // Refresh users list
       const usersResponse = await fetch("http://localhost:8080/api/users", {
-        method: "GET",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -172,11 +188,9 @@ export default function AdminUsers() {
       });
       const data = await usersResponse.json();
       setUsers(data);
-
       setOpenDialog(false);
     } catch (err) {
       console.error("API ERROR:", err.message);
-      // You can add error handling here, like showing a snackbar
     }
   };
 
@@ -497,6 +511,7 @@ export default function AdminUsers() {
           <DialogTitle className="!px-6 !pt-6 !pb-2">
             <Typography
               variant="h5"
+              component="p"
               className="!font-black !text-slate-900 dark:!text-white"
             >
               {isEdit ? "Përditëso Përdoruesin" : "Shto Përdorues të Ri"}
@@ -542,7 +557,7 @@ export default function AdminUsers() {
                   type="password"
                   fullWidth
                   value={formData.passwordHash}
-                  onChange={field("passwordHash")}
+                  onChange={field("password")}
                   InputProps={{ className: "!rounded-2xl" }}
                 />
               )}
