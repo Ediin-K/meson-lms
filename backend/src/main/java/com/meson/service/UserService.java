@@ -12,11 +12,13 @@ import com.meson.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserService {
 
     private final UserRepository userRepository;
@@ -116,16 +118,26 @@ public class UserService {
         user.setStatusi(dto.getStatusi());
 
         if (dto.getRole() != null && !dto.getRole().isEmpty()) {
-            userRoleRepository.deleteAll(user.getUserRoles());
-
             String dbRole = normalizeRoleForDB(dto.getRole());
             Role role = roleRepository.findByEmertimi(dbRole)
                     .orElseThrow(() -> new RuntimeException("Role nuk u gjet: " + dbRole));
-            UserRole userRole = UserRole.builder()
-                    .user(user)
-                    .role(role)
-                    .build();
-            userRoleRepository.save(userRole);
+
+            var existingRoles = userRoleRepository.findByUser(user);
+            if (existingRoles.isEmpty()) {
+                UserRole userRole = UserRole.builder()
+                        .user(user)
+                        .role(role)
+                        .build();
+                userRoleRepository.save(userRole);
+            } else {
+                UserRole primaryRole = existingRoles.get(0);
+                primaryRole.setRole(role);
+                userRoleRepository.save(primaryRole);
+
+                if (existingRoles.size() > 1) {
+                    userRoleRepository.deleteAll(existingRoles.subList(1, existingRoles.size()));
+                }
+            }
         }
 
         return userRepository.save(user);

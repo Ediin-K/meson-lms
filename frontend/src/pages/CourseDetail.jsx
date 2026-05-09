@@ -64,6 +64,7 @@ export default function CourseDetail() {
             setIsEnrolled(true)
             setShowModal(false)
         } catch (err) {
+            console.error(err)
             setEnrollError('Kodi i regjistrimit është i gabuar')
         } finally {
             setEnrolling(false)

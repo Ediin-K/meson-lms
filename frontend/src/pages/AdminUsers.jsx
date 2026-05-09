@@ -26,6 +26,8 @@ import {
   MenuItem,
   Avatar,
   CircularProgress,
+  Snackbar,
+  Alert,
   Tooltip,
   Zoom,
   Grid,
@@ -81,6 +83,10 @@ export default function AdminUsers() {
   const [isEdit, setIsEdit] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [formData, setFormData] = useState(EMPTY_FORM);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [openSnackbar, setOpenSnackbar] = useState(false);
 
   const filtered = users.filter((u) => {
     const matchesSearch = `${u.emri} ${u.mbiemri} ${u.email}`
@@ -97,6 +103,7 @@ export default function AdminUsers() {
 
     fetch("http://localhost:8080/api/users", {
       method: "GET",
+      cache: "no-store",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
@@ -130,6 +137,7 @@ export default function AdminUsers() {
       emri: user.emri || "",
       mbiemri: user.mbiemri || "",
       email: user.email || "",
+      phoneNumber: user.phoneNumber || "",
       role: user.role || "student",
       statusi: user.statusi || "active",
       passwordHash: "",
@@ -143,12 +151,12 @@ export default function AdminUsers() {
   const handleSubmit = async () => {
     const token = localStorage.getItem("token");
     const url = isEdit
-        ? `http://localhost:8080/api/users/${selectedUser.id}`
-        : "http://localhost:8080/api/users";
+      ? `http://localhost:8080/api/users/${selectedUser.id}`
+      : "http://localhost:8080/api/users";
     const method = isEdit ? "PUT" : "POST";
 
     const body = isEdit
-        ? {
+      ? {
           emri: formData.emri,
           mbiemri: formData.mbiemri,
           email: formData.email,
@@ -156,7 +164,7 @@ export default function AdminUsers() {
           statusi: formData.statusi,
           role: formData.role,
         }
-        : {
+      : {
           emri: formData.emri,
           mbiemri: formData.mbiemri,
           email: formData.email,
@@ -180,7 +188,27 @@ export default function AdminUsers() {
         throw new Error(msg || "Error saving user");
       }
 
+      if (isEdit && selectedUser) {
+        setUsers((prevUsers) =>
+          prevUsers.map((user) =>
+            user.id === selectedUser.id
+              ? {
+                  ...user,
+                  emri: formData.emri,
+                  mbiemri: formData.mbiemri,
+                  email: formData.email,
+                  phoneNumber: formData.phoneNumber || "",
+                  statusi: formData.statusi,
+                  role: formData.role,
+                }
+              : user,
+          ),
+        );
+      }
+
       const usersResponse = await fetch("http://localhost:8080/api/users", {
+        method: "GET",
+        cache: "no-store",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -188,7 +216,52 @@ export default function AdminUsers() {
       });
       const data = await usersResponse.json();
       setUsers(data);
+      setSnackbarMessage(
+        isEdit ? "Useri u përditësua me sukses." : "Useri u krijua me sukses.",
+      );
+      setOpenSnackbar(true);
       setOpenDialog(false);
+    } catch (err) {
+      console.error("API ERROR:", err.message);
+    }
+  };
+
+  const handleOpenDelete = (user) => {
+    setDeleteTarget(user);
+    setOpenDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
+
+    const token = localStorage.getItem("token");
+
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/users/${deleteTarget.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        const msg = await response.text();
+        throw new Error(msg || "Error deleting user");
+      }
+
+      setUsers((prevUsers) =>
+        prevUsers.filter((user) => user.id !== deleteTarget.id),
+      );
+      setSnackbarMessage(
+        `${deleteTarget.emri} ${deleteTarget.mbiemri} u fshi me sukses.`,
+      );
+      setOpenSnackbar(true);
+      setDeleteTarget(null);
+      setOpenDeleteConfirm(false);
     } catch (err) {
       console.error("API ERROR:", err.message);
     }
@@ -475,6 +548,7 @@ export default function AdminUsers() {
                             </IconButton>
                             <IconButton
                               size="small"
+                              onClick={() => handleOpenDelete(user)}
                               className="!bg-slate-100 dark:!bg-slate-800 !text-slate-400 hover:!text-rose-600 !rounded-xl transition-all"
                             >
                               <DeleteRounded fontSize="small" />
@@ -501,10 +575,13 @@ export default function AdminUsers() {
             sx: {
               borderRadius: "2.5rem",
               p: 2,
-              backgroundImage: isDark
-                ? "linear-gradient(to bottom right, #0f172a, #020617)"
-                : "white",
-              border: isDark ? "1px solid #1e293b" : "none",
+              backgroundColor: isDark ? "#0f172a" : "white",
+              border: isDark
+                ? "1px solid #1e293b"
+                : "1px solid rgba(148,163,184,0.15)",
+              boxShadow: isDark
+                ? "0 30px 60px rgba(15,23,42,0.65)"
+                : "0 30px 60px rgba(148,163,184,0.15)",
             },
           }}
         >
@@ -512,20 +589,28 @@ export default function AdminUsers() {
             <Typography
               variant="h5"
               component="p"
-              className="!font-black !text-slate-900 dark:!text-white"
+              className={
+                isDark
+                  ? "!font-black !text-white"
+                  : "!font-black !text-slate-900"
+              }
             >
               {isEdit ? "Përditëso Përdoruesin" : "Shto Përdorues të Ri"}
             </Typography>
             <Typography
               variant="body2"
-              className="!text-slate-500 dark:!text-slate-400 !mt-1"
+              className={
+                isDark ? "!text-slate-300 !mt-1" : "!text-slate-600 !mt-1"
+              }
             >
               {isEdit
                 ? "Ndryshoni të dhënat e llogarisë ekzistuese."
                 : "Plotësoni të dhënat për të krijuar një llogari të re."}
             </Typography>
           </DialogTitle>
-          <DialogContent className="!px-6 !py-4">
+          <DialogContent
+            className={`!px-6 !py-4 ${isDark ? "!bg-slate-900/20" : ""}`}
+          >
             <Box className="flex flex-col gap-5 mt-4">
               <Box className="flex gap-4">
                 <TextField
@@ -534,6 +619,24 @@ export default function AdminUsers() {
                   value={formData.emri}
                   onChange={field("emri")}
                   InputProps={{ className: "!rounded-2xl" }}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      color: isDark ? "#f1f5f9" : "#1e293b",
+                      "& fieldset": {
+                        borderColor: isDark ? "#334155" : "#cbd5e1",
+                      },
+                      "&:hover fieldset": {
+                        borderColor: isDark ? "#475569" : "#cbd5e1",
+                      },
+                    },
+                    "& .MuiInputBase-input::placeholder": {
+                      color: isDark ? "#94a3b8" : "#94a3b8",
+                      opacity: 1,
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: isDark ? "#cbd5e1" : "#64748b",
+                    },
+                  }}
                 />
                 <TextField
                   label="Mbiemri"
@@ -541,6 +644,24 @@ export default function AdminUsers() {
                   value={formData.mbiemri}
                   onChange={field("mbiemri")}
                   InputProps={{ className: "!rounded-2xl" }}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      color: isDark ? "#f1f5f9" : "#1e293b",
+                      "& fieldset": {
+                        borderColor: isDark ? "#334155" : "#cbd5e1",
+                      },
+                      "&:hover fieldset": {
+                        borderColor: isDark ? "#475569" : "#cbd5e1",
+                      },
+                    },
+                    "& .MuiInputBase-input::placeholder": {
+                      color: isDark ? "#94a3b8" : "#94a3b8",
+                      opacity: 1,
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: isDark ? "#cbd5e1" : "#64748b",
+                    },
+                  }}
                 />
               </Box>
               <TextField
@@ -550,6 +671,24 @@ export default function AdminUsers() {
                 value={formData.email}
                 onChange={field("email")}
                 InputProps={{ className: "!rounded-2xl" }}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    color: isDark ? "#f1f5f9" : "#1e293b",
+                    "& fieldset": {
+                      borderColor: isDark ? "#334155" : "#cbd5e1",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: isDark ? "#475569" : "#cbd5e1",
+                    },
+                  },
+                  "& .MuiInputBase-input::placeholder": {
+                    color: isDark ? "#94a3b8" : "#94a3b8",
+                    opacity: 1,
+                  },
+                  "& .MuiInputLabel-root": {
+                    color: isDark ? "#cbd5e1" : "#64748b",
+                  },
+                }}
               />
               {!isEdit && (
                 <TextField
@@ -559,16 +698,48 @@ export default function AdminUsers() {
                   value={formData.passwordHash}
                   onChange={field("password")}
                   InputProps={{ className: "!rounded-2xl" }}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      color: isDark ? "#f1f5f9" : "#1e293b",
+                      "& fieldset": {
+                        borderColor: isDark ? "#334155" : "#cbd5e1",
+                      },
+                      "&:hover fieldset": {
+                        borderColor: isDark ? "#475569" : "#cbd5e1",
+                      },
+                    },
+                    "& .MuiInputBase-input::placeholder": {
+                      color: isDark ? "#94a3b8" : "#94a3b8",
+                      opacity: 1,
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: isDark ? "#cbd5e1" : "#64748b",
+                    },
+                  }}
                 />
               )}
               <Box className="flex gap-4">
                 <FormControl fullWidth>
-                  <InputLabel>Roli i Përdoruesit</InputLabel>
+                  <InputLabel sx={{ color: isDark ? "#cbd5e1" : "#64748b" }}>
+                    Roli i Përdoruesit
+                  </InputLabel>
                   <Select
                     value={formData.role}
                     label="Roli i Përdoruesit"
                     onChange={field("role")}
-                    sx={{ borderRadius: "1rem" }}
+                    sx={{
+                      borderRadius: "1rem",
+                      color: isDark ? "#f1f5f9" : "#1e293b",
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        borderColor: isDark ? "#334155" : "#cbd5e1",
+                      },
+                      "&:hover .MuiOutlinedInput-notchedOutline": {
+                        borderColor: isDark ? "#475569" : "#cbd5e1",
+                      },
+                      "& .MuiSvgIcon-root": {
+                        color: isDark ? "#cbd5e1" : "#64748b",
+                      },
+                    }}
                   >
                     <MenuItem value="student">Student</MenuItem>
                     <MenuItem value="teacher">Mësues</MenuItem>
@@ -577,12 +748,26 @@ export default function AdminUsers() {
                   </Select>
                 </FormControl>
                 <FormControl fullWidth>
-                  <InputLabel>Statusi</InputLabel>
+                  <InputLabel sx={{ color: isDark ? "#cbd5e1" : "#64748b" }}>
+                    Statusi
+                  </InputLabel>
                   <Select
                     value={formData.statusi}
                     label="Statusi"
                     onChange={field("statusi")}
-                    sx={{ borderRadius: "1rem" }}
+                    sx={{
+                      borderRadius: "1rem",
+                      color: isDark ? "#f1f5f9" : "#1e293b",
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        borderColor: isDark ? "#334155" : "#cbd5e1",
+                      },
+                      "&:hover .MuiOutlinedInput-notchedOutline": {
+                        borderColor: isDark ? "#475569" : "#cbd5e1",
+                      },
+                      "& .MuiSvgIcon-root": {
+                        color: isDark ? "#cbd5e1" : "#64748b",
+                      },
+                    }}
                   >
                     <MenuItem value="active">Aktiv</MenuItem>
                     <MenuItem value="inactive">Joaktiv</MenuItem>
@@ -608,8 +793,103 @@ export default function AdminUsers() {
             </Button>
           </DialogActions>
         </Dialog>
+        <Dialog
+          open={openDeleteConfirm}
+          onClose={() => {
+            setOpenDeleteConfirm(false);
+            setDeleteTarget(null);
+          }}
+          maxWidth="xs"
+          fullWidth
+          PaperProps={{
+            sx: {
+              borderRadius: "2.5rem",
+              p: 2,
+              backgroundColor: isDark ? "#0f172a" : "white",
+              border: isDark
+                ? "1px solid #1e293b"
+                : "1px solid rgba(148,163,184,0.15)",
+              boxShadow: isDark
+                ? "0 30px 60px rgba(15,23,42,0.65)"
+                : "0 30px 60px rgba(148,163,184,0.15)",
+            },
+          }}
+        >
+          <DialogTitle className="!px-6 !pt-6 !pb-2">
+            <Typography
+              variant="h5"
+              component="p"
+              className={
+                isDark
+                  ? "!font-black !text-white"
+                  : "!font-black !text-slate-900"
+              }
+            >
+              A jeni i sigurt?
+            </Typography>
+          </DialogTitle>
+          <DialogContent className="!px-6 !py-4">
+            <Typography
+              variant="body2"
+              className={isDark ? "!text-slate-300" : "!text-slate-600"}
+            >
+              Do të fshihet përhershëm përdoruesi:
+            </Typography>
+            <Typography
+              variant="body1"
+              className={
+                isDark
+                  ? "!font-bold !text-white !mt-3"
+                  : "!font-bold !text-slate-900 !mt-3"
+              }
+            >
+              {deleteTarget
+                ? `${deleteTarget.emri} ${deleteTarget.mbiemri}`
+                : ""}
+            </Typography>
+            <Typography
+              variant="caption"
+              className={isDark ? "!text-slate-400" : "!text-slate-500"}
+            >
+              {deleteTarget ? deleteTarget.email : ""}
+            </Typography>
+          </DialogContent>
+          <DialogActions className="!px-8 !pb-8 !pt-4 gap-2">
+            <Button
+              onClick={() => {
+                setOpenDeleteConfirm(false);
+                setDeleteTarget(null);
+              }}
+              className="!rounded-2xl !px-6 !py-3 !normal-case !font-bold !text-slate-500 hover:!bg-slate-100 dark:hover:!bg-slate-800"
+            >
+              Anulo
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={handleConfirmDelete}
+              className="!rounded-2xl !px-10 !py-3 !normal-case !font-black"
+            >
+              Fshi
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Container>
       <Footer />
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={4500}
+        onClose={() => setOpenSnackbar(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      >
+        <Alert
+          onClose={() => setOpenSnackbar(false)}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }
