@@ -13,7 +13,7 @@ import PlayCircleFilledRounded from '@mui/icons-material/PlayCircleFilledRounded
 
 export default function ProfilePage() {
     const navigate = useNavigate()
-    const { t } = useAppPreferences()
+
 
     const userId = localStorage.getItem('userId')
 
