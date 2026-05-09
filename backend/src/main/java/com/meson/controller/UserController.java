@@ -1,6 +1,8 @@
 package com.meson.controller;
 
 import com.meson.dto.UserDTO;
+import com.meson.dto.CreateUserDTO;
+import com.meson.dto.UpdateUserDTO;
 import com.meson.entity.User;
 import com.meson.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -27,15 +29,15 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<User> create(@RequestBody User user) {
+    public ResponseEntity<User> create(@RequestBody CreateUserDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(userService.create(user));
+                .body(userService.create(dto));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<User> update(@PathVariable Long id,
-                                       @RequestBody User updated) {
-        return ResponseEntity.ok(userService.update(id, updated));
+                                       @RequestBody UpdateUserDTO dto) {
+        return ResponseEntity.ok(userService.update(id, dto));
     }
 
     @DeleteMapping("/{id}")

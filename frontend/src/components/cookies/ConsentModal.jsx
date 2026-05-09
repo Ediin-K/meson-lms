@@ -21,7 +21,7 @@ import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 
 const COOKIE_STORAGE_KEY = 'meson-cookie-consent';
 
-const CookieModal = ({ open, onClose, onSave }) => {
+const ConsentModal = ({ open, onClose, onSave }) => {
   const { colorMode } = useAppPreferences();
   const [currentPreferences, setCurrentPreferences] = useState({
     necessary: true,
@@ -269,4 +269,4 @@ const CookieModal = ({ open, onClose, onSave }) => {
   );
 };
 
-export default CookieModal;
+export default ConsentModal;

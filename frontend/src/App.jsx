@@ -24,7 +24,7 @@ import AdminCategories from './pages/AdminCategories.jsx';
 import AdminEnrollments from './pages/AdminEnrollments.jsx';
 import AdminCertificates from './pages/AdminCertificates.jsx';
 import AdminReports from './pages/AdminReports.jsx';
-import CookieBanner from './components/cookies/CookieBanner.jsx';
+import ConsentBanner from './components/cookies/ConsentBanner.jsx';
 
 
 //sdsdsd
@@ -105,7 +105,7 @@ function App() {
             </Routes>
           </div>
         </main>
-        <CookieBanner />
+        <ConsentBanner />
       </div>
     </BrowserRouter>
   );
