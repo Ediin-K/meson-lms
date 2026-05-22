@@ -210,22 +210,4 @@ CREATE INDEX idx_user_tokens_user_id ON user_tokens (user_id);
 CREATE INDEX idx_user_roles_user_id ON user_roles (user_id);
 CREATE INDEX idx_user_roles_role_id ON user_roles (role_id);
 
-CREATE INDEX idx_courses_teacher_id ON courses (teacher_id);
-CREATE INDEX idx_courses_category_id ON courses (category_id);
-CREATE INDEX idx_modules_course_id ON modules (course_id);
-CREATE INDEX idx_lessons_module_id ON lessons (module_id);
-CREATE INDEX idx_quizzes_lesson_id ON quizzes (lesson_id);
-CREATE INDEX idx_quiz_questions_quiz_id ON quiz_questions (quiz_id);
-CREATE INDEX idx_quiz_answers_question_id ON quiz_answers (question_id);
-CREATE INDEX idx_quiz_attempts_quiz_id ON quiz_attempts (quiz_id);
-CREATE INDEX idx_quiz_attempts_user_id ON quiz_attempts (user_id);
-CREATE INDEX idx_assignments_lesson_id ON assignments (lesson_id);
-CREATE INDEX idx_assignment_submissions_assignment_id ON assignment_submissions (assignment_id);
-CREATE INDEX idx_assignment_submissions_student_id ON assignment_submissions (student_id);
-CREATE INDEX idx_enrollments_user_id ON enrollments (user_id);
-CREATE INDEX idx_enrollments_course_id ON enrollments (course_id);
-CREATE INDEX idx_refresh_tokens_user_id ON refresh_tokens (user_id);
-CREATE INDEX idx_user_claims_user_id ON user_claims (user_id);
-CREATE INDEX idx_user_tokens_user_id ON user_tokens (user_id);
-CREATE INDEX idx_user_roles_user_id ON user_roles (user_id);
-CREATE INDEX idx_user_roles_role_id ON user_roles (role_id);
+
