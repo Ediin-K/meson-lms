@@ -32,7 +32,7 @@ public class TeacherService {
 
     public TeacherResponse createTeacher(CreateTeacherRequest request) {
         if (userRepository.existsByEmailIgnoreCase(request.getEmail())) {
-            throw new RuntimeException("Email ekziston tashmë");
+            throw new RuntimeException("Email ekziston tashme");
         }
 
         User teacher = new User();
