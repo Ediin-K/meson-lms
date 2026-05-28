@@ -153,6 +153,8 @@ export default function CourseDetail() {
     // Quiz Management State
     const [quizModal, setQuizModal] = useState({ open: false, lessonId: null, quizId: null })
     const [questions, setQuestions] = useState([])
+    const [questionForm, setQuestionForm] = useState({ pyetja: '', lloji: 'SHUMEFISHTE', rradhitja: 1 })
+    const [answerForm, setAnswerForm] = useState({ pergjigja: '', eshteSakte: false })
 
 
     // Assignment Management State
