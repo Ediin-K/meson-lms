@@ -4,6 +4,7 @@ import com.meson.dto.GradeRequest;
 import com.meson.dto.GradeResponse;
 import com.meson.dto.StudentGradesSummaryResponse;
 import com.meson.entity.Course;
+import com.meson.entity.EnrollmentStatus;
 import com.meson.entity.Grade;
 import com.meson.entity.User;
 import com.meson.repository.CourseRepository;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,14 +29,23 @@ public class GradeService {
     private final CourseRepository courseRepository;
     private final EnrollmentRepository enrollmentRepository;
 
+    @Transactional(readOnly = true)
     public StudentGradesSummaryResponse getByStudentId(Long studentId) {
         List<GradeResponse> grades = gradeRepository.findByStudentId(studentId)
                 .stream()
                 .map(this::toResponse)
                 .toList();
-        return buildSummary(grades);
+
+        int totalEnrolledEcts = enrollmentRepository.findByUserId(studentId)
+                .stream()
+                .filter(e -> e.getStatusi() != EnrollmentStatus.ANULUAR)
+                .mapToInt(e -> resolveCourseEcts(e.getCourse()))
+                .sum();
+
+        return buildSummary(grades, totalEnrolledEcts);
     }
 
+    @Transactional(readOnly = true)
     public List<GradeResponse> getByCourseId(Long courseId) {
         assertCanManageCourse(courseId);
         return gradeRepository.findByCourseId(courseId)
@@ -43,6 +54,7 @@ public class GradeService {
                 .toList();
     }
 
+    @Transactional
     public GradeResponse create(GradeRequest request) {
         assertCanManageCourse(request.getCourseId());
 
@@ -74,6 +86,7 @@ public class GradeService {
         return toResponse(gradeRepository.save(grade));
     }
 
+    @Transactional
     public GradeResponse update(Long id, GradeRequest request) {
         Grade grade = gradeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Nota nuk u gjet"));
@@ -92,6 +105,7 @@ public class GradeService {
         return toResponse(gradeRepository.save(grade));
     }
 
+    @Transactional
     public void delete(Long id) {
         Grade grade = gradeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Nota nuk u gjet"));
@@ -111,15 +125,27 @@ public class GradeService {
                 .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses ne kete kurs"));
     }
 
-    private StudentGradesSummaryResponse buildSummary(List<GradeResponse> grades) {
+    private StudentGradesSummaryResponse buildSummary(List<GradeResponse> grades, int totalEnrolledEcts) {
         double average = grades.isEmpty()
                 ? 0.0
                 : grades.stream().mapToInt(GradeResponse::getGrade).average().orElse(0.0);
+        int totalEcts = grades.stream()
+                .mapToInt(g -> g.getCourseEcts() != null ? g.getCourseEcts() : 5)
+                .sum();
         return StudentGradesSummaryResponse.builder()
                 .grades(grades)
                 .averageGrade(Math.round(average * 100.0) / 100.0)
                 .totalGrades(grades.size())
+                .totalEcts(totalEcts)
+                .totalEnrolledEcts(totalEnrolledEcts)
                 .build();
+    }
+
+    private int resolveCourseEcts(Course course) {
+        if (course == null || course.getEcts() == null) {
+            return 5;
+        }
+        return course.getEcts();
     }
 
     private GradeResponse toResponse(Grade grade) {
@@ -130,7 +156,7 @@ public class GradeService {
                 .studentMbiemri(grade.getStudent().getMbiemri())
                 .courseId(grade.getCourse().getId())
                 .courseTitulli(grade.getCourse().getTitulli())
-                .courseEcts(grade.getCourse().getEcts())
+                .courseEcts(resolveCourseEcts(grade.getCourse()))
                 .professorId(grade.getProfessor().getId())
                 .professorEmri(grade.getProfessor().getEmri() + " " + grade.getProfessor().getMbiemri())
                 .grade(grade.getGrade())

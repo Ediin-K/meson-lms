@@ -15,6 +15,7 @@ public class EnrollmentResponse {
     private String userEmri;
     private Long courseId;
     private String courseTitulli;
+    private Integer courseEcts;
     private Long courseGroupId;
     private String courseGroupName;
     private Long courseSubgroupId;

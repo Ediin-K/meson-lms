@@ -35,7 +35,13 @@ export default function StudentGradesPage() {
   const isDark = colorMode === "dark";
   const userId = localStorage.getItem("userId");
 
-  const [summary, setSummary] = useState({ grades: [], averageGrade: 0, totalGrades: 0 });
+  const [summary, setSummary] = useState({
+    grades: [],
+    averageGrade: 0,
+    totalGrades: 0,
+    totalEcts: 0,
+    totalEnrolledEcts: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "error" });
@@ -73,11 +79,11 @@ export default function StudentGradesPage() {
   }, [summary.grades, searchTerm]);
 
   const gpaLabel = summary.averageGrade > 0 ? summary.averageGrade.toFixed(2) : "—";
-  const statusLabel = summary.totalGrades > 0 ? "Rregullt" : "Pa nota";
-  const totalEcts = useMemo(
-    () => (summary.grades || []).reduce((sum, g) => sum + (g.courseEcts || 0), 0),
-    [summary.grades],
+  const gradedEcts = summary.totalEcts ?? filteredGrades.reduce(
+    (sum, g) => sum + (g.courseEcts ?? 5),
+    0,
   );
+  const enrolledEcts = summary.totalEnrolledEcts ?? 0;
 
   return (
     <GradesPageShell
@@ -93,9 +99,9 @@ export default function StudentGradesPage() {
     >
       <Box className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatItem label="Mesatarja (GPA)" value={gpaLabel} highlight />
-        <StatItem label="Total lëndë me notë" value={summary.totalGrades || 0} />
-        <StatItem label="Kredite ECTS" value={totalEcts || 0} />
-        <StatItem label="Statusi" value={statusLabel} />
+        <StatItem label="Lëndë me notë" value={summary.totalGrades || 0} />
+        <StatItem label="ECTS (me notë)" value={gradedEcts} />
+        <StatItem label="ECTS (regjistruar)" value={enrolledEcts} />
       </Box>
 
       <Box className="mb-4 rounded-lg border border-slate-300 bg-white px-4 py-3 dark:border-slate-700 dark:bg-slate-900 sm:px-5">

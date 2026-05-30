@@ -175,7 +175,9 @@ export default function GradeTable({
                 )}
                 <TableCell sx={styles.bodyCell}>{row.courseTitulli}</TableCell>
                 <TableCell sx={styles.bodyCell} align="center">
-                  {row.courseEcts ?? "—"}
+                  <span className={`inline-flex min-w-[2rem] items-center justify-center rounded-md px-2 py-0.5 text-sm font-bold ${isDark ? "bg-slate-700 text-sky-300" : "bg-sky-50 text-sky-800"}`}>
+                    {row.courseEcts ?? 5}
+                  </span>
                 </TableCell>
                 <TableCell sx={styles.bodyCell}>{row.professorEmri}</TableCell>
                 <TableCell sx={styles.bodyCell} align="center">

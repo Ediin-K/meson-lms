@@ -12,4 +12,6 @@ public class StudentGradesSummaryResponse {
     private List<GradeResponse> grades;
     private Double averageGrade;
     private int totalGrades;
+    private int totalEcts;
+    private int totalEnrolledEcts;
 }
