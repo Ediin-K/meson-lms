@@ -14,9 +14,6 @@ public interface QuizRepository extends JpaRepository<Quiz, Long> {
     List<Quiz> findByStatus(QuizStatus status);
     List<Quiz> findByLessonIdAndStatus(Long lessonId, QuizStatus status);
 
-    List<Quiz> findByPublikuarTrue();
-    List<Quiz> findByLessonIdAndPublikuarTrue(Long lessonId);
-
     boolean existsByTitulliAndLessonId(String titulli, Long lessonId);
 
     Optional<Quiz> findByIdAndLessonModuleCourseTeacherId(Long id, Long teacherId);

@@ -1,8 +1,3 @@
--- Quiz status system: replaces the boolean 'publikuar' with a proper
--- DRAFT / ACTIVE / CLOSED lifecycle on the quizzes table.
--- Also adds session tracking fields to quiz_attempts.
--- All ADD COLUMN statements use IF NOT EXISTS for safety against re-runs.
-
 ALTER TABLE quizzes
     ADD COLUMN IF NOT EXISTS status       VARCHAR(20) NOT NULL DEFAULT 'DRAFT',
     ADD COLUMN IF NOT EXISTS activated_at DATETIME    NULL,
