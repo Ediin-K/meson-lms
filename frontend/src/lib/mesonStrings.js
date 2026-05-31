@@ -346,6 +346,10 @@ export const STRINGS = {
             title: "Kategoritë",
             desc: "Organizoni kurset në kategori dhe tema për navigim më të lehtë.",
           },
+          teachers: {
+            title: "Mësuesit",
+            desc: "Menaxho llogaritë e mësuesve dhe lejet e tyre në platformë.",
+          },
           enrollments: {
             title: "Regjistrimet",
             desc: "Shikoni dhe menaxhoni regjistrimet e studentëve në lëndë.",
@@ -477,6 +481,8 @@ export const STRINGS = {
         categories: "Kategori",
         average: "Mesatarja ECTS",
         active: "Semestri Aktiv",
+        teachers: "Mësues",
+        semesters: "Semestra",
       },
       catalogTitle: "Katalogu i Lëndëve",
       table: {
@@ -485,6 +491,7 @@ export const STRINGS = {
         semester: "Semestri",
         credits: "ECTS",
         instructor: "Instruktori",
+        status: "Statusi",
         actions: "Veprime",
       },
       form: {
@@ -1019,6 +1026,10 @@ export const STRINGS = {
             title: "Categories",
             desc: "Organize courses into categories and topics for easier navigation.",
           },
+          teachers: {
+            title: "Teacher Management",
+            desc: "Manage teacher accounts and their platform permissions.",
+          },
           enrollments: {
             title: "Enrollments",
             desc: "View and manage student enrollments in various subjects.",
@@ -1136,6 +1147,8 @@ export const STRINGS = {
         categories: "Categories",
         average: "Average ECTS",
         active: "Active Semester",
+        teachers: "Teachers",
+        semesters: "Semesters",
       },
       catalogTitle: "Subject Catalog",
       table: {
@@ -1144,6 +1157,7 @@ export const STRINGS = {
         semester: "Semester",
         credits: "ECTS",
         instructor: "Instructor",
+        status: "Status",
         actions: "Actions",
       },
       form: {

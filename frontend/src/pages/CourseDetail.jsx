@@ -26,10 +26,13 @@ import DescriptionRounded from '@mui/icons-material/DescriptionRounded'
 import QuizRounded from '@mui/icons-material/QuizRounded'
 import AssignmentTurnedInRounded from '@mui/icons-material/AssignmentTurnedInRounded'
 import teacherContentService from '../services/teacherContentService'
+import progressService from '../services/progressService'
 import { downloadResource, openResourcePreview } from '../services/resourceService'
 import { getCourseGroups } from '../services/courseGroupService'
 import FileUpload from '../components/common/FileUpload'
 import LessonQuizCard from '../components/quiz/LessonQuizCard'
+import LessonAssignmentCard from '../components/course/LessonAssignmentCard'
+import assignmentService from '../services/assignmentService'
 import {
     Dialog, DialogTitle, DialogContent, DialogActions, TextField,
     IconButton, Menu, MenuItem, ListItemIcon, ListItemText,
@@ -146,15 +149,15 @@ export default function CourseDetail() {
     const [moduleModal, setModuleModal] = useState({ open: false, editing: null })
     const [lessonModal, setLessonModal] = useState({ open: false, editing: null, moduleId: null })
     const [moduleForm, setModuleForm] = useState({ titulli: '', pershkrimi: '', rradhitja: 1 })
-    const [lessonForm, setLessonForm] = useState({ titulli: '', permbajtja: '', lloji: 'TEKST', videoUrl: '', resourceUrl: '', rradhitja: 1 })
+    const [lessonForm, setLessonForm] = useState({ titulli: '', permbajtja: '', lloji: 'TEKST', videoUrl: '', resourceUrl: '', rradhitja: 1, deadline: '' })
     const [uploading, setUploading] = useState(false)
     const [pendingFiles, setPendingFiles] = useState([])
     const [menuAnchor, setMenuAnchor] = useState({ el: null, type: null, id: null })
 
-    // Assignment Management State
-    const [submissionsModal, setSubmissionsModal] = useState({ open: false, assignmentId: null })
+    const [courseProgress, setCourseProgress] = useState(null)
+    const [submissionsModal, setSubmissionsModal] = useState({ open: false, lessonId: null, lessonTitle: '' })
     const [submissions, setSubmissions] = useState([])
-    const [gradingModal, setGradingModal] = useState({ open: false, submissionId: null, nota: 0, feedback: '' })
+    const [subsLoading, setSubsLoading] = useState(false)
 
     useEffect(() => {
         const fetchData = async () => {
@@ -175,6 +178,12 @@ export default function CourseDetail() {
 
                 const enrolled = enrollmentRes.data.some(e => e.courseId === Number(courseId))
                 setIsEnrolled(enrolled || owner)
+
+                if (enrolled && !owner) {
+                    progressService.getCourseProgress(courseId)
+                        .then(r => setCourseProgress(r.data))
+                        .catch(() => {})
+                }
             } catch (err) {
                 console.error(err)
             } finally {
@@ -248,19 +257,21 @@ export default function CourseDetail() {
             } else {
                 const created = await teacherContentService.createLesson({ ...lessonForm, moduleId: lessonModal.moduleId })
                 lessonId = created.data.id
-                // Upload pending files for new lesson
                 if (pendingFiles.length > 0) {
                     setUploading(true)
                     for (const file of pendingFiles) {
-                        try {
-                            await teacherContentService.uploadLessonFile(lessonId, file)
-                        } catch (err) {
-                            console.error("Gabim në ngarkimin e skedarit:", file.name, err)
-                        }
+                        try { await teacherContentService.uploadLessonFile(lessonId, file) }
+                        catch (err) { console.error("Gabim:", file.name, err) }
                     }
                     setUploading(false)
                     setPendingFiles([])
                 }
+            }
+            // If ASSIGNMENT lesson, save the deadline
+            if (lessonForm.lloji === 'ASSIGNMENT' && lessonForm.deadline) {
+                try {
+                    await assignmentService.upsertForLesson(lessonId, lessonForm.deadline + ':00')
+                } catch (err) { console.error("Gabim në ruajtjen e afatit:", err) }
             }
             const res = await axiosInstance.get(`/modules/${lessonModal.moduleId}/lessons`)
             setLessons(prev => ({ ...prev, [lessonModal.moduleId]: res.data }))
@@ -365,32 +376,24 @@ export default function CourseDetail() {
     }
 
     // --- ASSIGNMENT HANDLERS ---
-    const handleOpenSubmissions = async (lessonId) => {
+    const handleOpenSubmissions = async (lesson) => {
+        setSubmissionsModal({ open: true, lessonId: lesson.id, lessonTitle: lesson.titulli })
+        setSubsLoading(true)
         try {
-            const res = await teacherContentService.getAssignments(lessonId);
-            if (res.data.length > 0) {
-                const assignmentId = res.data[0].id;
-                const subsRes = await teacherContentService.getSubmissions(assignmentId);
-                setSubmissions(subsRes.data);
-                setSubmissionsModal({ open: true, assignmentId });
-            } else {
-                // Auto-create assignment
-                const newAss = await teacherContentService.createAssignment({ lessonId, titulli: "Detyrë", pershkrimi: "", afatiFundit: new Date(Date.now() + 7*24*60*60*1000).toISOString() });
-                setSubmissions([]);
-                setSubmissionsModal({ open: true, assignmentId: newAss.data.id });
-            }
-        } catch (err) { console.error(err); }
+            const res = await assignmentService.getSubmissions(lesson.id)
+            setSubmissions(res.data)
+        } catch { setSubmissions([]) }
+        finally { setSubsLoading(false) }
     }
 
-    const handleGrade = async () => {
+    const handleDownloadSubmission = async (sub) => {
         try {
-            await teacherContentService.gradeSubmission(gradingModal.submissionId, { nota: gradingModal.nota, statusi: 'GRADED' });
-            const res = await teacherContentService.getSubmissions(submissionsModal.assignmentId);
-            setSubmissions(res.data);
-            setSnackbarMessage("Vlerësimi u ruajt me sukses.")
-            setOpenSnackbar(true)
-            setGradingModal({ open: false, submissionId: null, nota: 0, feedback: '' });
-        } catch (err) { console.error(err); }
+            const res = await assignmentService.downloadSubmissionFile(sub.id)
+            const url = URL.createObjectURL(res.data)
+            const a = document.createElement('a')
+            a.href = url; a.download = sub.fileName || 'submission'; a.click()
+            URL.revokeObjectURL(url)
+        } catch (err) { console.error(err) }
     }
 
     if (loading) {
@@ -474,6 +477,46 @@ export default function CourseDetail() {
                             >
                                 Regjistrohu
                             </Button>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {/* STUDENT PROGRESS CARD */}
+                {courseProgress && !isOwner && (
+                    <Card elevation={0} className="rounded-2xl border border-slate-200/80 bg-white dark:bg-slate-900/50! dark:border-slate-700/80! mb-6">
+                        <CardContent className="p-5!">
+                            <div className="mb-3 flex items-center justify-between gap-2">
+                                <Typography variant="subtitle2" className="font-bold! dark:text-white!">
+                                    Progresi im
+                                </Typography>
+                                <span className="text-sm font-black text-sky-600 dark:text-sky-400">
+                                    {courseProgress.viewedLessons}/{courseProgress.totalLessons} leksione &nbsp;·&nbsp; {Math.round(courseProgress.progressPercent)}%
+                                </span>
+                            </div>
+                            {/* Overall bar */}
+                            <div className="mb-4 h-3 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                                <div
+                                    className="h-full rounded-full bg-sky-500 transition-all duration-500"
+                                    style={{ width: `${courseProgress.progressPercent}%` }}
+                                />
+                            </div>
+                            {/* Per-module breakdown */}
+                            <div className="flex flex-col gap-2">
+                                {courseProgress.modules.map((mod) => (
+                                    <div key={mod.moduleId}>
+                                        <div className="mb-1 flex items-center justify-between text-xs">
+                                            <span className="font-medium text-slate-600 dark:text-slate-300 truncate max-w-[70%]">{mod.titulli}</span>
+                                            <span className="text-slate-400 dark:text-slate-500">{mod.viewedLessons}/{mod.totalLessons}</span>
+                                        </div>
+                                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                                            <div
+                                                className={`h-full rounded-full transition-all duration-500 ${mod.progressPercent === 100 ? 'bg-emerald-500' : 'bg-sky-400'}`}
+                                                style={{ width: `${mod.progressPercent}%` }}
+                                            />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                         </CardContent>
                     </Card>
                 )}
@@ -639,7 +682,7 @@ export default function CourseDetail() {
                                                                             <Tooltip title="Shiko Dorëzimet">
                                                                                 <IconButton size="small" onClick={(e) => {
                                                                                     e.stopPropagation();
-                                                                                    handleOpenSubmissions(lesson.id);
+                                                                                    handleOpenSubmissions(lesson);
                                                                                 }} className="text-emerald-500!">
                                                                                     <AssignmentTurnedInRounded fontSize="small" />
                                                                                 </IconButton>
@@ -653,9 +696,17 @@ export default function CourseDetail() {
                                                                                 lloji: lesson.lloji,
                                                                                 videoUrl: lesson.videoUrl || '',
                                                                                 resourceUrl: lesson.resourceUrl || '',
-                                                                                rradhitja: lesson.rradhitja
+                                                                                rradhitja: lesson.rradhitja,
+                                                                                deadline: '',
                                                                             })
                                                                             setLessonModal({ open: true, editing: lesson.id, moduleId: module.id })
+                                                                            if (lesson.lloji === 'ASSIGNMENT') {
+                                                                                assignmentService.getByLesson(lesson.id)
+                                                                                    .then(r => {
+                                                                                        if (r.data?.deadline)
+                                                                                            setLessonForm(f => ({ ...f, deadline: r.data.deadline.slice(0, 16) }))
+                                                                                    }).catch(() => {})
+                                                                            }
                                                                         }}>
                                                                             <EditRounded fontSize="small" className="text-slate-400" />
                                                                         </IconButton>
@@ -676,6 +727,12 @@ export default function CourseDetail() {
                                                         {lesson.lloji === 'QUIZ' && isEnrolled && !isOwner && (
                                                             <Box className="px-5 pb-4" onClick={(e) => e.stopPropagation()}>
                                                                 <LessonQuizCard lessonId={lesson.id} courseId={courseId} compact />
+                                                            </Box>
+                                                        )}
+
+                                                        {lesson.lloji === 'ASSIGNMENT' && isEnrolled && !isOwner && (
+                                                            <Box className="px-5 pb-4" onClick={(e) => e.stopPropagation()}>
+                                                                <LessonAssignmentCard lessonId={lesson.id} />
                                                             </Box>
                                                         )}
 
@@ -876,6 +933,18 @@ export default function CourseDetail() {
                         onChange={e => setLessonForm({ ...lessonForm, videoUrl: e.target.value })}
                     />
 
+                    {lessonForm.lloji === 'ASSIGNMENT' && (
+                        <TextField
+                            label="Afati i dorëzimit *"
+                            type="datetime-local"
+                            fullWidth
+                            value={lessonForm.deadline}
+                            onChange={e => setLessonForm({ ...lessonForm, deadline: e.target.value })}
+                            InputLabelProps={{ shrink: true }}
+                            helperText="Studenti nuk mund të dorëzojë pas këtij afati"
+                        />
+                    )}
+
                     <>
                         <Divider className="my-2!" />
                         <Typography variant="subtitle2" className="font-bold! mb-2 flex items-center gap-2">
@@ -912,66 +981,57 @@ export default function CourseDetail() {
             {/* SUBMISSIONS DIALOG */}
             <Dialog
                 open={submissionsModal.open}
-                onClose={() => setSubmissionsModal({ open: false })}
+                onClose={() => setSubmissionsModal({ open: false, lessonId: null, lessonTitle: '' })}
                 maxWidth="md"
                 fullWidth
                 PaperProps={{ className: "rounded-[2.5rem]! p-4!" }}
             >
-                <DialogTitle className="font-black! text-2xl!">Dorëzimet e Detyrës</DialogTitle>
+                <DialogTitle className="font-black! text-2xl!">
+                    Dorëzimet · <span className="text-emerald-600">{submissionsModal.lessonTitle}</span>
+                </DialogTitle>
                 <DialogContent>
-                    <TableContainer className="mt-4">
-                        <Table>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell className="font-black!">Studenti</TableCell>
-                                    <TableCell className="font-black!">Data</TableCell>
-                                    <TableCell className="font-black!">Statusi</TableCell>
-                                    <TableCell className="font-black!">Nota</TableCell>
-                                    <TableCell align="right" className="font-black!">Veprime</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {submissions.map(sub => (
-                                    <TableRow key={sub.id}>
-                                        <TableCell>{sub.studentName}</TableCell>
-                                        <TableCell>{new Date(sub.submittedAt).toLocaleDateString()}</TableCell>
-                                        <TableCell>
-                                            <Chip label={sub.statusi} size="small" color={sub.statusi === 'GRADED' ? 'success' : 'warning'} className="font-bold! rounded-lg!" />
-                                        </TableCell>
-                                        <TableCell className="font-black!">{sub.nota || '-'}/100</TableCell>
-                                        <TableCell align="right">
-                                            <Button variant="outlined" size="small" onClick={() => setGradingModal({ open: true, submissionId: sub.id, nota: sub.nota || 0, feedback: sub.feedback || '' })} className="rounded-lg! normal-case!">Vlerëso</Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                                {submissions.length === 0 && (
+                    {subsLoading ? (
+                        <Box className="flex justify-center py-10"><CircularProgress className="text-sky-500!" /></Box>
+                    ) : (
+                        <TableContainer className="mt-2">
+                            <Table>
+                                <TableHead>
                                     <TableRow>
-                                        <TableCell colSpan={5} align="center" className="py-10! text-slate-400">Ende nuk ka dorëzime.</TableCell>
+                                        <TableCell className="font-black!">Studenti</TableCell>
+                                        <TableCell className="font-black!">Email</TableCell>
+                                        <TableCell className="font-black!">Skedari</TableCell>
+                                        <TableCell className="font-black!">Data</TableCell>
+                                        <TableCell align="right" className="font-black!">Shkarko</TableCell>
                                     </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                </DialogContent>
-                <DialogActions className="p-8!">
-                    <Button onClick={() => setSubmissionsModal({ open: false })} className="font-bold!">Mbyll</Button>
-                </DialogActions>
-            </Dialog>
-
-            {/* GRADING DIALOG */}
-            <Dialog
-                open={gradingModal.open}
-                onClose={() => setGradingModal({ open: false })}
-                PaperProps={{ className: "rounded-3xl! p-2!" }}
-            >
-                <DialogTitle className="font-black!">Vlerëso Dorëzimin</DialogTitle>
-                <DialogContent className="flex flex-col gap-4 mt-2">
-                    <TextField label="Nota (0-100)" type="number" fullWidth value={gradingModal.nota} onChange={e => setGradingModal({...gradingModal, nota: Number(e.target.value)})} />
-                    <TextField label="Feedback" fullWidth multiline rows={3} value={gradingModal.feedback} onChange={e => setGradingModal({...gradingModal, feedback: e.target.value})} />
+                                </TableHead>
+                                <TableBody>
+                                    {submissions.map(sub => (
+                                        <TableRow key={sub.id}>
+                                            <TableCell className="font-semibold!">{sub.studentName}</TableCell>
+                                            <TableCell className="text-slate-500!">{sub.studentEmail}</TableCell>
+                                            <TableCell className="text-slate-500! text-sm! max-w-[180px] truncate">{sub.fileName}</TableCell>
+                                            <TableCell>{new Date(sub.submittedAt).toLocaleDateString('sq-AL')}</TableCell>
+                                            <TableCell align="right">
+                                                <IconButton size="small" onClick={() => handleDownloadSubmission(sub)} className="text-sky-600!">
+                                                    <FileDownloadRounded fontSize="small" />
+                                                </IconButton>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                    {submissions.length === 0 && (
+                                        <TableRow>
+                                            <TableCell colSpan={5} align="center" className="py-10! text-slate-400">
+                                                Ende nuk ka dorëzime.
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    )}
                 </DialogContent>
                 <DialogActions className="p-6!">
-                    <Button onClick={() => setGradingModal({ open: false })}>Anulo</Button>
-                    <Button variant="contained" onClick={handleGrade} className="rounded-xl! bg-emerald-600!">Ruaj Vlerësimin</Button>
+                    <Button onClick={() => setSubmissionsModal({ open: false, lessonId: null, lessonTitle: '' })} className="font-bold!">Mbyll</Button>
                 </DialogActions>
             </Dialog>
             {/* DELETE CONFIRMATION DIALOG */}

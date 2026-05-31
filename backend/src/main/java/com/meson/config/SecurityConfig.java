@@ -41,6 +41,7 @@ public class SecurityConfig {
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/courses", "/api/courses/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/resources/*/view", "/api/resources/*/download").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/files/*/view", "/api/files/*/download", "/api/files/download/*").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/certificates/kod/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter,

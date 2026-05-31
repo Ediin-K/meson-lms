@@ -1,12 +1,19 @@
 package com.meson.controller;
 
-import com.meson.dto.*;
+import com.meson.dto.AssignmentResponse;
+import com.meson.dto.AssignmentSubmissionResponse;
+import com.meson.repository.UserRepository;
 import com.meson.service.AssignmentService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 
 @RestController
@@ -15,69 +22,57 @@ import java.util.List;
 public class AssignmentController {
 
     private final AssignmentService assignmentService;
+    private final UserRepository userRepository;
 
-    // ASSIGNMENT
-    @GetMapping
-    public ResponseEntity<List<AssignmentResponse>> getAll() {
-        return ResponseEntity.ok(assignmentService.getAll());
+    /** Returns the assignment for a lesson, or 204 if none exists. */
+    @GetMapping("/lesson/{lessonId}")
+    public ResponseEntity<AssignmentResponse> getByLesson(@PathVariable Long lessonId) {
+        return assignmentService.getByLesson(lessonId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.noContent().build());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AssignmentResponse> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(assignmentService.getById(id));
+    public AssignmentResponse getById(@PathVariable Long id) {
+        return assignmentService.getById(id);
     }
 
-    @GetMapping("/lesson/{lessonId}")
-    public ResponseEntity<List<AssignmentResponse>> getByLessonId(@PathVariable Long lessonId) {
-        return ResponseEntity.ok(assignmentService.getByLessonId(lessonId));
+    @GetMapping("/{id}/attachment")
+    public ResponseEntity<Resource> downloadAttachment(@PathVariable Long id) {
+        Resource resource = assignmentService.serveAttachment(id);
+        String filename = assignmentService.getAttachmentName(id);
+        if (filename == null) filename = "attachment";
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(resource);
     }
 
-    @PostMapping
-    public ResponseEntity<AssignmentResponse> create(@Valid @RequestBody AssignmentRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(assignmentService.create(request));
+    @PostMapping("/{id}/submit")
+    @PreAuthorize("hasRole('STUDENT')")
+    public AssignmentSubmissionResponse submit(@PathVariable Long id,
+                                               @RequestParam("file") MultipartFile file) {
+        return assignmentService.submit(id, file, currentUserId());
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<AssignmentResponse> update(@PathVariable Long id,
-                                                     @Valid @RequestBody AssignmentRequest request) {
-        return ResponseEntity.ok(assignmentService.update(id, request));
+    @GetMapping("/{id}/my-submission")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<AssignmentSubmissionResponse> getMySubmission(@PathVariable Long id) {
+        return assignmentService.getMySubmission(id, currentUserId())
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        assignmentService.delete(id);
-        return ResponseEntity.noContent().build();
+    @GetMapping("/my-submissions")
+    @PreAuthorize("hasRole('STUDENT')")
+    public List<AssignmentSubmissionResponse> getMySubmissions() {
+        return assignmentService.getMySubmissions(currentUserId());
     }
 
-    // SUBMISSION
-    @GetMapping("/{assignmentId}/submissions")
-    public ResponseEntity<List<AssignmentSubmissionResponse>> getSubmissions(@PathVariable Long assignmentId) {
-        return ResponseEntity.ok(assignmentService.getSubmissionsByAssignmentId(assignmentId));
-    }
-
-    @GetMapping("/submissions/student/{studentId}")
-    public ResponseEntity<List<AssignmentSubmissionResponse>> getByStudent(@PathVariable Long studentId) {
-        return ResponseEntity.ok(assignmentService.getSubmissionsByStudentId(studentId));
-    }
-
-    @PostMapping("/submissions")
-    public ResponseEntity<AssignmentSubmissionResponse> createSubmission(
-            @Valid @RequestBody AssignmentSubmissionRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(assignmentService.createSubmission(request));
-    }
-
-    @PatchMapping("/submissions/{id}/nota")
-    public ResponseEntity<AssignmentSubmissionResponse> gradeSubmission(
-            @PathVariable Long id,
-            @RequestParam Double nota) {
-        return ResponseEntity.ok(assignmentService.gradeSubmission(id, nota));
-    }
-
-    @DeleteMapping("/submissions/{id}")
-    public ResponseEntity<Void> deleteSubmission(@PathVariable Long id) {
-        assignmentService.deleteSubmission(id);
-        return ResponseEntity.noContent().build();
+    private Long currentUserId() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Përdoruesi nuk u gjet"))
+                .getId();
     }
 }

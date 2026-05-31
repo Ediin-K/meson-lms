@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useBlocker, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   Alert,
   Box,
@@ -8,10 +8,6 @@ import {
   CardContent,
   CircularProgress,
   Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   LinearProgress,
   Typography,
 } from '@mui/material';
@@ -39,6 +35,7 @@ export default function QuizPage() {
   const [finished, setFinished] = useState(false);
   const [finalScore, setFinalScore] = useState(null);
   const [error, setError] = useState('');
+  const [alreadySubmitted, setAlreadySubmitted] = useState(false);
 
   const courseId = courseIdParam || attempt?.courseId;
 
@@ -51,19 +48,25 @@ export default function QuizPage() {
         setAttempt(res.data);
         setRemainingSeconds(res.data.remainingSeconds || 0);
       })
-      .catch((err) => {
-        setError(err.response?.data?.message || 'Quiz-i nuk mund të hapet.');
+      .catch(async (err) => {
+        const msg = err.response?.data?.message || 'Quiz-i nuk mund të hapet.';
+        if (mounted) setError(msg);
+        if (msg.toLowerCase().includes('dorezuar') || msg.toLowerCase().includes('dorëzuar')) {
+          try {
+            const prev = await quizService.getMyAttempt(quizId);
+            if (mounted && prev.data?.submitted) {
+              setFinalScore(prev.data.pikete);
+              setAlreadySubmitted(true);
+              setFinished(true);
+            }
+          } catch { /* ignore */ }
+        }
       })
       .finally(() => {
         if (mounted) setLoading(false);
       });
     return () => { mounted = false; };
   }, [quizId]);
-
-  const blocker = useBlocker(
-    ({ currentLocation, nextLocation }) =>
-      !finished && attempt != null && currentLocation.pathname !== nextLocation.pathname,
-  );
 
   useEffect(() => {
     if (finished || !attempt) return undefined;
@@ -155,15 +158,17 @@ export default function QuizPage() {
           <CardContent className="!p-8 text-center">
             <CheckCircleRounded className="!mb-4 !text-6xl text-emerald-500" />
             <Typography variant="h4" className="!font-black text-slate-950 dark:!text-white">
-              Quiz-i u dorëzua
+              {alreadySubmitted ? 'Quiz-i është dorëzuar tashmë' : 'Quiz-i u dorëzua'}
             </Typography>
             {finalScore != null && (
-              <Typography variant="h5" className="!mt-3 !font-bold text-sky-600 dark:!text-sky-400">
+              <Typography variant="h5" className="!mt-3 !font-bold !text-sky-600 dark:!text-sky-400">
                 Rezultati: {Math.round(finalScore)}%
               </Typography>
             )}
             <Typography className="!mt-3 text-slate-600 dark:!text-slate-300">
-              Përgjigjet u ruajtën me sukses.
+              {alreadySubmitted
+                ? 'E keni dorëzuar tashmë këtë quiz. Nuk mund ta filloni përsëri.'
+                : 'Përgjigjet u ruajtën me sukses.'}
             </Typography>
             <Button variant="contained" onClick={goToCourse} className="!mt-7 !rounded-xl !normal-case">
               Kthehu te lënda
@@ -195,25 +200,6 @@ export default function QuizPage() {
 
   return (
     <Box className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      {blocker.state === 'blocked' && (
-        <Dialog open>
-          <DialogTitle className="flex items-center gap-2">
-            <WarningAmberRounded className="text-amber-500" />
-            Quiz-i është aktiv
-          </DialogTitle>
-          <DialogContent>
-            <Typography>
-              Duhet të përfundosh quiz-in ose të presësh që koha të mbarojë para se të largohesh.
-            </Typography>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => blocker.reset()} variant="contained" className="!normal-case">
-              Qëndro në quiz
-            </Button>
-          </DialogActions>
-        </Dialog>
-      )}
-
       <Container maxWidth="md" className="py-8">
         <Box className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
@@ -277,7 +263,8 @@ export default function QuizPage() {
                         variant={checked ? 'contained' : 'outlined'}
                         onClick={() => selectAnswer(currentQuestion.id, answer.id)}
                         className="!rounded-xl !py-4 !text-base !normal-case"
-                        color={checked ? 'primary' : 'inherit'}
+                        color="primary"
+                        sx={!checked ? { '.dark &': { color: '#fff', borderColor: 'rgba(255,255,255,0.3)' } } : {}}
                       >
                         {answer.pergjigja}
                       </Button>

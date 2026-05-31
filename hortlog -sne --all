@@ -1,0 +1,210 @@
+[33mcommit 9a9b344bcad248af686590b32306486328cb627e[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeature-edin[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m
+Merge: 6f586c6 2157b22
+Author: Edin <edinkamberi26@gmail.com>
+Commit: GitHub <noreply@github.com>
+
+    Merge pull request #102 from Ediin-K/feature-ediar
+    
+    Feature ediar
+
+[33mcommit 6f586c6ce8dbc392b9bbbc38664f50297c2de32a[m
+Merge: e036e20 6da70bc
+Author: Edin <edinkamberi26@gmail.com>
+Commit: GitHub <noreply@github.com>
+
+    Merge pull request #101 from Ediin-K/feature-endrit
+    
+    Feature endrit
+
+[33mcommit 2157b2228e7c9976f2e3f3858b67a7e26b64875d[m
+Author: EdiarHalili <eh74486@ubt-uni.net>
+Commit: EdiarHalili <eh74486@ubt-uni.net>
+
+    ndryshim ne Ects
+
+[33mcommit 6da70bc237a4175dcc356007ed20120268911364[m
+Author: Endrit-Ab <ea72791@ubt-uni.net>
+Commit: Endrit-Ab <ea72791@ubt-uni.net>
+
+    shtim i quizit dhe piket e pyetjeve dhe disa forme tjera te pyetjeve abcd dhe me true false dhe me shume se nje pergjigje te sakte, gjithashtu edhe nderfaqja e quizit ne frontend dhe backend
+
+[33mcommit 2273c25a8a8aa0eb9a6ca7e88cc40ab9f84b3bd4[m
+Merge: a02d6cb e036e20
+Author: EdiarHalili <eh74486@ubt-uni.net>
+Commit: EdiarHalili <eh74486@ubt-uni.net>
+
+    Merge branch 'main' of https://github.com/Ediin-K/meson-lms into feature-ediar
+
+[33mcommit a02d6cbe8f1741fa6a5bffdfef6f5e671e1f24f7[m
+Author: EdiarHalili <eh74486@ubt-uni.net>
+Commit: EdiarHalili <eh74486@ubt-uni.net>
+
+    Ects added ne kurse E gzoft pronari i ri...
+
+[33mcommit e036e20bcb1dde7b0ff4f45309f3d1a984c9c210[m
+Merge: c2f0680 76796da
+Author: EdiarHalili <eh74486@ubt-uni.net>
+Commit: GitHub <noreply@github.com>
+
+    Merge pull request #100 from Ediin-K/feature-ediar
+    
+    Feature ediar
+
+[33mcommit 76796da4e9717520e15c13a02ba2fa14b2536fef[m
+Author: EdiarHalili <eh74486@ubt-uni.net>
+Commit: EdiarHalili <eh74486@ubt-uni.net>
+
+    GradePages ne process...
+
+[33mcommit f8fd9f3f65d67686fd5ff5f083cf80d6a21d2b02[m
+Author: EdiarHalili <eh74486@ubt-uni.net>
+Commit: EdiarHalili <eh74486@ubt-uni.net>
+
+    Grade Page krijimi i faqes se notave ne proces...
+
+[33mcommit 05df329f480a1a8475abe2c463dab501b180a830[m
+Author: Endrit-Ab <ea72791@ubt-uni.net>
+Commit: Endrit-Ab <ea72791@ubt-uni.net>
+
+    ndryshime ne profilin e studentit
+
+[33mcommit c2f068055b40fccc6036f643e976dde2bf362244[m
+Merge: dc05927 25dc432
+Author: EdiarHalili <eh74486@ubt-uni.net>
+Commit: GitHub <noreply@github.com>
+
+    Merge pull request #99 from Ediin-K/feature-ediar
+    
+    rregullova filet v11 dhe v12 gabimme me sql , dhe assignment service …
+
+[33mcommit 25dc43252b0efc5d05a892dc59dd28fbc248cf5d[m
+Author: EdiarHalili <eh74486@ubt-uni.net>
+Commit: EdiarHalili <eh74486@ubt-uni.net>
+
+    rregullova filet v11 dhe v12 gabimme me sql , dhe assignment service minor fix
+
+[33mcommit dc05927ba783d7b1258f486994f89867f2193942[m
+Merge: bea9436 dd3c106
+Author: EdiarHalili <eh74486@ubt-uni.net>
+Commit: EdiarHalili <eh74486@ubt-uni.net>
+
+    hello
+
+[33mcommit dd3c106d16bbff5921509dfef907f68d64252d9c[m
+Merge: 132d5d3 0ae4589
+Author: Edin <edinkamberi26@gmail.com>
+Commit: GitHub <noreply@github.com>
+
+    Merge pull request #98 from Ediin-K/feature-edin
+    
+    minor fixes
+
+[33mcommit 0ae4589778666d2df09ca40d0bc639547d2d7d71[m[33m ([m[1;31morigin/feature-edin[m[33m)[m
+Author: Edin <edinkamberi26@gmail.com>
+Commit: Edin <edinkamberi26@gmail.com>
+
+    minor fixes
+
+[33mcommit 132d5d3109a1b9944c48b771c0260e612595e08c[m
+Merge: 6c8c04c 011fbae
+Author: Edin <edinkamberi26@gmail.com>
+Commit: GitHub <noreply@github.com>
+
+    Merge pull request #97 from Ediin-K/feature-edin
+    
+    Feature edin
+
+[33mcommit 011fbae98a5cb09e059f07c9d10f771285d3ac2d[m
+Merge: 8b9f389 6c8c04c
+Author: Edin <edinkamberi26@gmail.com>
+Commit: Edin <edinkamberi26@gmail.com>
+
+    Merge branch 'main' into feature-edin
+
+[33mcommit 6c8c04c39f93913b65559ffa68babd0d054e6360[m
+Merge: 3582701 3656c04
+Author: Edin <edinkamberi26@gmail.com>
+Commit: GitHub <noreply@github.com>
+
+    Merge pull request #96 from Ediin-K/feature-endrit
+    
+    Shtimi i faqes se profilit tte studentit
+
+[33mcommit 3656c04e2f326e61b92a5d3743b4dfea0c159b07[m
+Author: Endrit-Ab <ea72791@ubt-uni.net>
+Commit: Endrit-Ab <ea72791@ubt-uni.net>
+
+    Shtimi i faqes se profilit tte studentit
+
+[33mcommit 8b9f38991d698bac03c23375e979caa46ca69d69[m
+Author: Edin <edinkamberi26@gmail.com>
+Commit: Edin <edinkamberi26@gmail.com>
+
+    Fix Flyway V11 checksum mismatch: idempotent SQL + repair tooling
+    
+    Problem: flyway_schema_history ruan V11 me checksum te ndryshme nga file-i aktual
+    (mund te ishte aplikuar Quiz_session_security ose verzioni i vjeteur me DELIMITER).
+    
+    Ndryshimet:
+    - V11__Lesson_delete_cascade.sql: rishkruaj me DROP FOREIGN KEY IF EXISTS
+      (MySQL 8.0.26+), i sigurt te riaplikon ne cdo gjendje te DB-se
+    - application.properties: shto ignore-migration-patterns=*:missing per liri
+      ndaj skedareve te fshira nga git por te regjistruara ne histori
+    - pom.xml: shto flyway-maven-plugin per te mundësuar 'mvn flyway:repair'
+    
+    Per te zgjidhur checksum mismatch ne DB (zgjidh nje nga dy opsionet):
+    
+    Opsioni A - fshi hyrjen nga historia (REKOMANDOHET):
+      mysql -u root meson_lms -e "DELETE FROM flyway_schema_history WHERE version='11';"
+      mvn spring-boot:run   <- V11 riaplikon me SQL idempotent, V12 aplikon
+    
+    Opsioni B - perditeso checksumin ne historia (nese V11 u aplikua sic duhet):
+      mvn flyway:repair
+      mvn spring-boot:run   <- Flyway nuk e riekzekuton V11, vetem perditeson checksum
+    
+    Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+
+[33mcommit 078806cc52d507a32614e1e96efacd3b44ef92d4[m
+Author: Edin <edinkamberi26@gmail.com>
+Commit: Edin <edinkamberi26@gmail.com>
+
+    Fix Flyway V11 konflikti - riemerto quiz_status ne V12, shto V11 cascade
+    
+    Shkaku: target/classes kishte V11__Lesson_delete_cascade.sql (artifact i vjetër)
+    dhe src kishte V11__quiz_status_system.sql → Flyway "Duplicate migration version 11".
+    
+    - Shto V11__Lesson_delete_cascade.sql ne src/main/resources me SQL te paster
+      (pa DELIMITER $$, i punueshem me Flyway JDBC): shtimi CASCADE ne FK-te
+      quizzes, assignments, quiz_questions, quiz_attempts, quiz_answers,
+      assignment_submissions, answer_submissions.
+    - Riemerto V11__quiz_status_system.sql → V12__quiz_status_system.sql
+    - Perdor ADD COLUMN IF NOT EXISTS dhe CREATE INDEX IF NOT EXISTS ne V12
+      per siguri ndaj kolona qe mund te ekzistojne nga migrate te meparshme.
+    - mvn clean heq artifacts e vjetra; sekuenca finale: V11 → V12, pa duplikate.
+    
+    Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+
+[33mcommit 0a2781215cf5061594f14fff6227126d99021ae3[m
+Author: Edin <edinkamberi26@gmail.com>
+Commit: Edin <edinkamberi26@gmail.com>
+
+    Rishkrim i plote i sistemit te kuizeve me status DRAFT/ACTIVE/CLOSED
+    
+    Implementon kontroll live per mesuesit dhe exam-lock mode per studentet.
+    
+    - V11 migration: shton kolonat status, activated_at, closed_at, abandoned/abandoned_at
+    - QuizStatus enum: DRAFT, ACTIVE, CLOSED zevendeson boolean publikuar
+    - Quiz/QuizAttempt entitete: status + abandoned fields
+    - QuizRepository/QuizAttemptRepository: metoda te reja per status-based queries
+    - QuizService: studentet shohin vetem kuizet ACTIVE, + abandonQuiz()
+    - TeacherQuizService: activateQuiz(), closeQuiz(), getAllAttempts() per dashboard live
+    - TeacherQuizController: /activate, /close, /all-attempts endpoint
+    - QuizController: /abandon/{attemptId} endpoint per studentet
+    - quizService.js frontend: activate, close, getAllAttempts, abandon API calls
+    - TeacherQuizzes.jsx: rishkrim i plote - tabs Krijo/Lista/Dashboard Live/Rezultate,
+      status badges, butonin Aktivizo/Mbyll, polling cdo 5s per sesionin live
+    - QuizPage.jsx: exam-lock mode me useBlocker, beforeunload, dialog konfirmimi,
+      buton braktis me konfirmim, navigator me dots, timer i kuq kur < 60s
+    - QuizListPage.jsx: tregon vetem kuizet ACTIVE me pulsating indicator
+    
+    Co-Authored-By: Claude Sonnet 4.6 <noreply@anthro

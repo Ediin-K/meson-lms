@@ -21,6 +21,7 @@ const StudentDashboard = lazy(() => import("./components/dashboard/StudentDashbo
 const TeacherDashboard = lazy(() => import("./pages/teacher/TeacherDashboard.jsx"));
 const AssignmentPage = lazy(() => import("./pages/AssignmentPage.jsx"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage.jsx"));
+const CertificateVerify = lazy(() => import("./pages/CertificateVerify.jsx"));
 const AdminDashboard = lazy(() => import("./components/dashboard/AdminDashboard.jsx"));
 const AdminUsers = lazy(() => import("./pages/AdminUsers.jsx"));
 const AdminCourses = lazy(() => import("./pages/AdminCourses.jsx"));
@@ -119,10 +120,15 @@ function AppLayout() {
               />
               <Route
                 path="/assignment/:assignmentId"
-                element={<AssignmentPage />}
+                element={
+                  <ProtectedRoute requiredRole="student">
+                    <AssignmentPage />
+                  </ProtectedRoute>
+                }
               />
               <Route path="/contact" element={<Contact />} />
               <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/certificate/:kodiUnik" element={<CertificateVerify />} />
               <Route
                 path="/admin"
                 element={

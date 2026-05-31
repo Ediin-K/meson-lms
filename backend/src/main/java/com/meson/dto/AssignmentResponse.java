@@ -1,21 +1,24 @@
 package com.meson.dto;
 
-import com.meson.entity.AssignmentStatus;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import java.time.LocalDateTime;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class AssignmentResponse {
     private Long id;
-    private String titulli;
-    private String pershkrimi;
-    private String resourceUrl;
+    private String title;
+    private String description;
     private LocalDateTime deadline;
-    private AssignmentStatus statusi;
+    private boolean hasAttachment;
+    private String attachmentName;
     private Long lessonId;
-    private String lessonTitulli;
+    private String lessonTitle;
     private LocalDateTime createdAt;
+
+    @JsonProperty("isOpen")
+    private boolean isOpen;
 }

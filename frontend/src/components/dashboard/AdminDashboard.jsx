@@ -146,17 +146,6 @@ export default function AdminDashboard() {
       bg: "bg-amber-100 dark:bg-amber-900/40",
     },
     {
-      title: t("home.admin.services.teachers.title", "Mësuesit"),
-      desc: t(
-        "home.admin.services.teachers.desc",
-        "Menaxhoni mësuesit dhe caktoni kurse",
-      ),
-      icon: SchoolRounded,
-      path: "/admin/teachers",
-      color: "text-indigo-600",
-      bg: "bg-indigo-100 dark:bg-indigo-900/40",
-    },
-    {
       title: t("home.admin.services.enrollments.title"),
       desc: t("home.admin.services.enrollments.desc"),
       icon: AssignmentRounded,
@@ -173,14 +162,6 @@ export default function AdminDashboard() {
       bg: "bg-emerald-100 dark:bg-emerald-900/40",
     },
     {
-      title: t("home.admin.services.reports.title"),
-      desc: t("home.admin.services.reports.desc"),
-      icon: AnalyticsRounded,
-      path: "/admin/reports",
-      color: "text-violet-600",
-      bg: "bg-violet-100 dark:bg-violet-900/40",
-    },
-    {
       title: "Oraret",
       desc: "Pamje e pergjithshme e orareve. Krijimi behet brenda wizard-it te grupit.",
       icon: CalendarMonthRounded,
@@ -195,14 +176,6 @@ export default function AdminDashboard() {
       path: "/admin/groups",
       color: "text-indigo-600",
       bg: "bg-indigo-100 dark:bg-indigo-900/40",
-    },
-    {
-      title: "Aplikimet per grupe",
-      desc: "Aprovoni ose refuzoni kerkesat e studenteve per grupet e drejtimit.",
-      icon: PeopleRounded,
-      path: "/admin/group-applications",
-      color: "text-fuchsia-600",
-      bg: "bg-fuchsia-100 dark:bg-fuchsia-900/40",
     },
   ];
 

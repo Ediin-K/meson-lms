@@ -5,12 +5,15 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "assignment_submissions")
-@Data
+@Table(
+    name = "assignment_submissions",
+    uniqueConstraints = @UniqueConstraint(columnNames = {"assignment_id", "student_id"})
+)
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(exclude = {"assignment", "student"})
 public class AssignmentSubmission {
 
     @Id
@@ -25,23 +28,17 @@ public class AssignmentSubmission {
     @JoinColumn(name = "student_id", nullable = false)
     private User student;
 
-    private String submissionUrl;
-
-    @Column(columnDefinition = "TEXT")
-    private String pershkrimi;
-
-    private Double nota;
-
-    @Builder.Default
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private SubmissionStatus statusi = SubmissionStatus.DOREZUAR;
+    private String filePath;
 
-    @Column(nullable = false, updatable = false)
+    @Column(nullable = false)
+    private String fileName;
+
+    @Column(nullable = false)
     private LocalDateTime submittedAt;
 
     @PrePersist
-    protected void onCreate() {
-        this.submittedAt = LocalDateTime.now();
+    void onCreate() {
+        if (submittedAt == null) submittedAt = LocalDateTime.now();
     }
 }

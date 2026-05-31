@@ -46,7 +46,7 @@ export default function StudentProfilePage() {
       getStudentProfile(userId),
       getStudentEnrollments(userId),
       getStudentCertificates(userId),
-      getStudentAssignmentSubmissions(userId),
+      getStudentAssignmentSubmissions(),
       getStudentGroupStatus(userId),
       getStudentScheduleOverview(userId),
       getMyQuizAttempts(),
