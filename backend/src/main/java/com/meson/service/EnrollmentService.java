@@ -131,6 +131,7 @@ public class EnrollmentService {
                 .userEmri(enrollment.getUser().getEmri())
                 .courseId(enrollment.getCourse().getId())
                 .courseTitulli(enrollment.getCourse().getTitulli())
+                .courseEcts(resolveCourseEcts(enrollment.getCourse()))
                 .courseGroupId(enrollment.getCourseGroup() != null ? enrollment.getCourseGroup().getId() : null)
                 .courseGroupName(enrollment.getCourseGroup() != null ? enrollment.getCourseGroup().getName() : null)
                 .courseSubgroupId(enrollment.getCourseSubgroup() != null ? enrollment.getCourseSubgroup().getId() : null)
@@ -166,5 +167,12 @@ public class EnrollmentService {
                 .findFirst()
                 .map(assignment -> assignment.getTeacher().getEmri() + " " + assignment.getTeacher().getMbiemri())
                 .orElse(null);
+    }
+
+    private int resolveCourseEcts(Course course) {
+        if (course == null || course.getEcts() == null) {
+            return 5;
+        }
+        return course.getEcts();
     }
 }

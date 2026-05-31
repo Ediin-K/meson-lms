@@ -49,6 +49,11 @@ export default function ProfileCoursesSection({ enrollments, t }) {
                     )}
                     <div className="mt-2 flex flex-wrap items-center gap-2">
                       <Chip
+                        label={`${enrollment.courseEcts ?? 5} ECTS`}
+                        size="small"
+                        className="!bg-sky-100 !text-xs !font-bold !text-sky-800 dark:!bg-sky-950/50 dark:!text-sky-300"
+                      />
+                      <Chip
                         label={enrollment.statusi}
                         size="small"
                         color={enrollment.statusi === 'AKTIV' ? 'success' : 'default'}
