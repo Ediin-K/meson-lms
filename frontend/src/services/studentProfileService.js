@@ -25,8 +25,8 @@ export const getStudentCertificates = async (userId) => {
   return data
 }
 
-export const getStudentAssignmentSubmissions = async (userId) => {
-  const { data } = await axiosInstance.get(`/assignments/submissions/student/${userId}`)
+export const getStudentAssignmentSubmissions = async () => {
+  const { data } = await axiosInstance.get('/assignments/my-submissions')
   return data
 }
 

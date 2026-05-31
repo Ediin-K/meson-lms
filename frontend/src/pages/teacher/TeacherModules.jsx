@@ -29,7 +29,17 @@ import DeleteRounded from "@mui/icons-material/DeleteRounded";
 import SchoolRounded from "@mui/icons-material/SchoolRounded";
 import ArrowForwardRounded from "@mui/icons-material/ArrowForwardRounded";
 import AutoStoriesRounded from "@mui/icons-material/AutoStoriesRounded";
+import AssessmentRounded from "@mui/icons-material/AssessmentRounded";
+import CloseRounded from "@mui/icons-material/CloseRounded";
 import teacherContentService from "../../services/teacherContentService";
+import quizService from "../../services/quizService";
+
+function formatSeconds(sec) {
+  if (!sec && sec !== 0) return '-';
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
 import { useAppPreferences } from "../../context/appPreferencesContext";
 import Footer from "../../components/ui/Footer";
 
@@ -63,6 +73,15 @@ export default function TeacherModules() {
   const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
+
+  // Quiz results dialog
+  const [resultsOpen, setResultsOpen] = useState(false);
+  const [resultsModuleName, setResultsModuleName] = useState('');
+  const [resultsLoading, setResultsLoading] = useState(false);
+  const [resultsQuizzes, setResultsQuizzes] = useState([]);
+  const [resultsSelectedQuiz, setResultsSelectedQuiz] = useState(null);
+  const [resultsAttempts, setResultsAttempts] = useState([]);
+  const [resultsAttemptsLoading, setResultsAttemptsLoading] = useState(false);
 
   useEffect(() => {
     if (!courseId) {
@@ -160,6 +179,41 @@ export default function TeacherModules() {
       setOpenDeleteConfirm(false);
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const handleOpenResults = async (mod) => {
+    setResultsOpen(true);
+    setResultsModuleName(mod.titulli);
+    setResultsLoading(true);
+    setResultsQuizzes([]);
+    setResultsSelectedQuiz(null);
+    setResultsAttempts([]);
+    try {
+      const lessonsRes = await teacherContentService.getLessons(mod.id);
+      const quizLessons = (lessonsRes.data || []).filter((l) => l.lloji === 'QUIZ');
+      const quizArrays = await Promise.all(
+        quizLessons.map((l) =>
+          quizService.getTeacherLessonQuizzes(l.id).then((r) =>
+            (r.data || []).map((q) => ({ ...q, lessonTitulli: l.titulli }))
+          )
+        )
+      );
+      setResultsQuizzes(quizArrays.flat());
+    } catch { /* ignore */ } finally {
+      setResultsLoading(false);
+    }
+  };
+
+  const handleSelectQuiz = async (quiz) => {
+    setResultsSelectedQuiz(quiz);
+    setResultsAttemptsLoading(true);
+    setResultsAttempts([]);
+    try {
+      const res = await quizService.getResults(quiz.id);
+      setResultsAttempts(res.data || []);
+    } catch { /* ignore */ } finally {
+      setResultsAttemptsLoading(false);
     }
   };
 
@@ -347,8 +401,16 @@ export default function TeacherModules() {
                       </Box>
 
                       <Box className="flex gap-2">
+                        <Tooltip title="Rezultate Quiz">
+                          <IconButton
+                            onClick={() => handleOpenResults(mod)}
+                            className="bg-sky-50! dark:bg-sky-900/30! text-sky-600! dark:text-sky-300! hover:bg-sky-100! dark:hover:bg-sky-900/50! transition-colors"
+                          >
+                            <AssessmentRounded />
+                          </IconButton>
+                        </Tooltip>
                         <Tooltip title="Ndrysho">
-                          <IconButton 
+                          <IconButton
                             onClick={() => handleOpenEdit(mod)}
                             className="bg-indigo-50! dark:bg-indigo-900/30! text-indigo-600! dark:text-indigo-200! hover:bg-indigo-100! dark:hover:bg-indigo-900/50! transition-colors"
                           >
@@ -356,7 +418,7 @@ export default function TeacherModules() {
                           </IconButton>
                         </Tooltip>
                         <Tooltip title="Fshij">
-                          <IconButton 
+                          <IconButton
                             onClick={() => handleOpenDelete(mod)}
                             className="bg-rose-50! dark:bg-rose-900/30! text-rose-600! dark:text-rose-200! hover:bg-rose-100! dark:hover:bg-rose-900/50! transition-colors"
                           >
@@ -521,6 +583,103 @@ export default function TeacherModules() {
             Fshi
           </Button>
         </DialogActions>
+      </Dialog>
+
+      {/* QUIZ RESULTS DIALOG */}
+      <Dialog
+        open={resultsOpen}
+        onClose={() => setResultsOpen(false)}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{ className: "rounded-[2rem]! p-2! dark:bg-slate-900!" }}
+      >
+        <DialogTitle className="flex items-center justify-between font-black! text-xl! pt-6! px-6!">
+          <Box className="flex items-center gap-2">
+            <AssessmentRounded className="text-sky-500" />
+            <span className="dark:text-white">Rezultatet — {resultsModuleName}</span>
+          </Box>
+          <IconButton onClick={() => setResultsOpen(false)} size="small">
+            <CloseRounded fontSize="small" className="dark:text-slate-400" />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent className="px-6! pb-8!">
+          {resultsLoading ? (
+            <Box className="flex justify-center py-12">
+              <CircularProgress />
+            </Box>
+          ) : resultsQuizzes.length === 0 ? (
+            <Alert severity="info" className="mt-2">Ky modul nuk ka leksione quiz.</Alert>
+          ) : !resultsSelectedQuiz ? (
+            <Box className="mt-3 flex flex-col gap-3">
+              <Typography variant="body2" className="text-slate-500 dark:!text-slate-400">
+                Zgjidhni quiz-in për të parë rezultatet e studentëve:
+              </Typography>
+              {resultsQuizzes.map((q) => (
+                <Box
+                  key={q.id}
+                  onClick={() => handleSelectQuiz(q)}
+                  className="flex cursor-pointer items-center justify-between rounded-xl border border-slate-200 p-4 transition-all hover:border-sky-400 dark:border-slate-700 dark:hover:border-sky-600"
+                >
+                  <div>
+                    <Typography className="font-bold! dark:!text-white">{q.titulli}</Typography>
+                    <Typography variant="caption" className="text-slate-500">
+                      {q.lessonTitulli} · {q.status}
+                    </Typography>
+                  </div>
+                  <ArrowForwardRounded className="text-slate-400" />
+                </Box>
+              ))}
+            </Box>
+          ) : (
+            <Box className="mt-3">
+              <Box className="mb-4 flex items-center gap-3">
+                <Button
+                  startIcon={<ArrowBackRounded />}
+                  size="small"
+                  onClick={() => { setResultsSelectedQuiz(null); setResultsAttempts([]); }}
+                  className="normal-case! text-slate-500!"
+                >
+                  Kthehu
+                </Button>
+                <Typography className="font-bold! dark:!text-white">{resultsSelectedQuiz.titulli}</Typography>
+              </Box>
+              {resultsAttemptsLoading ? (
+                <Box className="flex justify-center py-8"><CircularProgress size={28} /></Box>
+              ) : resultsAttempts.length === 0 ? (
+                <Alert severity="info">Asnjë student nuk e ka dorëzuar ende këtë quiz.</Alert>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead>
+                      <tr className="border-b border-slate-200 dark:border-slate-700">
+                        <th className="py-3 pr-4 font-bold text-slate-500 dark:text-slate-400">#</th>
+                        <th className="py-3 pr-4 font-bold text-slate-500 dark:text-slate-400">Emri dhe Mbiemri</th>
+                        <th className="py-3 pr-4 font-bold text-slate-500 dark:text-slate-400">ID</th>
+                        <th className="py-3 pr-4 font-bold text-slate-500 dark:text-slate-400">Koha</th>
+                        <th className="py-3 font-bold text-slate-500 dark:text-slate-400">Pikët</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                      {resultsAttempts.map((r, i) => (
+                        <tr key={r.id} className="dark:text-slate-200">
+                          <td className="py-3 pr-4 text-slate-400">{i + 1}</td>
+                          <td className="py-3 pr-4 font-medium">{r.userEmri}</td>
+                          <td className="py-3 pr-4 font-mono text-xs text-slate-500">{r.userId}</td>
+                          <td className="py-3 pr-4 text-slate-500">{formatSeconds(r.kohaSekondat)}</td>
+                          <td className="py-3">
+                            <span className={`font-bold ${r.pikete != null && r.pikete >= 50 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
+                              {r.pikete != null ? `${Math.round(r.pikete)}%` : '-'}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </Box>
+          )}
+        </DialogContent>
       </Dialog>
 
       {/* SUCCESS TOAST */}

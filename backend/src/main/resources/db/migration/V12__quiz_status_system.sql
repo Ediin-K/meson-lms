@@ -1,5 +1,3 @@
--- V12: Quiz status system
-
 ALTER TABLE quizzes
     ADD COLUMN status       VARCHAR(20) NOT NULL DEFAULT 'DRAFT',
     ADD COLUMN activated_at DATETIME    NULL,

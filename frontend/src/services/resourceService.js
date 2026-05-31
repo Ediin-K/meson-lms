@@ -1,60 +1,45 @@
-import axiosInstance from "./axiosInstance";
+import axiosInstance from './axiosInstance';
 
-const API_ORIGIN = axiosInstance.defaults.baseURL.replace(/\/api\/?$/, "");
+const BASE = (axiosInstance.defaults.baseURL || 'http://localhost:8080/api').replace(/\/$/, '');
 
-function absoluteApiUrl(path) {
-  if (!path) return "";
-  if (/^https?:\/\//i.test(path)) return path;
-  return `${API_ORIGIN}${path.startsWith("/api") ? path : `/api${path.startsWith("/") ? path : `/${path}`}`}`;
+/** Direct URL to serve the file inline (view in browser). Public endpoint — no auth needed. */
+export function getViewUrl(resourceId) {
+  return `${BASE}/resources/${resourceId}/view`;
 }
 
-function normalizeApiPath(path) {
-  if (/^https?:\/\//i.test(path)) return path;
-  const normalized = path.startsWith("/api") ? path.slice(4) : path;
-  return normalized.startsWith("/") ? normalized : `/${normalized}`;
+/** Direct URL to force-download the file. Public endpoint — no auth needed. */
+export function getDownloadUrl(resourceId) {
+  return `${BASE}/resources/${resourceId}/download`;
 }
 
-function requireResourceId(resource) {
-  const id = Number(resource?.id);
-  if (!Number.isInteger(id) || id <= 0) {
-    throw new Error("Cannot download resource: missing or invalid resource id.");
-  }
-  return id;
+/**
+ * Open a file in a new browser tab (PDF, image, video, etc.).
+ * Uses a direct link — no blob, no pop-up blocker issues.
+ */
+export function openResourcePreview(resource) {
+  const id = resource?.id;
+  if (!id) return;
+  window.open(getViewUrl(id), '_blank', 'noopener,noreferrer');
 }
 
-function getResourcePath(resource, mode) {
-  const raw = mode === "view" ? resource?.viewUrl : resource?.downloadUrl || resource?.url;
-  if (raw) return normalizeApiPath(raw);
-  return `/resources/${requireResourceId(resource)}/${mode}`;
+/**
+ * Trigger a browser download for any resource.
+ * Creates a hidden <a> with the download URL and clicks it.
+ */
+export function downloadResource(resource) {
+  const id = resource?.id;
+  if (!id) return;
+  const a = document.createElement('a');
+  a.href = getDownloadUrl(id);
+  a.download = resource.emriOrigjinal || 'material';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
 }
 
-export async function openResourcePreview(resource) {
-  const path = getResourcePath(resource, "view");
-  const response = await axiosInstance.get(path, { responseType: "blob" });
-  const blob = new Blob([response.data], {
-    type: response.headers["content-type"] || resource.tipi || "application/octet-stream",
-  });
-  const objectUrl = URL.createObjectURL(blob);
-  window.open(objectUrl, "_blank", "noopener,noreferrer");
-  setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
-}
-
-export async function downloadResource(resource) {
-  const path = getResourcePath(resource, "download");
-  const response = await axiosInstance.get(path, { responseType: "blob" });
-  const blob = new Blob([response.data], {
-    type: response.headers["content-type"] || resource.tipi || "application/octet-stream",
-  });
-  const objectUrl = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = objectUrl;
-  link.download = resource.emriOrigjinal || "material";
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
-}
-
-export function getExternalResourceUrl(resource, mode = "view") {
-  return absoluteApiUrl(getResourcePath(resource, mode));
+/** Full absolute URL — kept for backward compatibility with CourseDetail. */
+export function getExternalResourceUrl(resource, mode = 'view') {
+  const id = resource?.id;
+  if (!id) return '';
+  return mode === 'view' ? getViewUrl(id) : getDownloadUrl(id);
 }

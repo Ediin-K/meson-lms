@@ -779,7 +779,7 @@ export default function AdminCourses() {
                           <span
                             className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest ${SEMESTER_COLORS[course.semester] || SEMESTER_COLORS[1]}`}
                           >
-                            Sem. {course.semester}
+                            {course.semester}
                           </span>
                         </TableCell>
                         <TableCell className="text-slate-700! dark:text-slate-300! font-bold! text-sm!">

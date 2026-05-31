@@ -62,6 +62,17 @@ public class CertificateService {
         return toResponse(certificateRepository.save(certificate));
     }
 
+    /** Called internally when a student reaches 100 % progress — idempotent. */
+    public String createForEnrollment(Enrollment enrollment) {
+        return certificateRepository.findByEnrollmentId(enrollment.getId())
+                .map(Certificate::getKodiUnik)
+                .orElseGet(() -> {
+                    Certificate cert = new Certificate();
+                    cert.setEnrollment(enrollment);
+                    return certificateRepository.save(cert).getKodiUnik();
+                });
+    }
+
     public void delete(Long id) {
         if (!certificateRepository.existsById(id)) {
             throw new RuntimeException("Certifikata nuk u gjet");

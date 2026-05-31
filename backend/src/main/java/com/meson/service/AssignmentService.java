@@ -1,11 +1,24 @@
 package com.meson.service;
 
-import com.meson.dto.*;
-import com.meson.entity.*;
-import com.meson.repository.*;
+import com.meson.dto.AssignmentCreateRequest;
+import com.meson.dto.AssignmentResponse;
+import com.meson.dto.AssignmentSubmissionResponse;
+import com.meson.entity.Assignment;
+import com.meson.entity.AssignmentSubmission;
+import com.meson.entity.Lesson;
+import com.meson.entity.User;
+import com.meson.repository.AssignmentRepository;
+import com.meson.repository.AssignmentSubmissionRepository;
+import com.meson.repository.LessonRepository;
+import com.meson.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -15,135 +28,197 @@ public class AssignmentService {
     private final AssignmentSubmissionRepository submissionRepository;
     private final LessonRepository lessonRepository;
     private final UserRepository userRepository;
+    private final FileStorageService fileStorageService;
 
-   
-    public List<AssignmentResponse> getAll() {
-        return assignmentRepository.findAll()
-                .stream().map(this::toAssignmentResponse).toList();
+    // ── Student: get assignment for a lesson (single) ─────────────────────────
+
+    public Optional<AssignmentResponse> getByLesson(Long lessonId) {
+        return assignmentRepository.findByLessonId(lessonId)
+                .map(this::toResponse);
     }
 
     public AssignmentResponse getById(Long id) {
-        return toAssignmentResponse(assignmentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Detyra nuk u gjet")));
+        return toResponse(findAssignment(id));
     }
 
-    public List<AssignmentResponse> getByLessonId(Long lessonId) {
-        return assignmentRepository.findByLessonId(lessonId)
-                .stream().map(this::toAssignmentResponse).toList();
-    }
+    // ── Teacher: create or update assignment for a lesson (upsert) ───────────
 
-    public AssignmentResponse create(AssignmentRequest request) {
-        if (assignmentRepository.existsByTitulliAndLessonId(request.getTitulli(), request.getLessonId())) {
-            throw new RuntimeException("Detyra tashmë ekziston në këtë leksion");
-        }
-
-        Lesson lesson = lessonRepository.findById(request.getLessonId())
+    public AssignmentResponse upsertForLesson(Long lessonId, LocalDateTime deadline, Long teacherId) {
+        Lesson lesson = lessonRepository.findById(lessonId)
                 .orElseThrow(() -> new RuntimeException("Leksioni nuk u gjet"));
+        verifyTeacherOwnsLesson(lesson, teacherId);
 
-        Assignment assignment = new Assignment();
-        assignment.setTitulli(request.getTitulli());
-        assignment.setPershkrimi(request.getPershkrimi());
-        assignment.setResourceUrl(request.getResourceUrl());
-        assignment.setDeadline(request.getDeadline());
-        assignment.setStatusi(request.getStatusi());
-        assignment.setLesson(lesson);
+        Assignment assignment = assignmentRepository.findByLessonId(lessonId)
+                .orElse(Assignment.builder().lesson(lesson).build());
 
-        return toAssignmentResponse(assignmentRepository.save(assignment));
+        assignment.setDeadline(deadline);
+        return toResponse(assignmentRepository.save(assignment));
     }
 
-    public AssignmentResponse update(Long id, AssignmentRequest request) {
-        Assignment assignment = assignmentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Detyra nuk u gjet"));
-
-        Lesson lesson = lessonRepository.findById(request.getLessonId())
-                .orElseThrow(() -> new RuntimeException("Leksioni nuk u gjet"));
-
-        assignment.setTitulli(request.getTitulli());
-        assignment.setPershkrimi(request.getPershkrimi());
-        assignment.setResourceUrl(request.getResourceUrl());
-        assignment.setDeadline(request.getDeadline());
-        assignment.setStatusi(request.getStatusi());
-        assignment.setLesson(lesson);
-
-        return toAssignmentResponse(assignmentRepository.save(assignment));
+    public void deleteForLesson(Long lessonId, Long teacherId) {
+        assignmentRepository.findByLessonId(lessonId).ifPresent(a -> {
+            verifyTeacherOwnsLesson(a.getLesson(), teacherId);
+            cleanupFiles(a);
+            submissionRepository.findByAssignmentId(a.getId())
+                    .forEach(sub -> deleteSubmissionFile(sub));
+            assignmentRepository.delete(a);
+        });
     }
 
-    public void delete(Long id) {
-        if (!assignmentRepository.existsById(id))
-            throw new RuntimeException("Detyra nuk u gjet");
-        assignmentRepository.deleteById(id);
+    // ── Teacher: all assignments ──────────────────────────────────────────────
+
+    public List<AssignmentResponse> getTeacherAssignments(Long teacherId) {
+        return assignmentRepository.findByLessonModuleCourseTeacherId(teacherId)
+                .stream().map(this::toResponse).toList();
     }
 
-    // SUBMISSION
-    public List<AssignmentSubmissionResponse> getSubmissionsByAssignmentId(Long assignmentId) {
-        return submissionRepository.findByAssignmentId(assignmentId)
+    // ── Teacher: attachment ───────────────────────────────────────────────────
+
+    public AssignmentResponse uploadAttachment(Long lessonId, MultipartFile file, Long teacherId) {
+        Assignment assignment = findTeacherAssignmentByLesson(lessonId, teacherId);
+        cleanupFiles(assignment);
+        String path = fileStorageService.store(file, "assignments/attachments");
+        assignment.setAttachmentPath(path);
+        assignment.setAttachmentName(file.getOriginalFilename() != null ? file.getOriginalFilename() : "attachment");
+        return toResponse(assignmentRepository.save(assignment));
+    }
+
+    public AssignmentResponse removeAttachment(Long lessonId, Long teacherId) {
+        Assignment assignment = findTeacherAssignmentByLesson(lessonId, teacherId);
+        cleanupFiles(assignment);
+        assignment.setAttachmentPath(null);
+        assignment.setAttachmentName(null);
+        return toResponse(assignmentRepository.save(assignment));
+    }
+
+    // ── Teacher: submissions ──────────────────────────────────────────────────
+
+    public List<AssignmentSubmissionResponse> getSubmissionsByLesson(Long lessonId, Long teacherId) {
+        Assignment assignment = findTeacherAssignmentByLesson(lessonId, teacherId);
+        return submissionRepository.findByAssignmentId(assignment.getId())
                 .stream().map(this::toSubmissionResponse).toList();
     }
 
-    public List<AssignmentSubmissionResponse> getSubmissionsByStudentId(Long studentId) {
+    public Resource serveSubmissionFile(Long submissionId, Long teacherId) {
+        AssignmentSubmission sub = submissionRepository.findById(submissionId)
+                .orElseThrow(() -> new RuntimeException("Dorëzimi nuk u gjet"));
+        findTeacherAssignment(sub.getAssignment().getId(), teacherId);
+        return fileStorageService.loadAsResource(sub.getFilePath());
+    }
+
+    public String getSubmissionFileName(Long submissionId, Long teacherId) {
+        AssignmentSubmission sub = submissionRepository.findById(submissionId)
+                .orElseThrow(() -> new RuntimeException("Dorëzimi nuk u gjet"));
+        findTeacherAssignment(sub.getAssignment().getId(), teacherId);
+        return sub.getFileName();
+    }
+
+    // ── Attachment download ───────────────────────────────────────────────────
+
+    public Resource serveAttachment(Long assignmentId) {
+        Assignment assignment = findAssignment(assignmentId);
+        if (assignment.getAttachmentPath() == null)
+            throw new RuntimeException("Nuk ka skedar të bashkangjitur");
+        return fileStorageService.loadAsResource(assignment.getAttachmentPath());
+    }
+
+    public String getAttachmentName(Long assignmentId) {
+        return findAssignment(assignmentId).getAttachmentName();
+    }
+
+    // ── Student: submission ───────────────────────────────────────────────────
+
+    public AssignmentSubmissionResponse submit(Long assignmentId, MultipartFile file, Long studentId) {
+        Assignment assignment = findAssignment(assignmentId);
+        if (LocalDateTime.now().isAfter(assignment.getDeadline()))
+            throw new RuntimeException("Afati i dorëzimit ka kaluar");
+        if (submissionRepository.existsByAssignmentIdAndStudentId(assignmentId, studentId))
+            throw new RuntimeException("E keni dorëzuar tashmë këtë detyrë");
+
+        User student = userRepository.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("Studenti nuk u gjet"));
+        String path = fileStorageService.store(file, "assignments/submissions");
+
+        return toSubmissionResponse(submissionRepository.save(
+                AssignmentSubmission.builder()
+                        .assignment(assignment).student(student)
+                        .filePath(path)
+                        .fileName(file.getOriginalFilename() != null ? file.getOriginalFilename() : "file")
+                        .build()
+        ));
+    }
+
+    public Optional<AssignmentSubmissionResponse> getMySubmission(Long assignmentId, Long studentId) {
+        return submissionRepository.findByAssignmentIdAndStudentId(assignmentId, studentId)
+                .map(this::toSubmissionResponse);
+    }
+
+    public List<AssignmentSubmissionResponse> getMySubmissions(Long studentId) {
         return submissionRepository.findByStudentId(studentId)
                 .stream().map(this::toSubmissionResponse).toList();
     }
 
-    public AssignmentSubmissionResponse createSubmission(AssignmentSubmissionRequest request) {
-        if (submissionRepository.existsByAssignmentIdAndStudentId(request.getAssignmentId(), request.getStudentId())) {
-            throw new RuntimeException("Studenti e ka dorezuar tashme kete detyre");
-        }
+    // ── Private helpers ───────────────────────────────────────────────────────
 
-        Assignment assignment = assignmentRepository.findById(request.getAssignmentId())
+    private Assignment findAssignment(Long id) {
+        return assignmentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Detyra nuk u gjet"));
-
-        User student = userRepository.findById(request.getStudentId())
-                .orElseThrow(() -> new RuntimeException("Studenti nuk u gjet"));
-
-        AssignmentSubmission submission = new AssignmentSubmission();
-        submission.setAssignment(assignment);
-        submission.setStudent(student);
-        submission.setSubmissionUrl(request.getSubmissionUrl());
-        submission.setPershkrimi(request.getPershkrimi());
-
-        return toSubmissionResponse(submissionRepository.save(submission));
     }
 
-    public AssignmentSubmissionResponse gradeSubmission(Long id, Double nota) {
-        AssignmentSubmission submission = submissionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Dorezimi nuk u gjet"));
-        submission.setNota(nota);
-        submission.setStatusi(SubmissionStatus.VLERESUAR);
-        return toSubmissionResponse(submissionRepository.save(submission));
+    private Assignment findTeacherAssignment(Long id, Long teacherId) {
+        return assignmentRepository.findByIdAndLessonModuleCourseTeacherId(id, teacherId)
+                .orElseThrow(() -> new RuntimeException("Detyra nuk u gjet ose nuk keni akses"));
     }
 
-    public void deleteSubmission(Long id) {
-        if (!submissionRepository.existsById(id))
-            throw new RuntimeException("Dorezimi nuk u gjet");
-        submissionRepository.deleteById(id);
+    private Assignment findTeacherAssignmentByLesson(Long lessonId, Long teacherId) {
+        return assignmentRepository.findByLessonId(lessonId)
+                .filter(a -> a.getLesson().getModule().getCourse().getTeacher().getId().equals(teacherId))
+                .orElseThrow(() -> new RuntimeException("Detyra nuk u gjet ose nuk keni akses"));
     }
 
-    private AssignmentResponse toAssignmentResponse(Assignment a) {
+    private void verifyTeacherOwnsLesson(Lesson lesson, Long teacherId) {
+        if (!lesson.getModule().getCourse().getTeacher().getId().equals(teacherId))
+            throw new RuntimeException("Nuk keni akses në këtë leksion");
+    }
+
+    private void cleanupFiles(Assignment a) {
+        if (a.getAttachmentPath() != null)
+            try { fileStorageService.delete(a.getAttachmentPath()); } catch (Exception ignored) {}
+    }
+
+    private void deleteSubmissionFile(AssignmentSubmission sub) {
+        try { fileStorageService.delete(sub.getFilePath()); } catch (Exception ignored) {}
+    }
+
+    AssignmentResponse toResponse(Assignment a) {
         return AssignmentResponse.builder()
                 .id(a.getId())
-                .titulli(a.getTitulli())
-                .pershkrimi(a.getPershkrimi())
-                .resourceUrl(a.getResourceUrl())
+                .title(a.getTitle() != null ? a.getTitle() : a.getLesson().getTitulli())
+                .description(a.getDescription() != null ? a.getDescription() : a.getLesson().getPermbajtja())
                 .deadline(a.getDeadline())
-                .statusi(a.getStatusi())
+                .hasAttachment(a.getAttachmentPath() != null)
+                .attachmentName(a.getAttachmentName())
                 .lessonId(a.getLesson().getId())
-                .lessonTitulli(a.getLesson().getTitulli())
+                .lessonTitle(a.getLesson().getTitulli())
                 .createdAt(a.getCreatedAt())
+                .isOpen(LocalDateTime.now().isBefore(a.getDeadline()))
                 .build();
     }
 
-    private AssignmentSubmissionResponse toSubmissionResponse(AssignmentSubmission s) {
+    AssignmentSubmissionResponse toSubmissionResponse(AssignmentSubmission s) {
+        Assignment a = s.getAssignment();
+        User student = s.getStudent();
         return AssignmentSubmissionResponse.builder()
                 .id(s.getId())
-                .assignmentId(s.getAssignment().getId())
-                .assignmentTitulli(s.getAssignment().getTitulli())
-                .studentId(s.getStudent().getId())
-                .studentEmri(s.getStudent().getEmri())
-                .submissionUrl(s.getSubmissionUrl())
-                .pershkrimi(s.getPershkrimi())
-                .nota(s.getNota())
-                .statusi(s.getStatusi())
+                .assignmentId(a.getId())
+                .assignmentTitle(a.getTitle() != null ? a.getTitle() : a.getLesson().getTitulli())
+                .deadline(a.getDeadline())
+                .lessonId(a.getLesson().getId())
+                .lessonTitle(a.getLesson().getTitulli())
+                .studentId(student.getId())
+                .studentName(student.getEmri() + " " + student.getMbiemri())
+                .studentEmail(student.getEmail())
+                .fileName(s.getFileName())
                 .submittedAt(s.getSubmittedAt())
                 .build();
     }

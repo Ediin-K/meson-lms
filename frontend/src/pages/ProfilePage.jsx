@@ -10,6 +10,84 @@ import PersonRounded from '@mui/icons-material/PersonRounded'
 import SchoolRounded from '@mui/icons-material/SchoolRounded'
 import WorkspacePremiumRounded from '@mui/icons-material/WorkspacePremiumRounded'
 import PlayCircleFilledRounded from '@mui/icons-material/PlayCircleFilledRounded'
+import VerifiedRounded from '@mui/icons-material/VerifiedRounded'
+import ContentCopyRounded from '@mui/icons-material/ContentCopyRounded'
+
+function CertificateCard({ cert }) {
+    const navigate = useNavigate()
+    const [copied, setCopied] = useState(false)
+
+    const copy = () => {
+        navigator.clipboard?.writeText(cert.kodiUnik || '')
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+    }
+
+    return (
+        <div className="overflow-hidden rounded-2xl border border-emerald-200 dark:border-emerald-800/60">
+            {/* Colored header */}
+            <div className="bg-gradient-to-r from-emerald-500 to-teal-600 px-5 py-4 flex items-center gap-3">
+                <WorkspacePremiumRounded className="!text-3xl text-white/90" />
+                <div className="min-w-0 flex-1">
+                    <Typography variant="subtitle2" className="!font-black !text-white !leading-snug truncate">
+                        {cert.courseTitulli}
+                    </Typography>
+                    <Typography variant="caption" className="!text-white/70">
+                        Certifikatë e Përfundimit
+                    </Typography>
+                </div>
+                <VerifiedRounded className="!text-2xl text-white/80 shrink-0" />
+            </div>
+
+            {/* Body */}
+            <div className="bg-emerald-50 dark:bg-emerald-950/20 px-5 py-4">
+                <div className="flex items-center justify-between gap-3 mb-3">
+                    <div>
+                        <Typography variant="caption" className="!font-bold !uppercase !tracking-wider !text-slate-400 dark:!text-slate-500">
+                            Data e lëshimit
+                        </Typography>
+                        <Typography variant="body2" className="!font-semibold !text-slate-700 dark:!text-slate-200">
+                            {new Date(cert.dataLeshimit).toLocaleDateString('sq-AL', { day: 'numeric', month: 'long', year: 'numeric' })}
+                        </Typography>
+                    </div>
+                    <Chip
+                        label="E vlefshme"
+                        size="small"
+                        icon={<VerifiedRounded style={{ fontSize: 13 }} />}
+                        className="!bg-emerald-100 !text-emerald-700 dark:!bg-emerald-900/50 dark:!text-emerald-300 !font-bold"
+                    />
+                </div>
+
+                {/* Code */}
+                <div
+                    onClick={copy}
+                    className="cursor-pointer rounded-xl border border-emerald-200 dark:border-emerald-800/50 bg-white dark:bg-slate-900/60 px-3 py-2 flex items-center justify-between gap-2 hover:border-emerald-400 transition-colors"
+                    title="Kopjo kodin"
+                >
+                    <Typography variant="caption" className="!font-mono !text-slate-600 dark:!text-slate-300 !break-all flex-1">
+                        {cert.kodiUnik}
+                    </Typography>
+                    <ContentCopyRounded style={{ fontSize: 15 }} className={copied ? 'text-emerald-500' : 'text-slate-400'} />
+                </div>
+                {copied && (
+                    <Typography variant="caption" className="!text-emerald-600 dark:!text-emerald-400 !block !mt-1 !text-center">
+                        U kopjua!
+                    </Typography>
+                )}
+
+                <Button
+                    fullWidth
+                    size="small"
+                    variant="outlined"
+                    onClick={() => navigate(`/certificate/${cert.kodiUnik}`)}
+                    className="!mt-3 !rounded-xl !normal-case !border-emerald-400 !text-emerald-700 dark:!text-emerald-400 dark:!border-emerald-700"
+                >
+                    Shiko & Verifikoni
+                </Button>
+            </div>
+        </div>
+    )
+}
 
 export default function ProfilePage() {
     const navigate = useNavigate()
@@ -164,31 +242,24 @@ export default function ProfilePage() {
                         <Card elevation={0} className="rounded-2xl border border-slate-200/80 dark:!border-slate-700/80">
                             <CardContent className="!p-6">
                                 <Typography variant="subtitle1" className="!font-bold !text-slate-900 dark:!text-white !mb-4 flex items-center gap-2">
-                                    <WorkspacePremiumRounded className="text-green-600" fontSize="small" />
+                                    <WorkspacePremiumRounded className="text-emerald-600" fontSize="small" />
                                     Certifikatat e mia
                                 </Typography>
 
                                 {certificates.length === 0 ? (
-                                    <Typography variant="body2" className="!text-slate-500">
-                                        Nuk ke asnjë certifikatë ende
-                                    </Typography>
+                                    <Box className="rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 p-8 text-center">
+                                        <WorkspacePremiumRounded className="!text-4xl text-slate-300 dark:text-slate-600 !mb-2" />
+                                        <Typography variant="body2" className="!text-slate-500">
+                                            Nuk ke asnjë certifikatë ende.
+                                        </Typography>
+                                        <Typography variant="caption" className="!text-slate-400 !block !mt-1">
+                                            Përfundo të gjitha leksionet e një kursi për të marrë certifikatën.
+                                        </Typography>
+                                    </Box>
                                 ) : (
-                                    <div className="flex flex-col gap-3">
+                                    <div className="flex flex-col gap-4">
                                         {certificates.map(cert => (
-                                            <Box
-                                                key={cert.id}
-                                                className="p-4 rounded-xl border border-green-100 dark:border-green-900/40 bg-green-50/50 dark:bg-green-900/10"
-                                            >
-                                                <Typography variant="body2" className="!font-semibold !text-slate-800 dark:!text-white">
-                                                    {cert.courseTitulli}
-                                                </Typography>
-                                                <Typography variant="caption" className="!text-slate-500 !block !mt-1">
-                                                    Lëshuar: {new Date(cert.dataLeshimit).toLocaleDateString()}
-                                                </Typography>
-                                                <Typography variant="caption" className="!text-green-600 dark:!text-green-400 !block !mt-1 !font-mono">
-                                                    #{cert.kodiUnik}
-                                                </Typography>
-                                            </Box>
+                                            <CertificateCard key={cert.id} cert={cert} />
                                         ))}
                                     </div>
                                 )}

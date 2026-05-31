@@ -1,67 +1,63 @@
-import { useMemo, useState } from 'react'
-import { Box, Card, CardContent, Chip, Tab, Tabs, Typography } from '@mui/material'
+import { useNavigate } from 'react-router-dom'
+import { Box, Chip, Typography } from '@mui/material'
 import AssignmentRounded from '@mui/icons-material/AssignmentRounded'
-
-const TABS = ['all', 'submitted', 'graded']
+import CheckCircleRounded from '@mui/icons-material/CheckCircleRounded'
 
 export default function ProfileAssignmentsSection({ submissions, t }) {
-  const [tab, setTab] = useState('all')
+    const navigate = useNavigate()
 
-  const filtered = useMemo(() => {
-    if (!submissions) return []
-    if (tab === 'submitted') {
-      return submissions.filter((s) => s.statusi === 'DOREZUAR')
-    }
-    if (tab === 'graded') {
-      return submissions.filter((s) => s.statusi === 'VLERESUAR')
-    }
-    return submissions
-  }, [submissions, tab])
+    return (
+        <Box>
+            <Typography variant="h6" className="!font-extrabold !text-slate-900 dark:!text-white !mb-4 flex items-center gap-2">
+                <AssignmentRounded className="text-sky-600" fontSize="small" />
+                {t?.('profile.assignments') ?? 'Detyrat'}
+            </Typography>
 
-  return (
-    <Card elevation={0} className="rounded-2xl border border-slate-200/80 bg-white dark:!border-slate-700/80 dark:!bg-slate-900">
-      <CardContent className="!p-6">
-        <Typography variant="subtitle1" className="!mb-2 !flex !items-center !gap-2 !font-bold !text-slate-900 dark:!text-white">
-          <AssignmentRounded className="text-amber-600" fontSize="small" />
-          {t('studentProfile.assignments')}
-        </Typography>
-        <Tabs value={tab} onChange={(_, v) => setTab(v)} className="!mb-3 !min-h-0">
-          <Tab value="all" label={t('studentProfile.tabAll')} className="!min-h-0 !py-2 !text-xs" />
-          <Tab value="submitted" label={t('studentProfile.tabSubmitted')} className="!min-h-0 !py-2 !text-xs" />
-          <Tab value="graded" label={t('studentProfile.tabGraded')} className="!min-h-0 !py-2 !text-xs" />
-        </Tabs>
-        {!filtered.length ? (
-          <Typography variant="body2" className="!text-slate-500">
-            {t('studentProfile.noAssignments')}
-          </Typography>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {filtered.slice(0, 10).map((sub) => (
-              <Box
-                key={sub.id}
-                className="rounded-xl border border-slate-100 bg-slate-50/30 p-3 dark:border-slate-700 dark:bg-slate-800/40"
-              >
-                <Typography variant="body2" className="!font-semibold !text-slate-800 dark:!text-white">
-                  {sub.assignmentTitulli}
+            {!submissions || submissions.length === 0 ? (
+                <Typography variant="body2" className="!text-slate-500">
+                    {t?.('profile.noAssignments') ?? 'Nuk keni dorëzime ende.'}
                 </Typography>
-                <div className="mt-2 flex flex-wrap items-center gap-2">
-                  <Chip label={sub.statusi} size="small" className="!text-xs" />
-                  {sub.nota != null && (
-                    <Typography variant="caption" className="!font-bold !text-sky-600">
-                      {t('studentProfile.grade')}: {sub.nota}
-                    </Typography>
-                  )}
-                  {sub.submittedAt && (
-                    <Typography variant="caption" className="!text-slate-500">
-                      {new Date(sub.submittedAt).toLocaleDateString()}
-                    </Typography>
-                  )}
+            ) : (
+                <div className="flex flex-col gap-3">
+                    {submissions.map(sub => {
+                        const isLate = new Date(sub.submittedAt) > new Date(sub.deadline)
+                        return (
+                            <Box
+                                key={sub.id}
+                                className="p-3 rounded-xl border border-slate-100 dark:border-slate-700 hover:bg-sky-50/50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors"
+                                onClick={() => navigate(`/assignment/${sub.assignmentId}`)}
+                            >
+                                <div className="flex items-start justify-between gap-2">
+                                    <div className="flex-1 min-w-0">
+                                        <Typography variant="body2" className="!font-semibold !text-slate-800 dark:!text-white truncate">
+                                            {sub.assignmentTitle}
+                                        </Typography>
+                                        <Typography variant="caption" className="!text-slate-500 !block">
+                                            {sub.lessonTitle}
+                                        </Typography>
+                                        <Typography variant="caption" className="!text-slate-400 !block !mt-0.5">
+                                            Dorëzuar: {new Date(sub.submittedAt).toLocaleDateString('sq-AL')}
+                                        </Typography>
+                                    </div>
+                                    <div className="flex flex-col items-end gap-1 shrink-0">
+                                        <Chip
+                                            icon={<CheckCircleRounded style={{ fontSize: 14 }} />}
+                                            label="Dorëzuar"
+                                            size="small"
+                                            color="success"
+                                            variant="outlined"
+                                            className="!text-xs"
+                                        />
+                                        {isLate && (
+                                            <Chip label="Me vonesë" size="small" color="warning" className="!text-xs" />
+                                        )}
+                                    </div>
+                                </div>
+                            </Box>
+                        )
+                    })}
                 </div>
-              </Box>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  )
+            )}
+        </Box>
+    )
 }

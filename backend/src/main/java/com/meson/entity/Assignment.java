@@ -8,11 +8,11 @@ import java.util.List;
 
 @Entity
 @Table(name = "assignments")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(exclude = {"lesson", "submissions"})
 public class Assignment {
 
     @Id
@@ -20,34 +20,30 @@ public class Assignment {
     private Long id;
 
     @Column(nullable = false)
-    private String titulli;
+    private String title;
 
     @Column(columnDefinition = "TEXT")
-    private String pershkrimi;
-
-    private String resourceUrl;
+    private String description;
 
     @Column(nullable = false)
     private LocalDateTime deadline;
 
-    @Builder.Default
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private AssignmentStatus statusi = AssignmentStatus.AKTIV;
+    private String attachmentPath;
+    private String attachmentName;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lesson_id", nullable = false)
     private Lesson lesson;
 
-    @Builder.Default
-    @OneToMany(mappedBy = "assignment", fetch = FetchType.LAZY)
-    private List<AssignmentSubmission> submissions = new ArrayList<>();
-
-    @Column(nullable = false, updatable = false)
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    @Builder.Default
+    @OneToMany(mappedBy = "assignment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AssignmentSubmission> submissions = new ArrayList<>();
+
     @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
+    void onCreate() {
+        if (createdAt == null) createdAt = LocalDateTime.now();
     }
 }
