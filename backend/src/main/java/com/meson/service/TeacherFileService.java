@@ -29,7 +29,7 @@ public class TeacherFileService {
 
     public List<LessonResourceResponse> getResourcesByLesson(Long lessonId) {
         User teacher = getCurrentUser();
-        // Validate ownership
+    
         lessonRepository.findByIdAndModuleCourseTeacherId(lessonId, teacher.getId())
                 .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses në këtë lëndë."));
 
