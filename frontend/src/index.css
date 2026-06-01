@@ -177,7 +177,7 @@ button:disabled,
   @apply bg-sky-200/50 rounded-full hover:bg-sky-300/50 transition-colors;
 }
 
-/
+
 @keyframes marquee {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
