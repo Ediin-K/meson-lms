@@ -26,7 +26,7 @@ public class Quiz {
     private String pershkrimi;
 
     @Column(nullable = false)
-    private Integer kohezgjatjaMinuta;
+    private Integer kohezgjatjaMInuta;
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
