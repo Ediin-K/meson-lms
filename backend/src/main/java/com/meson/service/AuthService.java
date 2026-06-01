@@ -58,7 +58,7 @@ public class AuthService {
         // 5. Generate JWT
         String token = jwtService.generateToken(user.getEmail(), roleName);
 
-        // 6. Revoke old refresh tokens
+        
         refreshTokenService.revokeAllUserTokens(user);
 
         // 7. Create new refresh token
