@@ -4,6 +4,7 @@ import {
   Typography, Box, Card, CardContent, CircularProgress, 
   Container, Grid, IconButton 
 } from "@mui/material";
+import Alert from "@mui/material/Alert";
 import SchoolRounded from "@mui/icons-material/SchoolRounded";
 import PeopleRounded from "@mui/icons-material/PeopleRounded";
 import QuizRounded from "@mui/icons-material/QuizRounded";
@@ -20,11 +21,15 @@ export default function TeacherDashboard() {
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     teacherContentService.getStats()
       .then(res => setStats(res.data))
-      .catch(err => console.error(err))
+      .catch(err => {
+        console.error(err);
+        setError("Nuk u ngarkuan statistikat dinamike te mesuesit.");
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -77,6 +82,12 @@ export default function TeacherDashboard() {
         </Box>
 
         {}
+        {error && (
+          <Alert severity="error" className="!mt-8 !rounded-2xl">
+            {error}
+          </Alert>
+        )}
+
         {!loading && stats ? (
           <Box className="mt-10 grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[

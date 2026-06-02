@@ -33,6 +33,8 @@ import {
   getWizardFieldSx,
   primaryButtonSx,
   wizardFieldClass,
+  wizardProgressChipSx,
+  wizardStepChipSx,
   wizardSurfaceClass,
 } from "./wizardUi";
 import { getScheduleConflict, getScheduleConflictMessage } from "../../../utils/scheduleConflict";
@@ -246,7 +248,12 @@ export default function GroupCreateWizard({
               Step {wizardStep + 1} of {WIZARD_STEPS.length}: {stepMeta.label}
             </Typography>
           </Box>
-          <Chip icon={StepIcon ? <StepIcon /> : undefined} label={`${Math.round(progress)}%`} variant="outlined" />
+          <Chip
+            icon={StepIcon ? <StepIcon /> : undefined}
+            label={`${Math.round(progress)}%`}
+            variant="outlined"
+            sx={wizardProgressChipSx(isDark)}
+          />
         </Box>
 
         <LinearProgress
@@ -266,8 +273,9 @@ export default function GroupCreateWizard({
               key={s.id}
               size="small"
               label={`${i + 1}. ${s.label}`}
-              color={i === wizardStep ? "primary" : i < wizardStep ? "success" : "default"}
+              color="default"
               variant={i === wizardStep ? "filled" : "outlined"}
+              sx={wizardStepChipSx(isDark, i === wizardStep ? "active" : i < wizardStep ? "complete" : "pending")}
             />
           ))}
         </Box>

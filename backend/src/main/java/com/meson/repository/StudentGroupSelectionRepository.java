@@ -9,4 +9,6 @@ import java.util.Optional;
 public interface StudentGroupSelectionRepository extends JpaRepository<StudentGroupSelection, Long> {
     boolean existsByStudentId(Long studentId);
     Optional<StudentGroupSelection> findByStudentId(Long studentId);
+
+    void deleteByStudentId(Long studentId);
 }

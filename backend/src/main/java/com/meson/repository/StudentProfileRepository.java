@@ -21,6 +21,8 @@ public interface StudentProfileRepository extends JpaRepository<StudentProfile, 
             """)
     Optional<StudentProfile> findByUserIdWithDetails(@Param("userId") Long userId);
 
+    void deleteByUserId(Long userId);
+
     long countByApprovedDirectionGroupId(Long directionGroupId);
 
     @Query("""

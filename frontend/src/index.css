@@ -313,6 +313,26 @@ html.dark svg:not([class*="text-"]):not([class*="MuiSvgIcon-color"]) {
   border-bottom-color: #1e293b !important;
 }
 
+/* --- Dark mode: Tables --- */
+.dark .MuiTableContainer-root {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+.dark .MuiTableHead-root .MuiTableCell-root {
+  background-color: rgba(15, 23, 42, 0.55) !important;
+  color: #94a3b8 !important;
+  border-bottom-color: rgba(51, 65, 85, 0.6) !important;
+}
+
+.dark .MuiTableBody-root .MuiTableRow-root:hover {
+  background-color: rgba(30, 41, 59, 0.55) !important;
+}
+
+.dark .MuiTableBody-root .MuiTableCell-root {
+  border-bottom-color: rgba(30, 41, 59, 0.8) !important;
+}
+
 .lms-schedule-surface {
   border: 1px solid var(--lms-schedule-border);
   background: var(--lms-schedule-card);

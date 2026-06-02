@@ -1,5 +1,6 @@
 package com.meson.config;
 
+import com.meson.repository.UserClaimRepository;
 import com.meson.repository.UserRepository;
 import com.meson.service.JwtService;
 import jakarta.servlet.FilterChain;
@@ -26,6 +27,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserRepository userRepository;
     private final com.meson.repository.UserRoleRepository userRoleRepository;
+    private final UserClaimRepository userClaimRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -54,11 +56,19 @@ public class JwtFilter extends OncePerRequestFilter {
             var userOptional = userRepository.findByEmail(email);
 
             if (userOptional.isPresent() && jwtService.isTokenValid(token, email)) {
-                
+
                 var authorities = new java.util.ArrayList<org.springframework.security.core.GrantedAuthority>();
                 if (tokenRole != null) {
                     authorities.add(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + tokenRole.toUpperCase()));
                 }
+
+                // Load UserClaims from DB and add as authorities (format: "claimType:claimValue")
+                var dbUser = userOptional.get();
+                userClaimRepository.findByUserId(dbUser.getId()).forEach(claim ->
+                    authorities.add(new org.springframework.security.core.authority.SimpleGrantedAuthority(
+                        claim.getClaimType() + ":" + claim.getClaimValue()
+                    ))
+                );
 
                 UserDetails userDetails = User.builder()
                         .username(email)

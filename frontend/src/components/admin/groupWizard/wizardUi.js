@@ -129,6 +129,42 @@ export function primaryButtonSx() {
   return schedulePrimaryButtonSx();
 }
 
+export function wizardProgressChipSx(isDark) {
+  const t = getGroupsTheme(isDark);
+  return {
+    color: t.text,
+    borderColor: t.border,
+    bgcolor: t.card,
+    "& .MuiChip-icon": { color: t.accent },
+  };
+}
+
+export function wizardStepChipSx(isDark, state) {
+  const t = getGroupsTheme(isDark);
+  if (state === "active") {
+    return {
+      bgcolor: t.accentStrong,
+      color: t.card,
+      borderColor: t.accentStrong,
+      fontWeight: 800,
+    };
+  }
+  if (state === "complete") {
+    return {
+      bgcolor: t.hover,
+      color: t.text,
+      borderColor: t.border,
+      fontWeight: 700,
+    };
+  }
+  return {
+    bgcolor: "transparent",
+    color: t.textMuted,
+    borderColor: t.border,
+    fontWeight: 700,
+  };
+}
+
 export function buildStaffByCourse(staffRows, courses, teachers) {
   const map = {};
   for (const row of staffRows) {

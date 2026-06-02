@@ -15,6 +15,10 @@ public interface StudentGroupRequestRepository extends JpaRepository<StudentGrou
     boolean existsByStudentIdAndStatus(Long studentId, GroupRequestStatus status);
     List<StudentGroupRequest> findByStudentIdOrderByAppliedAtDesc(Long studentId);
 
+    void deleteByStudentId(Long studentId);
+
+    void deleteByApprovedById(Long approvedById);
+
     @Query("""
             SELECT r FROM StudentGroupRequest r
             JOIN FETCH r.student s

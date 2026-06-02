@@ -8,11 +8,24 @@ import com.meson.entity.CourseCategory;
 import com.meson.entity.StudentProfile;
 import com.meson.entity.User;
 import com.meson.entity.UserRole;
+import com.meson.repository.AssignmentSubmissionRepository;
+import com.meson.repository.CertificateRepository;
 import com.meson.repository.CourseCategoryRepository;
+import com.meson.repository.CourseGroupTeacherRepository;
+import com.meson.repository.CourseRepository;
+import com.meson.repository.CourseSubgroupTeacherRepository;
+import com.meson.repository.EnrollmentRepository;
+import com.meson.repository.GradeRepository;
+import com.meson.repository.LessonProgressRepository;
+import com.meson.repository.QuizAttemptRepository;
 import com.meson.repository.RoleRepository;
+import com.meson.repository.ScheduleSessionRepository;
+import com.meson.repository.StudentGroupRequestRepository;
+import com.meson.repository.StudentGroupSelectionRepository;
 import com.meson.repository.StudentProfileRepository;
 import com.meson.repository.UserRepository;
 import com.meson.repository.UserRoleRepository;
+import com.meson.repository.UserTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -36,6 +49,19 @@ public class UserService {
     private final UserRoleRepository userRoleRepository;
     private final CourseCategoryRepository courseCategoryRepository;
     private final StudentProfileRepository studentProfileRepository;
+    private final CourseRepository courseRepository;
+    private final EnrollmentRepository enrollmentRepository;
+    private final CertificateRepository certificateRepository;
+    private final GradeRepository gradeRepository;
+    private final LessonProgressRepository lessonProgressRepository;
+    private final QuizAttemptRepository quizAttemptRepository;
+    private final AssignmentSubmissionRepository assignmentSubmissionRepository;
+    private final StudentGroupRequestRepository studentGroupRequestRepository;
+    private final StudentGroupSelectionRepository studentGroupSelectionRepository;
+    private final CourseGroupTeacherRepository courseGroupTeacherRepository;
+    private final CourseSubgroupTeacherRepository courseSubgroupTeacherRepository;
+    private final ScheduleSessionRepository scheduleSessionRepository;
+    private final UserTokenRepository userTokenRepository;
     private Role resolveAllowedRole(String requestedRole) {
         String dbRole = normalizeRoleForDB(requestedRole.trim().toLowerCase());
         if (!ALLOWED_ASSIGNABLE_ROLES.contains(dbRole)) {
@@ -157,6 +183,37 @@ public class UserService {
     }
 
     public void delete(Long id) {
+        // Block deletion if teacher has courses (teacher_id NOT NULL in Course)
+        if (courseRepository.countByTeacherId(id) > 0) {
+            throw new RuntimeException(
+                "Ky mësues ka lëndë të caktuara. Fshij ose ricakto lëndët para se të fshish mësuesin.");
+        }
+
+        // Teacher-specific: schedule sessions and group assignments
+        scheduleSessionRepository.deleteByTeacherId(id);
+        courseGroupTeacherRepository.deleteByTeacherId(id);
+        courseSubgroupTeacherRepository.deleteByTeacherId(id);
+
+        // Student-specific and general: all user-owned data
+        lessonProgressRepository.deleteByStudentId(id);
+        assignmentSubmissionRepository.deleteByStudentId(id);
+        quizAttemptRepository.deleteByUserId(id);
+        gradeRepository.deleteByStudentId(id);
+        gradeRepository.deleteByProfessorId(id);
+        studentGroupSelectionRepository.deleteByStudentId(id);
+        studentGroupRequestRepository.deleteByApprovedById(id);
+        studentGroupRequestRepository.deleteByStudentId(id);
+
+        // Certificate must be deleted before Enrollment (FK: certificate.enrollment_id)
+        certificateRepository.deleteByEnrollmentUserId(id);
+        enrollmentRepository.deleteByUserId(id);
+
+        studentProfileRepository.deleteByUserId(id);
+
+        // Fshi eksplicit para cascade (siguri shtesë)
+        userTokenRepository.deleteByUserId(id);
+
+        // UserRole, UserClaim, RefreshToken → CascadeType.ALL
         userRepository.deleteById(id);
     }
 

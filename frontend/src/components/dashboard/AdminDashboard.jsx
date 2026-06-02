@@ -21,7 +21,6 @@ import {
   Bar,
   PieChart,
   Pie,
-  Cell,
   Legend,
   AreaChart,
   Area,
@@ -35,6 +34,9 @@ import AnalyticsRounded from "@mui/icons-material/AnalyticsRounded";
 import CalendarMonthRounded from "@mui/icons-material/CalendarMonthRounded";
 import GroupsRounded from "@mui/icons-material/GroupsRounded";
 import ArrowForwardRounded from "@mui/icons-material/ArrowForwardRounded";
+import AdminPanelSettingsRounded from "@mui/icons-material/AdminPanelSettingsRounded";
+import LabelRounded from "@mui/icons-material/LabelRounded";
+import TokenRounded from "@mui/icons-material/TokenRounded";
 import Footer from "../ui/Footer";
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -63,6 +65,8 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
+const CHART_COLORS = ["#6366f1", "#0ea5e9", "#f59e0b", "#10b981", "#ec4899", "#8b5cf6"];
+
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const { t, mode } = useAppPreferences();
@@ -80,43 +84,22 @@ export default function AdminDashboard() {
       .finally(() => setLoading(false));
   }, []);
 
-  const registrationData = [
-    { month: t("months.jan"), students: 400, courses: 20 },
-    { month: t("months.feb"), students: 700, courses: 25 },
-    { month: t("months.mar"), students: 600, courses: 28 },
-    { month: t("months.apr"), students: 1200, courses: 35 },
-    { month: t("months.may"), students: 1500, courses: 42 },
-    { month: t("months.jun"), students: 1800, courses: 50 },
-  ];
+  const registrationData = (stats?.enrollmentsByMonth || []).map((item) => ({
+    month: item.month,
+    students: item.count,
+  }));
 
-  const categoryData = [
-    { name: t("home.admin.services.charts.prog"), value: 45, color: "#6366f1" },
-    {
-      name: t("home.admin.services.charts.design"),
-      value: 30,
-      color: "#0ea5e9",
-    },
-    { name: t("home.admin.services.charts.biz"), value: 15, color: "#f59e0b" },
-    { name: t("home.admin.services.charts.lang"), value: 10, color: "#10b981" },
-  ];
+  const categoryData = (stats?.coursesByCategory || []).map((item, index) => ({
+    name: item.name,
+    value: item.value,
+    fill: CHART_COLORS[index % CHART_COLORS.length],
+  }));
 
-  const enrollmentStatusData = [
-    {
-      name: t("home.admin.services.charts.active"),
-      students: 850,
-      fill: "#0ea5e9",
-    },
-    {
-      name: t("home.admin.services.charts.completed"),
-      students: 420,
-      fill: "#10b981",
-    },
-    {
-      name: t("home.admin.services.charts.pending"),
-      students: 150,
-      fill: "#f59e0b",
-    },
-  ];
+  const enrollmentStatusData = (stats?.enrollmentsByStatus || []).map((item, index) => ({
+    name: item.name,
+    students: item.value,
+    fill: CHART_COLORS[(index + 1) % CHART_COLORS.length],
+  }));
 
   const adminServices = [
     {
@@ -174,6 +157,30 @@ export default function AdminDashboard() {
       path: "/admin/groups",
       color: "text-indigo-600",
       bg: "bg-indigo-100 dark:bg-indigo-900/40",
+    },
+    {
+      title: "Rolet",
+      desc: "Krijo dhe menaxho rolet e sistemit (Admin, Teacher, Student, etj.).",
+      icon: AdminPanelSettingsRounded,
+      path: "/admin/roles",
+      color: "text-violet-600",
+      bg: "bg-violet-100 dark:bg-violet-900/40",
+    },
+    {
+      title: "User Claims",
+      desc: "Menaxho claim-et e përdoruesve për autorizim të detajuar.",
+      icon: LabelRounded,
+      path: "/admin/user-claims",
+      color: "text-teal-600",
+      bg: "bg-teal-100 dark:bg-teal-900/40",
+    },
+    {
+      title: "User Tokens",
+      desc: "Menaxho tokenat e jashtëm të përdoruesve (OAuth, SSO, etj.).",
+      icon: TokenRounded,
+      path: "/admin/user-tokens",
+      color: "text-orange-600",
+      bg: "bg-orange-100 dark:bg-orange-900/40",
     },
   ];
 
@@ -367,17 +374,10 @@ export default function AdminDashboard() {
                         outerRadius={85}
                         paddingAngle={8}
                         dataKey="value"
+                        cornerRadius={10}
                         animationBegin={500}
                         animationDuration={1500}
-                      >
-                        {categoryData.map((entry, index) => (
-                          <Cell
-                            key={`cell-${index}`}
-                            fill={entry.color}
-                            cornerRadius={10}
-                          />
-                        ))}
-                      </Pie>
+                      />
                       <Tooltip content={<CustomTooltip />} />
                       <Legend
                         verticalAlign="bottom"
@@ -425,14 +425,12 @@ export default function AdminDashboard() {
                       <Bar
                         dataKey="students"
                         name={t("home.admin.services.charts.students")}
-                        radius={[15, 15, 0, 0]}
                         barSize={40}
                         animationDuration={1500}
-                      >
-                        {enrollmentStatusData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.fill} />
-                        ))}
-                      </Bar>
+                        shape={({ x, y, width, height, payload }) => (
+                          <rect x={x} y={y} width={width} height={height} fill={payload.fill} rx={15} ry={15} />
+                        )}
+                      />
                     </BarChart>
                   </ResponsiveContainer>
                 </Box>

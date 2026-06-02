@@ -99,6 +99,13 @@ public class QuizController {
         return ResponseEntity.status(HttpStatus.CREATED).body(quizService.createQuestion(request));
     }
 
+    @PutMapping("/questions/{id}")
+    @PreAuthorize("hasRole('TEACHER')")
+    public ResponseEntity<QuizQuestionResponse> updateQuestion(@PathVariable Long id,
+                                                               @Valid @RequestBody QuizQuestionRequest request) {
+        return ResponseEntity.ok(quizService.updateQuestion(id, request));
+    }
+
     @DeleteMapping("/questions/{id}")
     @PreAuthorize("hasRole('TEACHER')")
     public ResponseEntity<Void> deleteQuestion(@PathVariable Long id) {
@@ -116,6 +123,13 @@ public class QuizController {
     @PreAuthorize("hasRole('TEACHER')")
     public ResponseEntity<QuizAnswerResponse> createAnswer(@Valid @RequestBody QuizAnswerRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(quizService.createAnswer(request));
+    }
+
+    @PutMapping("/answers/{id}")
+    @PreAuthorize("hasRole('TEACHER')")
+    public ResponseEntity<QuizAnswerResponse> updateAnswer(@PathVariable Long id,
+                                                           @Valid @RequestBody QuizAnswerRequest request) {
+        return ResponseEntity.ok(quizService.updateAnswer(id, request));
     }
 
     @DeleteMapping("/answers/{id}")

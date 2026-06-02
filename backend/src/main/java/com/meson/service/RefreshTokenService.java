@@ -4,18 +4,23 @@ import com.meson.dto.AuthResponse;
 import com.meson.dto.RefreshTokenRequest;
 import com.meson.entity.RefreshToken;
 import com.meson.entity.User;
+import com.meson.entity.UserToken;
 import com.meson.repository.RefreshTokenRepository;
+import com.meson.repository.UserTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class RefreshTokenService {
 
     private final RefreshTokenRepository refreshTokenRepository;
+    private final UserTokenRepository userTokenRepository;
     private final JwtService jwtService;
 
     public RefreshToken generateRefreshToken(User user) {
@@ -61,6 +66,15 @@ public class RefreshTokenService {
 
         String newAccessToken = jwtService.generateToken(user.getEmail(), normalizedRole);
 
+        // Përditëso access token-in në user_tokens
+        userTokenRepository.deleteByUserIdAndLoginProvider(user.getId(), "Local");
+        userTokenRepository.save(UserToken.builder()
+                .user(user)
+                .loginProvider("Local")
+                .tokenName("access_token")
+                .tokenValue(newAccessToken)
+                .build());
+
         RefreshToken newRefreshToken = generateRefreshToken(user);
 
         return new AuthResponse(newAccessToken, user.getEmail(), role, newRefreshToken.getToken(), user.getId());
@@ -69,7 +83,10 @@ public class RefreshTokenService {
     public void logout(RefreshTokenRequest request) {
         RefreshToken refreshToken = refreshTokenRepository.findByToken(request.getRefreshToken())
                 .orElseThrow(() -> new RuntimeException("Token nuk u gjet"));
-        revokeAllUserTokens(refreshToken.getUser());
+        User user = refreshToken.getUser();
+        revokeAllUserTokens(user);
+        // Fshi access token-in nga user_tokens në logout
+        userTokenRepository.deleteByUserId(user.getId());
     }
 
     public void revokeAllUserTokens(User user) {

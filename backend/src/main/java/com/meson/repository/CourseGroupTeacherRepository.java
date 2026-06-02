@@ -10,4 +10,6 @@ public interface CourseGroupTeacherRepository extends JpaRepository<CourseGroupT
     List<CourseGroupTeacher> findByCourseGroupId(Long courseGroupId);
     boolean existsByCourseGroupIdAndTeacherId(Long courseGroupId, Long teacherId);
     void deleteByCourseGroupId(Long courseGroupId);
+
+    void deleteByTeacherId(Long teacherId);
 }

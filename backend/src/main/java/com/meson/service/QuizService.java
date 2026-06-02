@@ -118,6 +118,16 @@ public class QuizService {
         return toQuestionResponse(questionRepository.save(question));
     }
 
+    public QuizQuestionResponse updateQuestion(Long id, QuizQuestionRequest request) {
+        QuizQuestion question = questionRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Pyetja nuk u gjet"));
+        question.setPyetja(request.getPyetja());
+        question.setLloji(request.getLloji());
+        question.setRradhitja(request.getRradhitja());
+        question.setPikete(request.getPikete() != null ? request.getPikete() : 1);
+        return toQuestionResponse(questionRepository.save(question));
+    }
+
     public void deleteQuestion(Long id) {
         if (!questionRepository.existsById(id)) {
             throw new ResourceNotFoundException("Pyetja nuk u gjet");
@@ -137,6 +147,14 @@ public class QuizService {
         answer.setPergjigja(request.getPergjigja());
         answer.setEshteSakte(request.getEshteSakte());
         answer.setQuestion(question);
+        return toAnswerResponse(answerRepository.save(answer));
+    }
+
+    public QuizAnswerResponse updateAnswer(Long id, QuizAnswerRequest request) {
+        QuizAnswer answer = answerRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Pergjigja nuk u gjet"));
+        answer.setPergjigja(request.getPergjigja());
+        answer.setEshteSakte(request.getEshteSakte());
         return toAnswerResponse(answerRepository.save(answer));
     }
 

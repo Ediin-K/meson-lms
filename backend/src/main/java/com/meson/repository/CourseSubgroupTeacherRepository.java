@@ -9,4 +9,6 @@ import java.util.List;
 public interface CourseSubgroupTeacherRepository extends JpaRepository<CourseSubgroupTeacher, Long> {
     List<CourseSubgroupTeacher> findByCourseSubgroupId(Long courseSubgroupId);
     void deleteByCourseSubgroupId(Long courseSubgroupId);
+
+    void deleteByTeacherId(Long teacherId);
 }
