@@ -16,13 +16,8 @@ import AddRounded from '@mui/icons-material/AddRounded'
 import EditRounded from '@mui/icons-material/EditRounded'
 import DeleteRounded from '@mui/icons-material/DeleteRounded'
 import MoreVertRounded from '@mui/icons-material/MoreVertRounded'
-import AttachFileRounded from '@mui/icons-material/AttachFileRounded'
 import FileDownloadRounded from '@mui/icons-material/FileDownloadRounded'
 import VisibilityRounded from '@mui/icons-material/VisibilityRounded'
-import PictureAsPdfRounded from '@mui/icons-material/PictureAsPdfRounded'
-import ImageRounded from '@mui/icons-material/ImageRounded'
-import VideocamRounded from '@mui/icons-material/VideocamRounded'
-import DescriptionRounded from '@mui/icons-material/DescriptionRounded'
 import QuizRounded from '@mui/icons-material/QuizRounded'
 import AssignmentTurnedInRounded from '@mui/icons-material/AssignmentTurnedInRounded'
 import UploadFileRounded from '@mui/icons-material/UploadFileRounded'
@@ -34,6 +29,7 @@ import { getCourseGroups } from '../services/courseGroupService'
 import FileUpload from '../components/common/FileUpload'
 import LessonQuizCard from '../components/quiz/LessonQuizCard'
 import LessonAssignmentCard from '../components/course/LessonAssignmentCard'
+import ResourceTypeIcon from '../components/common/ResourceTypeIcon'
 import assignmentService from '../services/assignmentService'
 import {
     Dialog, DialogTitle, DialogContent, DialogActions, TextField,
@@ -49,16 +45,7 @@ function formatFileSize(bytes) {
     return `${(bytes / 1024 / 1024).toFixed(1)} MB`
 }
 
-function resourceIcon(type) {
-    if (type === 'PDF') return PictureAsPdfRounded
-    if (type === 'IMAGE') return ImageRounded
-    if (type === 'VIDEO') return VideocamRounded
-    if (type === 'DOCUMENT' || type === 'PRESENTATION' || type === 'SPREADSHEET') return DescriptionRounded
-    return AttachFileRounded
-}
-
 function LearningResourceCard({ resource, isOwner, isDark, onPreview, onDownload, onDelete }) {
-    const Icon = resourceIcon(resource.resourceType)
     const text = isDark ? '#f8fafc' : '#0f172a'
     const muted = isDark ? '#cbd5e1' : '#64748b'
     const border = isDark ? '#334155' : '#e2e8f0'
@@ -73,7 +60,10 @@ function LearningResourceCard({ resource, isOwner, isDark, onPreview, onDownload
                 className="h-11 w-11 rounded-xl flex items-center justify-center shrink-0"
                 sx={{ bgcolor: isDark ? 'rgba(125,211,252,0.14)' : 'rgba(14,165,233,0.10)' }}
             >
-                <Icon sx={{ color: isDark ? '#bae6fd' : '#0369a1' }} />
+                <ResourceTypeIcon
+                    type={resource.resourceType}
+                    sx={{ color: isDark ? '#bae6fd' : '#0369a1' }}
+                />
             </Box>
             <Box className="min-w-0 flex-1">
                 <Typography sx={{ color: text, fontWeight: 800 }} noWrap title={resource.emriOrigjinal}>
@@ -156,8 +146,6 @@ export default function CourseDetail() {
     const [pendingFiles, setPendingFiles] = useState([])
     const [pendingAssignmentFile, setPendingAssignmentFile] = useState(null)
     const [currentAssignmentAttachment, setCurrentAssignmentAttachment] = useState(null)
-    const [menuAnchor, setMenuAnchor] = useState({ el: null, type: null, id: null })
-
     const [courseProgress, setCourseProgress] = useState(null)
     const [submissionsModal, setSubmissionsModal] = useState({ open: false, lessonId: null, lessonTitle: '' })
     const [submissions, setSubmissions] = useState([])
@@ -195,7 +183,7 @@ export default function CourseDetail() {
             }
         }
         fetchData()
-    }, [courseId, userId])
+    }, [courseId, userId, role])
 
     const handleEnroll = async () => {
         try {

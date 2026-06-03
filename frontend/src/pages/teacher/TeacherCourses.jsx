@@ -51,7 +51,7 @@ const SEMESTER_STYLE = {
 
 export default function TeacherCourses() {
   const navigate = useNavigate();
-  const { t, mode } = useAppPreferences();
+  const { mode } = useAppPreferences();
   const isDark = mode === "dark";
 
   const [courses, setCourses] = useState([]);

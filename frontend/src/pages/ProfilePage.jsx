@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axiosInstance from '../services/axiosInstance'
-import { useAppPreferences } from '../context/appPreferencesContext'
 import Footer from '../components/ui/Footer'
 import {
     Typography, Container, Box, CircularProgress, Card, CardContent, Chip, Button

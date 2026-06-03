@@ -78,8 +78,6 @@ export default function AdminTeachers() {
   const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [moreMenuId, setMoreMenuId] = useState(null);
-
   const filtered = teachers.filter((t) => {
     const matchesSearch =
       `${t.emri} ${t.mbiemri} ${t.email}`

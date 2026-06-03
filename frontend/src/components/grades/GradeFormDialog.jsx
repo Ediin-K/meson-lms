@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -25,6 +25,18 @@ const emptyForm = {
   comment: "",
 };
 
+function buildForm(initialData, fixedCourseId) {
+  if (initialData) {
+    return {
+      studentId: initialData.studentId || "",
+      courseId: initialData.courseId || fixedCourseId || "",
+      grade: initialData.grade ?? "",
+      comment: initialData.comment || "",
+    };
+  }
+  return { ...emptyForm, courseId: fixedCourseId || "" };
+}
+
 function gradeBtnClass(selected, value) {
   const base = "flex h-11 w-11 items-center justify-center rounded-lg border-2 text-base font-bold transition-all";
   if (selected) {
@@ -36,8 +48,7 @@ function gradeBtnClass(selected, value) {
   return `${base} border-slate-200 bg-white text-slate-700 hover:border-sky-400 hover:bg-sky-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200`;
 }
 
-export default function GradeFormDialog({
-  open,
+function GradeFormFields({
   onClose,
   onSubmit,
   initialData = null,
@@ -47,23 +58,8 @@ export default function GradeFormDialog({
   fixedCourseTitle = "",
   submitting = false,
 }) {
-  const [form, setForm] = useState(emptyForm);
+  const [form, setForm] = useState(() => buildForm(initialData, fixedCourseId));
   const isEdit = Boolean(initialData?.id);
-
-  useEffect(() => {
-    if (open) {
-      if (initialData) {
-        setForm({
-          studentId: initialData.studentId || "",
-          courseId: initialData.courseId || fixedCourseId || "",
-          grade: initialData.grade ?? "",
-          comment: initialData.comment || "",
-        });
-      } else {
-        setForm({ ...emptyForm, courseId: fixedCourseId || "" });
-      }
-    }
-  }, [open, initialData, fixedCourseId]);
 
   const handleChange = (field) => (e) => {
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
@@ -86,6 +82,125 @@ export default function GradeFormDialog({
     GRADE_OPTIONS.includes(Number(form.grade));
 
   return (
+    <form onSubmit={handleSubmit}>
+      <DialogTitle className="!border-b !border-slate-200 !pb-4 dark:!border-slate-700">
+        <Box className="flex items-center gap-2">
+          <GradeOutlined className="text-[#1e3a5f] dark:text-sky-400" />
+          <Typography variant="h6" className="!font-bold dark:!text-white">
+            {isEdit ? "Ndrysho notën" : "Vendos notë të re"}
+          </Typography>
+        </Box>
+      </DialogTitle>
+
+      <DialogContent className="!pt-5">
+        {fixedCourseId && fixedCourseTitle && (
+          <Box className="mb-4 rounded-lg bg-slate-100 px-4 py-3 dark:bg-slate-800">
+            <Typography variant="caption" className="!font-semibold !uppercase !tracking-wide !text-slate-500">
+              Kursi
+            </Typography>
+            <Typography className="!mt-0.5 !font-semibold !text-[#1e3a5f] dark:!text-white">
+              {fixedCourseTitle}
+            </Typography>
+          </Box>
+        )}
+
+        <Box className="flex flex-col gap-4">
+          {!fixedCourseId && (
+            <FormControl fullWidth required size="small">
+              <InputLabel>Kursi</InputLabel>
+              <Select
+                value={form.courseId}
+                label="Kursi"
+                onChange={handleChange("courseId")}
+                disabled={isEdit}
+              >
+                {courses.map((c) => (
+                  <MenuItem key={c.id} value={c.id}>{c.titulli}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+
+          <FormControl fullWidth required size="small">
+            <InputLabel>Studenti</InputLabel>
+            <Select
+              value={form.studentId}
+              label="Studenti"
+              onChange={handleChange("studentId")}
+              disabled={isEdit}
+            >
+              {students.map((s) => (
+                <MenuItem key={s.userId || s.id} value={s.userId || s.id}>
+                  {s.userEmri || s.emri} {s.userMbiemri || s.mbiemri}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <Divider />
+
+          <Box>
+            <Typography variant="subtitle2" className="!mb-3 !font-bold !text-slate-700 dark:!text-slate-300">
+              Zgjidhni notën (5 – 10)
+            </Typography>
+            <Box className="flex flex-wrap gap-2">
+              {GRADE_OPTIONS.map((g) => (
+                <button
+                  key={g}
+                  type="button"
+                  onClick={() => setForm((prev) => ({ ...prev, grade: g }))}
+                  className={gradeBtnClass(Number(form.grade) === g, g)}
+                >
+                  {g}
+                </button>
+              ))}
+            </Box>
+          </Box>
+
+          <TextField
+            label="Koment / Feedback"
+            value={form.comment}
+            onChange={handleChange("comment")}
+            multiline
+            rows={3}
+            fullWidth
+            size="small"
+            placeholder="Shkruani vlerësimin ose komentin për studentin..."
+          />
+        </Box>
+      </DialogContent>
+
+      <DialogActions className="!border-t !border-slate-200 !px-6 !py-4 dark:!border-slate-700">
+        <Button onClick={onClose} className="!rounded-lg !normal-case !text-slate-600">
+          Anulo
+        </Button>
+        <Button
+          type="submit"
+          variant="contained"
+          disabled={!isValid || submitting}
+          className="!rounded-lg !normal-case !bg-[#2563eb] !px-6 hover:!bg-[#1d4ed8]"
+        >
+          {submitting ? "Duke ruajtur..." : isEdit ? "Ruaj ndryshimet" : "Ruaj notën"}
+        </Button>
+      </DialogActions>
+    </form>
+  );
+}
+
+export default function GradeFormDialog({
+  open,
+  onClose,
+  onSubmit,
+  initialData = null,
+  students = [],
+  courses = [],
+  fixedCourseId = null,
+  fixedCourseTitle = "",
+  submitting = false,
+}) {
+  const formKey = `${initialData?.id ?? "new"}-${fixedCourseId ?? ""}`;
+
+  return (
     <Dialog
       open={open}
       onClose={onClose}
@@ -93,108 +208,19 @@ export default function GradeFormDialog({
       fullWidth
       PaperProps={{ className: "rounded-xl" }}
     >
-      <form onSubmit={handleSubmit}>
-        <DialogTitle className="!border-b !border-slate-200 !pb-4 dark:!border-slate-700">
-          <Box className="flex items-center gap-2">
-            <GradeOutlined className="text-[#1e3a5f] dark:text-sky-400" />
-            <Typography variant="h6" className="!font-bold dark:!text-white">
-              {isEdit ? "Ndrysho notën" : "Vendos notë të re"}
-            </Typography>
-          </Box>
-        </DialogTitle>
-
-        <DialogContent className="!pt-5">
-          {fixedCourseId && fixedCourseTitle && (
-            <Box className="mb-4 rounded-lg bg-slate-100 px-4 py-3 dark:bg-slate-800">
-              <Typography variant="caption" className="!font-semibold !uppercase !tracking-wide !text-slate-500">
-                Kursi
-              </Typography>
-              <Typography className="!mt-0.5 !font-semibold !text-[#1e3a5f] dark:!text-white">
-                {fixedCourseTitle}
-              </Typography>
-            </Box>
-          )}
-
-          <Box className="flex flex-col gap-4">
-            {!fixedCourseId && (
-              <FormControl fullWidth required size="small">
-                <InputLabel>Kursi</InputLabel>
-                <Select
-                  value={form.courseId}
-                  label="Kursi"
-                  onChange={handleChange("courseId")}
-                  disabled={isEdit}
-                >
-                  {courses.map((c) => (
-                    <MenuItem key={c.id} value={c.id}>{c.titulli}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            )}
-
-            <FormControl fullWidth required size="small">
-              <InputLabel>Studenti</InputLabel>
-              <Select
-                value={form.studentId}
-                label="Studenti"
-                onChange={handleChange("studentId")}
-                disabled={isEdit}
-              >
-                {students.map((s) => (
-                  <MenuItem key={s.userId || s.id} value={s.userId || s.id}>
-                    {s.userEmri || s.emri} {s.userMbiemri || s.mbiemri}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <Divider />
-
-            <Box>
-              <Typography variant="subtitle2" className="!mb-3 !font-bold !text-slate-700 dark:!text-slate-300">
-                Zgjidhni notën (5 – 10)
-              </Typography>
-              <Box className="flex flex-wrap gap-2">
-                {GRADE_OPTIONS.map((g) => (
-                  <button
-                    key={g}
-                    type="button"
-                    onClick={() => setForm((prev) => ({ ...prev, grade: g }))}
-                    className={gradeBtnClass(Number(form.grade) === g, g)}
-                  >
-                    {g}
-                  </button>
-                ))}
-              </Box>
-            </Box>
-
-            <TextField
-              label="Koment / Feedback"
-              value={form.comment}
-              onChange={handleChange("comment")}
-              multiline
-              rows={3}
-              fullWidth
-              size="small"
-              placeholder="Shkruani vlerësimin ose komentin për studentin..."
-            />
-          </Box>
-        </DialogContent>
-
-        <DialogActions className="!border-t !border-slate-200 !px-6 !py-4 dark:!border-slate-700">
-          <Button onClick={onClose} className="!rounded-lg !normal-case !text-slate-600">
-            Anulo
-          </Button>
-          <Button
-            type="submit"
-            variant="contained"
-            disabled={!isValid || submitting}
-            className="!rounded-lg !normal-case !bg-[#2563eb] !px-6 hover:!bg-[#1d4ed8]"
-          >
-            {submitting ? "Duke ruajtur..." : isEdit ? "Ruaj ndryshimet" : "Ruaj notën"}
-          </Button>
-        </DialogActions>
-      </form>
+      {open && (
+        <GradeFormFields
+          key={formKey}
+          onClose={onClose}
+          onSubmit={onSubmit}
+          initialData={initialData}
+          students={students}
+          courses={courses}
+          fixedCourseId={fixedCourseId}
+          fixedCourseTitle={fixedCourseTitle}
+          submitting={submitting}
+        />
+      )}
     </Dialog>
   );
 }

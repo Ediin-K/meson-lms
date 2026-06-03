@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppPreferences } from "../context/appPreferencesContext";
 import {
@@ -116,7 +116,7 @@ export default function AdminEnrollments() {
     );
   };
 
-  const loadEnrollments = async () => {
+  const loadEnrollments = useCallback(async () => {
     setLoading(true);
     try {
       const data = await getAllEnrollments();
@@ -129,9 +129,9 @@ export default function AdminEnrollments() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     try {
       const response = await axiosInstance.get("/users");
       setUsers(response.data);
@@ -141,9 +141,9 @@ export default function AdminEnrollments() {
         "error",
       );
     }
-  };
+  }, []);
 
-  const loadCourses = async () => {
+  const loadCourses = useCallback(async () => {
     try {
       const response = await axiosInstance.get("/courses");
       setCourses(response.data);
@@ -153,13 +153,13 @@ export default function AdminEnrollments() {
         "error",
       );
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadEnrollments();
     loadUsers();
     loadCourses();
-  }, []);
+  }, [loadEnrollments, loadUsers, loadCourses]);
 
   const filtered = enrollments.filter((e) => {
     const matchSearch =

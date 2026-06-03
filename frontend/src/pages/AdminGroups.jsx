@@ -150,8 +150,8 @@ export default function AdminGroups() {
     [staffRows],
   );
 
-  const courses = context?.courses || [];
-  const teachers = context?.teachers || [];
+  const courses = useMemo(() => context?.courses || [], [context?.courses]);
+  const teachers = useMemo(() => context?.teachers || [], [context?.teachers]);
 
   const staffByCourse = useMemo(
     () => buildStaffByCourse(staffRows, courses, teachers),

@@ -14,34 +14,15 @@ import LinkRounded from '@mui/icons-material/LinkRounded'
 import QuizRounded from '@mui/icons-material/QuizRounded'
 import WorkspacePremiumRounded from '@mui/icons-material/WorkspacePremiumRounded'
 import FolderOpenRounded from '@mui/icons-material/FolderOpenRounded'
-import PictureAsPdfRounded from '@mui/icons-material/PictureAsPdfRounded'
-import ImageRounded from '@mui/icons-material/ImageRounded'
-import VideocamRounded from '@mui/icons-material/VideocamRounded'
-import InsertDriveFileRounded from '@mui/icons-material/InsertDriveFileRounded'
 import FileDownloadRounded from '@mui/icons-material/FileDownloadRounded'
 import OpenInNewRounded from '@mui/icons-material/OpenInNewRounded'
-import SlideshowRounded from '@mui/icons-material/SlideshowRounded'
-import TableChartRounded from '@mui/icons-material/TableChartRounded'
-import FolderZipRounded from '@mui/icons-material/FolderZipRounded'
+import ResourceTypeIcon from '../components/common/ResourceTypeIcon'
 import LessonQuizCard from '../components/quiz/LessonQuizCard'
 import LessonAssignmentCard from '../components/course/LessonAssignmentCard'
 import progressService from '../services/progressService'
 import { downloadResource, openResourcePreview, getViewUrl } from '../services/resourceService'
 
 // ── Resource helpers ──────────────────────────────────────────────────────────
-
-function resourceIcon(type) {
-    const map = {
-        PDF:          PictureAsPdfRounded,
-        IMAGE:        ImageRounded,
-        VIDEO:        VideocamRounded,
-        DOCUMENT:     DescriptionRounded,
-        PRESENTATION: SlideshowRounded,
-        SPREADSHEET:  TableChartRounded,
-        ARCHIVE:      FolderZipRounded,
-    }
-    return map[type] || InsertDriveFileRounded
-}
 
 function formatSize(bytes) {
     if (!bytes && bytes !== 0) return ''
@@ -54,7 +35,6 @@ function formatSize(bytes) {
 
 function ResourceCard({ resource }) {
     const [previewOpen, setPreviewOpen] = useState(false)
-    const Icon = resourceIcon(resource.resourceType)
     const canEmbedPreview = resource.resourceType === 'IMAGE' || resource.resourceType === 'VIDEO'
     const canOpenPreview  = resource.previewable || resource.resourceType === 'PDF'
 
@@ -113,7 +93,10 @@ function ResourceCard({ resource }) {
                 {/* File info row */}
                 <div className={`flex items-center gap-3 px-4 py-3 ${bgColor}`}>
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white dark:bg-slate-900 shadow-sm">
-                        <Icon className={`!text-xl ${iconColor}`} />
+                        <ResourceTypeIcon
+                            type={resource.resourceType}
+                            className={`!text-xl ${iconColor}`}
+                        />
                     </div>
                     <div className="min-w-0 flex-1">
                         <Tooltip title={resource.emriOrigjinal} placement="top">
