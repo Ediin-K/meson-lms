@@ -5,15 +5,19 @@ import com.meson.dto.LoginRequest;
 import com.meson.entity.Role;
 import com.meson.entity.User;
 import com.meson.entity.UserRole;
+import com.meson.entity.UserToken;
 import com.meson.entity.RefreshToken;
 import com.meson.repository.UserRepository;
 import com.meson.repository.UserRoleRepository;
+import com.meson.repository.UserTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class AuthService {
 
     private final UserRepository userRepository;
@@ -21,17 +25,15 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
+    private final UserTokenRepository userTokenRepository;
 
     public AuthResponse login(LoginRequest request) {
 
-        // 1. Normalizo email
         String email = request.getEmail().trim().toLowerCase();
 
-        // 2. Gjej userin
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Email ose password gabim"));
 
-        // 3. Kontrollo password (BCrypt)
         boolean isPasswordValid = passwordEncoder.matches(
                 request.getPassword(),
                 user.getPasswordHash()
@@ -40,7 +42,7 @@ public class AuthService {
         if (!isPasswordValid) {
             throw new RuntimeException("Email ose password gabim");
         }
-// Merr Rolin e Userit 
+
         Role role = userRoleRepository.findByUser(user)
                 .stream()
                 .findFirst()
@@ -55,16 +57,21 @@ public class AuthService {
                 ? role.getEmertimi().toLowerCase()
                 : "guest";
 
-      // Generate JWT Tokeni.
         String token = jwtService.generateToken(user.getEmail(), roleName);
 
-        
         refreshTokenService.revokeAllUserTokens(user);
 
-        // 7. Create new refresh token
+        // Ruaj access token-in në user_tokens (replace nëse ekziston)
+        userTokenRepository.deleteByUserIdAndLoginProvider(user.getId(), "Local");
+        userTokenRepository.save(UserToken.builder()
+                .user(user)
+                .loginProvider("Local")
+                .tokenName("access_token")
+                .tokenValue(token)
+                .build());
+
         RefreshToken refreshToken = refreshTokenService.generateRefreshToken(user);
 
-        // 8. Return response
         return new AuthResponse(
                 token,
                 user.getEmail(),

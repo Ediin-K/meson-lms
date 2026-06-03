@@ -36,6 +36,9 @@ const StudentGroups = lazy(() => import("./pages/StudentGroups.jsx"));
 const StudentProfilePage = lazy(() => import("./pages/student/StudentProfilePage.jsx"));
 const AdminGroupApplications = lazy(() => import("./pages/AdminGroupApplications.jsx"));
 const AdminGroups = lazy(() => import("./pages/AdminGroups.jsx"));
+const AdminRoles = lazy(() => import("./pages/AdminRoles.jsx"));
+const AdminUserClaims = lazy(() => import("./pages/AdminUserClaims.jsx"));
+const AdminUserTokens = lazy(() => import("./pages/AdminUserTokens.jsx"));
 const TeacherLayout = lazy(() => import("./layouts/TeacherLayout.jsx"));
 const TeacherCourses = lazy(() => import("./pages/teacher/TeacherCourses.jsx"));
 const TeacherModules = lazy(() => import("./pages/teacher/TeacherModules.jsx"));
@@ -213,6 +216,30 @@ function AppLayout() {
                 element={
                   <ProtectedRoute requiredRole="admin">
                     <AdminGroupApplications />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/roles"
+                element={
+                  <ProtectedRoute requiredRole="admin">
+                    <AdminRoles />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/user-claims"
+                element={
+                  <ProtectedRoute requiredRole="admin">
+                    <AdminUserClaims />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/user-tokens"
+                element={
+                  <ProtectedRoute requiredRole="admin">
+                    <AdminUserTokens />
                   </ProtectedRoute>
                 }
               />

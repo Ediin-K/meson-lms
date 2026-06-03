@@ -96,7 +96,6 @@ const emptyScheduleRow = () => ({
   startTime: "10:00",
   endTime: "",
   room: "",
-  color: "sky",
 });
 
 const dayOptions = DAYS.map((d) => ({ value: d, label: DAY_LABELS[d] }));
@@ -386,7 +385,6 @@ export default function AdminGroups() {
             : r.endTime
           : null,
         room: r.room || null,
-        color: r.color || "sky",
       })),
   });
 
@@ -505,7 +503,7 @@ export default function AdminGroups() {
   return (
     <Box sx={pageShellSx(isDark)} className="flex flex-col min-h-full">
       <Container maxWidth="xl" className="py-4 mt-2 sm:mt-4 grow">
-        {/* Compact toolbar — single row on desktop */}
+        {}
         <Box
           className="mb-4 flex flex-wrap items-center gap-2 sm:gap-3"
           sx={{
@@ -605,7 +603,7 @@ export default function AdminGroups() {
           </Box>
         ) : (
           <>
-            {/* Desktop table */}
+            {}
             <TableContainer
               className="hidden md:block rounded-2xl overflow-hidden"
               sx={tableContainerSx(isDark)}
@@ -659,7 +657,7 @@ export default function AdminGroups() {
               </Table>
             </TableContainer>
 
-            {/* Mobile cards */}
+            {}
             <Box className="md:hidden flex flex-col gap-2">
               {filteredGroups.length === 0 ? (
                 <Box

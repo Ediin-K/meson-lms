@@ -22,7 +22,22 @@ import LessonAssignmentCard from '../components/course/LessonAssignmentCard'
 import progressService from '../services/progressService'
 import { downloadResource, openResourcePreview, getViewUrl } from '../services/resourceService'
 
+<<<<<<< HEAD
 // ── Resource helpers ──────────────────────────────────────────────────────────
+=======
+function ResourceTypeIcon({ type, className }) {
+    switch (type) {
+        case 'PDF':          return <PictureAsPdfRounded className={className} />
+        case 'IMAGE':        return <ImageRounded className={className} />
+        case 'VIDEO':        return <VideocamRounded className={className} />
+        case 'DOCUMENT':     return <DescriptionRounded className={className} />
+        case 'PRESENTATION': return <SlideshowRounded className={className} />
+        case 'SPREADSHEET':  return <TableChartRounded className={className} />
+        case 'ARCHIVE':      return <FolderZipRounded className={className} />
+        default:             return <InsertDriveFileRounded className={className} />
+    }
+}
+>>>>>>> e8f52cdd10b89aff0676e24611dcdc448acda21b
 
 function formatSize(bytes) {
     if (!bytes && bytes !== 0) return ''
@@ -30,8 +45,6 @@ function formatSize(bytes) {
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
     return `${(bytes / 1024 / 1024).toFixed(1)} MB`
 }
-
-// ── ResourceCard component ────────────────────────────────────────────────────
 
 function ResourceCard({ resource }) {
     const [previewOpen, setPreviewOpen] = useState(false)
@@ -61,7 +74,7 @@ function ResourceCard({ resource }) {
     return (
         <>
             <div className="rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-                {/* Inline preview for images */}
+                {}
                 {resource.resourceType === 'IMAGE' && (
                     <div
                         className="cursor-zoom-in bg-slate-100 dark:bg-slate-800 flex items-center justify-center max-h-64 overflow-hidden"
@@ -76,7 +89,7 @@ function ResourceCard({ resource }) {
                     </div>
                 )}
 
-                {/* Inline preview for video */}
+                {}
                 {resource.resourceType === 'VIDEO' && (
                     <div className="bg-black">
                         <video
@@ -90,13 +103,17 @@ function ResourceCard({ resource }) {
                     </div>
                 )}
 
-                {/* File info row */}
+                {}
                 <div className={`flex items-center gap-3 px-4 py-3 ${bgColor}`}>
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white dark:bg-slate-900 shadow-sm">
+<<<<<<< HEAD
                         <ResourceTypeIcon
                             type={resource.resourceType}
                             className={`!text-xl ${iconColor}`}
                         />
+=======
+                        <ResourceTypeIcon type={resource.resourceType} className={`!text-xl ${iconColor}`} />
+>>>>>>> e8f52cdd10b89aff0676e24611dcdc448acda21b
                     </div>
                     <div className="min-w-0 flex-1">
                         <Tooltip title={resource.emriOrigjinal} placement="top">
@@ -154,7 +171,7 @@ function ResourceCard({ resource }) {
                 </div>
             </div>
 
-            {/* Full-screen image preview dialog */}
+            {}
             {resource.resourceType === 'IMAGE' && (
                 <Dialog
                     open={previewOpen}
@@ -177,8 +194,6 @@ function ResourceCard({ resource }) {
     )
 }
 
-// ── Main page ─────────────────────────────────────────────────────────────────
-
 export default function LessonDetail() {
     const { lessonId } = useParams()
     const navigate = useNavigate()
@@ -189,7 +204,6 @@ export default function LessonDetail() {
     const [loading, setLoading]   = useState(true)
     const [completion, setCompletion] = useState(null)
 
-    // Mark lesson as viewed — backend auto-completes course if progress hits 100%
     useEffect(() => {
         progressService.markViewed(lessonId)
             .then(res => {
@@ -208,7 +222,7 @@ export default function LessonDetail() {
                     try {
                         const modRes = await axiosInstance.get(`/modules/${lessonRes.data.moduleId}`)
                         setCourseId(modRes.data?.courseId || null)
-                    } catch { /* ignore */ }
+                    } catch { void 0 }
                 }
             } catch (err) {
                 console.error(err)
@@ -254,7 +268,7 @@ export default function LessonDetail() {
                     {t('lessonDetail.backToCourse')}
                 </Button>
 
-                {/* Header */}
+                {}
                 <Box className="mb-8">
                     <div className="flex items-center gap-3 mb-3">
                         <Chip label={lesson.lloji} size="small" className="!font-bold !bg-sky-100 !text-sky-700 dark:!bg-sky-900/50 dark:!text-sky-400" />
@@ -265,7 +279,7 @@ export default function LessonDetail() {
                     </Typography>
                 </Box>
 
-                {/* Assignment type — show submit card prominently before grid */}
+                {}
                 {lesson.lloji === 'ASSIGNMENT' && (
                     <Box className="mb-6">
                         <LessonAssignmentCard lessonId={lessonId} />
@@ -274,10 +288,10 @@ export default function LessonDetail() {
 
                 <div className="grid gap-6 lg:grid-cols-3">
 
-                    {/* ── Main content ── */}
+                    {}
                     <div className="lg:col-span-2 flex flex-col gap-6">
 
-                        {/* Video */}
+                        {}
                         {lesson.videoUrl && (
                             <Card elevation={0} className="rounded-2xl border border-slate-200/80 bg-white dark:!bg-slate-900/50 dark:!border-slate-700/80">
                                 <CardContent className="!p-5">
@@ -297,7 +311,7 @@ export default function LessonDetail() {
                             </Card>
                         )}
 
-                        {/* Text content */}
+                        {}
                         {lesson.permbajtja && (
                             <Card elevation={0} className="rounded-2xl border border-slate-200/80 bg-white dark:!bg-slate-900/50 dark:!border-slate-700/80">
                                 <CardContent className="!p-5">
@@ -312,7 +326,7 @@ export default function LessonDetail() {
                             </Card>
                         )}
 
-                        {/* External link */}
+                        {}
                         {lesson.resourceUrl && (
                             <Card elevation={0} className="rounded-2xl border border-slate-200/80 bg-white dark:!bg-slate-900/50 dark:!border-slate-700/80">
                                 <CardContent className="!p-5 flex items-center justify-between">
@@ -329,7 +343,7 @@ export default function LessonDetail() {
                             </Card>
                         )}
 
-                        {/* Uploaded resources */}
+                        {}
                         {resources.length > 0 && (
                             <Card elevation={0} className="rounded-2xl border border-slate-200/80 bg-white dark:!bg-slate-900/50 dark:!border-slate-700/80">
                                 <CardContent className="!p-5">
@@ -350,10 +364,10 @@ export default function LessonDetail() {
                         )}
                     </div>
 
-                    {/* ── Sidebar ── */}
+                    {}
                     <div className="flex flex-col gap-6">
 
-                        {/* Quizzes */}
+                        {}
                         <Card elevation={0} className="rounded-2xl border border-slate-200/80 bg-white dark:!bg-slate-900/50 dark:!border-slate-700/80">
                             <CardContent className="!p-5">
                                 <Typography variant="subtitle1" className="!font-bold !text-slate-900 dark:!text-white !mb-4 flex items-center gap-2">
@@ -364,7 +378,7 @@ export default function LessonDetail() {
                             </CardContent>
                         </Card>
 
-                        {/* Assignment in sidebar only for non-ASSIGNMENT lessons (e.g. a lesson that also has an assignment) */}
+                        {}
                         {lesson.lloji !== 'ASSIGNMENT' && (
                             <LessonAssignmentCard lessonId={lessonId} />
                         )}
@@ -374,7 +388,7 @@ export default function LessonDetail() {
 
             <Footer />
 
-            {/* Course completion celebration dialog */}
+            {}
             <Dialog
                 open={!!completion}
                 onClose={() => setCompletion(null)}

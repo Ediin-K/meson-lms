@@ -22,4 +22,6 @@ public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, Long> 
 
     @Query("SELECT COUNT(a) FROM QuizAttempt a WHERE a.quiz.id = :quizId AND a.submitted = false AND a.abandoned = false")
     long countInProgressByQuizId(@Param("quizId") Long quizId);
+
+    void deleteByUserId(Long userId);
 }

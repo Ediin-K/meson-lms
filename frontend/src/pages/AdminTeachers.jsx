@@ -198,7 +198,7 @@ export default function AdminTeachers() {
   return (
     <Box className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-950">
       <Container maxWidth="xl" className="py-8 mt-4 sm:mt-8 grow">
-        {/* BACK BUTTON */}
+        {}
         <Box className="mb-8">
           <Button
             startIcon={<ArrowBackRounded />}
@@ -209,7 +209,7 @@ export default function AdminTeachers() {
           </Button>
         </Box>
 
-        {/* HEADER */}
+        {}
         <Box className="mb-12 flex flex-col lg:flex-row lg:items-end justify-between gap-8">
           <div>
             <Typography
@@ -263,7 +263,7 @@ export default function AdminTeachers() {
           </Box>
         </Box>
 
-        {/* STATS */}
+        {}
         <Grid container spacing={3} className="mb-10">
           {[
             {
@@ -314,7 +314,7 @@ export default function AdminTeachers() {
           ))}
         </Grid>
 
-        {/* TABLE */}
+        {}
         <Card
           elevation={0}
           className="rounded-[2.5rem]! border border-slate-200/60 bg-white/80 dark:bg-slate-900/50! backdrop-blur-xl overflow-hidden shadow-2xl shadow-slate-200/20 dark:shadow-none"
@@ -521,7 +521,7 @@ export default function AdminTeachers() {
         </Card>
       </Container>
 
-      {/* CREATE/EDIT DIALOG */}
+      {}
       <Dialog
         open={openDialog}
         onClose={() => setOpenDialog(false)}
@@ -772,7 +772,7 @@ export default function AdminTeachers() {
         </DialogActions>
       </Dialog>
 
-      {/* DELETE CONFIRMATION */}
+      {}
       <Dialog
         open={openDeleteConfirm}
         onClose={() => {
@@ -851,7 +851,7 @@ export default function AdminTeachers() {
         </DialogActions>
       </Dialog>
 
-      {/* SNACKBAR */}
+      {}
       <Snackbar
         open={openSnackbar}
         autoHideDuration={4000}

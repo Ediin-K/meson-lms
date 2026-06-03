@@ -43,6 +43,7 @@ import FilterListRounded from "@mui/icons-material/FilterListRounded";
 import MoreVertRounded from "@mui/icons-material/MoreVertRounded";
 import VerifiedUserRounded from "@mui/icons-material/VerifiedUserRounded";
 import Footer from "../components/ui/Footer";
+import axiosInstance from "../services/axiosInstance";
 import { getDirectionGroups } from "../services/directionGroupService";
 import {
   assignStudentToGroup,
@@ -99,7 +100,14 @@ export default function AdminUsers() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const [openSnackbar, setOpenSnackbar] = useState(false);
+
+  const showToast = (message, severity = "success") => {
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setOpenSnackbar(true);
+  };
 
   const filtered = users.filter((u) => {
     const matchesSearch = `${u.emri} ${u.mbiemri} ${u.email}`
@@ -110,40 +118,17 @@ export default function AdminUsers() {
   });
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-
     setLoading(true);
-
-    fetch("http://localhost:8080/api/users", {
-      method: "GET",
-      cache: "no-store",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then(async (res) => {
-        if (!res.ok) {
-          const msg = await res.text();
-          throw new Error(msg || "Error fetching users");
-        }
-        return res.json();
+    Promise.all([
+      axiosInstance.get("/users"),
+      axiosInstance.get("/categories").catch(() => ({ data: [] })),
+    ])
+      .then(([usersRes, catsRes]) => {
+        setUsers(usersRes.data);
+        setCategories(catsRes.data);
       })
-      .then((data) => setUsers(data))
-      .catch((err) => {
-        console.error("API ERROR:", err.message);
-      })
+      .catch((err) => console.error("API ERROR:", err.message))
       .finally(() => setLoading(false));
-
-    fetch("http://localhost:8080/api/categories", {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => res.ok ? res.json() : [])
-      .then(setCategories)
-      .catch(() => setCategories([]));
   }, []);
 
   const handleOpenAdd = () => {
@@ -235,12 +220,6 @@ export default function AdminUsers() {
     setFormData((f) => ({ ...f, [k]: e.target.value }));
 
   const handleSubmit = async () => {
-    const token = localStorage.getItem("token");
-    const url = isEdit
-      ? `http://localhost:8080/api/users/${selectedUser.id}`
-      : "http://localhost:8080/api/users";
-    const method = isEdit ? "PUT" : "POST";
-
     const body = isEdit
       ? {
           emri: formData.emri,
@@ -264,57 +243,18 @@ export default function AdminUsers() {
         };
 
     try {
-      const response = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(body),
-      });
-
-      if (!response.ok) {
-        const msg = await response.text();
-        throw new Error(msg || "Error saving user");
+      if (isEdit) {
+        await axiosInstance.put(`/users/${selectedUser.id}`, body);
+      } else {
+        await axiosInstance.post("/users", body);
       }
-
-      if (isEdit && selectedUser) {
-        setUsers((prevUsers) =>
-          prevUsers.map((user) =>
-            user.id === selectedUser.id
-              ? {
-                  ...user,
-                  emri: formData.emri,
-                  mbiemri: formData.mbiemri,
-                  email: formData.email,
-                  phoneNumber: formData.phoneNumber || "",
-                  statusi: formData.statusi,
-                  role: formData.role,
-                  categoryId: formData.categoryId,
-                  currentSemester: formData.currentSemester,
-                }
-              : user,
-          ),
-        );
-      }
-
-      const usersResponse = await fetch("http://localhost:8080/api/users", {
-        method: "GET",
-        cache: "no-store",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = await usersResponse.json();
+      const { data } = await axiosInstance.get("/users");
       setUsers(data);
-      setSnackbarMessage(
-        isEdit ? "Useri u përditësua me sukses." : "Useri u krijua me sukses.",
-      );
-      setOpenSnackbar(true);
+      showToast(isEdit ? "Useri u përditësua me sukses." : "Useri u krijua me sukses.");
       setOpenDialog(false);
     } catch (err) {
-      console.error("API ERROR:", err.message);
+      const msg = err.response?.data?.message || err.response?.data || err.message || "Gabim gjatë ruajtjes";
+      showToast(typeof msg === "string" ? msg : "Gabim gjatë ruajtjes", "error");
     }
   };
 
@@ -325,44 +265,22 @@ export default function AdminUsers() {
 
   const handleConfirmDelete = async () => {
     if (!deleteTarget) return;
-
-    const token = localStorage.getItem("token");
-
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/users/${deleteTarget.id}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
-      if (!response.ok) {
-        const msg = await response.text();
-        throw new Error(msg || "Error deleting user");
-      }
-
-      setUsers((prevUsers) =>
-        prevUsers.filter((user) => user.id !== deleteTarget.id),
-      );
-      setSnackbarMessage(
-        `${deleteTarget.emri} ${deleteTarget.mbiemri} u fshi me sukses.`,
-      );
-      setOpenSnackbar(true);
+      await axiosInstance.delete(`/users/${deleteTarget.id}`);
+      setUsers((prev) => prev.filter((u) => u.id !== deleteTarget.id));
+      showToast(`${deleteTarget.emri} ${deleteTarget.mbiemri} u fshi me sukses.`);
       setDeleteTarget(null);
       setOpenDeleteConfirm(false);
     } catch (err) {
-      console.error("API ERROR:", err.message);
+      const msg = err.response?.data?.message || err.response?.data || err.message || "Gabim gjatë fshirjes";
+      showToast(typeof msg === "string" ? msg : "Gabim gjatë fshirjes", "error");
     }
   };
 
   return (
     <Box className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-950">
       <Container maxWidth="xl" className="py-8 mt-4 sm:mt-8 grow">
-        {/* BACK BUTTON & TOP STRIP */}
+        {}
         <Box className="flex items-center justify-between mb-8">
           <Button
             startIcon={<ArrowBackRounded />}
@@ -380,7 +298,7 @@ export default function AdminUsers() {
           </Box>
         </Box>
 
-        {/* HEADER SECTION */}
+        {}
         <Box className="mb-12 flex flex-col lg:flex-row lg:items-end justify-between gap-8">
           <div>
             <Typography
@@ -441,7 +359,7 @@ export default function AdminUsers() {
           </Box>
         </Box>
 
-        {/* QUICK STATS STRIP */}
+        {}
         <Grid container spacing={3} className="mb-10">
           {[
             {
@@ -489,7 +407,7 @@ export default function AdminUsers() {
           ))}
         </Grid>
 
-        {/* TABLE CONTAINER */}
+        {}
         <Card
           elevation={0}
           className="rounded-[2.5rem]! border border-slate-200/60 bg-white/80 dark:bg-slate-900/50! backdrop-blur-xl overflow-hidden shadow-2xl shadow-slate-200/20 dark:shadow-none"
@@ -658,7 +576,7 @@ export default function AdminUsers() {
           )}
         </Card>
 
-        {/* MODERN DIALOG */}
+        {}
         <Dialog
           open={openDialog}
           onClose={() => setOpenDialog(false)}
@@ -1107,10 +1025,10 @@ export default function AdminUsers() {
       >
         <Alert
           onClose={() => setOpenSnackbar(false)}
-          severity="success"
+          severity={snackbarSeverity}
           variant="filled"
-          sx={{ 
-            width: "100%", 
+          sx={{
+            width: "100%",
             borderRadius: "1.25rem",
             fontWeight: "bold",
             boxShadow: "0 10px 30px rgba(0,0,0,0.1)"

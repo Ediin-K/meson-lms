@@ -43,9 +43,8 @@ import MenuBookRounded from "@mui/icons-material/MenuBookRounded";
 import AutoStoriesRounded from "@mui/icons-material/AutoStoriesRounded";
 import LayersRounded from "@mui/icons-material/LayersRounded";
 import Footer from "../components/ui/Footer";
+import axiosInstance from "../services/axiosInstance";
 import { getDirectionGroups } from "../services/directionGroupService";
-
-const BASE_URL = "http://localhost:8080/api";
 
 const SEMESTER_COLORS = {
   1: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300",
@@ -108,189 +107,62 @@ export default function AdminCourses() {
     setLoading(true);
     setError(null);
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`${BASE_URL}/courses`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-      if (!response.ok) throw new Error("Gabim gjatë marrjes së kurseve");
-      const data = await response.json();
+      const { data } = await axiosInstance.get("/courses");
       setCourses(data);
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.message || err.message || "Gabim gjatë marrjes së kurseve");
     } finally {
       setLoading(false);
     }
   };
 
   const createCourse = async (courseData) => {
-    const token = localStorage.getItem("token");
-    const response = await fetch(`${BASE_URL}/courses`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(courseData),
-    });
-
-    if (!response.ok) {
-      const text = await response.text();
-      throw new Error(text || "Gabim gjatë krijimit");
-    }
-
-    // Nëse body është bosh, mos provo ta parse-sh
-    const text = await response.text();
-    return text ? JSON.parse(text) : {};
+    const { data } = await axiosInstance.post("/courses", courseData);
+    return data;
   };
 
   const updateCourse = async (id, courseData) => {
-    const token = localStorage.getItem("token");
-    const response = await fetch(`${BASE_URL}/courses/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(courseData),
-    });
-    if (!response.ok) {
-      const text = await response.text();
-      throw new Error(text || "Gabim gjatë përditësimit");
-    }
-    const responseText = await response.text();
-    return responseText ? JSON.parse(responseText) : {};
+    const { data } = await axiosInstance.put(`/courses/${id}`, courseData);
+    return data;
   };
 
   const deleteCourse = async (id) => {
-    const token = localStorage.getItem("token");
-    console.log(
-      "Fshij kurs me ID:",
-      id,
-      "Token:",
-      token ? "Ekziston" : "Nuk ekziston",
-    );
-    const response = await fetch(`${BASE_URL}/courses/${id}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    console.log("Response status:", response.status, response.statusText);
-    if (!response.ok) {
-      const text = await response.text();
-      console.log("Error response text:", text);
-      throw new Error(
-        text || `Gabim ${response.status}: ${response.statusText}`,
-      );
-    }
+    await axiosInstance.delete(`/courses/${id}`);
   };
 
   const fetchCourseGroups = async (courseId) => {
-    const token = localStorage.getItem("token");
-    const response = await fetch(`${BASE_URL}/courses/${courseId}/groups`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response.ok) throw new Error("Gabim gjate marrjes se grupeve");
-    return response.json();
+    const { data } = await axiosInstance.get(`/courses/${courseId}/groups`);
+    return data;
   };
 
   const createGroup = async (courseId, payload) => {
-    const token = localStorage.getItem("token");
-    const response = await fetch(`${BASE_URL}/courses/${courseId}/groups`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) throw new Error(await response.text());
-    return response.json();
+    const { data } = await axiosInstance.post(`/courses/${courseId}/groups`, payload);
+    return data;
   };
 
   const updateGroup = async (groupId, payload) => {
-    const token = localStorage.getItem("token");
-    const response = await fetch(`${BASE_URL}/course-groups/${groupId}`, {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) throw new Error(await response.text());
-    return response.json();
+    const { data } = await axiosInstance.put(`/course-groups/${groupId}`, payload);
+    return data;
   };
 
   const deleteGroup = async (groupId) => {
-    const token = localStorage.getItem("token");
-    const response = await fetch(`${BASE_URL}/course-groups/${groupId}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response.ok) throw new Error(await response.text());
+    await axiosInstance.delete(`/course-groups/${groupId}`);
   };
 
   const createSubgroup = async (groupId, payload) => {
-    const token = localStorage.getItem("token");
-    const response = await fetch(`${BASE_URL}/course-groups/${groupId}/subgroups`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) throw new Error(await response.text());
-    return response.json();
+    const { data } = await axiosInstance.post(`/course-groups/${groupId}/subgroups`, payload);
+    return data;
   };
 
   const updateSubgroup = async (subgroupId, payload) => {
-    const token = localStorage.getItem("token");
-    const response = await fetch(`${BASE_URL}/course-subgroups/${subgroupId}`, {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) throw new Error(await response.text());
-    return response.json();
+    const { data } = await axiosInstance.put(`/course-subgroups/${subgroupId}`, payload);
+    return data;
   };
 
   const deleteSubgroup = async (subgroupId) => {
-    const token = localStorage.getItem("token");
-    const response = await fetch(`${BASE_URL}/course-subgroups/${subgroupId}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response.ok) throw new Error(await response.text());
+    await axiosInstance.delete(`/course-subgroups/${subgroupId}`);
   };
 
-  // ─── HANDLERS ─────────────────────────────────────────────────
-
-  // Hap dialogun për shtim
   const handleOpenAdd = () => {
     setIsEdit(false);
     setSelectedCourse(null);
@@ -299,11 +171,10 @@ export default function AdminCourses() {
     setOpenDialog(true);
   };
 
-  // Hap dialogun për editim
   const handleOpenEdit = (course) => {
     setIsEdit(true);
     setSelectedCourse(course);
-    // Mbush form-in me të dhënat e kursit ekzistues
+    
     setFormData({
       titulli: course.titulli,
       pershkrimi: course.pershkrimi,
@@ -320,21 +191,20 @@ export default function AdminCourses() {
     setOpenDialog(true);
   };
 
-  // Submit - Krijo ose Përditëso
   const handleSubmit = async () => {
     setSaving(true);
     setFormError(null);
     try {
       if (isEdit) {
         const updated = await updateCourse(selectedCourse.id, formData);
-        // Zëvendëso kursin e vjetër me të riun në state
+        
         setCourses((prev) =>
           prev.map((c) => (c.id === updated.id ? updated : c)),
         );
         setSnackbarMessage("Kursi u përditësua me sukses.");
       } else {
         const created = await createCourse(formData);
-        // Shto kursin e ri në listë
+        
         setCourses((prev) => [...prev, created]);
         setSnackbarMessage("Kursi u krijua me sukses.");
       }
@@ -347,7 +217,6 @@ export default function AdminCourses() {
     }
   };
 
-  // Fshi kurs
   const handleOpenDelete = (course) => {
     setDeleteTarget(course);
     setOpenDeleteConfirm(true);
@@ -358,7 +227,7 @@ export default function AdminCourses() {
 
     try {
       await deleteCourse(deleteTarget.id);
-      // Largo kursin nga state pa re-fetch
+      
       setCourses((prev) => prev.filter((c) => c.id !== deleteTarget.id));
       setSnackbarMessage(`${deleteTarget.titulli} u fshi me sukses.`);
       setOpenSnackbar(true);
@@ -510,24 +379,20 @@ export default function AdminCourses() {
   const field = (k) => (e) =>
     setFormData((f) => ({ ...f, [k]: e.target.value }));
 
-  // Merr kurset kur komponenti ngarkohet
   useEffect(() => {
     fetchCourses();
   }, []);
 
-  // Filtro kurset sipas kërkimit
   const filtered = courses.filter(
     (c) =>
       (c.titulli?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
       (c.categoryName?.toLowerCase() || "").includes(searchTerm.toLowerCase()),
   );
 
-  // ─── UI ───────────────────────────────────────────────────────
-
   return (
     <Box className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-950">
       <Container maxWidth="xl" className="py-8 mt-4 sm:mt-8 grow">
-        {/* BACK BUTTON */}
+        {}
         <Box className="mb-8">
           <Button
             startIcon={<ArrowBackRounded />}
@@ -538,7 +403,7 @@ export default function AdminCourses() {
           </Button>
         </Box>
 
-        {/* HEADER */}
+        {}
         <Box className="mb-12 flex flex-col lg:flex-row lg:items-end justify-between gap-8">
           <div>
             <Typography
@@ -597,7 +462,7 @@ export default function AdminCourses() {
           </Box>
         </Box>
 
-        {/* ERROR GLOBAL */}
+        {}
         {error && (
           <Alert
             severity="error"
@@ -608,7 +473,7 @@ export default function AdminCourses() {
           </Alert>
         )}
 
-        {/* STATS */}
+        {}
         <Grid container spacing={3} className="mb-10">
           {[
             {
@@ -666,7 +531,7 @@ export default function AdminCourses() {
           ))}
         </Grid>
 
-        {/* TABLE */}
+        {}
         <Card
           elevation={0}
           className="rounded-[2.5rem]! border border-slate-200/60 bg-white/80 dark:bg-slate-900/50! backdrop-blur-xl overflow-hidden shadow-2xl shadow-slate-200/20 dark:shadow-none"
@@ -839,7 +704,7 @@ export default function AdminCourses() {
           )}
         </Card>
 
-        {/* DIALOG - SHTO / NDRYSHO */}
+        {}
         <Dialog
           open={openDialog}
           onClose={() => setOpenDialog(false)}
@@ -884,7 +749,7 @@ export default function AdminCourses() {
           <DialogContent
             className={`!px-6 py-4! ${isDark ? "bg-slate-900/20!" : ""}`}
           >
-            {/* ERROR NË FORM */}
+            {}
             {formError && (
               <Alert
                 severity="error"
@@ -896,7 +761,7 @@ export default function AdminCourses() {
             )}
 
             <Box className="flex flex-col gap-5 mt-4">
-              {/* TITULLI */}
+              {}
               <TextField
                 label="Titulli i Lëndës *"
                 fullWidth
@@ -919,7 +784,7 @@ export default function AdminCourses() {
                 }}
               />
 
-              {/* PERSHKRIMI */}
+              {}
               <TextField
                 label="Përshkrimi"
                 fullWidth
@@ -944,7 +809,7 @@ export default function AdminCourses() {
                 }}
               />
 
-              {/* TEACHER ID & CATEGORY ID */}
+              {}
               <Box className="flex gap-4">
                 <TextField
                   label="Teacher ID *"
@@ -986,7 +851,7 @@ export default function AdminCourses() {
                 />
               </Box>
 
-              {/* SEMESTER & CMIMI */}
+              {}
               <Box className="flex gap-4">
                 <FormControl fullWidth>
                   <InputLabel sx={{ color: isDark ? "#cbd5e1" : "#64748b" }}>
@@ -1057,7 +922,7 @@ export default function AdminCourses() {
                 />
               </Box>
 
-              {/* NIVELI & STATUSI */}
+              {}
               <Box className="flex gap-4">
                 <FormControl fullWidth>
                   <InputLabel sx={{ color: isDark ? "#cbd5e1" : "#64748b" }}>
@@ -1110,7 +975,7 @@ export default function AdminCourses() {
                 </FormControl>
               </Box>
 
-              {/* ENROLLMENT KEY */}
+              {}
               <TextField
                 label="Enrollment Key (opsionale)"
                 fullWidth
@@ -1162,7 +1027,7 @@ export default function AdminCourses() {
           </DialogActions>
         </Dialog>
 
-        {/* GROUPS DIALOG */}
+        {}
         <Dialog
           open={groupDialog.open}
           onClose={() => setGroupDialog({ open: false, course: null })}
@@ -1391,7 +1256,7 @@ export default function AdminCourses() {
           </DialogActions>
         </Dialog>
 
-        {/* DELETE CONFIRMATION DIALOG */}
+        {}
         <Dialog
           open={openDeleteConfirm}
           onClose={() => {
@@ -1473,7 +1338,7 @@ export default function AdminCourses() {
           </DialogActions>
         </Dialog>
 
-        {/* SNACKBAR */}
+        {}
         <Snackbar
           open={openSnackbar}
           autoHideDuration={4000}
