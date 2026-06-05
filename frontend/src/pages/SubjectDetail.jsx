@@ -16,13 +16,8 @@ import AddRounded from '@mui/icons-material/AddRounded'
 import EditRounded from '@mui/icons-material/EditRounded'
 import DeleteRounded from '@mui/icons-material/DeleteRounded'
 import MoreVertRounded from '@mui/icons-material/MoreVertRounded'
-import AttachFileRounded from '@mui/icons-material/AttachFileRounded'
 import FileDownloadRounded from '@mui/icons-material/FileDownloadRounded'
 import VisibilityRounded from '@mui/icons-material/VisibilityRounded'
-import PictureAsPdfRounded from '@mui/icons-material/PictureAsPdfRounded'
-import ImageRounded from '@mui/icons-material/ImageRounded'
-import VideocamRounded from '@mui/icons-material/VideocamRounded'
-import DescriptionRounded from '@mui/icons-material/DescriptionRounded'
 import QuizRounded from '@mui/icons-material/QuizRounded'
 import AssignmentTurnedInRounded from '@mui/icons-material/AssignmentTurnedInRounded'
 import UploadFileRounded from '@mui/icons-material/UploadFileRounded'
@@ -34,6 +29,7 @@ import { getSubjectGroups } from '../services/subjectGroupService'
 import FileUpload from '../components/common/FileUpload'
 import LessonQuizCard from '../components/quiz/LessonQuizCard'
 import LessonAssignmentCard from '../components/subject/LessonAssignmentCard'
+import ResourceTypeIcon from '../components/common/ResourceTypeIcon'
 import assignmentService from '../services/assignmentService'
 import {
     Dialog, DialogTitle, DialogContent, DialogActions, TextField,
@@ -47,18 +43,6 @@ function formatFileSize(bytes) {
     if (bytes < 1024) return `${bytes} B`
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
     return `${(bytes / 1024 / 1024).toFixed(1)} MB`
-}
-
-function ResourceTypeIcon({ type, sx }) {
-    switch (type) {
-        case 'PDF':          return <PictureAsPdfRounded sx={sx} />
-        case 'IMAGE':        return <ImageRounded sx={sx} />
-        case 'VIDEO':        return <VideocamRounded sx={sx} />
-        case 'DOCUMENT':
-        case 'PRESENTATION':
-        case 'SPREADSHEET':  return <DescriptionRounded sx={sx} />
-        default:             return <AttachFileRounded sx={sx} />
-    }
 }
 
 function LearningResourceCard({ resource, isOwner, isDark, onPreview, onDownload, onDelete }) {
@@ -76,7 +60,10 @@ function LearningResourceCard({ resource, isOwner, isDark, onPreview, onDownload
                 className="h-11 w-11 rounded-xl flex items-center justify-center shrink-0"
                 sx={{ bgcolor: isDark ? 'rgba(125,211,252,0.14)' : 'rgba(14,165,233,0.10)' }}
             >
-                <ResourceTypeIcon type={resource.resourceType} sx={{ color: isDark ? '#bae6fd' : '#0369a1' }} />
+                <ResourceTypeIcon
+                    type={resource.resourceType}
+                    sx={{ color: isDark ? '#bae6fd' : '#0369a1' }}
+                />
             </Box>
             <Box className="min-w-0 flex-1">
                 <Typography sx={{ color: text, fontWeight: 800 }} noWrap title={resource.emriOrigjinal}>
@@ -157,7 +144,6 @@ export default function SubjectDetail() {
     const [pendingFiles, setPendingFiles] = useState([])
     const [pendingAssignmentFile, setPendingAssignmentFile] = useState(null)
     const [currentAssignmentAttachment, setCurrentAssignmentAttachment] = useState(null)
-
     const [subjectProgress, setSubjectProgress] = useState(null)
     const [submissionsModal, setSubmissionsModal] = useState({ open: false, lessonId: null, lessonTitle: '' })
     const [submissions, setSubmissions] = useState([])
@@ -195,7 +181,7 @@ export default function SubjectDetail() {
             }
         }
         fetchData()
-    }, [subjectId, userId])
+    }, [subjectId, userId, role])
 
     const handleEnroll = async () => {
         try {

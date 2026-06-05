@@ -149,8 +149,8 @@ export default function AdminGroups() {
     [staffRows],
   );
 
-  const subjects = context?.subjects || [];
-  const teachers = context?.teachers || [];
+  const subjects = useMemo(() => context?.subjects || [], [context?.subjects]);
+  const teachers = useMemo(() => context?.teachers || [], [context?.teachers]);
 
   const staffBySubject = useMemo(
     () => buildStaffBySubject(staffRows, subjects, teachers),

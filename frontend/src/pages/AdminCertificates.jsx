@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppPreferences } from "../context/appPreferencesContext";
 import {
@@ -76,7 +76,7 @@ export default function AdminCertificates() {
     );
   };
 
-  const loadCertificates = async () => {
+  const loadCertificates = useCallback(async () => {
     setLoading(true);
     try {
       const response = await getAllCertificates();
@@ -89,9 +89,9 @@ export default function AdminCertificates() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const loadEnrollments = async () => {
+  const loadEnrollments = useCallback(async () => {
     try {
       const response = await axiosInstance.get("/enrollments");
       setEnrollments(response.data);
@@ -101,12 +101,12 @@ export default function AdminCertificates() {
         "error",
       );
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadCertificates();
     loadEnrollments();
-  }, []);
+  }, [loadCertificates, loadEnrollments]);
 
   const availableEnrollments = enrollments.filter(
     (enr) =>

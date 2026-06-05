@@ -18,7 +18,7 @@ for (const file of files) {
     let content = fs.readFileSync(file, 'utf8');
     let original = content;
     
-    // Replace <Select ... without variant with <Select variant="outlined" ...
+    // Replace <Select ... without variant with <Select variant="outlined" ..
     // Note: this regex is simple and assumes <Select is followed by whitespace and doesn't already have variant="
     content = content.replace(/<Select\s+(?![\s\S]*?variant=)([^>]*?)>/g, '<Select variant="outlined" $1>');
 

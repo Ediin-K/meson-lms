@@ -29,7 +29,6 @@ public class TeacherFileService {
 
     public List<LessonResourceResponse> getResourcesByLesson(Long lessonId) {
         User teacher = getCurrentUser();
-        
         lessonRepository.findByIdAndModuleSubjectTeacherId(lessonId, teacher.getId())
                 .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses në këtë lëndë."));
 

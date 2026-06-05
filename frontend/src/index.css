@@ -77,7 +77,7 @@
   --lms-schedule-slate-text: #e2e8f0;
 }
 
-/* Sfond bazë i njëjtë me fundin e faqes — nuk mbetet “strikë” e bardhë poshtë footer-it */
+
 html {
   min-height: 100dvh;
   background-color: #d8e8f2;
@@ -111,7 +111,7 @@ html.dark #root {
   background-color: transparent;
 }
 
-/* Dorë (pointer) për elemente të klikueshme — përputhet me hover në UI */
+
 a[href]:not([aria-disabled="true"]),
 button:not(:disabled),
 [role="button"]:not([aria-disabled="true"]),
@@ -134,7 +134,7 @@ button:disabled,
   cursor: not-allowed;
 }
 
-/* --- Glassmorphism --- */
+
 .glass-panel {
   @apply bg-white/70 backdrop-blur-md border border-white/40 shadow-xl;
 }
@@ -143,7 +143,7 @@ button:disabled,
   @apply bg-slate-900/70 backdrop-blur-md border border-slate-700/40 shadow-black/40;
 }
 
-/* --- Animations --- */
+
 @keyframes float {
   0% { transform: translateY(0px); }
   50% { transform: translateY(-10px); }
@@ -163,7 +163,7 @@ button:disabled,
   animation: fadeIn 0.8s ease-out forwards;
 }
 
-/* --- Custom Scrollbar --- */
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -177,7 +177,7 @@ button:disabled,
   @apply bg-sky-200/50 rounded-full hover:bg-sky-300/50 transition-colors;
 }
 
-/* --- Infinite Marquee --- */
+
 @keyframes marquee {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }

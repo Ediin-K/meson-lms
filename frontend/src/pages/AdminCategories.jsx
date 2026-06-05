@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppPreferences } from "../context/appPreferencesContext";
 import {
@@ -87,7 +87,7 @@ export default function AdminCategories() {
     );
   };
 
-  const loadCategories = async () => {
+  const loadCategories = useCallback(async () => {
     setLoading(true);
     try {
       const data = await getAllCategories();
@@ -100,11 +100,11 @@ export default function AdminCategories() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadCategories();
-  }, []);
+  }, [loadCategories]);
 
   const filteredCategories = categories.filter(
     (category) =>
@@ -129,11 +129,6 @@ export default function AdminCategories() {
     } finally {
       setGroupsLoading(false);
     }
-  };
-
-  const reloadDirectionGroups = async () => {
-    if (!groupsDialog.category) return;
-    setDirectionGroups(await getDirectionGroups(groupsDialog.category.id, groupsSemester));
   };
 
   const openEditDialog = (category) => {
