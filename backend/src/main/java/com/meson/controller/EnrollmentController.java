@@ -34,9 +34,9 @@ public class EnrollmentController {
         return ResponseEntity.ok(enrollmentService.getByUserId(userId));
     }
 
-    @GetMapping("/course/{courseId}")
-    public ResponseEntity<List<EnrollmentResponse>> getByCourseId(@PathVariable Long courseId) {
-        return ResponseEntity.ok(enrollmentService.getByCourseId(courseId));
+    @GetMapping("/subject/{subjectId}")
+    public ResponseEntity<List<EnrollmentResponse>> getBySubjectId(@PathVariable Long subjectId) {
+        return ResponseEntity.ok(enrollmentService.getBySubjectId(subjectId));
     }
 
     @PostMapping

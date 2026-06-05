@@ -276,7 +276,7 @@ public class QuizService {
                 .submitted(true)
                 .message("Kuizi u dorezua me sukses.")
                 .pikete(score)
-                .courseId(getCourseIdFromQuiz(attempt.getQuiz()))
+                .subjectId(getSubjectIdFromQuiz(attempt.getQuiz()))
                 .build();
     }
 
@@ -368,7 +368,7 @@ public class QuizService {
                 .startedAt(attempt.getStartedAt())
                 .expiresAt(attempt.getExpiresAt())
                 .remainingSeconds(remaining)
-                .courseId(getCourseIdFromQuiz(attempt.getQuiz()))
+                .subjectId(getSubjectIdFromQuiz(attempt.getQuiz()))
                 .totalPikete(questionHelper.calculateTotalPoints(attempt.getQuiz().getId()))
                 .questions(questionRepository.findByQuizIdOrderByRradhitjaAsc(attempt.getQuiz().getId()).stream()
                         .map(this::toQuestionForAttempt)
@@ -387,11 +387,11 @@ public class QuizService {
                 .build();
     }
 
-    private Long getCourseIdFromQuiz(Quiz quiz) {
-        if (quiz.getLesson() == null || quiz.getLesson().getModule() == null || quiz.getLesson().getModule().getCourse() == null) {
+    private Long getSubjectIdFromQuiz(Quiz quiz) {
+        if (quiz.getLesson() == null || quiz.getLesson().getModule() == null || quiz.getLesson().getModule().getSubject() == null) {
             return null;
         }
-        return quiz.getLesson().getModule().getCourse().getId();
+        return quiz.getLesson().getModule().getSubject().getId();
     }
 
     public Long getCurrentStudentId() {
@@ -418,7 +418,7 @@ public class QuizService {
                 .createdAt(quiz.getCreatedAt())
                 .activatedAt(quiz.getActivatedAt())
                 .closedAt(quiz.getClosedAt())
-                .courseId(getCourseIdFromQuiz(quiz))
+                .subjectId(getSubjectIdFromQuiz(quiz))
                 .questionCount((int) questionCount)
                 .totalPikete(questionHelper.calculateTotalPoints(quiz.getId()))
                 .build();

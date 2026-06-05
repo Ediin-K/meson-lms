@@ -1,11 +1,11 @@
 package com.meson.service;
 
 import com.meson.dto.*;
-import com.meson.entity.CourseCategory;
+import com.meson.entity.Direction;
 import com.meson.entity.DirectionGroup;
 import com.meson.entity.DirectionGroupStatus;
 import com.meson.entity.StudentProfile;
-import com.meson.repository.CourseCategoryRepository;
+import com.meson.repository.DirectionRepository;
 import com.meson.repository.DirectionGroupRepository;
 import com.meson.repository.StudentProfileRepository;
 import com.meson.exception.BadRequestException;
@@ -20,7 +20,7 @@ import java.util.List;
 public class DirectionGroupService {
 
     private final DirectionGroupRepository directionGroupRepository;
-    private final CourseCategoryRepository courseCategoryRepository;
+    private final DirectionRepository directionRepository;
     private final StudentProfileRepository studentProfileRepository;
 
     @Transactional(readOnly = true)
@@ -33,19 +33,19 @@ public class DirectionGroupService {
 
     @Transactional
     public DirectionGroupResponse create(Long categoryId, DirectionGroupRequest request) {
-        CourseCategory category = courseCategoryRepository.findById(categoryId)
-                .orElseThrow(() -> new ResourceNotFoundException("Kategoria nuk u gjet"));
+        Direction category = directionRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Drejtimi nuk u gjet"));
 
         validateRequest(request);
         int semester = request.getSemester();
 
-        if (directionGroupRepository.existsByCourseCategoryIdAndSemesterAndNameIgnoreCase(
+        if (directionGroupRepository.existsByDirectionIdAndSemesterAndNameIgnoreCase(
                 categoryId, semester, request.getName())) {
             throw new BadRequestException("Ky grup ekziston tashme per kete drejtim dhe semestrin");
         }
 
         DirectionGroup group = DirectionGroup.builder()
-                .courseCategory(category)
+                .direction(category)
                 .semester(semester)
                 .name(request.getName().trim())
                 .description(trimToNull(request.getDescription()))
@@ -62,11 +62,11 @@ public class DirectionGroupService {
                 .orElseThrow(() -> new ResourceNotFoundException("Grupi i drejtimit nuk u gjet"));
 
         validateRequest(request);
-        Long categoryId = group.getCourseCategory().getId();
+        Long categoryId = group.getDirection().getId();
         int semester = request.getSemester() != null ? request.getSemester() : group.getSemester();
 
         if (!group.getName().equalsIgnoreCase(request.getName())
-                && directionGroupRepository.existsByCourseCategoryIdAndSemesterAndNameIgnoreCase(
+                && directionGroupRepository.existsByDirectionIdAndSemesterAndNameIgnoreCase(
                         categoryId, semester, request.getName())) {
             throw new BadRequestException("Ky grup ekziston tashme per kete drejtim dhe semestrin");
         }
@@ -129,12 +129,12 @@ public class DirectionGroupService {
         int max = group.getMaxCapacity() != null ? group.getMaxCapacity() : 0;
         int remaining = Math.max(0, max - current);
         boolean isFull = max > 0 && current >= max;
-        CourseCategory category = group.getCourseCategory();
+        Direction direction = group.getDirection();
 
         return DirectionGroupResponse.builder()
                 .id(group.getId())
-                .categoryId(category != null ? category.getId() : null)
-                .categoryName(category != null ? category.getEmertimi() : null)
+                .categoryId(direction != null ? direction.getId() : null)
+                .categoryName(direction != null ? direction.getEmertimi() : null)
                 .semester(group.getSemester())
                 .name(group.getName())
                 .description(group.getDescription())

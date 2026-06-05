@@ -18,20 +18,20 @@ public class DirectionGroupController {
 
     private final DirectionGroupService directionGroupService;
 
-    @GetMapping("/api/categories/{categoryId}/direction-groups")
-    public ResponseEntity<List<DirectionGroupResponse>> getByCategory(
-            @PathVariable Long categoryId,
+    @GetMapping("/api/directions/{directionId}/direction-groups")
+    public ResponseEntity<List<DirectionGroupResponse>> getByDirection(
+            @PathVariable Long directionId,
             @RequestParam(required = false) Integer semester) {
-        return ResponseEntity.ok(directionGroupService.getByCategory(categoryId, semester));
+        return ResponseEntity.ok(directionGroupService.getByCategory(directionId, semester));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/api/categories/{categoryId}/direction-groups")
+    @PostMapping("/api/directions/{directionId}/direction-groups")
     public ResponseEntity<DirectionGroupResponse> create(
-            @PathVariable Long categoryId,
+            @PathVariable Long directionId,
             @Valid @RequestBody DirectionGroupRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(directionGroupService.create(categoryId, request));
+                .body(directionGroupService.create(directionId, request));
     }
 
     @PreAuthorize("hasRole('ADMIN')")

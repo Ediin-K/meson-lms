@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+﻿import { NavLink } from "react-router-dom";
 import DashboardRounded from "@mui/icons-material/DashboardRounded";
 import SchoolRounded from "@mui/icons-material/SchoolRounded";
 import ViewModuleRounded from "@mui/icons-material/ViewModuleRounded";
@@ -26,7 +26,7 @@ const SidebarLink = ({ to, icon: Icon, label }) => (
 export default function TeacherSidebar() {
   const links = [
     { to: "/teacher", icon: DashboardRounded, label: "Dashboard" },
-    { to: "/teacher/courses", icon: SchoolRounded, label: "My Courses" },
+    { to: "/teacher/subjects", icon: SchoolRounded, label: "My subjects" },
     { to: "/teacher/modules", icon: ViewModuleRounded, label: "Modules" },
     { to: "/teacher/lessons", icon: MenuBookRounded, label: "Lessons" },
     { to: "/teacher/quizzes", icon: QuizRounded, label: "Quizzes" },

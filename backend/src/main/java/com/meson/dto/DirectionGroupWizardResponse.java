@@ -9,6 +9,6 @@ import java.util.List;
 @Builder
 public class DirectionGroupWizardResponse {
     private DirectionGroupResponse group;
-    private List<CourseGroupResponse> courseGroups;
+    private List<SubjectGroupResponse> subjectGroups;
     private List<ScheduleSessionResponse> schedules;
 }

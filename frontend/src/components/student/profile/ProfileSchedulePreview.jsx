@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+﻿import { Link } from 'react-router-dom'
 import { Box, Button, Card, CardContent, Typography } from '@mui/material'
 import CalendarMonthRounded from '@mui/icons-material/CalendarMonthRounded'
 
@@ -34,7 +34,7 @@ export default function ProfileSchedulePreview({ schedules, t }) {
                 className="rounded-xl border border-slate-100 bg-slate-50/30 p-3 dark:border-slate-700 dark:bg-slate-800/40"
               >
                 <Typography variant="body2" className="!font-semibold !text-slate-800 dark:!text-white">
-                  {session.courseTitle}
+                  {session.subjectTitle}
                 </Typography>
                 <Typography variant="caption" className="!mt-1 !block !text-slate-500">
                   {DAY_NAMES[session.dayOfWeek] || session.dayOfWeek}

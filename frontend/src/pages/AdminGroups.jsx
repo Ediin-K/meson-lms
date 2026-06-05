@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+﻿import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Alert,
@@ -42,7 +42,7 @@ import GroupCreateWizard from "../components/admin/groupWizard/GroupCreateWizard
 import {
   DRAFT_STORAGE_KEY,
   applyStaffToScheduleRow,
-  buildStaffByCourse,
+  buildStaffBySubject,
   cardSx,
   getGroupsTheme,
   getMenuPaperSx,
@@ -86,9 +86,9 @@ const STATUS_FILTER_OPTIONS = [
   { value: GROUP_STATUS.CLOSED, label: "Mbyllur" },
 ];
 
-const emptyStaffRow = () => ({ courseId: "", professorId: "", assistantId: "" });
+const emptyStaffRow = () => ({ subjectId: "", professorId: "", assistantId: "" });
 const emptyScheduleRow = () => ({
-  courseId: "",
+  subjectId: "",
   professorId: "",
   assistantId: "",
   sessionType: "LECTURE",
@@ -144,17 +144,17 @@ export default function AdminGroups() {
     [categories, categoryId],
   );
 
-  const staffCourseIds = useMemo(
-    () => new Set(staffRows.map((r) => Number(r.courseId)).filter(Boolean)),
+  const staffSubjectIds = useMemo(
+    () => new Set(staffRows.map((r) => Number(r.subjectId)).filter(Boolean)),
     [staffRows],
   );
 
-  const courses = useMemo(() => context?.courses || [], [context?.courses]);
+  const subjects = useMemo(() => context?.subjects || [], [context?.subjects]);
   const teachers = useMemo(() => context?.teachers || [], [context?.teachers]);
 
-  const staffByCourse = useMemo(
-    () => buildStaffByCourse(staffRows, courses, teachers),
-    [staffRows, courses, teachers],
+  const staffBySubject = useMemo(
+    () => buildStaffBySubject(staffRows, subjects, teachers),
+    [staffRows, subjects, teachers],
   );
 
   const filteredGroups = useMemo(() => {
@@ -226,12 +226,12 @@ export default function AdminGroups() {
         rows.map((r, i) => {
           if (i !== index) return r;
           const next = { ...r, [key]: val };
-          if (key === "courseId") return applyStaffToScheduleRow(next, staffByCourse);
+          if (key === "subjectId") return applyStaffToScheduleRow(next, staffBySubject);
           return next;
         }),
       );
     },
-    [staffByCourse],
+    [staffBySubject],
   );
 
   const restoreDraft = () => {
@@ -309,9 +309,9 @@ export default function AdminGroups() {
       }
     }
     if (wizardStep === 1) {
-      const validStaff = staffRows.filter((r) => r.courseId && r.professorId);
+      const validStaff = staffRows.filter((r) => r.subjectId && r.professorId);
       if (validStaff.length === 0) errors.staff = "Shto te pakten nje rresht stafi (lende + profesor)";
-      const validSchedules = scheduleRows.filter((r) => r.courseId && r.professorId && r.startTime);
+      const validSchedules = scheduleRows.filter((r) => r.subjectId && r.professorId && r.startTime);
       if (validSchedules.length === 0) {
         errors.schedules = "Shto te pakten nje sesion orari";
       } else {
@@ -323,7 +323,7 @@ export default function AdminGroups() {
             break;
           }
         }
-        const missingStaff = validSchedules.some((r) => !staffByCourse[String(r.courseId)]?.professorId);
+        const missingStaff = validSchedules.some((r) => !staffBySubject[String(r.subjectId)]?.professorId);
         if (missingStaff) {
           errors.schedules = "Disa lende nuk kane staf te caktuar ne hapin e stafit";
         }
@@ -340,11 +340,11 @@ export default function AdminGroups() {
     if (!ok) return;
 
     if (wizardStep === 1) {
-      const hasValidSchedule = scheduleRows.some((r) => r.courseId && r.startTime);
+      const hasValidSchedule = scheduleRows.some((r) => r.subjectId && r.startTime);
       if (!hasValidSchedule) {
         setScheduleRows(seedScheduleRowsFromStaff(staffRows, emptyScheduleRow));
       } else {
-        setScheduleRows((rows) => rows.map((r) => applyStaffToScheduleRow(r, staffByCourse)));
+        setScheduleRows((rows) => rows.map((r) => applyStaffToScheduleRow(r, staffBySubject)));
       }
     }
 
@@ -364,16 +364,16 @@ export default function AdminGroups() {
     description: groupDescription.trim() || null,
     maxCapacity: Number(maxCapacity),
     staff: staffRows
-      .filter((r) => r.courseId && r.professorId)
+      .filter((r) => r.subjectId && r.professorId)
       .map((r) => ({
-        courseId: Number(r.courseId),
+        subjectId: Number(r.subjectId),
         professorId: Number(r.professorId),
         assistantId: r.assistantId ? Number(r.assistantId) : null,
       })),
     schedules: scheduleRows
-      .filter((r) => r.courseId && r.professorId && r.startTime)
+      .filter((r) => r.subjectId && r.professorId && r.startTime)
       .map((r) => ({
-        courseId: Number(r.courseId),
+        subjectId: Number(r.subjectId),
         professorId: Number(r.professorId),
         assistantId: r.assistantId ? Number(r.assistantId) : null,
         sessionType: r.sessionType,
@@ -471,7 +471,7 @@ export default function AdminGroups() {
             semester={semester}
             setSemester={setSemester}
             semesters={SEMESTERS}
-            courses={courses}
+            subjects={subjects}
             teachers={teachers}
             groupName={groupName}
             setGroupName={setGroupName}
@@ -483,7 +483,7 @@ export default function AdminGroups() {
             setStaffRows={setStaffRows}
             scheduleRows={scheduleRows}
             onScheduleChange={handleScheduleChange}
-            staffCourseIds={staffCourseIds}
+            staffSubjectIds={staffSubjectIds}
             selectedCategory={selectedCategory}
             onBack={() => setView("list")}
             onNext={goNext}
@@ -731,7 +731,7 @@ export default function AdminGroups() {
                       <TableCell>
                         {String(s.startTime).slice(0, 5)} – {String(s.endTime).slice(0, 5)}
                       </TableCell>
-                      <TableCell>{s.courseTitle}</TableCell>
+                      <TableCell>{s.subjectTitle}</TableCell>
                       <TableCell>{s.teacherName}</TableCell>
                       <TableCell>{s.room || "—"}</TableCell>
                     </TableRow>

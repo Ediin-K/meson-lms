@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Alert,
@@ -41,10 +41,10 @@ function ProgressBar({ value, color = 'bg-sky-500', height = 'h-2' }) {
 export default function TeacherStudents() {
   const navigate = useNavigate();
 
-  const [courses, setCourses]           = useState([]);
-  const [selectedCourse, setSelectedCourse] = useState('');
+  const [subjects, setSubjects]           = useState([]);
+  const [selectedSubject, setselectedSubject] = useState('');
   const [students, setStudents]         = useState([]);
-  const [loadingCourses, setLoadingCourses] = useState(true);
+  const [loadingSubjects, setloadingSubjects] = useState(true);
   const [loadingStudents, setLoadingStudents] = useState(false);
   const [error, setError]               = useState('');
 
@@ -54,21 +54,21 @@ export default function TeacherStudents() {
   const [detailLoading, setDetailLoading] = useState(false);
 
   useEffect(() => {
-    teacherContentService.getCourses()
-      .then((res) => setCourses(res.data))
-      .catch(() => setError('Kurset nuk u ngarkuan.'))
-      .finally(() => setLoadingCourses(false));
+    teacherContentService.getSubjects()
+      .then((res) => setSubjects(res.data))
+      .catch(() => setError('Lëndët nuk u ngarkuan.'))
+      .finally(() => setloadingSubjects(false));
   }, []);
 
   useEffect(() => {
-    if (!selectedCourse) return;
+    if (!selectedSubject) return;
     setStudents([]);
     setLoadingStudents(true);
-    progressService.getCourseStudents(selectedCourse)
+    progressService.getSubjectStudents(selectedSubject)
       .then((res) => setStudents(res.data))
       .catch(() => setError('Studentët nuk u ngarkuan.'))
       .finally(() => setLoadingStudents(false));
-  }, [selectedCourse]);
+  }, [selectedSubject]);
 
   const openDetail = async (student) => {
     setDetailStudent(student);
@@ -76,7 +76,7 @@ export default function TeacherStudents() {
     setDetailProgress(null);
     setDetailLoading(true);
     try {
-      const res = await progressService.getStudentProgress(selectedCourse, student.userId);
+      const res = await progressService.getStudentProgress(selectedSubject, student.userId);
       setDetailProgress(res.data);
     } catch {
       setDetailProgress(null);
@@ -118,18 +118,18 @@ export default function TeacherStudents() {
         {}
         <Card elevation={0} className="rounded-2xl border border-slate-200 bg-white dark:!border-slate-800 dark:!bg-slate-900 mb-6">
           <CardContent className="!p-5">
-            <Typography variant="subtitle2" className="!mb-3 !font-bold dark:!text-white">Zgjidh kursin</Typography>
-            {loadingCourses ? (
+            <Typography variant="subtitle2" className="!mb-3 !font-bold dark:!text-white">Zgjidh Lëndan</Typography>
+            {loadingSubjects ? (
               <CircularProgress size={24} />
             ) : (
               <FormControl size="small" fullWidth sx={{ maxWidth: 420 }}>
-                <InputLabel>Kursi</InputLabel>
+                <InputLabel>Lënda</InputLabel>
                 <Select
-                  label="Kursi"
-                  value={selectedCourse}
-                  onChange={(e) => setSelectedCourse(e.target.value)}
+                  label="Lënda"
+                  value={selectedSubject}
+                  onChange={(e) => setselectedSubject(e.target.value)}
                 >
-                  {courses.map((c) => (
+                  {subjects.map((c) => (
                     <MenuItem key={c.id} value={c.id}>{c.titulli}</MenuItem>
                   ))}
                 </Select>
@@ -139,7 +139,7 @@ export default function TeacherStudents() {
         </Card>
 
         {}
-        {!selectedCourse && (
+        {!selectedSubject && (
           <div className="rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-slate-800 p-16 text-center">
             <SchoolRounded className="!text-5xl text-slate-200 dark:text-slate-700 !mb-3" />
             <Typography className="text-slate-400 dark:!text-slate-500">Zgjidh një kurs për të parë studentët.</Typography>
@@ -150,7 +150,7 @@ export default function TeacherStudents() {
           <Box className="flex justify-center py-12"><CircularProgress /></Box>
         )}
 
-        {!loadingStudents && selectedCourse && students.length === 0 && (
+        {!loadingStudents && selectedSubject && students.length === 0 && (
           <Alert severity="info">Asnjë student i regjistruar në këtë kurs.</Alert>
         )}
 

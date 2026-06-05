@@ -10,14 +10,14 @@ import java.util.Optional;
 @Repository
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     List<Enrollment> findByUserId(Long userId);
-    List<Enrollment> findByCourseId(Long courseId);
+    List<Enrollment> findBySubjectId(Long subjectId);
     List<Enrollment> findByUserIdAndStatusi(Long userId, EnrollmentStatus statusi);
-    Optional<Enrollment> findByUserIdAndCourseId(Long userId, Long courseId);
-    boolean existsByUserIdAndCourseId(Long userId, Long courseId);
+    Optional<Enrollment> findByUserIdAndSubjectId(Long userId, Long subjectId);
+    boolean existsByUserIdAndSubjectId(Long userId, Long subjectId);
 
-    List<Enrollment> findByCourseTeacherId(Long teacherId);
-    long countByCourseTeacherId(Long teacherId);
-    long countByCourseId(Long courseId);
+    List<Enrollment> findBySubjectTeacherId(Long teacherId);
+    long countBySubjectTeacherId(Long teacherId);
+    long countBySubjectId(Long subjectId);
 
     void deleteByUserId(Long userId);
 }

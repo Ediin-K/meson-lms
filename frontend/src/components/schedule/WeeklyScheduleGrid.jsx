@@ -1,4 +1,4 @@
-import { Box, Chip, Typography } from "@mui/material";
+﻿import { Box, Chip, Typography } from "@mui/material";
 import AccessTimeRounded from "@mui/icons-material/AccessTimeRounded";
 import MeetingRoomRounded from "@mui/icons-material/MeetingRoomRounded";
 import PersonRounded from "@mui/icons-material/PersonRounded";
@@ -59,7 +59,7 @@ export default function WeeklyScheduleGrid({ schedules = [], isDark = false, com
                 >
                   <Box className="flex items-start justify-between gap-2">
                     <Typography sx={{ color: colors.text, fontWeight: 900, lineHeight: 1.2 }}>
-                      {item.courseTitle}
+                      {item.subjectTitle}
                     </Typography>
                     <Chip
                       size="small"

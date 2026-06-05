@@ -3,11 +3,11 @@ package com.meson.service;
 import com.meson.dto.GradeRequest;
 import com.meson.dto.GradeResponse;
 import com.meson.dto.StudentGradesSummaryResponse;
-import com.meson.entity.Course;
+import com.meson.entity.Subject;
 import com.meson.entity.EnrollmentStatus;
 import com.meson.entity.Grade;
 import com.meson.entity.User;
-import com.meson.repository.CourseRepository;
+import com.meson.repository.SubjectRepository;
 import com.meson.repository.EnrollmentRepository;
 import com.meson.repository.GradeRepository;
 import com.meson.repository.UserRepository;
@@ -26,7 +26,7 @@ public class GradeService {
 
     private final GradeRepository gradeRepository;
     private final UserRepository userRepository;
-    private final CourseRepository courseRepository;
+    private final SubjectRepository subjectRepository;
     private final EnrollmentRepository enrollmentRepository;
 
     @Transactional(readOnly = true)
@@ -39,16 +39,16 @@ public class GradeService {
         int totalEnrolledEcts = enrollmentRepository.findByUserId(studentId)
                 .stream()
                 .filter(e -> e.getStatusi() != EnrollmentStatus.ANULUAR)
-                .mapToInt(e -> resolveCourseEcts(e.getCourse()))
+                .mapToInt(e -> resolveSubjectEcts(e.getSubject()))
                 .sum();
 
         return buildSummary(grades, totalEnrolledEcts);
     }
 
     @Transactional(readOnly = true)
-    public List<GradeResponse> getByCourseId(Long courseId) {
-        assertCanManageCourse(courseId);
-        return gradeRepository.findByCourseId(courseId)
+    public List<GradeResponse> getBySubjectId(Long subjectId) {
+        assertCanManageSubject(subjectId);
+        return gradeRepository.findBySubjectId(subjectId)
                 .stream()
                 .map(this::toResponse)
                 .toList();
@@ -56,27 +56,27 @@ public class GradeService {
 
     @Transactional
     public GradeResponse create(GradeRequest request) {
-        assertCanManageCourse(request.getCourseId());
+        assertCanManageSubject(request.getSubjectId());
 
-        if (gradeRepository.existsByStudentIdAndCourseId(request.getStudentId(), request.getCourseId())) {
+        if (gradeRepository.existsByStudentIdAndSubjectId(request.getStudentId(), request.getSubjectId())) {
             throw new RuntimeException("Studenti ka nje note ekzistuese per kete kurs");
         }
 
-        if (!enrollmentRepository.existsByUserIdAndCourseId(request.getStudentId(), request.getCourseId())) {
+        if (!enrollmentRepository.existsByUserIdAndSubjectId(request.getStudentId(), request.getSubjectId())) {
             throw new RuntimeException("Studenti nuk eshte i regjistruar ne kete kurs");
         }
 
         User student = userRepository.findById(request.getStudentId())
                 .orElseThrow(() -> new RuntimeException("Studenti nuk u gjet"));
 
-        Course course = courseRepository.findById(request.getCourseId())
-                .orElseThrow(() -> new RuntimeException("Kursi nuk u gjet"));
+        Subject course = subjectRepository.findById(request.getSubjectId())
+                .orElseThrow(() -> new RuntimeException("Lënda nuk u gjet"));
 
         User professor = getCurrentUser();
 
         Grade grade = Grade.builder()
                 .student(student)
-                .course(course)
+                .subject(course)
                 .professor(professor)
                 .grade(request.getGrade())
                 .comment(request.getComment())
@@ -91,11 +91,11 @@ public class GradeService {
         Grade grade = gradeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Nota nuk u gjet"));
 
-        assertCanManageCourse(grade.getCourse().getId());
+        assertCanManageSubject(grade.getSubject().getId());
 
         if (!grade.getStudent().getId().equals(request.getStudentId())
-                || !grade.getCourse().getId().equals(request.getCourseId())) {
-            throw new RuntimeException("Nuk lejohet ndryshimi i studentit ose kursit per nje note ekzistuese");
+                || !grade.getSubject().getId().equals(request.getSubjectId())) {
+            throw new RuntimeException("Nuk lejohet ndryshimi i studentit ose Lëndat per nje note ekzistuese");
         }
 
         grade.setGrade(request.getGrade());
@@ -109,11 +109,11 @@ public class GradeService {
     public void delete(Long id) {
         Grade grade = gradeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Nota nuk u gjet"));
-        assertCanManageCourse(grade.getCourse().getId());
+        assertCanManageSubject(grade.getSubject().getId());
         gradeRepository.delete(grade);
     }
 
-    private void assertCanManageCourse(Long courseId) {
+    private void assertCanManageSubject(Long subjectId) {
         if (hasRole("ADMIN")) {
             return;
         }
@@ -121,7 +121,7 @@ public class GradeService {
             throw new AccessDeniedException("Nuk keni qasje per te menaxhuar notat");
         }
         User teacher = getCurrentUser();
-        courseRepository.findByIdAndTeacherId(courseId, teacher.getId())
+        subjectRepository.findByIdAndTeacherId(subjectId, teacher.getId())
                 .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses ne kete kurs"));
     }
 
@@ -130,7 +130,7 @@ public class GradeService {
                 ? 0.0
                 : grades.stream().mapToInt(GradeResponse::getGrade).average().orElse(0.0);
         int totalEcts = grades.stream()
-                .mapToInt(g -> g.getCourseEcts() != null ? g.getCourseEcts() : 5)
+                .mapToInt(g -> g.getSubjectEcts() != null ? g.getSubjectEcts() : 5)
                 .sum();
         return StudentGradesSummaryResponse.builder()
                 .grades(grades)
@@ -141,7 +141,7 @@ public class GradeService {
                 .build();
     }
 
-    private int resolveCourseEcts(Course course) {
+    private int resolveSubjectEcts(Subject course) {
         if (course == null || course.getEcts() == null) {
             return 5;
         }
@@ -154,9 +154,9 @@ public class GradeService {
                 .studentId(grade.getStudent().getId())
                 .studentEmri(grade.getStudent().getEmri())
                 .studentMbiemri(grade.getStudent().getMbiemri())
-                .courseId(grade.getCourse().getId())
-                .courseTitulli(grade.getCourse().getTitulli())
-                .courseEcts(resolveCourseEcts(grade.getCourse()))
+                .subjectId(grade.getSubject().getId())
+                .subjectTitulli(grade.getSubject().getTitulli())
+                .subjectEcts(resolveSubjectEcts(grade.getSubject()))
                 .professorId(grade.getProfessor().getId())
                 .professorEmri(grade.getProfessor().getEmri() + " " + grade.getProfessor().getMbiemri())
                 .grade(grade.getGrade())

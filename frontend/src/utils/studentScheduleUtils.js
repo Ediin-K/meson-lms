@@ -1,4 +1,4 @@
-export const DAY_LABELS = {
+﻿export const DAY_LABELS = {
   MONDAY: "E Hene",
   TUESDAY: "E Marte",
   WEDNESDAY: "E Merkure",
@@ -47,10 +47,10 @@ export const normalizeSchedule = (raw) => {
     dayOfWeek: raw.dayOfWeek ?? "",
     startTime: raw.startTime ?? "",
     endTime: raw.endTime ?? "",
-    courseTitle: raw.courseTitle ?? "Lende",
+    subjectTitle: raw.subjectTitle ?? "Lende",
     sessionType: raw.sessionType ?? "LECTURE",
-    courseGroupName: raw.courseGroupName ?? null,
-    courseSubgroupName: raw.courseSubgroupName ?? null,
+    subjectGroupName: raw.subjectGroupName ?? null,
+    subjectSubgroupName: raw.subjectSubgroupName ?? null,
     teacherName: raw.teacherName ?? "",
     room: raw.room ?? "",
     color: raw.color ?? "sky",

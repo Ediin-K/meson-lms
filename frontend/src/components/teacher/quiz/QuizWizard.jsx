@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import {
   Alert,
   Box,
@@ -31,13 +31,13 @@ import {
 const STEPS = ['Vendosja', 'Pyetjet', 'Përmbledhje'];
 
 export default function QuizWizard({
-  courses,
+  subjects,
   modules,
   lessons,
-  selectedCourse,
+  selectedSubject,
   selectedModule,
   selectedLesson,
-  onCourseChange,
+  onSubjectChange,
   onModuleChange,
   onLessonChange,
   editingQuiz,
@@ -260,12 +260,12 @@ export default function QuizWizard({
               </div>
               <div className="grid gap-3 md:grid-cols-3">
                 <FormControl fullWidth size="small">
-                  <InputLabel>Kursi</InputLabel>
-                  <Select label="Kursi" value={selectedCourse} onChange={(e) => onCourseChange(e.target.value)}>
-                    {courses.map((c) => <MenuItem key={c.id} value={c.id}>{c.titulli}</MenuItem>)}
+                  <InputLabel>Lënda</InputLabel>
+                  <Select label="Lënda" value={selectedSubject} onChange={(e) => onSubjectChange(e.target.value)}>
+                    {subjects.map((c) => <MenuItem key={c.id} value={c.id}>{c.titulli}</MenuItem>)}
                   </Select>
                 </FormControl>
-                <FormControl fullWidth size="small" disabled={!selectedCourse}>
+                <FormControl fullWidth size="small" disabled={!selectedSubject}>
                   <InputLabel>Moduli</InputLabel>
                   <Select label="Moduli" value={selectedModule} onChange={(e) => onModuleChange(e.target.value)}>
                     {modules.map((m) => <MenuItem key={m.id} value={m.id}>{m.titulli}</MenuItem>)}

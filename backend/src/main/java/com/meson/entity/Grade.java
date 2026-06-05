@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(exclude = {"student", "course", "professor"})
+@EqualsAndHashCode(exclude = {"student", "subject", "professor"})
 public class Grade {
 
     @Id
@@ -23,8 +23,8 @@ public class Grade {
     private User student;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id", nullable = false)
-    private Course course;
+    @JoinColumn(name = "subject_id", nullable = false)
+    private Subject subject;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "professor_id", nullable = false)

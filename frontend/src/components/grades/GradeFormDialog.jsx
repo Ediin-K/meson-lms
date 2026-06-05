@@ -20,7 +20,7 @@ const GRADE_OPTIONS = [5, 6, 7, 8, 9, 10];
 
 const emptyForm = {
   studentId: "",
-  courseId: "",
+  subjectId: "",
   grade: "",
   comment: "",
 };
@@ -53,9 +53,9 @@ function GradeFormFields({
   onSubmit,
   initialData = null,
   students = [],
-  courses = [],
-  fixedCourseId = null,
-  fixedCourseTitle = "",
+  subjects = [],
+  fixedSubjectId = null,
+  fixedSubjectTitle = "",
   submitting = false,
 }) {
   const [form, setForm] = useState(() => buildForm(initialData, fixedCourseId));
@@ -69,7 +69,7 @@ function GradeFormFields({
     e.preventDefault();
     onSubmit({
       studentId: Number(form.studentId),
-      courseId: Number(form.courseId),
+      subjectId: Number(form.subjectId),
       grade: Number(form.grade),
       comment: form.comment.trim() || null,
     });
@@ -77,7 +77,7 @@ function GradeFormFields({
 
   const isValid =
     form.studentId &&
-    form.courseId &&
+    form.subjectId &&
     form.grade &&
     GRADE_OPTIONS.includes(Number(form.grade));
 

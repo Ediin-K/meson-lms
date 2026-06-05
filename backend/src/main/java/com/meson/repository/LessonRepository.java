@@ -12,8 +12,8 @@ public interface LessonRepository extends JpaRepository<Lesson, Long> {
     boolean existsByTitulliAndModuleId(String titulli, Long moduleId);
     void deleteAllByModuleId(Long moduleId);
 
-    List<Lesson> findByModuleCourseTeacherId(Long teacherId);
-    Optional<Lesson> findByIdAndModuleCourseTeacherId(Long id, Long teacherId);
+    List<Lesson> findByModuleSubjectTeacherId(Long teacherId);
+    Optional<Lesson> findByIdAndModuleSubjectTeacherId(Long id, Long teacherId);
     long countByModuleId(Long moduleId);
-    long countByModuleCourseId(Long courseId);
+    long countByModuleSubjectId(Long subjectId);
 }

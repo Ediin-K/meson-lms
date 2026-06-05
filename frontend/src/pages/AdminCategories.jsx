@@ -225,7 +225,7 @@ export default function AdminCategories() {
             >
               {t(
                 "home.admin.services.categories.desc",
-                "Organizoni kurset në kategori dhe tema.",
+                "Organizoni Lëndët në kategori dhe tema.",
               )}
             </Typography>
           </div>

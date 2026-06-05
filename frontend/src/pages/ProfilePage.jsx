@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axiosInstance from '../services/axiosInstance'
 <<<<<<< HEAD
@@ -33,7 +33,7 @@ function CertificateCard({ cert }) {
                 <WorkspacePremiumRounded className="!text-3xl text-white/90" />
                 <div className="min-w-0 flex-1">
                     <Typography variant="subtitle2" className="!font-black !text-white !leading-snug truncate">
-                        {cert.courseTitulli}
+                        {cert.subjectTitulli}
                     </Typography>
                     <Typography variant="caption" className="!text-white/70">
                         Certifikatë e Përfundimit
@@ -174,7 +174,7 @@ export default function ProfilePage() {
                                     </div>
                                     <div>
                                         <Typography variant="caption" className="!text-slate-500 dark:!text-slate-400 !font-semibold !uppercase !tracking-wider">
-                                            Kurse të regjistruara
+                                            Lëndë të regjistruara
                                         </Typography>
                                         <Typography variant="h5" className="!font-extrabold !text-sky-600 dark:!text-sky-400 !mt-0.5">
                                             {enrollments.length}
@@ -201,7 +201,7 @@ export default function ProfilePage() {
                             <CardContent className="!p-6">
                                 <Typography variant="subtitle1" className="!font-bold !text-slate-900 dark:!text-white !mb-4 flex items-center gap-2">
                                     <SchoolRounded className="text-sky-600" fontSize="small" />
-                                    Kurset e mia
+                                    Lëndët e mia
                                 </Typography>
 
                                 {enrollments.length === 0 ? (
@@ -214,11 +214,11 @@ export default function ProfilePage() {
                                             <Box
                                                 key={enrollment.id}
                                                 className="flex items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-slate-700 hover:bg-sky-50/50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors"
-                                                onClick={() => navigate(`/course/${enrollment.courseId}`)}
+                                                onClick={() => navigate(`/subject/${enrollment.subjectId}`)}
                                             >
                                                 <div>
                                                     <Typography variant="body2" className="!font-semibold !text-slate-800 dark:!text-white">
-                                                        {enrollment.courseTitulli}
+                                                        {enrollment.subjectTitulli}
                                                     </Typography>
                                                     <div className="flex items-center gap-2 mt-1">
                                                         <Chip
@@ -255,7 +255,7 @@ export default function ProfilePage() {
                                             Nuk ke asnjë certifikatë ende.
                                         </Typography>
                                         <Typography variant="caption" className="!text-slate-400 !block !mt-1">
-                                            Përfundo të gjitha leksionet e një kursi për të marrë certifikatën.
+                                            Përfundo të gjitha leksionet e një Lënda për të marrë certifikatën.
                                         </Typography>
                                     </Box>
                                 ) : (

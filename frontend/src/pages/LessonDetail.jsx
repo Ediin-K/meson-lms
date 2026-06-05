@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom'
+﻿import { useParams, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import axiosInstance from '../services/axiosInstance'
 import { useAppPreferences } from '../context/appPreferencesContext'
@@ -18,7 +18,7 @@ import FileDownloadRounded from '@mui/icons-material/FileDownloadRounded'
 import OpenInNewRounded from '@mui/icons-material/OpenInNewRounded'
 import ResourceTypeIcon from '../components/common/ResourceTypeIcon'
 import LessonQuizCard from '../components/quiz/LessonQuizCard'
-import LessonAssignmentCard from '../components/course/LessonAssignmentCard'
+import LessonAssignmentCard from '../components/subject/LessonAssignmentCard'
 import progressService from '../services/progressService'
 import { downloadResource, openResourcePreview, getViewUrl } from '../services/resourceService'
 
@@ -200,14 +200,14 @@ export default function LessonDetail() {
     const { t } = useAppPreferences()
 
     const [lesson, setLesson]     = useState(null)
-    const [courseId, setCourseId] = useState(null)
+    const [subjectId, setSubjectId] = useState(null)
     const [loading, setLoading]   = useState(true)
     const [completion, setCompletion] = useState(null)
 
     useEffect(() => {
         progressService.markViewed(lessonId)
             .then(res => {
-                if (res.data?.courseCompleted) setCompletion(res.data)
+                if (res.data?.subjectCompleted) setCompletion(res.data)
             })
             .catch(() => {})
     }, [lessonId])
@@ -221,7 +221,7 @@ export default function LessonDetail() {
                 if (lessonRes.data?.moduleId) {
                     try {
                         const modRes = await axiosInstance.get(`/modules/${lessonRes.data.moduleId}`)
-                        setCourseId(modRes.data?.courseId || null)
+                        setSubjectId(modRes.data?.subjectId || null)
                     } catch { void 0 }
                 }
             } catch (err) {
@@ -265,7 +265,7 @@ export default function LessonDetail() {
                     onClick={() => navigate(-1)}
                     className="!mb-8 !normal-case !text-slate-600 dark:!text-slate-400 hover:!bg-sky-50 dark:hover:!bg-slate-800/50 !rounded-full !px-4 !py-2"
                 >
-                    {t('lessonDetail.backToCourse')}
+                    {t('lessonDetail.backToSubject')}
                 </Button>
 
                 {}
@@ -374,7 +374,7 @@ export default function LessonDetail() {
                                     <QuizRounded className="text-sky-600" fontSize="small" />
                                     {t('lessonDetail.quizzes')}
                                 </Typography>
-                                <LessonQuizCard lessonId={lessonId} courseId={courseId} />
+                                <LessonQuizCard lessonId={lessonId} subjectId={subjectId} />
                             </CardContent>
                         </Card>
 
@@ -400,11 +400,11 @@ export default function LessonDetail() {
                     <div className="bg-gradient-to-br from-emerald-500 to-teal-600 px-8 py-10 text-center">
                         <WorkspacePremiumRounded className="!text-6xl text-white/90 !mb-3" />
                         <Typography variant="h4" className="!font-black !text-white !leading-tight">Urime!</Typography>
-                        <Typography className="!mt-2 !text-white/80">E ke përfunduar kursin me sukses</Typography>
+                        <Typography className="!mt-2 !text-white/80">E ke përfunduar Lëndan me sukses</Typography>
                     </div>
                     <div className="px-8 py-6">
                         <Typography variant="h6" className="!font-black !text-slate-900 dark:!text-white !text-center !mb-1">
-                            {completion?.courseTitulli}
+                            {completion?.subjectTitulli}
                         </Typography>
                         <Typography variant="body2" className="!text-slate-500 !text-center !mb-5">
                             Certifikata jote është gjeneruar automatikisht.

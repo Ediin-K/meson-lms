@@ -28,11 +28,11 @@ public class QuizAttempt {
     private User user;
 
     @Builder.Default
-    @Column(nullable = false)
+    @Column(name = "points", nullable = false)
     private Double pikete = 0.0;
 
     @Builder.Default
-    @Column(nullable = false)
+    @Column(name = "time_seconds", nullable = false)
     private Integer kohaSekondat = 0;
 
     @Column(nullable = false, updatable = false)
@@ -57,7 +57,7 @@ public class QuizAttempt {
     @OneToMany(mappedBy = "attempt", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AnswerSubmission> submissions = new ArrayList<>();
 
-    @Column(nullable = false, updatable = false)
+    @Column(name = "attempt_date", nullable = false, updatable = false)
     private LocalDateTime data;
 
     @PrePersist

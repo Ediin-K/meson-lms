@@ -12,12 +12,12 @@ public class EnrollmentRequest {
     @NotNull(message = "UserId nuk mund te jet bosh")
     private Long userId;
 
-    @NotNull(message = "CourseId nuk mund te jet bosh")
-    private Long courseId;
+    @NotNull(message = "SubjectId nuk mund te jet bosh")
+    private Long subjectId;
 
-    private Long courseGroupId;
+    private Long subjectGroupId;
 
-    private Long courseSubgroupId;
+    private Long subjectSubgroupId;
 
     private String enrollmentKey;
 }

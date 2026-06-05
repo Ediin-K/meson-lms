@@ -20,9 +20,9 @@ public class TeacherModuleController {
 
     private final TeacherModuleService teacherModuleService;
 
-    @GetMapping("/courses/{courseId}/modules")
-    public ResponseEntity<List<ModuleResponse>> getModulesByCourse(@PathVariable Long courseId) {
-        return ResponseEntity.ok(teacherModuleService.getModulesByCourse(courseId));
+    @GetMapping("/subjects/{subjectId}/modules")
+    public ResponseEntity<List<ModuleResponse>> getModulesBySubject(@PathVariable Long subjectId) {
+        return ResponseEntity.ok(teacherModuleService.getModulesBySubject(subjectId));
     }
 
     @PostMapping("/modules")

@@ -23,7 +23,7 @@ public interface StudentGroupRequestRepository extends JpaRepository<StudentGrou
             SELECT r FROM StudentGroupRequest r
             JOIN FETCH r.student s
             JOIN FETCH r.directionGroup dg
-            JOIN FETCH dg.courseCategory c
+            JOIN FETCH dg.direction c
             WHERE (:status IS NULL OR r.status = :status)
               AND (:categoryId IS NULL OR c.id = :categoryId)
               AND (:directionGroupId IS NULL OR dg.id = :directionGroupId)

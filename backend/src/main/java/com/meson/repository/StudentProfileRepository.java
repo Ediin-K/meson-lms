@@ -14,9 +14,9 @@ public interface StudentProfileRepository extends JpaRepository<StudentProfile, 
 
     @Query("""
             SELECT sp FROM StudentProfile sp
-            LEFT JOIN FETCH sp.courseCategory
+            LEFT JOIN FETCH sp.direction
             LEFT JOIN FETCH sp.approvedDirectionGroup dg
-            LEFT JOIN FETCH dg.courseCategory
+            LEFT JOIN FETCH dg.direction
             WHERE sp.user.id = :userId
             """)
     Optional<StudentProfile> findByUserIdWithDetails(@Param("userId") Long userId);

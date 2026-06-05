@@ -1,6 +1,6 @@
 import axiosInstance from "./axiosInstance";
 
-const CATEGORY_API = "/categories";
+const CATEGORY_API = "/directions";
 
 export const getAllCategories = async () => {
   const response = await axiosInstance.get(CATEGORY_API);

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Alert,
@@ -91,11 +91,11 @@ export default function AdminSchedules() {
                     >
                       <Typography className="font-black! text-slate-900! dark:text-white!">
                         {String(schedule.startTime).slice(0, 5)} -{" "}
-                        {String(schedule.endTime).slice(0, 5)} · {schedule.courseTitle}
+                        {String(schedule.endTime).slice(0, 5)} · {schedule.subjectTitle}
                       </Typography>
                       <Typography variant="body2" className="text-slate-500! dark:text-slate-300!">
                         {schedule.sessionType === "LECTURE" ? "Ligjerate" : "Ushtrime"} ·{" "}
-                        {schedule.courseGroupName || "—"} · {schedule.teacherName}
+                        {schedule.subjectGroupName || "—"} · {schedule.teacherName}
                         {schedule.room ? ` · ${schedule.room}` : ""}
                       </Typography>
                     </Box>

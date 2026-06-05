@@ -32,7 +32,7 @@ public class TeacherLessonService {
     public List<LessonResponse> getLessonsByModule(Long moduleId) {
         User teacher = getCurrentUser();
         
-        moduleRepository.findByIdAndCourseTeacherId(moduleId, teacher.getId())
+        moduleRepository.findByIdAndSubjectTeacherId(moduleId, teacher.getId())
                 .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses në këtë modul ose moduli nuk ekziston."));
 
         return lessonRepository.findByModuleIdOrderByRradhitjaAsc(moduleId).stream()
@@ -42,7 +42,7 @@ public class TeacherLessonService {
 
     public LessonResponse createLesson(LessonRequest request) {
         User teacher = getCurrentUser();
-        Module module = moduleRepository.findByIdAndCourseTeacherId(request.getModuleId(), teacher.getId())
+        Module module = moduleRepository.findByIdAndSubjectTeacherId(request.getModuleId(), teacher.getId())
                 .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses në këtë modul ose moduli nuk ekziston."));
 
         Lesson lesson = Lesson.builder()
@@ -60,7 +60,7 @@ public class TeacherLessonService {
 
     public LessonResponse updateLesson(Long id, LessonRequest request) {
         User teacher = getCurrentUser();
-        Lesson lesson = lessonRepository.findByIdAndModuleCourseTeacherId(id, teacher.getId())
+        Lesson lesson = lessonRepository.findByIdAndModuleSubjectTeacherId(id, teacher.getId())
                 .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses në këtë lëndë ose lënda nuk ekziston."));
 
         lesson.setTitulli(request.getTitulli());
@@ -76,7 +76,7 @@ public class TeacherLessonService {
     @Transactional
     public void deleteLesson(Long id) {
         User teacher = getCurrentUser();
-        Lesson lesson = lessonRepository.findByIdAndModuleCourseTeacherId(id, teacher.getId())
+        Lesson lesson = lessonRepository.findByIdAndModuleSubjectTeacherId(id, teacher.getId())
                 .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses në këtë lëndë ose lënda nuk ekziston."));
 
         lessonRepository.delete(lesson);

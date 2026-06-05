@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+﻿import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Alert, Box, CircularProgress, Container, Snackbar, Typography } from '@mui/material'
 import { useAppPreferences } from '../../context/appPreferencesContext'
 import Footer from '../../components/ui/Footer'
 import ProfileHeaderCard from '../../components/student/profile/ProfileHeaderCard'
 import ProfileStatsRow from '../../components/student/profile/ProfileStatsRow'
-import ProfileCoursesSection from '../../components/student/profile/ProfileCoursesSection'
+import ProfileSubjectsSection from '../../components/student/profile/ProfileSubjectsSection'
 import ProfileCertificatesSection from '../../components/student/profile/ProfileCertificatesSection'
 import ProfileGroupSection from '../../components/student/profile/ProfileGroupSection'
 import ProfileAssignmentsSection from '../../components/student/profile/ProfileAssignmentsSection'
@@ -78,7 +78,7 @@ export default function StudentProfilePage() {
       ? Math.round(progressValues.reduce((a, b) => a + b, 0) / progressValues.length)
       : 0
     return {
-      courseCount: enrollments.length,
+      subjectCount: enrollments.length,
       certificateCount: certificates.length,
       avgProgress,
       submissionCount: submissions.length,
@@ -134,7 +134,7 @@ export default function StudentProfilePage() {
           </div>
 
           <div className="flex flex-col gap-6 lg:col-span-2">
-            <ProfileCoursesSection enrollments={enrollments} t={t} />
+            <ProfileSubjectsSection enrollments={enrollments} t={t} />
             <ProfileCertificatesSection certificates={certificates} t={t} />
             <ProfileAssignmentsSection submissions={submissions} t={t} />
             <ProfileQuizActivitySection attempts={quizAttempts} t={t} />

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+﻿import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   Box,
@@ -48,11 +48,11 @@ function formatSeconds(sec) {
 }
 
 export default function TeacherQuizzes() {
-  const [courses, setCourses]               = useState([]);
+  const [subjects, setSubjects]               = useState([]);
   const [modules, setModules]               = useState([]);
   const [lessons, setLessons]               = useState([]);
   const [quizzes, setQuizzes]               = useState([]);
-  const [selectedCourse, setSelectedCourse] = useState('');
+  const [selectedSubject, setSelectedSubject] = useState('');
   const [selectedModule, setSelectedModule] = useState('');
   const [selectedLesson, setSelectedLesson] = useState('');
   const [selectedQuizId, setSelectedQuizId] = useState(null);
@@ -60,7 +60,7 @@ export default function TeacherQuizzes() {
   const [activeTab, setActiveTab]           = useState('list');
   const [results, setResults]               = useState([]);
   const [allAttempts, setAllAttempts]       = useState([]);
-  const [loadingCourses, setLoadingCourses] = useState(true);
+  const [loadingSubjects, setloadingSubjects] = useState(true);
   const [loadingQuizzes, setLoadingQuizzes] = useState(false);
   const [activating, setActivating]         = useState(false);
   const [message, setMessage]               = useState('');
@@ -68,20 +68,20 @@ export default function TeacherQuizzes() {
   const pollRef = useRef(null);
 
   useEffect(() => {
-    teacherContentService.getCourses()
-      .then((res) => setCourses(res.data))
-      .catch(() => setError('Kurset nuk u ngarkuan.'))
-      .finally(() => setLoadingCourses(false));
+    teacherContentService.getSubjects()
+      .then((res) => setSubjects(res.data))
+      .catch(() => setError('Lëndët nuk u ngarkuan.'))
+      .finally(() => setloadingSubjects(false));
   }, []);
 
   useEffect(() => {
-    if (!selectedCourse) return;
+    if (!selectedSubject) return;
     setSelectedModule('');
     setSelectedLesson('');
     setQuizzes([]);
     setSelectedQuizId(null);
-    teacherContentService.getModules(selectedCourse).then((res) => setModules(res.data));
-  }, [selectedCourse]);
+    teacherContentService.getModules(selectedSubject).then((res) => setModules(res.data));
+  }, [selectedSubject]);
 
   useEffect(() => {
     if (!selectedModule) return;
@@ -188,7 +188,7 @@ export default function TeacherQuizzes() {
     return (submitted.reduce((s, r) => s + (r.pikete || 0), 0) / submitted.length).toFixed(1);
   }, [results]);
 
-  if (loadingCourses) {
+  if (loadingSubjects) {
     return (
       <Box className="flex min-h-[60vh] items-center justify-center">
         <CircularProgress />
@@ -259,12 +259,12 @@ export default function TeacherQuizzes() {
               </div>
               <div className="grid gap-3 sm:grid-cols-3">
                 <FormControl size="small" fullWidth>
-                  <InputLabel>Kursi</InputLabel>
-                  <Select label="Kursi" value={selectedCourse} onChange={(e) => setSelectedCourse(e.target.value)}>
-                    {courses.map((c) => <MenuItem key={c.id} value={c.id}>{c.titulli}</MenuItem>)}
+                  <InputLabel>Lënda</InputLabel>
+                  <Select label="Lënda" value={selectedSubject} onChange={(e) => setSelectedSubject(e.target.value)}>
+                    {subjects.map((c) => <MenuItem key={c.id} value={c.id}>{c.titulli}</MenuItem>)}
                   </Select>
                 </FormControl>
-                <FormControl size="small" fullWidth disabled={!selectedCourse}>
+                <FormControl size="small" fullWidth disabled={!selectedSubject}>
                   <InputLabel>Moduli</InputLabel>
                   <Select label="Moduli" value={selectedModule} onChange={(e) => setSelectedModule(e.target.value)}>
                     {modules.map((m) => <MenuItem key={m.id} value={m.id}>{m.titulli}</MenuItem>)}
@@ -284,7 +284,7 @@ export default function TeacherQuizzes() {
 
           {}
           {!selectedLesson && (
-            <Alert severity="info">Zgjidh kursin, modulin dhe leksionin QUIZ për të parë quiz-et.</Alert>
+            <Alert severity="info">Zgjidh Lëndan, modulin dhe leksionin QUIZ për të parë quiz-et.</Alert>
           )}
           {loadingQuizzes && (
             <Box className="flex justify-center py-10"><CircularProgress /></Box>
@@ -371,13 +371,13 @@ export default function TeacherQuizzes() {
       {}
       {activeTab === 'create' && (
         <QuizWizard
-          courses={courses}
+          subjects={subjects}
           modules={modules}
           lessons={lessons}
-          selectedCourse={selectedCourse}
+          selectedSubject={selectedSubject}
           selectedModule={selectedModule}
           selectedLesson={selectedLesson}
-          onCourseChange={setSelectedCourse}
+          onSubjectChange={setSelectedSubject}
           onModuleChange={setSelectedModule}
           onLessonChange={setSelectedLesson}
           editingQuiz={editingQuiz}

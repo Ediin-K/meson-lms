@@ -1,6 +1,6 @@
 package com.meson.controller;
 
-import com.meson.dto.CourseProgressResponse;
+import com.meson.dto.SubjectProgressResponse;
 import com.meson.dto.EnrollmentResponse;
 import com.meson.service.ProgressService;
 import com.meson.service.TeacherStudentService;
@@ -25,15 +25,15 @@ public class TeacherStudentController {
         return ResponseEntity.ok(teacherStudentService.getStudentsByTeacher());
     }
 
-    @GetMapping("/courses/{courseId}/students")
-    public ResponseEntity<List<EnrollmentResponse>> getStudentsByCourse(@PathVariable Long courseId) {
-        return ResponseEntity.ok(teacherStudentService.getStudentsByCourse(courseId));
+    @GetMapping("/subjects/{subjectId}/students")
+    public ResponseEntity<List<EnrollmentResponse>> getStudentsBySubject(@PathVariable Long subjectId) {
+        return ResponseEntity.ok(teacherStudentService.getStudentsBySubject(subjectId));
     }
 
-    @GetMapping("/courses/{courseId}/students/{studentId}/progress")
-    public ResponseEntity<CourseProgressResponse> getStudentProgress(
-            @PathVariable Long courseId,
+    @GetMapping("/subjects/{subjectId}/students/{studentId}/progress")
+    public ResponseEntity<SubjectProgressResponse> getStudentProgress(
+            @PathVariable Long subjectId,
             @PathVariable Long studentId) {
-        return ResponseEntity.ok(progressService.getStudentCourseProgress(courseId, studentId));
+        return ResponseEntity.ok(progressService.getStudentSubjectProgress(subjectId, studentId));
     }
 }

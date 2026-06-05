@@ -53,7 +53,7 @@ public class CertificateService {
                 .orElseThrow(() -> new RuntimeException("Regjistrimi nuk u gjet"));
 
         if (enrollment.getStatusi() != EnrollmentStatus.PERFUNDUAR) {
-            throw new RuntimeException("Studenti nuk e ka perfunduar kursin");
+            throw new RuntimeException("Studenti nuk e ka perfunduar Lëndan");
         }
 
         Certificate certificate = new Certificate();
@@ -85,8 +85,8 @@ public class CertificateService {
                 .enrollmentId(certificate.getEnrollment().getId())
                 .userId(certificate.getEnrollment().getUser().getId())
                 .userEmri(certificate.getEnrollment().getUser().getEmri())
-                .courseId(certificate.getEnrollment().getCourse().getId())
-                .courseTitulli(certificate.getEnrollment().getCourse().getTitulli())
+                .subjectId(certificate.getEnrollment().getSubject().getId())
+                .subjectTitulli(certificate.getEnrollment().getSubject().getTitulli())
                 .kodiUnik(certificate.getKodiUnik())
                 .dataLeshimit(certificate.getDataLeshimit())
                 .build();

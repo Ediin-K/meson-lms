@@ -11,7 +11,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(exclude = {"courseCategory", "courseGroups"})
+@EqualsAndHashCode(exclude = {"direction", "subjectGroups"})
 public class DirectionGroup {
 
     @Id
@@ -20,7 +20,7 @@ public class DirectionGroup {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "category_id", nullable = false)
-    private CourseCategory courseCategory;
+    private Direction direction;
 
     @Column(nullable = false)
     private Integer semester;
@@ -42,5 +42,5 @@ public class DirectionGroup {
     @OneToMany(mappedBy = "directionGroup")
     @JsonIgnore
     @ToString.Exclude
-    private Set<CourseGroup> courseGroups;
+    private Set<SubjectGroup> subjectGroups;
 }

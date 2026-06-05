@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import {
   Typography,
@@ -50,13 +50,13 @@ const EMPTY_MODULE = {
 };
 
 export default function TeacherModules() {
-  const { courseId } = useParams();
+  const { subjectId } = useParams();
   const navigate = useNavigate();
   const { mode } = useAppPreferences();
   const isDark = mode === "dark";
 
-  const [courses, setCourses] = useState([]);
-  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [subjects, setSubjects] = useState([]);
+  const [selectedSubject, setSelectedSubject] = useState(null);
   const [modules, setModules] = useState([]);
   const [loading, setLoading] = useState(true);
   const [, setError] = useState(null);
@@ -81,33 +81,33 @@ export default function TeacherModules() {
   const [resultsAttemptsLoading, setResultsAttemptsLoading] = useState(false);
 
   useEffect(() => {
-    if (!courseId) {
-      fetchCourses();
+    if (!subjectId) {
+      fetchSubjects();
     } else {
-      fetchCourseAndModules();
+      fetchSubjectAndModules();
     }
-  }, [courseId]);
+  }, [subjectId]);
 
-  const fetchCourses = async () => {
+  const fetchSubjects = async () => {
     setLoading(true);
     try {
-      const res = await teacherContentService.getCourses();
-      setCourses(res.data);
+      const res = await teacherContentService.getSubjects();
+      setSubjects(res.data);
     } catch {
-      setError("Gabim gjatë marrjes së kurseve.");
+      setError("Gabim gjatë marrjes së Lëndëve.");
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchCourseAndModules = async () => {
+  const fetchSubjectAndModules = async () => {
     setLoading(true);
     try {
-      const [courseRes, modulesRes] = await Promise.all([
-        teacherContentService.getCourseById(courseId),
-        teacherContentService.getModules(courseId),
+      const [subjectRes, modulesRes] = await Promise.all([
+        teacherContentService.getSubjectById(subjectId),
+        teacherContentService.getModules(subjectId),
       ]);
-      setSelectedCourse(courseRes.data);
+      setSelectedSubject(subjectRes.data);
       setModules(modulesRes.data);
     } catch {
       setError("Gabim gjatë marrjes së të dhënave.");
@@ -140,15 +140,15 @@ export default function TeacherModules() {
       if (isEdit) {
         await teacherContentService.updateModule(editingModule.id, {
           ...formData,
-          courseId: Number(courseId),
+          subjectId: Number(subjectId),
         });
       } else {
         await teacherContentService.createModule({
           ...formData,
-          courseId: Number(courseId),
+          subjectId: Number(subjectId),
         });
       }
-      const res = await teacherContentService.getModules(courseId);
+      const res = await teacherContentService.getModules(subjectId);
       setModules(res.data);
       setSnackbarMessage(isEdit ? "Moduli u përditësua me sukses." : "Moduli u krijua me sukses.");
       setOpenSnackbar(true);
@@ -238,37 +238,37 @@ export default function TeacherModules() {
             <Link to="/teacher/modules" className="hover:text-indigo-600 transition-colors font-bold uppercase tracking-wider text-xs">
               Modulet
             </Link>
-            {selectedCourse && (
+            {selectedSubject && (
               <Typography className="font-bold! text-indigo-600! uppercase! tracking-wider! text-xs!">
-                {selectedCourse.titulli}
+                {selectedSubject.titulli}
               </Typography>
             )}
           </Breadcrumbs>
 
           <Button
             startIcon={<ArrowBackRounded />}
-            onClick={() => navigate(courseId ? "/teacher/modules" : "/teacher")}
+            onClick={() => navigate(subjectId ? "/teacher/modules" : "/teacher")}
             className="rounded-2xl! px-6! py-2! normal-case! font-bold! text-slate-600! dark:text-slate-400! hover:bg-slate-200/50! dark:hover:bg-slate-800/50!"
           >
-            {courseId ? "Ndërro Kursin" : "Kthehu te Paneli"}
+            {subjectId ? "Ndërro Lëndan" : "Kthehu te Paneli"}
           </Button>
         </Box>
 
         {}
-        {!courseId ? (
+        {!subjectId ? (
           
           <Box>
             <Box className="mb-12">
               <Typography variant="h3" className="font-black! text-slate-900! dark:text-white! mb-2">
-                Zgjidhni Kursin
+                Zgjidhni Lëndan
               </Typography>
               <Typography variant="body1" className="text-slate-500 dark:text-slate-400 text-lg">
-                Zgjidhni një nga kurset tuaja për të menaxhuar modulet.
+                Zgjidhni një nga Lëndët tuaja për të menaxhuar modulet.
               </Typography>
             </Box>
 
             <Grid container spacing={4}>
-              {courses.map((course) => (
+              {subjects.map((course) => (
                 <Grid item xs={12} sm={6} lg={4} key={course.id}>
                   <Card 
                     elevation={0}
@@ -336,7 +336,7 @@ export default function TeacherModules() {
                   </Card>
                 </Grid>
               ))}
-              {courses.length === 0 && (
+              {subjects.length === 0 && (
                 <Grid item xs={12}>
                    <Box className="p-20 text-center rounded-[3rem] border-2 border-dashed border-slate-200 dark:border-slate-800">
                       <SchoolRounded className="text-6xl! text-slate-200 mb-4" />
@@ -355,7 +355,7 @@ export default function TeacherModules() {
                   Menaxhimi i Moduleve
                 </Typography>
                 <Typography variant="body1" className="text-slate-500 dark:text-slate-400 text-lg flex items-center gap-2">
-                  <SchoolRounded className="text-indigo-600" /> {selectedCourse?.titulli}
+                  <SchoolRounded className="text-indigo-600" /> {selectedSubject?.titulli}
                 </Typography>
               </div>
               <Button

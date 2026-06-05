@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+﻿import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   Alert,
@@ -22,7 +22,7 @@ const QUESTION_TYPE = {
 };
 
 export default function QuizPage() {
-  const { quizId, courseId: courseIdParam } = useParams();
+  const { quizId, subjectId: subjectIdParam } = useParams();
   const navigate = useNavigate();
   const submittedRef = useRef(false);
 
@@ -37,7 +37,7 @@ export default function QuizPage() {
   const [error, setError] = useState('');
   const [alreadySubmitted, setAlreadySubmitted] = useState(false);
 
-  const courseId = courseIdParam || attempt?.courseId;
+  const subjectId = subjectIdParam || attempt?.subjectId;
 
   useEffect(() => {
     let mounted = true;
@@ -135,9 +135,9 @@ export default function QuizPage() {
 
   const allAnswered = questions.length > 0 && answeredCount === questions.length;
 
-  const goToCourse = () => {
-    if (courseId) {
-      navigate(`/course/${courseId}`, { replace: true });
+  const goToSubject = () => {
+    if (subjectId) {
+      navigate(`/subject/${subjectId}`, { replace: true });
     } else {
       navigate(-1);
     }
@@ -170,7 +170,7 @@ export default function QuizPage() {
                 ? 'E keni dorëzuar tashmë këtë quiz. Nuk mund ta filloni përsëri.'
                 : 'Përgjigjet u ruajtën me sukses.'}
             </Typography>
-            <Button variant="contained" onClick={goToCourse} className="!mt-7 !rounded-xl !normal-case">
+            <Button variant="contained" onClick={goToSubject} className="!mt-7 !rounded-xl !normal-case">
               Kthehu te lënda
             </Button>
           </CardContent>
@@ -189,7 +189,7 @@ export default function QuizPage() {
               Quiz-i nuk është i disponueshëm
             </Typography>
             <Alert severity="error" className="!mb-5 text-left">{error}</Alert>
-            <Button variant="outlined" onClick={goToCourse} className="!rounded-xl !normal-case">
+            <Button variant="outlined" onClick={goToSubject} className="!rounded-xl !normal-case">
               Kthehu
             </Button>
           </CardContent>

@@ -46,7 +46,7 @@ public class FileController {
             throw new BadRequestException("ID e materialit eshte e pavlefshme.");
         }
 
-        LessonResource resource = lessonResourceRepository.findByIdWithLessonCourse(id)
+        LessonResource resource = lessonResourceRepository.findByIdWithLessonSubject(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Skedari nuk u gjet."));
 
         Resource file;

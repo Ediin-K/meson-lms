@@ -19,7 +19,7 @@ public class StudentGroupRequestService {
     private final StudentGroupRequestRepository studentGroupRequestRepository;
     private final StudentProfileRepository studentProfileRepository;
     private final DirectionGroupRepository directionGroupRepository;
-    private final CourseGroupRepository courseGroupRepository;
+    private final SubjectGroupRepository subjectGroupRepository;
     private final DirectionGroupService directionGroupService;
     private final UserRepository userRepository;
     private final ScheduleSessionRepository scheduleSessionRepository;
@@ -226,7 +226,7 @@ public class StudentGroupRequestService {
     }
 
     private void validateGroupMatchesStudent(StudentProfile profile, DirectionGroup group) {
-        if (!group.getCourseCategory().getId().equals(profile.getCourseCategory().getId())) {
+        if (!group.getDirection().getId().equals(profile.getDirection().getId())) {
             throw new RuntimeException("Ky grup nuk i perket drejtimit tend");
         }
         int studentSemester = profile.getCurrentSemester() != null ? profile.getCurrentSemester() : 1;
@@ -246,7 +246,7 @@ public class StudentGroupRequestService {
         }
 
         StudentProfile profile = profileOpt.get();
-        CourseCategory category = profile.getCourseCategory();
+        Direction category = profile.getDirection();
 
         DirectionGroupResponse approved = null;
         if (profile.getApprovedDirectionGroup() != null) {
@@ -272,12 +272,12 @@ public class StudentGroupRequestService {
     private List<AvailableDirectionGroupResponse> buildAvailableGroups(
             Long userId, StudentGroupStatusResponse status) {
         Optional<StudentProfile> profileOpt = studentProfileRepository.findByUserIdWithDetails(userId);
-        if (profileOpt.isEmpty() || profileOpt.get().getCourseCategory() == null) {
+        if (profileOpt.isEmpty() || profileOpt.get().getDirection() == null) {
             return List.of();
         }
 
         StudentProfile profile = profileOpt.get();
-        Long categoryId = profile.getCourseCategory().getId();
+        Long categoryId = profile.getDirection().getId();
         Integer semester = profile.getCurrentSemester() != null ? profile.getCurrentSemester() : 1;
 
         boolean hasPending = status.getPendingRequest() != null;
@@ -298,7 +298,7 @@ public class StudentGroupRequestService {
         }
 
         List<DirectionGroup> linked =
-                courseGroupRepository.findDistinctDirectionGroupsByCategoryId(categoryId);
+                subjectGroupRepository.findDistinctDirectionGroupsByDirectionId(categoryId);
         return linked.stream()
                 .filter(g -> semester.equals(g.getSemester()))
                 .toList();
@@ -341,13 +341,13 @@ public class StudentGroupRequestService {
 
     private List<ScheduleSessionResponse> loadApprovedSchedules(Long userId, Long directionGroupId) {
         Optional<StudentProfile> profileOpt = studentProfileRepository.findByUserIdWithDetails(userId);
-        if (profileOpt.isEmpty() || profileOpt.get().getCourseCategory() == null) {
+        if (profileOpt.isEmpty() || profileOpt.get().getDirection() == null) {
             return List.of();
         }
 
         StudentProfile profile = profileOpt.get();
         return scheduleSessionRepository.findApprovedSchedulesForStudent(
-                        profile.getCourseCategory().getId(),
+                        profile.getDirection().getId(),
                         profile.getCurrentSemester() != null ? profile.getCurrentSemester() : 1,
                         directionGroupId)
                 .stream()
@@ -367,7 +367,7 @@ public class StudentGroupRequestService {
     }
 
     private void validateStudentCategory(StudentProfile profile) {
-        if (profile.getCourseCategory() == null) {
+        if (profile.getDirection() == null) {
             throw new RuntimeException("Drejtimi nuk eshte caktuar per kete student");
         }
     }
@@ -382,7 +382,7 @@ public class StudentGroupRequestService {
         if (student == null || group == null) {
             return null;
         }
-        CourseCategory category = group.getCourseCategory();
+        Direction category = group.getDirection();
 
         return StudentGroupRequestResponse.builder()
                 .id(request.getId())

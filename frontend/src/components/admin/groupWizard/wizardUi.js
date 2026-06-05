@@ -1,4 +1,4 @@
-
+﻿
 import { scheduleCardSx, schedulePrimaryButtonSx, scheduleTheme } from "../../schedule/scheduleTheme";
 
 export const WIZARD_STEPS = [
@@ -165,19 +165,19 @@ export function wizardStepChipSx(isDark, state) {
   };
 }
 
-export function buildStaffByCourse(staffRows, courses, teachers) {
+export function buildStaffBySubject(staffRows, subjects, teachers) {
   const map = {};
   for (const row of staffRows) {
-    if (!row.courseId || !row.professorId) continue;
-    const course = courses.find((c) => String(c.id) === String(row.courseId));
+    if (!row.subjectId || !row.professorId) continue;
+    const course = subjects.find((c) => String(c.id) === String(row.subjectId));
     const prof = teachers.find((t) => String(t.id) === String(row.professorId));
     const asst = row.assistantId
       ? teachers.find((t) => String(t.id) === String(row.assistantId))
       : null;
-    map[String(row.courseId)] = {
+    map[String(row.subjectId)] = {
       professorId: row.professorId,
       assistantId: row.assistantId || "",
-      courseLabel: course?.titulli || "—",
+      subjectLabel: course?.titulli || "—",
       professorLabel: prof ? `${prof.emri || ""} ${prof.mbiemri || ""}`.trim() : "—",
       assistantLabel: asst ? `${asst.emri || ""} ${asst.mbiemri || ""}`.trim() : "—",
     };
@@ -185,9 +185,9 @@ export function buildStaffByCourse(staffRows, courses, teachers) {
   return map;
 }
 
-export function applyStaffToScheduleRow(row, staffByCourse) {
-  if (!row.courseId) return row;
-  const staff = staffByCourse[String(row.courseId)];
+export function applyStaffToScheduleRow(row, staffBySubject) {
+  if (!row.subjectId) return row;
+  const staff = staffBySubject[String(row.subjectId)];
   if (!staff) return row;
   return {
     ...row,
@@ -197,10 +197,10 @@ export function applyStaffToScheduleRow(row, staffByCourse) {
 }
 
 export function seedScheduleRowsFromStaff(staffRows, emptyScheduleRow) {
-  const valid = staffRows.filter((r) => r.courseId && r.professorId);
+  const valid = staffRows.filter((r) => r.subjectId && r.professorId);
   if (valid.length === 0) return [emptyScheduleRow()];
   return valid.map((r) => ({
-    courseId: r.courseId,
+    subjectId: r.subjectId,
     professorId: r.professorId,
     assistantId: r.assistantId || "",
     sessionType: "LECTURE",

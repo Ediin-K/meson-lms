@@ -10,35 +10,35 @@ import java.util.Optional;
 
 @Repository
 public interface DirectionGroupRepository extends JpaRepository<DirectionGroup, Long> {
-    List<DirectionGroup> findByCourseCategoryIdOrderByNameAsc(Long categoryId);
+    List<DirectionGroup> findByDirectionIdOrderByNameAsc(Long categoryId);
 
-    List<DirectionGroup> findByCourseCategoryIdAndSemesterOrderByNameAsc(Long categoryId, Integer semester);
+    List<DirectionGroup> findByDirectionIdAndSemesterOrderByNameAsc(Long categoryId, Integer semester);
 
-    Optional<DirectionGroup> findByCourseCategoryIdAndSemesterAndNameIgnoreCase(
+    Optional<DirectionGroup> findByDirectionIdAndSemesterAndNameIgnoreCase(
             Long categoryId, Integer semester, String name);
 
-    boolean existsByCourseCategoryIdAndSemesterAndNameIgnoreCase(
+    boolean existsByDirectionIdAndSemesterAndNameIgnoreCase(
             Long categoryId, Integer semester, String name);
 
     @Query("""
             SELECT dg FROM DirectionGroup dg
-            JOIN FETCH dg.courseCategory
+            JOIN FETCH dg.direction
             WHERE dg.id = :id
             """)
     java.util.Optional<DirectionGroup> findByIdWithCategory(@Param("id") Long id);
 
     @Query("""
             SELECT dg FROM DirectionGroup dg
-            JOIN FETCH dg.courseCategory
-            WHERE dg.courseCategory.id = :categoryId
+            JOIN FETCH dg.direction
+            WHERE dg.direction.id = :categoryId
             ORDER BY dg.name ASC
             """)
     List<DirectionGroup> findByCategoryIdWithCategory(@Param("categoryId") Long categoryId);
 
     @Query("""
             SELECT dg FROM DirectionGroup dg
-            JOIN FETCH dg.courseCategory
-            WHERE dg.courseCategory.id = :categoryId AND dg.semester = :semester
+            JOIN FETCH dg.direction
+            WHERE dg.direction.id = :categoryId AND dg.semester = :semester
             ORDER BY dg.name ASC
             """)
     List<DirectionGroup> findByCategoryIdAndSemesterWithCategory(

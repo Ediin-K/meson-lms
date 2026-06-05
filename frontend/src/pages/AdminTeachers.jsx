@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppPreferences } from "../context/appPreferencesContext";
 import {
@@ -83,7 +83,7 @@ export default function AdminTeachers() {
       `${t.emri} ${t.mbiemri} ${t.email}`
         .toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
-      t.courseCount?.toString().includes(searchTerm);
+      t.subjectCount?.toString().includes(searchTerm);
     const matchesStatus = statusFilter === "all" || t.statusi === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -229,7 +229,7 @@ export default function AdminTeachers() {
               variant="body1"
               className="mt-4! max-w-2xl! text-slate-500! dark:text-slate-400! text-lg font-medium!"
             >
-              Menaxhoni mësuesit, caktoni kurset dhe monitoroni aktivitetin në
+              Menaxhoni mësuesit, caktoni Lëndët dhe monitoroni aktivitetin në
               sistem.
             </Typography>
           </div>
@@ -274,8 +274,8 @@ export default function AdminTeachers() {
               bg: "bg-indigo-50 dark:bg-indigo-900/20",
             },
             {
-              label: "Kurse Të Lidhura",
-              value: teachers.reduce((sum, t) => sum + (t.courseCount || 0), 0),
+              label: "Lëndë Të Lidhura",
+              value: teachers.reduce((sum, t) => sum + (t.subjectCount || 0), 0),
               icon: SchoolRounded,
               color: "text-sky-600",
               bg: "bg-sky-50 dark:bg-sky-900/20",
@@ -375,7 +375,7 @@ export default function AdminTeachers() {
                       Telefon
                     </TableCell>
                     <TableCell className="font-black! text-slate-400! uppercase! text-[10px]! tracking-widest! py-6!">
-                      Kurse
+                      Lëndë
                     </TableCell>
                     <TableCell className="font-black! text-slate-400! uppercase! text-[10px]! tracking-widest! py-6!">
                       Statusi
@@ -481,7 +481,7 @@ export default function AdminTeachers() {
                             variant="body2"
                             className="font-bold! text-indigo-600! dark:text-indigo-400!"
                           >
-                            {teacher.courseCount || 0}
+                            {teacher.subjectCount || 0}
                           </Typography>
                         </TableCell>
                         <TableCell>

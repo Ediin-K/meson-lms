@@ -10,28 +10,28 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(exclude = {"course"})
+@EqualsAndHashCode(exclude = {"subject"})
 public class Module {
 
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "title", nullable = false)
     private String titulli;
 
-    @Column(nullable = false)
+    @Column(name = "description", nullable = false)
     private String pershkrimi;
 
-    @Column(nullable = false)
+    @Column(name = "sequence_order", nullable = false)
     private Integer rradhitja;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id",nullable = false)
-    private Course course;
+    @JoinColumn(name = "subject_id",nullable = false)
+    private Subject subject;
 
     @PrePersist
     protected void onCreate() {

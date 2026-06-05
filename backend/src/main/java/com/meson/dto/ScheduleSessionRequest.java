@@ -12,9 +12,9 @@ import java.time.LocalTime;
 @Builder
 public class ScheduleSessionRequest {
     @NotNull
-    private Long courseId;
-    private Long courseGroupId;
-    private Long courseSubgroupId;
+    private Long subjectId;
+    private Long subjectGroupId;
+    private Long subjectSubgroupId;
     @NotNull
     private Long teacherId;
     @NotNull

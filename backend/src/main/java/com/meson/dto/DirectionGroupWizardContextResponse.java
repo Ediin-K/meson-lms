@@ -11,6 +11,6 @@ public class DirectionGroupWizardContextResponse {
     private Long categoryId;
     private String categoryName;
     private Integer semester;
-    private List<CourseResponse> courses;
+    private List<SubjectResponse> subjects;
     private List<TeacherResponse> teachers;
 }
