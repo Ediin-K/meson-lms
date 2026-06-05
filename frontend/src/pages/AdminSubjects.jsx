@@ -44,7 +44,9 @@ import AutoStoriesRounded from "@mui/icons-material/AutoStoriesRounded";
 import LayersRounded from "@mui/icons-material/LayersRounded";
 import Footer from "../components/ui/Footer";
 import axiosInstance from "../services/axiosInstance";
-import { getDirectionGroups } from "../services/directionGroupService";
+import { getDepartmentGroups } from "../services/departmentGroupService";
+import { getAllDepartments } from "../services/departmentService";
+import { getAllTeachers } from "../services/teacherService";
 
 const SEMESTER_COLORS = {
   1: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300",
@@ -59,10 +61,9 @@ const EMPTY_FORM = {
   titulli: "",
   pershkrimi: "",
   teacherId: "",
-  categoryId: "",
+  departmentId: "",
   semester: 1,
   enrollmentKey: "",
-  cmimi: 0.0,
   ects: 5,
   niveli: "FILLESTAR",
   statusi: "DRAFT",
@@ -95,9 +96,11 @@ export default function AdminSubjects() {
     name: "",
     capacity: "",
     teacherIds: "",
-    directionGroupId: "",
+    departmentGroupId: "",
   });
-  const [directionGroupsForSubject, setDirectionGroupsForSubject] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [teachers, setTeachers] = useState([]);
+  const [departmentGroupsForSubject, setDepartmentGroupsForSubject] = useState([]);
   const [editingGroupId, setEditingGroupId] = useState(null);
   const [subgroupForms, setSubgroupForms] = useState({});
   const [editingSubgroupId, setEditingSubgroupId] = useState(null);
@@ -110,7 +113,7 @@ export default function AdminSubjects() {
       const { data } = await axiosInstance.get("/subjects");
       setSubjects(data);
     } catch (err) {
-      setError(err.response?.data?.message || err.message || "Gabim gjatë marrjes së lëndëve");
+      setError(err.response?.data?.message || err.message || t("adminSubjects.toast.fetchError"));
     } finally {
       setLoading(false);
     }
@@ -178,10 +181,9 @@ export default function AdminSubjects() {
       titulli: subject.titulli,
       pershkrimi: subject.pershkrimi,
       teacherId: subject.teacherId,
-      categoryId: subject.categoryId,
+      departmentId: subject.departmentId,
       semester: subject.semester,
       enrollmentKey: subject.enrollmentKey || "",
-      cmimi: subject.cmimi,
       ects: subject.ects ?? 5,
       niveli: subject.niveli,
       statusi: subject.statusi,
@@ -199,11 +201,11 @@ export default function AdminSubjects() {
         setSubjects((prev) =>
             prev.map((s) => (s.id === updated.id ? updated : s)),
         );
-        setSnackbarMessage("Lënda u përditësua me sukses.");
+        setSnackbarMessage(t("adminSubjects.toast.updated"));
       } else {
         const created = await createSubject(formData);
         setSubjects((prev) => [...prev, created]);
-        setSnackbarMessage("Lënda u krijua me sukses.");
+        setSnackbarMessage(t("adminSubjects.toast.created"));
       }
       setOpenSnackbar(true);
       setOpenDialog(false);
@@ -225,13 +227,13 @@ export default function AdminSubjects() {
     try {
       await deleteSubject(deleteTarget.id);
       setSubjects((prev) => prev.filter((s) => s.id !== deleteTarget.id));
-      setSnackbarMessage(`${deleteTarget.titulli} u fshi me sukses.`);
+      setSnackbarMessage(`${deleteTarget.titulli} ${t("adminSubjects.toast.deleted")}`);
       setOpenSnackbar(true);
       setDeleteTarget(null);
       setOpenDeleteConfirm(false);
     } catch (err) {
       console.error("Delete error:", err);
-      setError(err.message || "Gabim gjatë fshirjes");
+      setError(err.message || t("adminSubjects.toast.deleteError"));
       setOpenDeleteConfirm(false);
       setDeleteTarget(null);
     }
@@ -246,11 +248,11 @@ export default function AdminSubjects() {
   const handleOpenGroups = async (subject) => {
     try {
       setGroupDialog({ open: true, subject });
-      setGroupForm({ name: "", capacity: "", teacherIds: "", directionGroupId: "" });
-      if (subject.categoryId) {
-        setDirectionGroupsForSubject(await getDirectionGroups(subject.categoryId));
+      setGroupForm({ name: "", capacity: "", teacherIds: "", departmentGroupId: "" });
+      if (subject.departmentId) {
+        setDepartmentGroupsForSubject(await getDepartmentGroups(subject.departmentId));
       } else {
-        setDirectionGroupsForSubject([]);
+        setDepartmentGroupsForSubject([]);
       }
       setEditingGroupId(null);
       setSubgroupForms({});
@@ -258,7 +260,7 @@ export default function AdminSubjects() {
       setEditingSubgroupGroupId(null);
       setSubjectGroups(await fetchSubjectGroups(subject.id));
     } catch (err) {
-      setError(err.message || "Gabim gjate hapjes se grupeve");
+      setError(err.message || t("adminSubjects.toast.groupsError"));
     }
   };
 
@@ -270,7 +272,7 @@ export default function AdminSubjects() {
         name: groupForm.name.trim(),
         capacity: groupForm.capacity ? Number(groupForm.capacity) : null,
         teacherIds: parseIds(groupForm.teacherIds),
-        directionGroupId: groupForm.directionGroupId ? Number(groupForm.directionGroupId) : null,
+        departmentGroupId: groupForm.departmentGroupId ? Number(groupForm.departmentGroupId) : null,
       };
 
       if (editingGroupId) {
@@ -279,13 +281,13 @@ export default function AdminSubjects() {
         await createGroup(groupDialog.subject.id, payload);
       }
 
-      setGroupForm({ name: "", capacity: "", teacherIds: "", directionGroupId: "" });
+      setGroupForm({ name: "", capacity: "", teacherIds: "", departmentGroupId: "" });
       setEditingGroupId(null);
       setSubjectGroups(await fetchSubjectGroups(groupDialog.subject.id));
-      setSnackbarMessage(editingGroupId ? "Grupi u perditesua me sukses." : "Grupi u krijua me sukses.");
+      setSnackbarMessage(editingGroupId ? t("adminSubjects.groups.groupUpdated") : t("adminSubjects.groups.groupCreated"));
       setOpenSnackbar(true);
     } catch (err) {
-      setError(err.message || "Gabim gjate krijimit te grupit");
+      setError(err.message || t("adminSubjects.toast.groupCreateError"));
     }
   };
 
@@ -312,12 +314,12 @@ export default function AdminSubjects() {
       setSubjectGroups(await fetchSubjectGroups(groupDialog.subject.id));
       setSnackbarMessage(
           editingSubgroupId && editingSubgroupGroupId === groupId
-              ? "Nengrupi u perditesua me sukses."
-              : "Nengrupi u krijua me sukses.",
+              ? t("adminSubjects.groups.subgroupUpdated")
+              : t("adminSubjects.groups.subgroupCreated"),
       );
       setOpenSnackbar(true);
     } catch (err) {
-      setError(err.message || "Gabim gjate krijimit te nengrupit");
+      setError(err.message || t("adminSubjects.toast.subgroupCreateError"));
     }
   };
 
@@ -327,20 +329,20 @@ export default function AdminSubjects() {
       name: group.name || "",
       capacity: group.capacity || "",
       teacherIds: group.teachers?.map((teacher) => teacher.id).join(", ") || "",
-      directionGroupId: group.directionGroupId || "",
+      departmentGroupId: group.departmentGroupId || "",
     });
   };
 
   const handleDeleteGroup = async (group) => {
-    if (!window.confirm(`A je i sigurt qe deshiron ta fshish grupin ${group.name}?`)) return;
+    if (!window.confirm(`${t("adminSubjects.groups.tooltipDeleteGroup")} ${group.name}?`)) return;
 
     try {
       await deleteGroup(group.id);
       setSubjectGroups(await fetchSubjectGroups(groupDialog.subject.id));
-      setSnackbarMessage("Grupi u fshi me sukses.");
+      setSnackbarMessage(t("adminSubjects.groups.groupDeleted"));
       setOpenSnackbar(true);
     } catch (err) {
-      setError(err.message || "Gabim gjate fshirjes se grupit");
+      setError(err.message || t("adminSubjects.toast.groupDeleteError"));
     }
   };
 
@@ -358,31 +360,43 @@ export default function AdminSubjects() {
   };
 
   const handleDeleteSubgroup = async (subgroup) => {
-    if (!window.confirm(`A je i sigurt qe deshiron ta fshish nengrupin ${subgroup.name}?`)) return;
+    if (!window.confirm(`${t("adminSubjects.groups.tooltipDeleteGroup")} ${subgroup.name}?`)) return;
 
     try {
       await deleteSubgroup(subgroup.id);
       setEditingSubgroupId(null);
       setEditingSubgroupGroupId(null);
       setSubjectGroups(await fetchSubjectGroups(groupDialog.subject.id));
-      setSnackbarMessage("Nengrupi u fshi me sukses.");
+      setSnackbarMessage(t("adminSubjects.groups.subgroupDeleted"));
       setOpenSnackbar(true);
     } catch (err) {
-      setError(err.message || "Gabim gjate fshirjes se nengrupit");
+      setError(err.message || t("adminSubjects.toast.subgroupDeleteError"));
     }
   };
 
   const field = (k) => (e) =>
       setFormData((f) => ({ ...f, [k]: e.target.value }));
 
+  const handleDepartmentChange = (e) => {
+    setFormData((f) => ({ ...f, departmentId: e.target.value, semester: 1 }));
+  };
+
+  const selectedDept = departments.find((d) => String(d.id) === String(formData.departmentId));
+  const numSem = parseInt(selectedDept?.numSemesters, 10) || 0;
+  const availableSemesters = numSem > 0
+      ? Array.from({ length: numSem }, (_, i) => i + 1)
+      : [];
+
   useEffect(() => {
     fetchSubjects();
+    getAllDepartments().then(setDepartments).catch(() => {});
+    getAllTeachers().then(setTeachers).catch(() => {});
   }, []);
 
   const filtered = subjects.filter(
       (s) =>
           (s.titulli?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
-          (s.categoryName?.toLowerCase() || "").includes(searchTerm.toLowerCase()),
+          (s.departmentName?.toLowerCase() || "").includes(searchTerm.toLowerCase()),
   );
 
   return (
@@ -395,7 +409,7 @@ export default function AdminSubjects() {
                 onClick={() => navigate("/admin")}
                 className="rounded-2xl! px-6! py-2! normal-case! font-bold! text-slate-600! dark:text-slate-400! hover:bg-slate-200/50! dark:hover:bg-slate-800/50!"
             >
-              {t("home.admin.services.backToPanel", "Kthehu te Paneli")}
+              {t("home.admin.services.backToPanel")}
             </Button>
           </Box>
 
@@ -406,32 +420,26 @@ export default function AdminSubjects() {
                   variant="overline"
                   className="font-bold! tracking-[0.3em]! text-sky-600! dark:text-sky-400!"
               >
-                {t("adminSubjects.overline", "KURIKULA AKADEMIKE")}
+                {t("adminSubjects.overline")}
               </Typography>
               <Typography
                   variant="h3"
                   component="h1"
                   className="mt-2! font-black! text-slate-900! dark:text-white!"
               >
-                {t("adminSubjects.title", "Lëndët")}
+                {t("adminSubjects.title")}
               </Typography>
               <Typography
                   variant="body1"
                   className="mt-4! max-w-2xl! text-slate-500! dark:text-slate-400! text-lg font-medium!"
               >
-                {t(
-                    "adminSubjects.subtitle",
-                    "Menaxhoni planin mësimor, kreditet ECTS dhe instruktorët për çdo lëndë.",
-                )}
+                {t("adminSubjects.subtitle")}
               </Typography>
             </div>
 
             <Box className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
               <TextField
-                  placeholder={t(
-                      "adminSubjects.searchPlaceholder",
-                      "Kërko lëndët...",
-                  )}
+                  placeholder={t("adminSubjects.searchPlaceholder")}
                   variant="outlined"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -453,7 +461,7 @@ export default function AdminSubjects() {
                   onClick={handleOpenAdd}
                   className="rounded-3xl! py-4! px-8! normal-case! font-black! bg-sky-600! hover:bg-sky-700! shadow-xl shadow-sky-500/30 transition-all hover:scale-105 active:scale-95"
               >
-                {t("adminSubjects.addTitle", "Shto Lëndë")}
+                {t("adminSubjects.addTitle")}
               </Button>
             </Box>
           </Box>
@@ -473,28 +481,28 @@ export default function AdminSubjects() {
           <Grid container spacing={3} className="mb-10">
             {[
               {
-                label: t("adminSubjects.stats.total", "Gjithsej"),
+                label: t("adminSubjects.stats.total"),
                 value: subjects.length,
                 icon: BookRounded,
                 color: "text-sky-600",
                 bg: "bg-sky-50 dark:bg-sky-900/20",
               },
               {
-                label: t("adminSubjects.stats.categories", "Kategori"),
-                value: new Set(subjects.map((s) => s.categoryName)).size,
+                label: t("adminSubjects.stats.departments"),
+                value: new Set(subjects.map((s) => s.departmentName)).size,
                 icon: AutoStoriesRounded,
                 color: "text-emerald-600",
                 bg: "bg-emerald-50 dark:bg-emerald-900/20",
               },
               {
-                label: t("adminSubjects.stats.teachers", "Mësues"),
+                label: t("adminSubjects.stats.teachers"),
                 value: new Set(subjects.map((s) => s.teacherId)).size,
                 icon: SchoolRounded,
                 color: "text-amber-600",
                 bg: "bg-amber-50 dark:bg-amber-900/20",
               },
               {
-                label: t("adminSubjects.stats.semesters", "Semestra"),
+                label: t("adminSubjects.stats.semesters"),
                 value: new Set(subjects.map((s) => s.semester)).size,
                 icon: LayersRounded,
                 color: "text-indigo-600",
@@ -537,7 +545,7 @@ export default function AdminSubjects() {
                   variant="h6"
                   className="font-black! text-slate-800! dark:text-white!"
               >
-                {t("adminSubjects.catalogTitle", "Katalogu i Lëndëve")}
+                {t("adminSubjects.catalogTitle")}
               </Typography>
             </Box>
 
@@ -551,28 +559,28 @@ export default function AdminSubjects() {
                     <TableHead className="bg-slate-50/50 dark:bg-slate-800/30!">
                       <TableRow>
                         <TableCell className="font-black! text-slate-400! uppercase! text-[10px]! tracking-widest! py-6! pl-8!">
-                          {t("adminSubjects.table.title", "Lënda")}
+                          {t("adminSubjects.table.title")}
                         </TableCell>
                         <TableCell className="font-black! text-slate-400! uppercase! text-[10px]! tracking-widest! py-6!">
-                          {t("adminSubjects.table.category", "Kategoria")}
+                          {t("adminSubjects.table.department")}
                         </TableCell>
                         <TableCell className="font-black! text-slate-400! uppercase! text-[10px]! tracking-widest! py-6!">
-                          {t("adminSubjects.table.semester", "Semestri")}
+                          {t("adminSubjects.table.semester")}
                         </TableCell>
                         <TableCell className="font-black! text-slate-400! uppercase! text-[10px]! tracking-widest! py-6!">
-                          {t("adminSubjects.table.credits", "ECTS")}
+                          {t("adminSubjects.table.credits")}
                         </TableCell>
                         <TableCell className="font-black! text-slate-400! uppercase! text-[10px]! tracking-widest! py-6!">
-                          {t("adminSubjects.table.instructor", "Instruktori")}
+                          {t("adminSubjects.table.instructor")}
                         </TableCell>
                         <TableCell className="font-black! text-slate-400! uppercase! text-[10px]! tracking-widest! py-6!">
-                          {t("adminSubjects.table.status", "Statusi")}
+                          {t("adminSubjects.table.status")}
                         </TableCell>
                         <TableCell
                             align="right"
                             className="font-black! text-slate-400! uppercase! text-[10px]! tracking-widest! py-6! pr-8!"
                         >
-                          {t("adminSubjects.table.actions", "Veprime")}
+                          {t("adminSubjects.table.actions")}
                         </TableCell>
                       </TableRow>
                     </TableHead>
@@ -589,14 +597,13 @@ export default function AdminSubjects() {
                                       variant="h6"
                                       className="font-black! text-slate-800! dark:text-white! mb-1"
                                   >
-                                    Nuk u gjet asnjë lëndë
+                                    {t("adminSubjects.noSubjects")}
                                   </Typography>
                                   <Typography
                                       variant="body2"
                                       className="text-slate-400!"
                                   >
-                                    Provo të ndryshosh kërkimin ose shto një lëndë të
-                                    re.
+                                    {t("adminSubjects.noSubjectsDesc")}
                                   </Typography>
                                 </div>
                               </Box>
@@ -631,7 +638,7 @@ export default function AdminSubjects() {
                                 </TableCell>
                                 <TableCell>
                                   <Chip
-                                      label={subject.categoryName}
+                                      label={subject.departmentName}
                                       size="small"
                                       className="font-bold! bg-slate-100! dark:bg-slate-800! text-slate-600! dark:text-slate-400! rounded-lg!"
                                   />
@@ -662,7 +669,7 @@ export default function AdminSubjects() {
                                 </TableCell>
                                 <TableCell align="right" className="pr-8!">
                                   <Box className="flex justify-end gap-1">
-                                    <Tooltip title="Ndrysho">
+                                    <Tooltip title={t("adminSubjects.tooltips.edit")}>
                                       <IconButton
                                           size="small"
                                           onClick={() => handleOpenEdit(subject)}
@@ -671,7 +678,7 @@ export default function AdminSubjects() {
                                         <EditRounded fontSize="small" />
                                       </IconButton>
                                     </Tooltip>
-                                    <Tooltip title="Grupet">
+                                    <Tooltip title={t("adminSubjects.tooltips.groups")}>
                                       <IconButton
                                           size="small"
                                           onClick={() => handleOpenGroups(subject)}
@@ -680,7 +687,7 @@ export default function AdminSubjects() {
                                         <LayersRounded fontSize="small" />
                                       </IconButton>
                                     </Tooltip>
-                                    <Tooltip title="Fshi">
+                                    <Tooltip title={t("adminSubjects.tooltips.delete")}>
                                       <IconButton
                                           size="small"
                                           onClick={() => handleOpenDelete(subject)}
@@ -730,7 +737,7 @@ export default function AdminSubjects() {
                         : "font-black! text-slate-900!"
                   }
               >
-                {isEdit ? "Ndrysho Lëndën" : "Shto Lëndë të Re"}
+                {isEdit ? t("adminSubjects.editTitle") : t("adminSubjects.addTitle")}
               </Typography>
               <Typography
                   variant="body2"
@@ -738,7 +745,7 @@ export default function AdminSubjects() {
                     isDark ? "text-slate-300! mt-1!" : "text-slate-600! mt-1!"
                   }
               >
-                Plotëso të dhënat e lëndës dhe ruaji ndryshimet.
+                {t("adminSubjects.form.dialogSubtitle")}
               </Typography>
             </DialogTitle>
 
@@ -759,7 +766,7 @@ export default function AdminSubjects() {
               <Box className="flex flex-col gap-5 mt-4">
                 {}
                 <TextField
-                    label="Titulli i Lëndës *"
+                    label={t("adminSubjects.form.titleLabel")}
                     fullWidth
                     value={formData.titulli}
                     onChange={field("titulli")}
@@ -782,7 +789,7 @@ export default function AdminSubjects() {
 
                 {}
                 <TextField
-                    label="Përshkrimi"
+                    label={t("adminSubjects.form.description")}
                     fullWidth
                     multiline
                     rows={3}
@@ -807,55 +814,63 @@ export default function AdminSubjects() {
 
                 {}
                 <Box className="flex gap-4">
-                  <TextField
-                      label="Teacher ID *"
-                      fullWidth
-                      type="number"
+                  <FormControl fullWidth>
+                    <InputLabel sx={{ color: isDark ? "#cbd5e1" : "#64748b" }}>
+                      {t("adminSubjects.form.instructorId")}
+                    </InputLabel>
+                    <Select
+                      label={t("adminSubjects.form.instructorId")}
                       value={formData.teacherId}
                       onChange={field("teacherId")}
-                      InputProps={{ className: "rounded-2xl!" }}
+                      className="rounded-2xl!"
                       sx={{
-                        "& .MuiOutlinedInput-root": {
-                          color: isDark ? "#f1f5f9" : "#1e293b",
-                          "& fieldset": {
-                            borderColor: isDark ? "#334155" : "#cbd5e1",
-                          },
-                        },
-                        "& .MuiInputLabel-root": {
-                          color: isDark ? "#cbd5e1" : "#64748b",
+                        color: isDark ? "#f1f5f9" : "#1e293b",
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          borderColor: isDark ? "#334155" : "#cbd5e1",
                         },
                       }}
-                  />
-                  <TextField
-                      label="Category ID *"
-                      fullWidth
-                      type="number"
-                      value={formData.categoryId}
-                      onChange={field("categoryId")}
-                      InputProps={{ className: "rounded-2xl!" }}
+                    >
+                      {teachers.map((tc) => (
+                        <MenuItem key={tc.id} value={tc.id}>
+                          {tc.emri} {tc.mbiemri} — ID: {tc.id}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  <FormControl fullWidth>
+                    <InputLabel sx={{ color: isDark ? "#cbd5e1" : "#64748b" }}>
+                      {t("adminSubjects.form.departmentId")}
+                    </InputLabel>
+                    <Select
+                      label={t("adminSubjects.form.departmentId")}
+                      value={formData.departmentId}
+                      onChange={handleDepartmentChange}
+                      className="rounded-2xl!"
                       sx={{
-                        "& .MuiOutlinedInput-root": {
-                          color: isDark ? "#f1f5f9" : "#1e293b",
-                          "& fieldset": {
-                            borderColor: isDark ? "#334155" : "#cbd5e1",
-                          },
-                        },
-                        "& .MuiInputLabel-root": {
-                          color: isDark ? "#cbd5e1" : "#64748b",
+                        color: isDark ? "#f1f5f9" : "#1e293b",
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          borderColor: isDark ? "#334155" : "#cbd5e1",
                         },
                       }}
-                  />
+                    >
+                      {departments.map((d) => (
+                        <MenuItem key={d.id} value={d.id}>
+                          {d.emertimi}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
                 </Box>
 
                 {}
                 <Box className="flex gap-4">
-                  <FormControl fullWidth>
+                  <FormControl fullWidth disabled={availableSemesters.length === 0}>
                     <InputLabel sx={{ color: isDark ? "#cbd5e1" : "#64748b" }}>
-                      Semestri *
+                      {availableSemesters.length > 0 ? t("adminSubjects.form.semester") : t("adminSubjects.form.selectDeptFirst")}
                     </InputLabel>
                     <Select variant="outlined"
-                            value={formData.semester}
-                            label="Semestri *"
+                            value={availableSemesters.includes(formData.semester) ? formData.semester : ""}
+                            label={availableSemesters.length > 0 ? t("adminSubjects.form.semester") : t("adminSubjects.form.selectDeptFirst")}
                             onChange={field("semester")}
                             sx={{
                               borderRadius: "1rem",
@@ -868,36 +883,16 @@ export default function AdminSubjects() {
                               },
                             }}
                     >
-                      {[1, 2, 3, 4, 5, 6, 7, 8].map((s) => (
+                      {availableSemesters.map((s) => (
                           <MenuItem key={s} value={s}>
-                            Semestri {s}
+                            {t("adminSubjects.table.semester")} {s}
                           </MenuItem>
                       ))}
                     </Select>
                   </FormControl>
 
                   <TextField
-                      label="Çmimi (€)"
-                      fullWidth
-                      type="number"
-                      value={formData.cmimi}
-                      onChange={field("cmimi")}
-                      InputProps={{ className: "rounded-2xl!" }}
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          color: isDark ? "#f1f5f9" : "#1e293b",
-                          "& fieldset": {
-                            borderColor: isDark ? "#334155" : "#cbd5e1",
-                          },
-                        },
-                        "& .MuiInputLabel-root": {
-                          color: isDark ? "#cbd5e1" : "#64748b",
-                        },
-                      }}
-                  />
-
-                  <TextField
-                      label="ECTS"
+                      label={t("adminSubjects.form.credits")}
                       fullWidth
                       type="number"
                       inputProps={{ min: 1, max: 30 }}
@@ -922,11 +917,11 @@ export default function AdminSubjects() {
                 <Box className="flex gap-4">
                   <FormControl fullWidth>
                     <InputLabel sx={{ color: isDark ? "#cbd5e1" : "#64748b" }}>
-                      Niveli
+                      {t("adminSubjects.form.level")}
                     </InputLabel>
                     <Select variant="outlined"
                             value={formData.niveli}
-                            label="Niveli"
+                            label={t("adminSubjects.form.level")}
                             onChange={field("niveli")}
                             sx={{
                               borderRadius: "1rem",
@@ -939,19 +934,19 @@ export default function AdminSubjects() {
                               },
                             }}
                     >
-                      <MenuItem value="FILLESTAR">Fillestar</MenuItem>
-                      <MenuItem value="MESEM">Mesëm</MenuItem>
-                      <MenuItem value="AVANCUAR">Avancuar</MenuItem>
+                      <MenuItem value="FILLESTAR">{t("adminSubjects.form.levelBeginner")}</MenuItem>
+                      <MenuItem value="MESEM">{t("adminSubjects.form.levelIntermediate")}</MenuItem>
+                      <MenuItem value="AVANCUAR">{t("adminSubjects.form.levelAdvanced")}</MenuItem>
                     </Select>
                   </FormControl>
 
                   <FormControl fullWidth>
                     <InputLabel sx={{ color: isDark ? "#cbd5e1" : "#64748b" }}>
-                      Statusi
+                      {t("adminSubjects.form.status")}
                     </InputLabel>
                     <Select variant="outlined"
                             value={formData.statusi}
-                            label="Statusi"
+                            label={t("adminSubjects.form.status")}
                             onChange={field("statusi")}
                             sx={{
                               borderRadius: "1rem",
@@ -964,16 +959,16 @@ export default function AdminSubjects() {
                               },
                             }}
                     >
-                      <MenuItem value="DRAFT">Draft</MenuItem>
-                      <MenuItem value="AKTIV">Aktiv</MenuItem>
-                      <MenuItem value="ARKIVUAR">Arkivuar</MenuItem>
+                      <MenuItem value="DRAFT">{t("adminSubjects.form.statusDraft")}</MenuItem>
+                      <MenuItem value="AKTIV">{t("adminSubjects.form.statusActive")}</MenuItem>
+                      <MenuItem value="ARKIVUAR">{t("adminSubjects.form.statusArchived")}</MenuItem>
                     </Select>
                   </FormControl>
                 </Box>
 
                 {}
                 <TextField
-                    label="Enrollment Key (opsionale)"
+                    label={t("adminSubjects.form.enrollmentKey")}
                     fullWidth
                     value={formData.enrollmentKey}
                     onChange={field("enrollmentKey")}
@@ -999,7 +994,7 @@ export default function AdminSubjects() {
                   disabled={saving}
                   className="rounded-2xl! px-6! py-3! normal-case! font-bold! text-slate-500! hover:bg-slate-100! dark:hover:bg-slate-800!"
               >
-                Anulo
+                {t("adminSubjects.form.cancel")}
               </Button>
               <Button
                   variant="contained"
@@ -1007,7 +1002,7 @@ export default function AdminSubjects() {
                   disabled={
                       !formData.titulli ||
                       !formData.teacherId ||
-                      !formData.categoryId ||
+                      !formData.departmentId ||
                       saving
                   }
                   className="rounded-2xl! px-10! py-3! normal-case! font-black! bg-sky-600! hover:bg-sky-700! shadow-lg shadow-sky-500/20"
@@ -1015,9 +1010,9 @@ export default function AdminSubjects() {
                 {saving ? (
                     <CircularProgress size={20} className="text-white!" />
                 ) : isEdit ? (
-                    "Përditëso"
+                    t("adminSubjects.form.update")
                 ) : (
-                    "Shto Lëndën"
+                    t("adminSubjects.form.addSubject")
                 )}
               </Button>
             </DialogActions>
@@ -1040,7 +1035,7 @@ export default function AdminSubjects() {
           >
             <DialogTitle className="px-6! pt-6! pb-2!">
               <Typography variant="h5" className="font-black! text-slate-900! dark:text-white!">
-                Grupet e lëndes
+                {t("adminSubjects.groups.dialogTitle")}
               </Typography>
               <Typography variant="body2" className="text-slate-500! dark:text-slate-400!">
                 {groupDialog.subject?.titulli}
@@ -1049,20 +1044,20 @@ export default function AdminSubjects() {
             <DialogContent className="px-6! py-4!">
               <Box className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
                 <TextField
-                    label="Emri i grupit"
+                    label={t("adminSubjects.groups.groupNameLabel")}
                     placeholder="G1"
                     value={groupForm.name}
                     onChange={(e) => setGroupForm((prev) => ({ ...prev, name: e.target.value }))}
                 />
                 <FormControl fullWidth>
-                  <InputLabel>Grupi i drejtimit</InputLabel>
+                  <InputLabel>{t("adminSubjects.groups.deptGroupLabel")}</InputLabel>
                   <Select
-                      value={groupForm.directionGroupId}
-                      label="Grupi i drejtimit"
-                      onChange={(e) => setGroupForm((prev) => ({ ...prev, directionGroupId: e.target.value }))}
+                      value={groupForm.departmentGroupId}
+                      label={t("adminSubjects.groups.deptGroupLabel")}
+                      onChange={(e) => setGroupForm((prev) => ({ ...prev, departmentGroupId: e.target.value }))}
                   >
-                    <MenuItem value="">Pa lidhje</MenuItem>
-                    {directionGroupsForSubject.map((dg) => (
+                    <MenuItem value="">{t("adminSubjects.groups.noLink")}</MenuItem>
+                    {departmentGroupsForSubject.map((dg) => (
                         <MenuItem key={dg.id} value={dg.id}>
                           {dg.name} ({dg.currentStudents}/{dg.maxCapacity})
                         </MenuItem>
@@ -1070,7 +1065,7 @@ export default function AdminSubjects() {
                   </Select>
                 </FormControl>
                 <TextField
-                    label="Kapaciteti (lëndë)"
+                    label={t("adminSubjects.groups.capacityLabel")}
                     type="number"
                     value={groupForm.capacity}
                     onChange={(e) => setGroupForm((prev) => ({ ...prev, capacity: e.target.value }))}
@@ -1089,18 +1084,18 @@ export default function AdminSubjects() {
                   disabled={!groupForm.name.trim()}
                   className="rounded-xl! normal-case! font-bold! bg-indigo-600! mb-6!"
               >
-                {editingGroupId ? "Ruaj Grupin" : "Shto Grup"}
+                {editingGroupId ? t("adminSubjects.groups.saveGroup") : t("adminSubjects.groups.addGroup")}
               </Button>
               {editingGroupId && (
                   <Button
                       variant="text"
                       onClick={() => {
                         setEditingGroupId(null);
-                        setGroupForm({ name: "", capacity: "", teacherIds: "", directionGroupId: "" });
+                        setGroupForm({ name: "", capacity: "", teacherIds: "", departmentGroupId: "" });
                       }}
                       className="rounded-xl! normal-case! font-bold! text-slate-500! dark:text-slate-300! mb-6! ml-2!"
                   >
-                    Anulo editimin
+                    {t("adminSubjects.groups.cancelEdit")}
                   </Button>
               )}
 
@@ -1112,14 +1107,14 @@ export default function AdminSubjects() {
                         <Box className="flex flex-col md:flex-row md:items-start md:justify-between gap-2 mb-3">
                           <div>
                             <Typography className="font-black! text-slate-900! dark:text-white!">
-                              Grupi: {group.name}
+                              {t("adminSubjects.groups.groupPrefix")}{group.name}
                             </Typography>
                             <Typography variant="caption" className="text-slate-500!">
-                              Profesoret: {group.teachers?.map((t) => t.name).join(", ") || "-"}
+                              {t("adminSubjects.groups.professorPrefix")}{group.teachers?.map((tc) => tc.name).join(", ") || "-"}
                             </Typography>
                           </div>
                           <Box className="flex gap-1">
-                            <Tooltip title="Ndrysho grupin">
+                            <Tooltip title={t("adminSubjects.groups.tooltipEditGroup")}>
                               <IconButton
                                   size="small"
                                   onClick={() => handleEditGroup(group)}
@@ -1128,7 +1123,7 @@ export default function AdminSubjects() {
                                 <EditRounded fontSize="small" />
                               </IconButton>
                             </Tooltip>
-                            <Tooltip title="Fshi grupin">
+                            <Tooltip title={t("adminSubjects.groups.tooltipDeleteGroup")}>
                               <IconButton
                                   size="small"
                                   onClick={() => handleDeleteGroup(group)}
@@ -1173,7 +1168,7 @@ export default function AdminSubjects() {
                         <Box className="grid grid-cols-1 md:grid-cols-3 gap-3">
                           <TextField
                               size="small"
-                              label="Nengrupi"
+                              label={t("adminSubjects.groups.subgroupLabel")}
                               placeholder="G1A"
                               value={form.name || ""}
                               onChange={(e) =>
@@ -1185,7 +1180,7 @@ export default function AdminSubjects() {
                           />
                           <TextField
                               size="small"
-                              label="Kapaciteti"
+                              label={t("adminSubjects.groups.capacityLabel")}
                               type="number"
                               value={form.capacity || ""}
                               onChange={(e) =>
@@ -1215,7 +1210,7 @@ export default function AdminSubjects() {
                             disabled={!form.name?.trim()}
                             className="rounded-xl! normal-case! font-bold! mt-3! border-indigo-300! text-indigo-700! hover:bg-indigo-50! dark:border-indigo-500! dark:text-indigo-200! dark:hover:bg-indigo-900/30!"
                         >
-                          {editingSubgroupGroupId === group.id ? "Ruaj Nengrupin" : "Shto Nengrup"}
+                          {editingSubgroupGroupId === group.id ? t("adminSubjects.groups.saveSubgroup") : t("adminSubjects.groups.addSubgroup")}
                         </Button>
                         {editingSubgroupGroupId === group.id && (
                             <Button
@@ -1228,7 +1223,7 @@ export default function AdminSubjects() {
                                 }}
                                 className="rounded-xl! normal-case! font-bold! mt-3! ml-2! text-slate-500! dark:text-slate-300!"
                             >
-                              Anulo
+                              {t("adminSubjects.form.cancel")}
                             </Button>
                         )}
                       </Box>
@@ -1237,7 +1232,7 @@ export default function AdminSubjects() {
 
                 {subjectGroups.length === 0 && (
                     <Typography className="text-slate-500! text-center! py-8!">
-                      Ende nuk ka grupe per kete lëndë.
+                      {t("adminSubjects.groups.noGroups")}
                     </Typography>
                 )}
               </Box>
@@ -1247,7 +1242,7 @@ export default function AdminSubjects() {
                   onClick={() => setGroupDialog({ open: false, subject: null })}
                   className="rounded-xl! normal-case! font-bold!"
               >
-                Mbyll
+                {t("adminSubjects.groups.close")}
               </Button>
             </DialogActions>
           </Dialog>
@@ -1286,7 +1281,7 @@ export default function AdminSubjects() {
                         : "font-black! text-slate-900!"
                   }
               >
-                A jeni i sigurt?
+                {t("adminSubjects.confirm.sure")}
               </Typography>
             </DialogTitle>
             <DialogContent className="px-6! py-4!">
@@ -1294,7 +1289,7 @@ export default function AdminSubjects() {
                   variant="body2"
                   className={isDark ? "text-slate-300!" : "text-slate-600!"}
               >
-                Do të fshihet përhershëm lënda:
+                {t("adminSubjects.confirm.deleteBody")}
               </Typography>
               <Typography
                   variant="body1"
@@ -1321,7 +1316,7 @@ export default function AdminSubjects() {
                   }}
                   className="rounded-2xl! px-6! py-3! normal-case! font-bold! text-slate-500! hover:bg-slate-100! dark:hover:bg-slate-800!"
               >
-                Anulo
+                {t("adminSubjects.confirm.cancel")}
               </Button>
               <Button
                   variant="contained"
@@ -1329,7 +1324,7 @@ export default function AdminSubjects() {
                   onClick={handleConfirmDelete}
                   className="rounded-2xl! px-10! py-3! normal-case! font-black!"
               >
-                Fshi
+                {t("adminSubjects.confirm.delete")}
               </Button>
             </DialogActions>
           </Dialog>

@@ -9,10 +9,10 @@ import lombok.*;
 @Builder
 public class StudentGroupStatusResponse {
     private boolean hasApprovedGroup;
-    private boolean categoryAssigned;
-    private Long categoryId;
-    private String categoryName;
+    private boolean departmentAssigned;
+    private Long departmentId;
+    private String departmentName;
     private Integer currentSemester;
-    private DirectionGroupResponse approvedGroup;
+    private DepartmentGroupResponse approvedGroup;
     private StudentGroupRequestResponse pendingRequest;
 }

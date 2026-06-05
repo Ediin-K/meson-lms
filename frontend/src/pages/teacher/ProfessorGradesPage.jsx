@@ -33,7 +33,7 @@ import {
 } from "../../services/gradeService";
 
 export default function ProfessorGradesPage() {
-  const { colorMode } = useAppPreferences();
+  const { colorMode, t } = useAppPreferences();
   const isDark = colorMode === "dark";
   const [subjects, setSubjects] = useState([]);
   const [selectedSubjectId, setSelectedSubjectId] = useState("");
@@ -59,7 +59,7 @@ export default function ProfessorGradesPage() {
       const res = await teacherContentService.getSubjects();
       setSubjects(res.data || []);
     } catch (error) {
-      showToast(getErrorMessage(error, "Gabim gjatë marrjes së Lëndëve"), "error");
+      showToast(getErrorMessage(error, t("professorGrades.toast.fetchSubjectsError")), "error");
     }
   }, []);
 
@@ -74,7 +74,7 @@ export default function ProfessorGradesPage() {
       setGrades(gradesData || []);
       setStudents(studentsRes.data || []);
     } catch (error) {
-      showToast(getErrorMessage(error, "Gabim gjatë marrjes së të dhënave"), "error");
+      showToast(getErrorMessage(error, t("professorGrades.toast.fetchDataError")), "error");
     } finally {
       setLoading(false);
     }
@@ -114,15 +114,15 @@ export default function ProfessorGradesPage() {
     try {
       if (editGrade?.id) {
         await updateGrade(editGrade.id, data);
-        showToast("Nota u përditësua me sukses");
+        showToast(t("professorGrades.toast.updated"));
       } else {
         await createGrade(data);
-        showToast("Nota u shtua me sukses");
+        showToast(t("professorGrades.toast.created"));
       }
       setOpenForm(false);
       await loadSubjectData(selectedSubjectId);
     } catch (error) {
-      showToast(getErrorMessage(error, "Gabim gjatë ruajtjes së notës"), "error");
+      showToast(getErrorMessage(error, t("professorGrades.toast.saveError")), "error");
     } finally {
       setSubmitting(false);
     }
@@ -133,11 +133,11 @@ export default function ProfessorGradesPage() {
     setSubmitting(true);
     try {
       await deleteGrade(deleteTarget.id);
-      showToast("Nota u fshi me sukses");
+      showToast(t("professorGrades.toast.deleted"));
       setDeleteTarget(null);
       await loadSubjectData(selectedSubjectId);
     } catch (error) {
-      showToast(getErrorMessage(error, "Gabim gjatë fshirjes së notës"), "error");
+      showToast(getErrorMessage(error, t("professorGrades.toast.deleteError")), "error");
     } finally {
       setSubmitting(false);
     }
@@ -151,34 +151,34 @@ export default function ProfessorGradesPage() {
       disabled={!selectedSubjectId}
       className="!rounded-lg !normal-case !bg-[#2563eb] !shadow-none hover:!bg-[#1d4ed8]"
     >
-      Shto notë
+      {t("professorGrades.addGradeBtn")}
     </Button>
   );
 
   return (
     <GradesPageShell
       backTo="/teacher"
-      backLabel="Kthehu te Paneli"
+      backLabel={t("professorGrades.backToPanel")}
       breadcrumbs={[
-        { label: "Paneli", to: "/teacher" },
-        { label: "Notat" },
+        { label: t("professorGrades.panelTitle"), to: "/teacher" },
+        { label: t("professorGrades.gradesTitle") },
       ]}
-      title="Menaxhimi i Notave"
-      subtitle="Vendosni, ndryshoni dhe fshini notat për studentët e regjistruar."
+      title={t("professorGrades.manageTitle")}
+      subtitle={t("professorGrades.subtitle")}
       icon={GradeRounded}
       actions={toolbarActions}
     >
       <Box className="mb-5 rounded-lg border border-slate-300 bg-white p-4 dark:border-slate-700 dark:bg-slate-900 sm:p-5">
         <Box className="flex flex-col gap-4 lg:flex-row lg:items-end">
           <FormControl size="small" className="w-full lg:max-w-xs" required>
-            <InputLabel>Lënda</InputLabel>
+            <InputLabel>{t("professorGrades.subjectLabel")}</InputLabel>
             <Select
               value={selectedSubjectId}
-              label="Lënda"
+              label={t("professorGrades.subjectLabel")}
               onChange={(e) => setSelectedSubjectId(e.target.value)}
             >
               <MenuItem value="">
-                <em>Zgjidhni Lëndan...</em>
+                <em>{t("professorGrades.chooseSubject")}</em>
               </MenuItem>
               {subjects.map((c) => (
                 <MenuItem key={c.id} value={c.id}>
@@ -190,7 +190,7 @@ export default function ProfessorGradesPage() {
 
           <TextField
             size="small"
-            placeholder="Kërko student ose koment..."
+            placeholder={t("professorGrades.searchPlaceholder")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             disabled={!selectedSubjectId}
@@ -216,17 +216,17 @@ export default function ProfessorGradesPage() {
           <Box className="mt-4 flex flex-wrap gap-2">
             <Chip
               size="small"
-              label={`${filteredGrades.length} nota`}
+              label={`${filteredGrades.length} ${t("professorGrades.chipGrades")}`}
               className="!bg-sky-100 !font-semibold !text-sky-800 dark:!bg-sky-950/60 dark:!text-sky-300"
             />
             <Chip
               size="small"
-              label={`${studentsWithoutGrade.length} studentë pa notë`}
+              label={`${studentsWithoutGrade.length} ${t("professorGrades.chipWithoutGrade")}`}
               className="!bg-amber-100 !font-semibold !text-amber-800 dark:!bg-amber-950/60 dark:!text-amber-300"
             />
             <Chip
               size="small"
-              label={`${students.length} studentë total`}
+              label={`${students.length} ${t("professorGrades.chipTotal")}`}
               variant="outlined"
               className="!font-semibold dark:!border-slate-600 dark:!text-slate-300"
             />
@@ -237,7 +237,7 @@ export default function ProfessorGradesPage() {
       {!selectedSubjectId ? (
         <Box className="flex min-h-[280px] items-center justify-center rounded-lg border border-dashed border-slate-400 bg-white px-6 text-center dark:border-slate-600 dark:bg-slate-900">
           <Typography className="!text-slate-600 dark:!text-slate-400">
-            Zgjidhni një kurs nga lista për të parë dhe menaxhuar notat e studentëve.
+            {t("professorGrades.noSubjectPrompt")}
           </Typography>
         </Box>
       ) : (
@@ -263,15 +263,15 @@ export default function ProfessorGradesPage() {
       />
 
       <Dialog open={Boolean(deleteTarget)} onClose={() => setDeleteTarget(null)} PaperProps={{ className: "rounded-xl" }}>
-        <DialogTitle className="!font-bold">Konfirmo fshirjen</DialogTitle>
+        <DialogTitle className="!font-bold">{t("professorGrades.deleteTitle")}</DialogTitle>
         <DialogContent>
           <Typography>
-            Doni të fshini notën e studentit{" "}
+            {t("professorGrades.deleteBody")}{" "}
             <strong>{deleteTarget?.studentEmri} {deleteTarget?.studentMbiemri}</strong>?
           </Typography>
         </DialogContent>
         <DialogActions className="!px-6 !pb-4">
-          <Button onClick={() => setDeleteTarget(null)} className="!rounded-lg !normal-case">Anulo</Button>
+          <Button onClick={() => setDeleteTarget(null)} className="!rounded-lg !normal-case">{t("professorGrades.cancel")}</Button>
           <Button
             color="error"
             variant="contained"
@@ -279,7 +279,7 @@ export default function ProfessorGradesPage() {
             disabled={submitting}
             className="!rounded-lg !normal-case"
           >
-            Fshi notën
+            {t("professorGrades.deleteBtn")}
           </Button>
         </DialogActions>
       </Dialog>

@@ -14,9 +14,11 @@ import QuizRounded from "@mui/icons-material/QuizRounded";
 import TimerRounded from "@mui/icons-material/TimerRounded";
 import FiberManualRecordRounded from "@mui/icons-material/FiberManualRecordRounded";
 import quizService from "../services/quizService";
+import { useAppPreferences } from "../context/appPreferencesContext";
 
 export default function QuizListPage() {
   const navigate = useNavigate();
+  const { t } = useAppPreferences();
   const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -25,7 +27,7 @@ export default function QuizListPage() {
     quizService
       .listActive()
       .then((res) => setQuizzes(res.data))
-      .catch((err) => setError(err.response?.data?.message || "Kuizet nuk u ngarkuan."))
+      .catch((err) => setError(err.response?.data?.message || t("quizList.errorLoad")))
       .finally(() => setLoading(false));
   }, []);
 
@@ -33,10 +35,10 @@ export default function QuizListPage() {
     <Container maxWidth="lg" className="py-8">
       <Box className="mb-7">
         <Typography variant="h4" className="!font-black text-slate-950 dark:!text-white">
-          Kuizet aktive
+          {t("quizList.title")}
         </Typography>
         <Typography className="!mt-2 text-slate-600 dark:!text-slate-300">
-          Kuizet e hapura nga profesori. Koha fillon sapo ta hapesh kuizin.
+          {t("quizList.subtitle")}
         </Typography>
       </Box>
 
@@ -48,7 +50,7 @@ export default function QuizListPage() {
       {error && <Alert severity="error">{error}</Alert>}
       {!loading && !error && quizzes.length === 0 && (
         <Alert severity="info">
-          Nuk ka kuize aktive per momentin. Prisni profesorin ta aktivizoje.
+          {t("quizList.noQuizzes")}
         </Alert>
       )}
 
@@ -83,11 +85,11 @@ export default function QuizListPage() {
               <Box className="mb-4 flex items-center justify-between text-sm">
                 <Box className="flex items-center gap-1 font-bold text-slate-600 dark:text-slate-300">
                   <TimerRounded fontSize="small" />
-                  {quiz.kohezgjatjaMinuta} minuta
+                  {quiz.kohezgjatjaMinuta} {t("quizList.minutes")}
                 </Box>
                 <Box className="flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400">
                   <FiberManualRecordRounded className="!text-xs animate-pulse" />
-                  Aktiv
+                  {t("quizList.activeLabel")}
                 </Box>
               </Box>
 
@@ -97,7 +99,7 @@ export default function QuizListPage() {
                 onClick={() => navigate(`/quiz/${quiz.id}`)}
                 className="!rounded-xl !normal-case"
               >
-                Fillo kuizin
+                {t("quizList.startBtn")}
               </Button>
             </CardContent>
           </Card>

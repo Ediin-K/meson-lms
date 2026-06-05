@@ -52,28 +52,28 @@ import {
   deleteEnrollment,
 } from "../services/enrollmentService";
 
-const STATUS_CONFIG = {
-  AKTIV: {
-    label: "Aktiv",
-    color:
-      "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
-    icon: HourglassTopRounded,
-  },
-  PERFUNDUAR: {
-    label: "Përfunduar",
-    color: "bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300",
-    icon: CheckCircleRounded,
-  },
-  ANULUAR: {
-    label: "Anuluar",
-    color: "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300",
-    icon: BlockRounded,
-  },
-};
-
 export default function AdminEnrollments() {
   const navigate = useNavigate();
   const { t } = useAppPreferences();
+
+  const STATUS_CONFIG = {
+    AKTIV: {
+      label: t("adminEnrollments.statusActive"),
+      color:
+        "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
+      icon: HourglassTopRounded,
+    },
+    PERFUNDUAR: {
+      label: t("adminEnrollments.statusCompleted"),
+      color: "bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300",
+      icon: CheckCircleRounded,
+    },
+    ANULUAR: {
+      label: t("adminEnrollments.statusCancelled"),
+      color: "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300",
+      icon: BlockRounded,
+    },
+  };
 
   const [enrollments, setEnrollments] = useState([]);
   const [users, setUsers] = useState([]);
@@ -123,7 +123,7 @@ export default function AdminEnrollments() {
       setEnrollments(data);
     } catch (error) {
       showToast(
-        getErrorMessage(error, "Gabim gjatë marrjes së regjistrimeve"),
+        getErrorMessage(error, t("adminEnrollments.toast.fetchError")),
         "error",
       );
     } finally {
@@ -137,7 +137,7 @@ export default function AdminEnrollments() {
       setUsers(response.data);
     } catch (error) {
       showToast(
-        getErrorMessage(error, "Gabim gjatë marrjes së përdoruesve"),
+        getErrorMessage(error, t("adminEnrollments.toast.fetchUsersError")),
         "error",
       );
     }
@@ -149,7 +149,7 @@ export default function AdminEnrollments() {
       setSubjects(response.data);
     } catch (error) {
       showToast(
-        getErrorMessage(error, "Gabim gjatë marrjes së Lëndëve"),
+        getErrorMessage(error, t("adminEnrollments.toast.fetchSubjectsError")),
         "error",
       );
     }
@@ -177,10 +177,10 @@ export default function AdminEnrollments() {
   };
 
   const FILTERS = [
-    { key: "all", label: `Të gjitha (${counts.all})` },
-    { key: "AKTIV", label: `Aktive (${counts.AKTIV})` },
-    { key: "PERFUNDUAR", label: `Përfunduara (${counts.PERFUNDUAR})` },
-    { key: "ANULUAR", label: `Anuluara (${counts.ANULUAR})` },
+    { key: "all", label: `${t("adminEnrollments.filterAll")} (${counts.all})` },
+    { key: "AKTIV", label: `${t("adminEnrollments.filterActive")} (${counts.AKTIV})` },
+    { key: "PERFUNDUAR", label: `${t("adminEnrollments.filterCompleted")} (${counts.PERFUNDUAR})` },
+    { key: "ANULUAR", label: `${t("adminEnrollments.filterCancelled")} (${counts.ANULUAR})` },
   ];
 
   const openAddDialog = () => {
@@ -224,7 +224,7 @@ export default function AdminEnrollments() {
       const groups = await getSubjectGroups(subjectId);
       setSubjectGroups(groups);
     } catch (error) {
-      showToast(getErrorMessage(error, "Gabim gjate marrjes se grupeve"), "error");
+      showToast(getErrorMessage(error, t("adminEnrollments.toast.groupsError")), "error");
     }
   };
 
@@ -244,7 +244,7 @@ export default function AdminEnrollments() {
 
   const handleSubmit = async () => {
     if (!isEdit && (!formData.userId || !formData.subjectId)) {
-      showToast("Zgjidh studentin dhe Lëndan", "error");
+      showToast(t("adminEnrollments.toast.selectRequired"), "error");
       return;
     }
 
@@ -268,10 +268,10 @@ export default function AdminEnrollments() {
         }
 
         if (requests.length === 0) {
-          showToast("Nuk ka ndryshime për të ruajtur", "info");
+          showToast(t("adminEnrollments.toast.noChanges"), "info");
         } else {
           await Promise.all(requests);
-          showToast("Regjistrimi u përditësua me sukses", "success");
+          showToast(t("adminEnrollments.toast.updated"), "success");
         }
       } else {
         await createEnrollment({
@@ -285,14 +285,14 @@ export default function AdminEnrollments() {
             : undefined,
           enrollmentKey: formData.enrollmentKey || undefined,
         });
-        showToast("Regjistrimi u krijua me sukses", "success");
+        showToast(t("adminEnrollments.toast.created"), "success");
       }
 
       setOpenDialog(false);
       await loadEnrollments();
     } catch (error) {
       showToast(
-        getErrorMessage(error, "Gabim gjatë ruajtjes së regjistrimit"),
+        getErrorMessage(error, t("adminEnrollments.toast.saveError")),
         "error",
       );
     } finally {
@@ -311,13 +311,13 @@ export default function AdminEnrollments() {
     setSubmitting(true);
     try {
       await deleteEnrollment(deleteTarget.id);
-      showToast("Regjistrimi u fshi me sukses", "success");
+      showToast(t("adminEnrollments.toast.deleted"), "success");
       setOpenDeleteConfirm(false);
       setDeleteTarget(null);
       await loadEnrollments();
     } catch (error) {
       showToast(
-        getErrorMessage(error, "Gabim gjatë fshirjes së regjistrimit"),
+        getErrorMessage(error, t("adminEnrollments.toast.deleteError")),
         "error",
       );
     } finally {
@@ -333,7 +333,7 @@ export default function AdminEnrollments() {
           onClick={() => navigate("/admin")}
           className="!mb-6 !normal-case !text-slate-600 dark:!text-slate-400"
         >
-          {t("home.admin.services.backToPanel", "Kthehu te Paneli")}
+          {t("home.admin.services.backToPanel")}
         </Button>
 
         <Box className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -347,22 +347,19 @@ export default function AdminEnrollments() {
                 component="h1"
                 className="!font-extrabold !text-slate-900 dark:!text-white"
               >
-                {t("home.admin.services.enrollments.title", "Regjistrimet")}
+                {t("home.admin.services.enrollments.title")}
               </Typography>
             </Box>
             <Typography
               variant="body1"
               className="!text-slate-600 dark:!text-slate-400"
             >
-              {t(
-                "home.admin.services.enrollments.desc",
-                "Shikoni dhe menaxhoni regjistrimet e studentëve.",
-              )}
+              {t("home.admin.services.enrollments.desc")}
             </Typography>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 items-center">
             <TextField
-              placeholder="Kërko student ose kurs..."
+              placeholder={t("adminEnrollments.searchPlaceholder")}
               variant="outlined"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -384,7 +381,7 @@ export default function AdminEnrollments() {
               onClick={openAddDialog}
               className="!rounded-xl !py-2.5 !px-6 !normal-case !font-bold !bg-rose-600 hover:!bg-rose-700 shadow-lg shadow-rose-500/20"
             >
-              Shto Regjistrim
+              {t("adminEnrollments.addBtn")}
             </Button>
           </div>
         </Box>
@@ -419,28 +416,28 @@ export default function AdminEnrollments() {
                 <TableHead className="bg-slate-50 dark:!bg-slate-800/80">
                   <TableRow>
                     <TableCell className="!font-bold !text-slate-700 dark:!text-slate-200">
-                      Studenti
+                      {t("adminEnrollments.tableStudent")}
                     </TableCell>
                     <TableCell className="!font-bold !text-slate-700 dark:!text-slate-200">
-                      Lënda
+                      {t("adminEnrollments.tableLenda")}
                     </TableCell>
                     <TableCell className="!font-bold !text-slate-700 dark:!text-slate-200">
-                      Grupi
+                      {t("adminEnrollments.tableGrupi")}
                     </TableCell>
                     <TableCell className="!font-bold !text-slate-700 dark:!text-slate-200">
-                      Progresi
+                      {t("adminEnrollments.tableProgress")}
                     </TableCell>
                     <TableCell className="!font-bold !text-slate-700 dark:!text-slate-200">
-                      Statusi
+                      {t("adminEnrollments.tableStatus")}
                     </TableCell>
                     <TableCell className="!font-bold !text-slate-700 dark:!text-slate-200">
-                      Regjistruar më
+                      {t("adminEnrollments.tableDate")}
                     </TableCell>
                     <TableCell
                       align="right"
                       className="!font-bold !text-slate-700 dark:!text-slate-200"
                     >
-                      Veprime
+                      {t("adminEnrollments.tableActions")}
                     </TableCell>
                   </TableRow>
                 </TableHead>
@@ -453,7 +450,7 @@ export default function AdminEnrollments() {
                             <AssignmentOutlinedIcon className="!text-4xl text-rose-400" />
                           </div>
                           <Typography className="!font-semibold !text-slate-500">
-                            Nuk ka regjistrime akoma.
+                            {t("adminEnrollments.noData")}
                           </Typography>
                         </Box>
                       </TableCell>
@@ -558,7 +555,7 @@ export default function AdminEnrollments() {
             variant="h5"
             className="!font-black !text-slate-900 dark:!text-white"
           >
-            {isEdit ? "Ndrysho Regjistrimin" : "Shto Regjistrim"}
+            {isEdit ? t("adminEnrollments.editDialogTitle") : t("adminEnrollments.addDialogTitle")}
           </Typography>
         </DialogTitle>
         <DialogContent className="!px-6 !py-4">
@@ -566,14 +563,14 @@ export default function AdminEnrollments() {
             {!isEdit ? (
               <>
                 <FormControl fullWidth>
-                  <InputLabel id="select-user-label">Studenti</InputLabel>
+                  <InputLabel id="select-user-label">{t("adminEnrollments.fieldStudent")}</InputLabel>
                   <Select
                     labelId="select-user-label"
                     value={formData.userId}
-                    label="Studenti"
+                    label={t("adminEnrollments.fieldStudent")}
                     onChange={handleFieldChange("userId")}
                   >
-                    <MenuItem value="">Zgjidh</MenuItem>
+                    <MenuItem value="">{t("adminEnrollments.chooseOption")}</MenuItem>
                     {users.map((user) => (
                       <MenuItem key={user.id} value={user.id}>
                         {user.emri} {user.mbiemri} ({user.email})
@@ -582,14 +579,14 @@ export default function AdminEnrollments() {
                   </Select>
                 </FormControl>
                 <FormControl fullWidth>
-                  <InputLabel id="select-subject-label">Lënda</InputLabel>
+                  <InputLabel id="select-subject-label">{t("adminEnrollments.fieldLenda")}</InputLabel>
                   <Select
                     labelId="select-subject-label"
                     value={formData.subjectId}
-                    label="Lënda"
+                    label={t("adminEnrollments.fieldLenda")}
                     onChange={handleFieldChange("subjectId")}
                   >
-                    <MenuItem value="">Zgjidh</MenuItem>
+                    <MenuItem value="">{t("adminEnrollments.chooseOption")}</MenuItem>
                     {subjects.map((course) => (
                       <MenuItem key={course.id} value={course.id}>
                         {course.titulli}
@@ -600,19 +597,19 @@ export default function AdminEnrollments() {
                 {subjectGroups.length > 0 && (
                   <>
                     <FormControl fullWidth>
-                      <InputLabel id="select-group-label">Grupi</InputLabel>
+                      <InputLabel id="select-group-label">{t("adminEnrollments.fieldGrupi")}</InputLabel>
                       <Select
                         labelId="select-group-label"
                         value={formData.subjectGroupId}
-                        label="Grupi"
+                        label={t("adminEnrollments.fieldGrupi")}
                         onChange={handleFieldChange("subjectGroupId")}
                       >
-                        <MenuItem value="">Zgjidh</MenuItem>
+                        <MenuItem value="">{t("adminEnrollments.chooseOption")}</MenuItem>
                         {subjectGroups.map((group) => (
                           <MenuItem key={group.id} value={group.id}>
                             {group.name}
                             {group.teachers?.length
-                              ? ` - ${group.teachers.map((t) => t.name).join(", ")}`
+                              ? ` - ${group.teachers.map((tc) => tc.name).join(", ")}`
                               : ""}
                           </MenuItem>
                         ))}
@@ -621,15 +618,15 @@ export default function AdminEnrollments() {
 
                     <FormControl fullWidth disabled={!formData.subjectGroupId}>
                       <InputLabel id="select-subgroup-label">
-                        Nengrupi i ushtrimeve
+                        {t("adminEnrollments.fieldSubgroup")}
                       </InputLabel>
                       <Select
                         labelId="select-subgroup-label"
                         value={formData.subjectSubgroupId}
-                        label="Nengrupi i ushtrimeve"
+                        label={t("adminEnrollments.fieldSubgroup")}
                         onChange={handleFieldChange("subjectSubgroupId")}
                       >
-                        <MenuItem value="">Pa nengrup</MenuItem>
+                        <MenuItem value="">{t("adminEnrollments.noSubgroup")}</MenuItem>
                         {availableSubgroups.map((subgroup) => (
                           <MenuItem key={subgroup.id} value={subgroup.id}>
                             {subgroup.name}
@@ -643,7 +640,7 @@ export default function AdminEnrollments() {
                   </>
                 )}
                 <TextField
-                  label="Enrollment Key (opsionale)"
+                  label={t("adminEnrollments.fieldEnrollmentKey")}
                   fullWidth
                   value={formData.enrollmentKey}
                   onChange={handleFieldChange("enrollmentKey")}
@@ -657,7 +654,7 @@ export default function AdminEnrollments() {
             ) : (
               <>
                 <TextField
-                  label="Progress (%)"
+                  label={t("adminEnrollments.fieldProgress")}
                   fullWidth
                   type="number"
                   value={formData.progresi}
@@ -670,16 +667,16 @@ export default function AdminEnrollments() {
                   }}
                 />
                 <FormControl fullWidth>
-                  <InputLabel id="select-status-label">Statusi</InputLabel>
+                  <InputLabel id="select-status-label">{t("adminEnrollments.fieldStatus")}</InputLabel>
                   <Select
                     labelId="select-status-label"
                     value={formData.statusi}
-                    label="Statusi"
+                    label={t("adminEnrollments.fieldStatus")}
                     onChange={handleFieldChange("statusi")}
                   >
-                    <MenuItem value="AKTIV">Aktiv</MenuItem>
-                    <MenuItem value="PERFUNDUAR">Përfunduar</MenuItem>
-                    <MenuItem value="ANULUAR">Anuluar</MenuItem>
+                    <MenuItem value="AKTIV">{t("adminEnrollments.statusActive")}</MenuItem>
+                    <MenuItem value="PERFUNDUAR">{t("adminEnrollments.statusCompleted")}</MenuItem>
+                    <MenuItem value="ANULUAR">{t("adminEnrollments.statusCancelled")}</MenuItem>
                   </Select>
                 </FormControl>
               </>
@@ -691,7 +688,7 @@ export default function AdminEnrollments() {
             onClick={() => setOpenDialog(false)}
             className="!rounded-xl !normal-case !text-slate-600"
           >
-            Anulo
+            {t("adminEnrollments.cancel")}
           </Button>
           <Button
             variant="contained"
@@ -708,10 +705,10 @@ export default function AdminEnrollments() {
             className="!rounded-xl !normal-case !font-bold !bg-rose-600 hover:!bg-rose-700"
           >
             {submitting
-              ? "Duke ruajtur..."
+              ? t("adminEnrollments.saving")
               : isEdit
-                ? "Ruaj Ndryshimet"
-                : "Krijo Regjistrim"}
+                ? t("adminEnrollments.saveChanges")
+                : t("adminEnrollments.createEnrollment")}
           </Button>
         </DialogActions>
       </Dialog>
@@ -728,13 +725,12 @@ export default function AdminEnrollments() {
             variant="h5"
             className="!font-black !text-slate-900 dark:!text-white"
           >
-            Fshi Regjistrimin
+            {t("adminEnrollments.deleteTitle")}
           </Typography>
         </DialogTitle>
         <DialogContent className="!px-6 !py-4">
           <Typography className="!text-slate-600 dark:!text-slate-300">
-            Je i sigurt që dëshiron të fshish regjistrimin e "
-            {deleteTarget?.userEmri}"?
+            {t("adminEnrollments.deleteBodyPrefix")} "{deleteTarget?.userEmri}"?
           </Typography>
         </DialogContent>
         <DialogActions className="!p-4 gap-2">
@@ -742,7 +738,7 @@ export default function AdminEnrollments() {
             onClick={() => setOpenDeleteConfirm(false)}
             className="!rounded-xl !normal-case !text-slate-600"
           >
-            Anulo
+            {t("adminEnrollments.cancel")}
           </Button>
           <Button
             variant="contained"
@@ -751,7 +747,7 @@ export default function AdminEnrollments() {
             disabled={submitting}
             className="!rounded-xl !normal-case !font-bold"
           >
-            {submitting ? "Po fshihet..." : "Fshi Regjistrimin"}
+            {submitting ? t("adminEnrollments.deleting") : t("adminEnrollments.deleteBtn")}
           </Button>
         </DialogActions>
       </Dialog>
@@ -767,8 +763,8 @@ export default function AdminEnrollments() {
           onClose={() => setOpenSnackbar(false)}
           severity={snackbarSeverity}
           variant="filled"
-          sx={{ 
-            width: "100%", 
+          sx={{
+            width: "100%",
             borderRadius: "1.25rem",
             fontWeight: "bold",
             boxShadow: "0 10px 30px rgba(0,0,0,0.1)"

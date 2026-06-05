@@ -24,11 +24,11 @@ public class SubjectController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<SubjectResponse>> getByDirectionAndSemester(
-            @RequestParam Long categoryId,
+    public ResponseEntity<List<SubjectResponse>> getByDepartmentAndSemester(
+            @RequestParam Long departmentId,
             @RequestParam Integer semester) {
         return ResponseEntity.ok(
-                subjectService.getByDirectionAndSemester(categoryId, semester));
+                subjectService.getByDepartmentAndSemester(departmentId, semester));
     }
 
     @GetMapping("/{id}")

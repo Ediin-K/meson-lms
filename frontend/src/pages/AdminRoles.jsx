@@ -42,7 +42,7 @@ const getErrorMessage = (error, fallback) =>
 
 export default function AdminRoles() {
   const navigate = useNavigate();
-  const { mode } = useAppPreferences();
+  const { mode, t } = useAppPreferences();
   const isDark = mode === "dark";
 
   const [roles, setRoles] = useState([]);
@@ -71,7 +71,7 @@ export default function AdminRoles() {
       const { data } = await axiosInstance.get("/roles");
       setRoles(data);
     } catch (error) {
-      showToast(getErrorMessage(error, "Gabim gjatë marrjes së roleve"), "error");
+      showToast(getErrorMessage(error, t("adminRoles.toast.fetchError")), "error");
     } finally {
       setLoading(false);
     }
@@ -109,22 +109,22 @@ export default function AdminRoles() {
 
   const handleSubmit = async () => {
     if (!formData.emertimi.trim() || !formData.normalizedName.trim()) {
-      showToast("Emertimi dhe Normalized Name janë të detyrueshme", "error");
+      showToast(t("adminRoles.toast.validationError"), "error");
       return;
     }
     setSubmitting(true);
     try {
       if (isEdit && selectedRole) {
         await axiosInstance.put(`/roles/${selectedRole.id}`, formData);
-        showToast("Roli u përditësua me sukses");
+        showToast(t("adminRoles.toast.updated"));
       } else {
         await axiosInstance.post("/roles", formData);
-        showToast("Roli u krijua me sukses");
+        showToast(t("adminRoles.toast.created"));
       }
       setOpenDialog(false);
       await loadRoles();
     } catch (error) {
-      showToast(getErrorMessage(error, "Gabim gjatë ruajtjes"), "error");
+      showToast(getErrorMessage(error, t("adminRoles.toast.saveError")), "error");
     } finally {
       setSubmitting(false);
     }
@@ -135,12 +135,12 @@ export default function AdminRoles() {
     setSubmitting(true);
     try {
       await axiosInstance.delete(`/roles/${deleteTarget.id}`);
-      showToast("Roli u fshi me sukses");
+      showToast(t("adminRoles.toast.deleted"));
       setOpenDeleteConfirm(false);
       setDeleteTarget(null);
       await loadRoles();
     } catch (error) {
-      showToast(getErrorMessage(error, "Gabim gjatë fshirjes"), "error");
+      showToast(getErrorMessage(error, t("adminRoles.toast.deleteError")), "error");
     } finally {
       setSubmitting(false);
     }
@@ -164,7 +164,7 @@ export default function AdminRoles() {
           onClick={() => navigate("/admin")}
           className="mb-6! normal-case! text-slate-600! dark:text-slate-400!"
         >
-          Kthehu te Paneli
+          {t("adminRoles.backToPanel")}
         </Button>
 
         <Box className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -174,16 +174,16 @@ export default function AdminRoles() {
                 <AdminPanelSettingsRounded className="text-violet-600 text-xl!" />
               </div>
               <Typography variant="h4" component="h1" className="font-extrabold! text-slate-900! dark:text-white!">
-                Menaxhimi i Roleve
+                {t("adminRoles.title")}
               </Typography>
             </Box>
             <Typography variant="body1" className="text-slate-600! dark:text-slate-400!">
-              Krijo, modifiko dhe fshi rolet e sistemit.
+              {t("adminRoles.subtitle")}
             </Typography>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 items-center">
             <TextField
-              placeholder="Kërko rol..."
+              placeholder={t("adminRoles.searchPlaceholder")}
               variant="outlined"
               size="small"
               value={searchTerm}
@@ -207,7 +207,7 @@ export default function AdminRoles() {
               onClick={openAddDialog}
               className="rounded-xl! py-2.5! px-6! normal-case! font-bold! bg-violet-600! hover:bg-violet-700! shadow-lg shadow-violet-500/20"
             >
-              Shto Rol
+              {t("adminRoles.addBtn")}
             </Button>
           </div>
         </Box>
@@ -222,18 +222,18 @@ export default function AdminRoles() {
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell sx={headCellSx}>ID</TableCell>
-                    <TableCell sx={headCellSx}>Emërtimi</TableCell>
-                    <TableCell sx={headCellSx}>Normalized Name</TableCell>
-                    <TableCell sx={headCellSx}>Përshkrimi</TableCell>
-                    <TableCell sx={headCellSx} align="right">Veprimet</TableCell>
+                    <TableCell sx={headCellSx}>{t("adminRoles.tableId")}</TableCell>
+                    <TableCell sx={headCellSx}>{t("adminRoles.tableName")}</TableCell>
+                    <TableCell sx={headCellSx}>{t("adminRoles.tableNormalizedName")}</TableCell>
+                    <TableCell sx={headCellSx}>{t("adminRoles.tableDesc")}</TableCell>
+                    <TableCell sx={headCellSx} align="right">{t("adminRoles.tableActions")}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {filteredRoles.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={5} align="center" sx={{ fontSize: "0.85rem" }}>
-                        Nuk u gjetën role.
+                        {t("adminRoles.noRoles")}
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -252,13 +252,13 @@ export default function AdminRoles() {
                         </TableCell>
                         <TableCell sx={{ fontSize: "0.85rem" }}>{role.pershkrimi || "—"}</TableCell>
                         <TableCell align="right">
-                          <Tooltip title="Modifiko" slots={{ transition: Zoom }}>
+                          <Tooltip title={t("adminRoles.tooltipEdit")} slots={{ transition: Zoom }}>
                             <IconButton size="small" onClick={() => openEditDialog(role)}
                               className="text-sky-500! hover:bg-sky-50! dark:hover:bg-sky-900/30!">
                               <EditRounded fontSize="small" />
                             </IconButton>
                           </Tooltip>
-                          <Tooltip title="Fshi" slots={{ transition: Zoom }}>
+                          <Tooltip title={t("adminRoles.tooltipDelete")} slots={{ transition: Zoom }}>
                             <IconButton size="small" onClick={() => { setDeleteTarget(role); setOpenDeleteConfirm(true); }}
                               className="text-red-500! hover:bg-red-50! dark:hover:bg-red-900/30!">
                               <DeleteRounded fontSize="small" />
@@ -279,13 +279,13 @@ export default function AdminRoles() {
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth
         slotProps={{ paper: { sx: { borderRadius: "1.5rem", backgroundColor: isDark ? "#0f172a" : "#fff", backgroundImage: "none" } } }}>
         <DialogTitle sx={{ fontWeight: 700, color: isDark ? "#f8fafc" : "#0f172a" }}>
-          {isEdit ? "Modifiko Rolin" : "Shto Rol të Ri"}
+          {isEdit ? t("adminRoles.editDialogTitle") : t("adminRoles.addDialogTitle")}
         </DialogTitle>
         <DialogContent className="flex flex-col gap-4 pt-4!">
           {[
-            { label: "Emërtimi *", key: "emertimi" },
-            { label: "Normalized Name *", key: "normalizedName", helper: "P.sh. ADMIN, TEACHER, STUDENT" },
-            { label: "Përshkrimi", key: "pershkrimi", multiline: true, rows: 2 },
+            { label: t("adminRoles.fieldName"), key: "emertimi" },
+            { label: t("adminRoles.fieldNormalizedName"), key: "normalizedName", helper: t("adminRoles.fieldNormalizedNameHelper") },
+            { label: t("adminRoles.fieldDesc"), key: "pershkrimi", multiline: true, rows: 2 },
           ].map(({ label, key, helper, multiline, rows }) => (
             <TextField
               key={key}
@@ -309,7 +309,7 @@ export default function AdminRoles() {
         </DialogContent>
         <DialogActions className="p-4!">
           <Button onClick={() => setOpenDialog(false)} sx={{ textTransform: "none", color: isDark ? "#94a3b8" : "#475569" }}>
-            Anulo
+            {t("adminRoles.cancel")}
           </Button>
           <Button
             variant="contained"
@@ -317,7 +317,7 @@ export default function AdminRoles() {
             disabled={submitting}
             sx={{ textTransform: "none", borderRadius: "0.75rem", backgroundColor: "#7c3aed", "&:hover": { backgroundColor: "#6d28d9" } }}
           >
-            {submitting ? <CircularProgress size={18} sx={{ color: "#fff" }} /> : isEdit ? "Ruaj" : "Krijo"}
+            {submitting ? <CircularProgress size={18} sx={{ color: "#fff" }} /> : isEdit ? t("adminRoles.save") : t("adminRoles.create")}
           </Button>
         </DialogActions>
       </Dialog>
@@ -325,16 +325,16 @@ export default function AdminRoles() {
       {/* Delete Confirm Dialog */}
       <Dialog open={openDeleteConfirm} onClose={() => setOpenDeleteConfirm(false)} maxWidth="xs" fullWidth
         slotProps={{ paper: { sx: { borderRadius: "1.5rem", backgroundColor: isDark ? "#0f172a" : "#fff", backgroundImage: "none" } } }}>
-        <DialogTitle sx={{ fontWeight: 700, color: isDark ? "#f8fafc" : "#0f172a" }}>Konfirmo Fshirjen</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 700, color: isDark ? "#f8fafc" : "#0f172a" }}>{t("adminRoles.deleteTitle")}</DialogTitle>
         <DialogContent>
           <Alert severity="warning" sx={{ borderRadius: "1rem" }}>
-            A jeni i sigurt që doni të fshini rolin <strong>{deleteTarget?.emertimi}</strong>?
-            Roli nuk mund të fshihet nëse ka përdorues me këtë rol.
+            {t("adminRoles.deleteWarning")} <strong>{deleteTarget?.emertimi}</strong>?{" "}
+            {t("adminRoles.deleteWarningNote")}
           </Alert>
         </DialogContent>
         <DialogActions className="p-4!">
           <Button onClick={() => setOpenDeleteConfirm(false)} sx={{ textTransform: "none", color: isDark ? "#94a3b8" : "#475569" }}>
-            Anulo
+            {t("adminRoles.cancel")}
           </Button>
           <Button
             variant="contained"
@@ -343,7 +343,7 @@ export default function AdminRoles() {
             disabled={submitting}
             sx={{ textTransform: "none", borderRadius: "0.75rem" }}
           >
-            {submitting ? <CircularProgress size={18} sx={{ color: "#fff" }} /> : "Fshi"}
+            {submitting ? <CircularProgress size={18} sx={{ color: "#fff" }} /> : t("adminRoles.delete")}
           </Button>
         </DialogActions>
       </Dialog>

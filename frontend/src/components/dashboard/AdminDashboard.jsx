@@ -89,7 +89,7 @@ export default function AdminDashboard() {
     students: item.count,
   }));
 
-  const categoryData = (stats?.subjectsByCategory || []).map((item, index) => ({
+  const departmentData = (stats?.subjectsByDepartment || []).map((item, index) => ({
     name: item.name,
     value: item.value,
     fill: CHART_COLORS[index % CHART_COLORS.length],
@@ -119,10 +119,10 @@ export default function AdminDashboard() {
       bg: "bg-sky-100 dark:bg-sky-900/40",
     },
     {
-      title: t("home.admin.services.categories.title"),
-      desc: t("home.admin.services.categories.desc"),
+      title: t("home.admin.services.departments.title"),
+      desc: t("home.admin.services.departments.desc"),
       icon: CategoryRounded,
-      path: "/admin/categories",
+      path: "/admin/departments",
       color: "text-amber-600",
       bg: "bg-amber-100 dark:bg-amber-900/40",
     },
@@ -363,13 +363,13 @@ export default function AdminDashboard() {
                       variant="subtitle1"
                       className="!font-black !mb-8 !text-slate-800 dark:!text-white uppercase tracking-widest text-center"
                   >
-                    {t("home.admin.services.charts.categories")}
+                    {t("home.admin.services.charts.departments")}
                   </Typography>
                   <Box className="h-[300px] w-full flex items-center justify-center">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
-                            data={categoryData}
+                            data={departmentData}
                             innerRadius={60}
                             outerRadius={85}
                             paddingAngle={8}

@@ -9,23 +9,23 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode(exclude = {"user"})
 public class UserToken {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name="user_id",nullable=false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false)
+    @Column(name = "login_provider", nullable = false)
     private String loginProvider;
 
-    @Column(nullable = false)
+    @Column(name = "token_name", nullable = false)
     private String tokenName;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(name = "token_value", nullable = false, columnDefinition = "TEXT")
     private String tokenValue;
-
 }

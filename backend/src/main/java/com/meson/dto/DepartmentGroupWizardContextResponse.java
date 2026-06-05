@@ -7,9 +7,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class DirectionGroupWizardContextResponse {
-    private Long categoryId;
-    private String categoryName;
+public class DepartmentGroupWizardContextResponse {
+    private Long departmentId;
+    private String departmentName;
     private Integer semester;
     private List<SubjectResponse> subjects;
     private List<TeacherResponse> teachers;

@@ -31,8 +31,8 @@ import {
   getAdminGroupRequests,
   rejectGroupRequest,
 } from "../services/studentGroupService";
-import { getAllCategories } from "../services/categoryService";
-import { getDirectionGroups } from "../services/directionGroupService";
+import { getAllDepartments } from "../services/departmentService";
+import { getDepartmentGroups } from "../services/departmentGroupService";
 
 const STATUS_OPTIONS = [
   { value: "", label: "Te gjitha" },
@@ -51,11 +51,11 @@ export default function AdminGroupApplications() {
   const navigate = useNavigate();
   const [requests, setRequests] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [directionGroups, setDirectionGroups] = useState([]);
+  const [departmentGroups, setDepartmentGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState(null);
   const [search, setSearch] = useState("");
-  const [filters, setFilters] = useState({ status: "PENDING", categoryId: "", directionGroupId: "" });
+  const [filters, setFilters] = useState({ status: "PENDING", departmentId: "", departmentGroupId: "" });
   const [toast, setToast] = useState({ open: false, message: "", severity: "success" });
 
   const loadRequests = useCallback(async () => {
@@ -63,8 +63,8 @@ export default function AdminGroupApplications() {
     try {
       const params = {};
       if (filters.status) params.status = filters.status;
-      if (filters.categoryId) params.categoryId = Number(filters.categoryId);
-      if (filters.directionGroupId) params.directionGroupId = Number(filters.directionGroupId);
+      if (filters.departmentId) params.departmentId = Number(filters.departmentId);
+      if (filters.departmentGroupId) params.departmentGroupId = Number(filters.departmentGroupId);
       const data = await getAdminGroupRequests(params);
       setRequests(data);
     } catch (err) {
@@ -79,16 +79,16 @@ export default function AdminGroupApplications() {
   }, [filters]);
 
   useEffect(() => {
-    getAllCategories().then(setCategories).catch(console.error);
+    getAllDepartments().then(setCategories).catch(console.error);
   }, []);
 
   useEffect(() => {
-    if (filters.categoryId) {
-      getDirectionGroups(filters.categoryId).then(setDirectionGroups).catch(() => setDirectionGroups([]));
+    if (filters.departmentId) {
+      getDepartmentGroups(filters.departmentId).then(setDepartmentGroups).catch(() => setDepartmentGroups([]));
     } else {
-      setDirectionGroups([]);
+      setDepartmentGroups([]);
     }
-  }, [filters.categoryId]);
+  }, [filters.departmentId]);
 
   useEffect(() => {
     loadRequests();
@@ -98,7 +98,7 @@ export default function AdminGroupApplications() {
     const q = search.trim().toLowerCase();
     if (!q) return requests;
     return requests.filter((r) =>
-      `${r.studentFirstName} ${r.studentLastName} ${r.studentEmail} ${r.directionGroupName} ${r.categoryName}`
+      `${r.studentFirstName} ${r.studentLastName} ${r.studentEmail} ${r.departmentGroupName} ${r.departmentName}`
         .toLowerCase()
         .includes(q),
     );
@@ -180,11 +180,11 @@ export default function AdminGroupApplications() {
               </Select>
             </FormControl>
             <FormControl fullWidth>
-              <InputLabel>Drejtimi</InputLabel>
+              <InputLabel>Departamenti</InputLabel>
               <Select
-                value={filters.categoryId}
-                label="Drejtimi"
-                onChange={(e) => setFilters((f) => ({ ...f, categoryId: e.target.value, directionGroupId: "" }))}
+                value={filters.departmentId}
+                label="Departamenti"
+                onChange={(e) => setFilters((f) => ({ ...f, departmentId: e.target.value, departmentGroupId: "" }))}
               >
                 <MenuItem value="">Te gjitha</MenuItem>
                 {categories.map((c) => (
@@ -195,13 +195,13 @@ export default function AdminGroupApplications() {
             <FormControl fullWidth className="md:col-span-2">
               <InputLabel>Grupi</InputLabel>
               <Select
-                value={filters.directionGroupId}
+                value={filters.departmentGroupId}
                 label="Grupi"
-                disabled={!filters.categoryId}
-                onChange={(e) => setFilters((f) => ({ ...f, directionGroupId: e.target.value }))}
+                disabled={!filters.departmentId}
+                onChange={(e) => setFilters((f) => ({ ...f, departmentGroupId: e.target.value }))}
               >
                 <MenuItem value="">Te gjitha</MenuItem>
-                {directionGroups.map((g) => (
+                {departmentGroups.map((g) => (
                   <MenuItem key={g.id} value={g.id}>
                     {g.name} ({g.currentStudents}/{g.maxCapacity})
                   </MenuItem>
@@ -221,7 +221,7 @@ export default function AdminGroupApplications() {
                   <TableCell className="font-black!">Emri</TableCell>
                   <TableCell className="font-black!">Mbiemri</TableCell>
                   <TableCell className="font-black!">Email</TableCell>
-                  <TableCell className="font-black!">Drejtimi</TableCell>
+                  <TableCell className="font-black!">Departamenti</TableCell>
                   <TableCell className="font-black!">Grupi</TableCell>
                   <TableCell className="font-black!">Statusi</TableCell>
                   <TableCell className="font-black!">Data</TableCell>
@@ -236,9 +236,9 @@ export default function AdminGroupApplications() {
                       <TableCell>{row.studentFirstName}</TableCell>
                       <TableCell>{row.studentLastName}</TableCell>
                       <TableCell>{row.studentEmail}</TableCell>
-                      <TableCell>{row.categoryName}</TableCell>
+                      <TableCell>{row.departmentName}</TableCell>
                       <TableCell>
-                        <Chip label={row.directionGroupName} size="small" className="font-bold!" />
+                        <Chip label={row.departmentGroupName} size="small" className="font-bold!" />
                       </TableCell>
                       <TableCell>
                         <Chip label={chip.label} color={chip.color} size="small" className="font-bold!" />

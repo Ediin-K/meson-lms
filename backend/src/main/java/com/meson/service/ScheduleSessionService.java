@@ -38,14 +38,14 @@ public class ScheduleSessionService {
     public List<ScheduleSessionResponse> getForStudent(Long userId) {
         StudentProfile profile = studentProfileRepository.findByUserIdWithDetails(userId).orElse(null);
 
-        if (profile == null || profile.getDirection() == null || profile.getApprovedDirectionGroup() == null) {
+        if (profile == null || profile.getDepartment() == null || profile.getApprovedDepartmentGroup() == null) {
             return List.of();
         }
 
         return scheduleSessionRepository.findApprovedSchedulesForStudent(
-                        profile.getDirection().getId(),
+                        profile.getDepartment().getId(),
                         profile.getCurrentSemester() != null ? profile.getCurrentSemester() : 1,
-                        profile.getApprovedDirectionGroup().getId())
+                        profile.getApprovedDepartmentGroup().getId())
                 .stream()
                 .map(this::toResponse)
                 .filter(java.util.Objects::nonNull)
@@ -94,7 +94,7 @@ public class ScheduleSessionService {
 
         User teacher = session.getTeacher();
         Subject course = session.getSubject();
-        Direction category = course.getDirection();
+        Department category = course.getDepartment();
         SubjectGroup courseGroup = session.getSubjectGroup();
         SubjectSubgroup subgroup = session.getSubjectSubgroup();
 
@@ -104,8 +104,8 @@ public class ScheduleSessionService {
                 .id(session.getId())
                 .subjectId(course.getId())
                 .subjectTitle(course.getTitulli())
-                .categoryId(category != null ? category.getId() : null)
-                .categoryName(category != null ? category.getEmertimi() : null)
+                .departmentId(category != null ? category.getId() : null)
+                .departmentName(category != null ? category.getEmertimi() : null)
                 .semester(course.getSemester())
                 .subjectGroupId(courseGroup != null ? courseGroup.getId() : null)
                 .subjectGroupName(courseGroup != null ? courseGroup.getName() : null)

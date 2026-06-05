@@ -43,7 +43,7 @@ const getErrorMessage = (error, fallback) =>
 
 export default function AdminUserTokens() {
   const navigate = useNavigate();
-  const { mode } = useAppPreferences();
+  const { mode, t } = useAppPreferences();
   const isDark = mode === "dark";
 
   const [tokens, setTokens] = useState([]);
@@ -77,7 +77,7 @@ export default function AdminUserTokens() {
       setTokens(tokensRes.data);
       setUsers(usersRes.data);
     } catch (error) {
-      showToast(getErrorMessage(error, "Gabim gjatë ngarkimit të të dhënave"), "error");
+      showToast(getErrorMessage(error, t("adminUserTokens.toast.fetchError")), "error");
     } finally {
       setLoading(false);
     }
@@ -114,22 +114,22 @@ export default function AdminUserTokens() {
 
   const handleSubmit = async () => {
     if (!formData.userId || !formData.loginProvider.trim() || !formData.tokenName.trim() || !formData.tokenValue.trim()) {
-      showToast("Të gjitha fushat janë të detyrueshme", "error");
+      showToast(t("adminUserTokens.toast.validationError"), "error");
       return;
     }
     setSubmitting(true);
     try {
       if (isEdit && selectedToken) {
         await axiosInstance.put(`/user-tokens/${selectedToken.id}`, formData);
-        showToast("Token u përditësua me sukses");
+        showToast(t("adminUserTokens.toast.updated"));
       } else {
         await axiosInstance.post("/user-tokens", formData);
-        showToast("Token u krijua me sukses");
+        showToast(t("adminUserTokens.toast.created"));
       }
       setOpenDialog(false);
       await loadData();
     } catch (error) {
-      showToast(getErrorMessage(error, "Gabim gjatë ruajtjes"), "error");
+      showToast(getErrorMessage(error, t("adminUserTokens.toast.saveError")), "error");
     } finally {
       setSubmitting(false);
     }
@@ -140,12 +140,12 @@ export default function AdminUserTokens() {
     setSubmitting(true);
     try {
       await axiosInstance.delete(`/user-tokens/${deleteTarget.id}`);
-      showToast("Token u fshi me sukses");
+      showToast(t("adminUserTokens.toast.deleted"));
       setOpenDeleteConfirm(false);
       setDeleteTarget(null);
       await loadData();
     } catch (error) {
-      showToast(getErrorMessage(error, "Gabim gjatë fshirjes"), "error");
+      showToast(getErrorMessage(error, t("adminUserTokens.toast.deleteError")), "error");
     } finally {
       setSubmitting(false);
     }
@@ -173,7 +173,7 @@ export default function AdminUserTokens() {
           onClick={() => navigate("/admin")}
           className="mb-6! normal-case! text-slate-600! dark:text-slate-400!"
         >
-          Kthehu te Paneli
+          {t("adminUserTokens.backToPanel")}
         </Button>
 
         <Box className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -183,16 +183,16 @@ export default function AdminUserTokens() {
                 <TokenRounded className="text-orange-600 text-xl!" />
               </div>
               <Typography variant="h4" component="h1" className="font-extrabold! text-slate-900! dark:text-white!">
-                User Tokens
+                {t("adminUserTokens.title")}
               </Typography>
             </Box>
             <Typography variant="body1" className="text-slate-600! dark:text-slate-400!">
-              Shikon tokenat aktivë të sesioneve. Krijohen automatikisht gjatë login dhe fshihen gjatë logout.
+              {t("adminUserTokens.subtitle")}
             </Typography>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 items-center">
             <TextField
-              placeholder="Kërko token..."
+              placeholder={t("adminUserTokens.searchPlaceholder")}
               variant="outlined"
               size="small"
               value={searchTerm}
@@ -216,7 +216,7 @@ export default function AdminUserTokens() {
               onClick={openAddDialog}
               className="rounded-xl! py-2.5! px-6! normal-case! font-bold! bg-orange-600! hover:bg-orange-700! shadow-lg shadow-orange-500/20"
             >
-              Shto Token
+              {t("adminUserTokens.addBtn")}
             </Button>
           </div>
         </Box>
@@ -231,19 +231,19 @@ export default function AdminUserTokens() {
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell sx={headCellSx}>ID</TableCell>
-                    <TableCell sx={headCellSx}>Përdoruesi</TableCell>
-                    <TableCell sx={headCellSx}>Login Provider</TableCell>
-                    <TableCell sx={headCellSx}>Token Name</TableCell>
-                    <TableCell sx={headCellSx}>Token Value</TableCell>
-                    <TableCell sx={headCellSx} align="right">Veprimet</TableCell>
+                    <TableCell sx={headCellSx}>{t("adminUserTokens.tableId")}</TableCell>
+                    <TableCell sx={headCellSx}>{t("adminUserTokens.tableUser")}</TableCell>
+                    <TableCell sx={headCellSx}>{t("adminUserTokens.tableLoginProvider")}</TableCell>
+                    <TableCell sx={headCellSx}>{t("adminUserTokens.tableTokenName")}</TableCell>
+                    <TableCell sx={headCellSx}>{t("adminUserTokens.tableTokenValue")}</TableCell>
+                    <TableCell sx={headCellSx} align="right">{t("adminUserTokens.tableActions")}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {filteredTokens.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={6} align="center" sx={{ fontSize: "0.85rem" }}>
-                        Nuk u gjetën tokenë.
+                        {t("adminUserTokens.noTokens")}
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -270,13 +270,13 @@ export default function AdminUserTokens() {
                           </Tooltip>
                         </TableCell>
                         <TableCell align="right">
-                          <Tooltip title="Modifiko" slots={{ transition: Zoom }}>
+                          <Tooltip title={t("adminUserTokens.tooltipEdit")} slots={{ transition: Zoom }}>
                             <IconButton size="small" onClick={() => openEditDialog(token)}
                               className="text-sky-500! hover:bg-sky-50! dark:hover:bg-sky-900/30!">
                               <EditRounded fontSize="small" />
                             </IconButton>
                           </Tooltip>
-                          <Tooltip title="Fshi" slots={{ transition: Zoom }}>
+                          <Tooltip title={t("adminUserTokens.tooltipDelete")} slots={{ transition: Zoom }}>
                             <IconButton size="small" onClick={() => { setDeleteTarget(token); setOpenDeleteConfirm(true); }}
                               className="text-red-500! hover:bg-red-50! dark:hover:bg-red-900/30!">
                               <DeleteRounded fontSize="small" />
@@ -297,7 +297,7 @@ export default function AdminUserTokens() {
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth
         slotProps={{ paper: { className: "rounded-3xl! dark:bg-slate-900!" } }}>
         <DialogTitle className="font-bold! text-slate-900! dark:text-white!">
-          {isEdit ? "Modifiko Token" : "Shto Token të Ri"}
+          {isEdit ? t("adminUserTokens.editDialogTitle") : t("adminUserTokens.addDialogTitle")}
         </DialogTitle>
         <DialogContent className="flex flex-col gap-4 pt-4!">
           <Autocomplete
@@ -306,25 +306,25 @@ export default function AdminUserTokens() {
             value={selectedUser}
             onChange={(_, val) => setFormData((p) => ({ ...p, userId: val?.id ?? null }))}
             renderInput={(params) => (
-              <TextField {...params} label="Përdoruesi *" size="small"
+              <TextField {...params} label={t("adminUserTokens.fieldUser")} size="small"
                 slotProps={{ inputLabel: { className: "dark:text-slate-400!" } }} />
             )}
           />
-          <TextField label="Login Provider *" value={formData.loginProvider}
+          <TextField label={t("adminUserTokens.fieldLoginProvider")} value={formData.loginProvider}
             onChange={(e) => setFormData((p) => ({ ...p, loginProvider: e.target.value }))}
-            fullWidth size="small" helperText='P.sh. "Google", "GitHub", "Local"'
+            fullWidth size="small" helperText={t("adminUserTokens.fieldLoginProviderHelper")}
             slotProps={{
               inputLabel: { className: "dark:text-slate-400!" },
               htmlInput: { className: "dark:text-white!" },
             }} />
-          <TextField label="Token Name *" value={formData.tokenName}
+          <TextField label={t("adminUserTokens.fieldTokenName")} value={formData.tokenName}
             onChange={(e) => setFormData((p) => ({ ...p, tokenName: e.target.value }))}
-            fullWidth size="small" helperText='P.sh. "access_token", "id_token"'
+            fullWidth size="small" helperText={t("adminUserTokens.fieldTokenNameHelper")}
             slotProps={{
               inputLabel: { className: "dark:text-slate-400!" },
               htmlInput: { className: "dark:text-white!" },
             }} />
-          <TextField label="Token Value *" value={formData.tokenValue}
+          <TextField label={t("adminUserTokens.fieldTokenValue")} value={formData.tokenValue}
             onChange={(e) => setFormData((p) => ({ ...p, tokenValue: e.target.value }))}
             fullWidth size="small" multiline rows={3}
             slotProps={{
@@ -334,11 +334,11 @@ export default function AdminUserTokens() {
         </DialogContent>
         <DialogActions className="p-4!">
           <Button onClick={() => setOpenDialog(false)} className="normal-case! text-slate-600! dark:text-slate-400!">
-            Anulo
+            {t("adminUserTokens.cancel")}
           </Button>
           <Button variant="contained" onClick={handleSubmit} disabled={submitting}
             className="normal-case! rounded-xl! bg-orange-600! hover:bg-orange-700!">
-            {submitting ? <CircularProgress size={18} className="text-white!" /> : isEdit ? "Ruaj" : "Krijo"}
+            {submitting ? <CircularProgress size={18} className="text-white!" /> : isEdit ? t("adminUserTokens.save") : t("adminUserTokens.create")}
           </Button>
         </DialogActions>
       </Dialog>
@@ -346,20 +346,20 @@ export default function AdminUserTokens() {
       {/* Delete Confirm */}
       <Dialog open={openDeleteConfirm} onClose={() => setOpenDeleteConfirm(false)} maxWidth="xs" fullWidth
         slotProps={{ paper: { className: "rounded-3xl! dark:bg-slate-900!" } }}>
-        <DialogTitle className="font-bold! text-slate-900! dark:text-white!">Konfirmo Fshirjen</DialogTitle>
+        <DialogTitle className="font-bold! text-slate-900! dark:text-white!">{t("adminUserTokens.deleteTitle")}</DialogTitle>
         <DialogContent>
           <Alert severity="warning" className="rounded-2xl!">
-            A jeni i sigurt që doni të fshini token-in <strong>{deleteTarget?.tokenName}</strong> të{" "}
+            {t("adminUserTokens.deleteWarning")} <strong>{deleteTarget?.tokenName}</strong> {t("adminUserTokens.deleteWarningOf")}{" "}
             <strong>{deleteTarget?.emri} {deleteTarget?.mbiemri}</strong>?
           </Alert>
         </DialogContent>
         <DialogActions className="p-4!">
           <Button onClick={() => setOpenDeleteConfirm(false)} className="normal-case! text-slate-600! dark:text-slate-400!">
-            Anulo
+            {t("adminUserTokens.cancel")}
           </Button>
           <Button variant="contained" color="error" onClick={handleDelete} disabled={submitting}
             className="normal-case! rounded-xl!">
-            {submitting ? <CircularProgress size={18} className="text-white!" /> : "Fshi"}
+            {submitting ? <CircularProgress size={18} className="text-white!" /> : t("adminUserTokens.delete")}
           </Button>
         </DialogActions>
       </Dialog>

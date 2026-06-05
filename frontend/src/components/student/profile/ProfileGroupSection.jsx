@@ -14,9 +14,9 @@ export default function ProfileGroupSection({ groupStatus, t }) {
           {t('studentProfile.group')}
         </Typography>
         <div className="flex flex-col gap-2">
-          {groupStatus?.categoryName && (
+          {groupStatus?.departmentName && (
             <Typography variant="body2" className="!text-slate-700 dark:!text-slate-200">
-              <span className="font-semibold">{t('studentProfile.category')}:</span> {groupStatus.categoryName}
+              <span className="font-semibold">{t('studentProfile.department')}:</span> {groupStatus.departmentName}
             </Typography>
           )}
           {groupStatus?.currentSemester != null && (

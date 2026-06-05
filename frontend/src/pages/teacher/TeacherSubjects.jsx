@@ -256,7 +256,7 @@ export default function TeacherSubjects() {
                       Lënda & Përshkrimi
                     </TableCell>
                     <TableCell className="font-black! text-slate-400! uppercase! text-[10px]! tracking-widest! py-6!">
-                      Kategoria / Semestri
+                      Departamenti / Semestri
                     </TableCell>
                     <TableCell className="font-black! text-slate-400! uppercase! text-[10px]! tracking-widest! py-6!">
                       Statusi
@@ -322,9 +322,9 @@ export default function TeacherSubjects() {
                         </TableCell>
                         <TableCell>
                           <Box className="flex flex-col gap-1.5 items-start">
-                            {course.categoryName && (
+                            {course.departmentName && (
                               <Typography variant="caption" className="font-bold! text-slate-700! dark:text-slate-300!">
-                                {course.categoryName}
+                                {course.departmentName}
                               </Typography>
                             )}
                             <span

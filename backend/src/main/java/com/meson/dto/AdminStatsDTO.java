@@ -13,6 +13,6 @@ public class AdminStatsDTO {
     private long totalTeachers;
     private long totalCertificates;
     private List<MonthlyCountDTO> enrollmentsByMonth;
-    private List<NameValueDTO>    subjectsByCategory;
+    private List<NameValueDTO>    subjectsByDepartment;
     private List<NameValueDTO>    enrollmentsByStatus;
 }

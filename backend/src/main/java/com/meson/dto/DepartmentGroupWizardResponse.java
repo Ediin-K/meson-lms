@@ -7,8 +7,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class DirectionGroupWizardResponse {
-    private DirectionGroupResponse group;
+public class DepartmentGroupWizardResponse {
+    private DepartmentGroupResponse group;
     private List<SubjectGroupResponse> subjectGroups;
     private List<ScheduleSessionResponse> schedules;
 }

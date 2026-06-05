@@ -25,7 +25,7 @@ const CertificateVerify = lazy(() => import("./pages/CertificateVerify.jsx"));
 const AdminDashboard = lazy(() => import("./components/dashboard/AdminDashboard.jsx"));
 const AdminUsers = lazy(() => import("./pages/AdminUsers.jsx"));
 const AdminSubjects = lazy(() => import("./pages/AdminSubjects.jsx"));
-const AdminCategories = lazy(() => import("./pages/AdminCategories.jsx"));
+const AdminDepartments = lazy(() => import("./pages/AdminDepartments.jsx"));
 const AdminTeachers = lazy(() => import("./pages/AdminTeachers.jsx"));
 const AdminEnrollments = lazy(() => import("./pages/AdminEnrollments.jsx"));
 const AdminCertificates = lazy(() => import("./pages/AdminCertificates.jsx"));
@@ -156,10 +156,10 @@ function AppLayout() {
                 }
               />
               <Route
-                path="/admin/directions"
+                path="/admin/departments"
                 element={
                   <ProtectedRoute requiredRole="admin">
-                    <AdminCategories />
+                    <AdminDepartments />
                   </ProtectedRoute>
                 }
               />

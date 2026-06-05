@@ -6,13 +6,13 @@ import java.util.List;
 import java.util.ArrayList;
 
 @Entity
-@Table(name="directions")
+@Table(name="departments")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode(exclude = {"subjects"})
-public class Direction {
+public class Department {
 
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -24,8 +24,11 @@ public class Direction {
     @Column(name = "description", columnDefinition = "TEXT")
     private String pershkrimi;
 
+    @Column(name = "num_semesters", nullable = false)
+    private Integer numSemesters;
+
     @Builder.Default
-    @OneToMany(mappedBy="direction", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy="department", fetch = FetchType.LAZY)
     private List<Subject> subjects = new ArrayList<>();
 
 }

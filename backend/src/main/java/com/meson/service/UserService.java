@@ -4,13 +4,13 @@ import com.meson.dto.UserDTO;
 import com.meson.dto.CreateUserDTO;
 import com.meson.dto.UpdateUserDTO;
 import com.meson.entity.Role;
-import com.meson.entity.Direction;
+import com.meson.entity.Department;
 import com.meson.entity.StudentProfile;
 import com.meson.entity.User;
 import com.meson.entity.UserRole;
 import com.meson.repository.AssignmentSubmissionRepository;
 import com.meson.repository.CertificateRepository;
-import com.meson.repository.DirectionRepository;
+import com.meson.repository.DepartmentRepository;
 import com.meson.repository.SubjectGroupTeacherRepository;
 import com.meson.repository.SubjectRepository;
 import com.meson.repository.SubjectSubgroupTeacherRepository;
@@ -47,7 +47,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
     private final UserRoleRepository userRoleRepository;
-    private final DirectionRepository directionRepository;
+    private final DepartmentRepository departmentRepository;
     private final StudentProfileRepository studentProfileRepository;
     private final SubjectRepository subjectRepository;
     private final EnrollmentRepository enrollmentRepository;
@@ -132,7 +132,7 @@ public class UserService {
             userRoleRepository.save(userRole);
         }
 
-        syncStudentProfile(savedUser, dto.getRole(), dto.getCategoryId(), dto.getCurrentSemester());
+        syncStudentProfile(savedUser, dto.getRole(), dto.getDepartmentId(), dto.getCurrentSemester());
 
         return savedUser;
     }
@@ -177,7 +177,7 @@ public class UserService {
             }
         }
 
-        syncStudentProfile(user, dto.getRole(), dto.getCategoryId(), dto.getCurrentSemester());
+        syncStudentProfile(user, dto.getRole(), dto.getDepartmentId(), dto.getCurrentSemester());
 
         return userRepository.save(user);
     }
@@ -232,14 +232,14 @@ public class UserService {
                 user.getEmail(),
                 user.getStatusi(),
                 role,
-                profile != null && profile.getDirection() != null ? profile.getDirection().getId() : null,
-                profile != null && profile.getDirection() != null ? profile.getDirection().getEmertimi() : null,
+                profile != null && profile.getDepartment() != null ? profile.getDepartment().getId() : null,
+                profile != null && profile.getDepartment() != null ? profile.getDepartment().getEmertimi() : null,
                 profile != null ? profile.getCurrentSemester() : null,
                 user.getDataKrijimit()
         );
     }
 
-    private void syncStudentProfile(User user, String role, Long categoryId, Integer currentSemester) {
+    private void syncStudentProfile(User user, String role, Long departmentId, Integer currentSemester) {
         if (!"student".equals(normalizeRoleForFrontend(normalizeRoleForDB(role)))) {
             return;
         }
@@ -250,10 +250,10 @@ public class UserService {
                         .currentSemester(1)
                         .build());
 
-        if (categoryId != null) {
-            Direction category = directionRepository.findById(categoryId)
-                    .orElseThrow(() -> new RuntimeException("Kategoria nuk u gjet"));
-            profile.setDirection(category);
+        if (departmentId != null) {
+            Department department = departmentRepository.findById(departmentId)
+                    .orElseThrow(() -> new RuntimeException("Departamenti nuk u gjet"));
+            profile.setDepartment(department);
         }
 
         profile.setCurrentSemester(currentSemester != null ? currentSemester : profile.getCurrentSemester());

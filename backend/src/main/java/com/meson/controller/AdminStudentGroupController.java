@@ -1,7 +1,7 @@
 package com.meson.controller;
 
 import com.meson.dto.AssignStudentGroupRequest;
-import com.meson.dto.DirectionGroupResponse;
+import com.meson.dto.DepartmentGroupResponse;
 import com.meson.entity.User;
 import com.meson.repository.UserRepository;
 import com.meson.service.StudentGroupRequestService;
@@ -22,7 +22,7 @@ public class AdminStudentGroupController {
     private final UserRepository userRepository;
 
     @PostMapping("/{userId}/assign-group")
-    public ResponseEntity<DirectionGroupResponse> assignGroup(
+    public ResponseEntity<DepartmentGroupResponse> assignGroup(
             @PathVariable Long userId,
             @Valid @RequestBody AssignStudentGroupRequest request) {
         return ResponseEntity.ok(

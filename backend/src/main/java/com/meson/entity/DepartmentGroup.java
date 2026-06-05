@@ -6,21 +6,21 @@ import lombok.*;
 import java.util.Set;
 
 @Entity
-@Table(name = "direction_groups")
+@Table(name = "department_groups")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(exclude = {"direction", "subjectGroups"})
-public class DirectionGroup {
+@EqualsAndHashCode(exclude = {"department", "subjectGroups"})
+public class DepartmentGroup {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "category_id", nullable = false)
-    private Direction direction;
+    @JoinColumn(name = "department_id", nullable = false)
+    private Department department;
 
     @Column(nullable = false)
     private Integer semester;
@@ -37,9 +37,9 @@ public class DirectionGroup {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     @Builder.Default
-    private DirectionGroupStatus status = DirectionGroupStatus.ACTIVE;
+    private DepartmentGroupStatus status = DepartmentGroupStatus.ACTIVE;
 
-    @OneToMany(mappedBy = "directionGroup")
+    @OneToMany(mappedBy = "departmentGroup")
     @JsonIgnore
     @ToString.Exclude
     private Set<SubjectGroup> subjectGroups;

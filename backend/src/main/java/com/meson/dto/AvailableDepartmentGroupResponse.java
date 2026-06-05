@@ -7,8 +7,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AvailableDirectionGroupResponse {
-    private DirectionGroupResponse group;
+public class AvailableDepartmentGroupResponse {
+    private DepartmentGroupResponse group;
     private List<ScheduleSessionResponse> schedules;
     private boolean canApply;
     private String applyBlockedReason;

@@ -6,10 +6,10 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class DirectionGroupResponse {
+public class DepartmentGroupResponse {
     private Long id;
-    private Long categoryId;
-    private String categoryName;
+    private Long departmentId;
+    private String departmentName;
     private Integer semester;
     private String name;
     private String description;
@@ -17,6 +17,6 @@ public class DirectionGroupResponse {
     private Integer currentStudents;
     private Integer remainingSeats;
     private Boolean isFull;
-    
+
     private String status;
 }

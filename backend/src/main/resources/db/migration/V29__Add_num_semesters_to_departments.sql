@@ -1,0 +1,1 @@
+ALTER TABLE departments ADD COLUMN num_semesters INT NOT NULL DEFAULT 8;

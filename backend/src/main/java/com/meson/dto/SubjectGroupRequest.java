@@ -13,6 +13,6 @@ public class SubjectGroupRequest {
     private String name;
     private Integer capacity;
     private String schedule;
-    private Long directionGroupId;
+    private Long departmentGroupId;
     private List<Long> teacherIds;
 }

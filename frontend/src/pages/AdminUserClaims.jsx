@@ -48,7 +48,7 @@ const getErrorMessage = (error, fallback) =>
 
 export default function AdminUserClaims() {
   const navigate = useNavigate();
-  const { mode } = useAppPreferences();
+  const { mode, t } = useAppPreferences();
   const isDark = mode === "dark";
 
   const [claims, setClaims] = useState([]);
@@ -82,7 +82,7 @@ export default function AdminUserClaims() {
       setClaims(claimsRes.data);
       setUsers(usersRes.data);
     } catch (error) {
-      showToast(getErrorMessage(error, "Gabim gjatë ngarkimit të të dhënave"), "error");
+      showToast(getErrorMessage(error, t("adminUserClaims.toast.fetchError")), "error");
     } finally {
       setLoading(false);
     }
@@ -122,7 +122,7 @@ export default function AdminUserClaims() {
       : formData.claimType.trim();
 
     if (!formData.userId || !resolvedType || !formData.claimValue.trim()) {
-      showToast("Të gjitha fushat janë të detyrueshme", "error");
+      showToast(t("adminUserClaims.toast.validationError"), "error");
       return;
     }
     const payload = { userId: formData.userId, claimType: resolvedType, claimValue: formData.claimValue.trim() };
@@ -130,15 +130,15 @@ export default function AdminUserClaims() {
     try {
       if (isEdit && selectedClaim) {
         await axiosInstance.put(`/user-claims/${selectedClaim.id}`, payload);
-        showToast("Claim u përditësua me sukses");
+        showToast(t("adminUserClaims.toast.updated"));
       } else {
         await axiosInstance.post("/user-claims", payload);
-        showToast("Claim u krijua me sukses");
+        showToast(t("adminUserClaims.toast.created"));
       }
       setOpenDialog(false);
       await loadData();
     } catch (error) {
-      showToast(getErrorMessage(error, "Gabim gjatë ruajtjes"), "error");
+      showToast(getErrorMessage(error, t("adminUserClaims.toast.saveError")), "error");
     } finally {
       setSubmitting(false);
     }
@@ -149,12 +149,12 @@ export default function AdminUserClaims() {
     setSubmitting(true);
     try {
       await axiosInstance.delete(`/user-claims/${deleteTarget.id}`);
-      showToast("Claim u fshi me sukses");
+      showToast(t("adminUserClaims.toast.deleted"));
       setOpenDeleteConfirm(false);
       setDeleteTarget(null);
       await loadData();
     } catch (error) {
-      showToast(getErrorMessage(error, "Gabim gjatë fshirjes"), "error");
+      showToast(getErrorMessage(error, t("adminUserClaims.toast.deleteError")), "error");
     } finally {
       setSubmitting(false);
     }
@@ -180,7 +180,7 @@ export default function AdminUserClaims() {
           onClick={() => navigate("/admin")}
           className="mb-6! normal-case! text-slate-600! dark:text-slate-400!"
         >
-          Kthehu te Paneli
+          {t("adminUserClaims.backToPanel")}
         </Button>
 
         <Box className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -190,16 +190,16 @@ export default function AdminUserClaims() {
                 <LabelRounded className="text-teal-600 text-xl!" />
               </div>
               <Typography variant="h4" component="h1" className="font-extrabold! text-slate-900! dark:text-white!">
-                User Claims
+                {t("adminUserClaims.title")}
               </Typography>
             </Box>
             <Typography variant="body1" className="text-slate-600! dark:text-slate-400!">
-              Permisione granulare për çdo përdorues të sistemit.
+              {t("adminUserClaims.subtitle")}
             </Typography>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 items-center">
             <TextField
-              placeholder="Kërko claim..."
+              placeholder={t("adminUserClaims.searchPlaceholder")}
               variant="outlined"
               size="small"
               value={searchTerm}
@@ -223,7 +223,7 @@ export default function AdminUserClaims() {
               onClick={openAddDialog}
               className="rounded-xl! py-2.5! px-6! normal-case! font-bold! bg-teal-600! hover:bg-teal-700! shadow-lg shadow-teal-500/20"
             >
-              Shto Claim
+              {t("adminUserClaims.addBtn")}
             </Button>
           </div>
         </Box>
@@ -238,18 +238,18 @@ export default function AdminUserClaims() {
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell sx={headCellSx}>ID</TableCell>
-                    <TableCell sx={headCellSx}>Përdoruesi</TableCell>
-                    <TableCell sx={headCellSx}>Claim Type</TableCell>
-                    <TableCell sx={headCellSx}>Claim Value</TableCell>
-                    <TableCell sx={headCellSx} align="right">Veprimet</TableCell>
+                    <TableCell sx={headCellSx}>{t("adminUserClaims.tableId")}</TableCell>
+                    <TableCell sx={headCellSx}>{t("adminUserClaims.tableUser")}</TableCell>
+                    <TableCell sx={headCellSx}>{t("adminUserClaims.tableClaimType")}</TableCell>
+                    <TableCell sx={headCellSx}>{t("adminUserClaims.tableClaimValue")}</TableCell>
+                    <TableCell sx={headCellSx} align="right">{t("adminUserClaims.tableActions")}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {filteredClaims.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={5} align="center" sx={{ fontSize: "0.85rem" }}>
-                        Nuk u gjetën claims.
+                        {t("adminUserClaims.noClaims")}
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -269,13 +269,13 @@ export default function AdminUserClaims() {
                         </TableCell>
                         <TableCell sx={{ fontSize: "0.85rem" }}>{claim.claimValue}</TableCell>
                         <TableCell align="right">
-                          <Tooltip title="Modifiko" slots={{ transition: Zoom }}>
+                          <Tooltip title={t("adminUserClaims.tooltipEdit")} slots={{ transition: Zoom }}>
                             <IconButton size="small" onClick={() => openEditDialog(claim)}
                               className="text-sky-500! hover:bg-sky-50! dark:hover:bg-sky-900/30!">
                               <EditRounded fontSize="small" />
                             </IconButton>
                           </Tooltip>
-                          <Tooltip title="Fshi" slots={{ transition: Zoom }}>
+                          <Tooltip title={t("adminUserClaims.tooltipDelete")} slots={{ transition: Zoom }}>
                             <IconButton size="small" onClick={() => { setDeleteTarget(claim); setOpenDeleteConfirm(true); }}
                               className="text-red-500! hover:bg-red-50! dark:hover:bg-red-900/30!">
                               <DeleteRounded fontSize="small" />
@@ -296,7 +296,7 @@ export default function AdminUserClaims() {
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth
         slotProps={{ paper: { sx: { borderRadius: "1.5rem", backgroundColor: isDark ? "#0f172a" : "#fff", backgroundImage: "none" } } }}>
         <DialogTitle sx={{ fontWeight: 700, color: isDark ? "#f8fafc" : "#0f172a" }}>
-          {isEdit ? "Modifiko Claim" : "Shto Claim të Ri"}
+          {isEdit ? t("adminUserClaims.editDialogTitle") : t("adminUserClaims.addDialogTitle")}
         </DialogTitle>
         <DialogContent className="flex flex-col gap-4 pt-4!">
 
@@ -307,7 +307,7 @@ export default function AdminUserClaims() {
             value={selectedUser}
             onChange={(_, val) => setFormData((p) => ({ ...p, userId: val?.id ?? null }))}
             renderInput={(params) => (
-              <TextField {...params} label="Përdoruesi *" size="small"
+              <TextField {...params} label={t("adminUserClaims.fieldUser")} size="small"
                 sx={{
                   "& .MuiInputLabel-root": { color: isDark ? "#94a3b8" : "#64748b" },
                   "& .MuiInputBase-input": { color: isDark ? "#f8fafc" : "#0f172a" },
@@ -319,30 +319,30 @@ export default function AdminUserClaims() {
 
           {/* Claim Type — Select */}
           <FormControl size="small" fullWidth>
-            <InputLabel sx={{ color: isDark ? "#94a3b8" : "#64748b" }}>Claim Type *</InputLabel>
+            <InputLabel sx={{ color: isDark ? "#94a3b8" : "#64748b" }}>{t("adminUserClaims.fieldClaimType")}</InputLabel>
             <Select
               value={formData.claimType}
-              label="Claim Type *"
+              label={t("adminUserClaims.fieldClaimType")}
               onChange={(e) => setFormData((p) => ({ ...p, claimType: e.target.value }))}
               sx={{
                 color: isDark ? "#f8fafc" : "#0f172a",
                 "& .MuiOutlinedInput-notchedOutline": { borderColor: isDark ? "#334155" : "#cbd5e1" },
               }}
             >
-              <MenuItem value="permission">permission — kontroll aksesi</MenuItem>
-              <MenuItem value="department">department — departamenti</MenuItem>
-              <MenuItem value="feature">feature — funksion i veçantë</MenuItem>
-              <MenuItem value="custom">custom — i personalizuar</MenuItem>
+              <MenuItem value="permission">{t("adminUserClaims.claimTypePermission")}</MenuItem>
+              <MenuItem value="department">{t("adminUserClaims.claimTypeDepartment")}</MenuItem>
+              <MenuItem value="feature">{t("adminUserClaims.claimTypeFeature")}</MenuItem>
+              <MenuItem value="custom">{t("adminUserClaims.claimTypeCustom")}</MenuItem>
             </Select>
           </FormControl>
 
           {/* Nëse custom, trego text field për type */}
           {formData.claimType === "custom" && (
             <TextField
-              label="Claim Type (custom) *"
+              label={t("adminUserClaims.fieldClaimTypeCustom")}
               value={formData._customType ?? ""}
               onChange={(e) => setFormData((p) => ({ ...p, _customType: e.target.value }))}
-              fullWidth size="small" placeholder="p.sh. region, clearance"
+              fullWidth size="small" placeholder={t("adminUserClaims.fieldClaimTypePlaceholder")}
               sx={{
                 "& .MuiInputLabel-root": { color: isDark ? "#94a3b8" : "#64748b" },
                 "& .MuiInputBase-input": { color: isDark ? "#f8fafc" : "#0f172a" },
@@ -353,15 +353,15 @@ export default function AdminUserClaims() {
 
           {/* Claim Value */}
           <TextField
-            label="Claim Value *"
+            label={t("adminUserClaims.fieldClaimValue")}
             value={formData.claimValue}
             onChange={(e) => setFormData((p) => ({ ...p, claimValue: e.target.value }))}
             fullWidth size="small"
             placeholder={
-              formData.claimType === "permission" ? "p.sh. manage_grades, view_reports" :
-              formData.claimType === "department" ? "p.sh. CS, Math, Engineering" :
-              formData.claimType === "feature"     ? "p.sh. beta_access, advanced_analytics" :
-              "vlera e claim-it"
+              formData.claimType === "permission" ? t("adminUserClaims.claimValuePlaceholderPermission") :
+              formData.claimType === "department" ? t("adminUserClaims.claimValuePlaceholderDepartment") :
+              formData.claimType === "feature"     ? t("adminUserClaims.claimValuePlaceholderFeature") :
+              t("adminUserClaims.claimValuePlaceholderDefault")
             }
             sx={{
               "& .MuiInputLabel-root": { color: isDark ? "#94a3b8" : "#64748b" },
@@ -374,7 +374,7 @@ export default function AdminUserClaims() {
           {(formData.claimType && formData.claimValue) && (
             <Box className="flex items-center gap-2 px-3 py-2 rounded-xl bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800">
               <Typography variant="caption" className="text-teal-700! dark:text-teal-400! font-semibold!">
-                Authority:
+                {t("adminUserClaims.authorityLabel")}
               </Typography>
               <Chip
                 label={`${formData.claimType === "custom" ? (formData._customType || "custom") : formData.claimType}:${formData.claimValue}`}
@@ -392,11 +392,11 @@ export default function AdminUserClaims() {
         </DialogContent>
         <DialogActions className="p-4!">
           <Button onClick={() => setOpenDialog(false)} sx={{ textTransform: "none", color: isDark ? "#94a3b8" : "#475569" }}>
-            Anulo
+            {t("adminUserClaims.cancel")}
           </Button>
           <Button variant="contained" onClick={handleSubmit} disabled={submitting}
             sx={{ textTransform: "none", borderRadius: "0.75rem", backgroundColor: "#0d9488", "&:hover": { backgroundColor: "#0f766e" } }}>
-            {submitting ? <CircularProgress size={18} sx={{ color: "#fff" }} /> : isEdit ? "Ruaj" : "Krijo"}
+            {submitting ? <CircularProgress size={18} sx={{ color: "#fff" }} /> : isEdit ? t("adminUserClaims.save") : t("adminUserClaims.create")}
           </Button>
         </DialogActions>
       </Dialog>
@@ -404,20 +404,20 @@ export default function AdminUserClaims() {
       {/* Delete Confirm */}
       <Dialog open={openDeleteConfirm} onClose={() => setOpenDeleteConfirm(false)} maxWidth="xs" fullWidth
         slotProps={{ paper: { className: "rounded-3xl! dark:bg-slate-900!" } }}>
-        <DialogTitle className="font-bold! text-slate-900! dark:text-white!">Konfirmo Fshirjen</DialogTitle>
+        <DialogTitle className="font-bold! text-slate-900! dark:text-white!">{t("adminUserClaims.deleteTitle")}</DialogTitle>
         <DialogContent>
           <Alert severity="warning" className="rounded-2xl!">
-            A jeni i sigurt që doni të fshini claim-in <strong>{deleteTarget?.claimType}</strong> për{" "}
+            {t("adminUserClaims.deleteWarning")} <strong>{deleteTarget?.claimType}</strong> {t("adminUserClaims.deleteWarningFor")}{" "}
             <strong>{deleteTarget?.emri} {deleteTarget?.mbiemri}</strong>?
           </Alert>
         </DialogContent>
         <DialogActions className="p-4!">
           <Button onClick={() => setOpenDeleteConfirm(false)} className="normal-case! text-slate-600! dark:text-slate-400!">
-            Anulo
+            {t("adminUserClaims.cancel")}
           </Button>
           <Button variant="contained" color="error" onClick={handleDelete} disabled={submitting}
             className="normal-case! rounded-xl!">
-            {submitting ? <CircularProgress size={18} className="text-white!" /> : "Fshi"}
+            {submitting ? <CircularProgress size={18} className="text-white!" /> : t("adminUserClaims.delete")}
           </Button>
         </DialogActions>
       </Dialog>

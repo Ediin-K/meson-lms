@@ -13,8 +13,8 @@ public class ScheduleSessionResponse {
     private Long id;
     private Long subjectId;
     private String subjectTitle;
-    private Long categoryId;
-    private String categoryName;
+    private Long departmentId;
+    private String departmentName;
     private Integer semester;
     private Long subjectGroupId;
     private String subjectGroupName;

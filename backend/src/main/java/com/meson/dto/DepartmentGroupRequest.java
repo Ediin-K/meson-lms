@@ -1,18 +1,14 @@
 package com.meson.dto;
 
-import jakarta.validation.Valid;
+import com.meson.entity.DepartmentGroupStatus;
 import jakarta.validation.constraints.*;
 import lombok.*;
-import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CreateDirectionGroupWizardRequest {
-    @NotNull
-    private Long categoryId;
-
+public class DepartmentGroupRequest {
     @NotNull
     @Min(1)
     @Max(12)
@@ -21,18 +17,11 @@ public class CreateDirectionGroupWizardRequest {
     @NotBlank
     private String name;
 
-    @Size(max = 1000)
     private String description;
 
     @NotNull
     @Min(1)
     private Integer maxCapacity;
 
-    @Valid
-    @NotEmpty
-    private List<GroupStaffAssignmentRequest> staff;
-
-    @Valid
-    @NotEmpty
-    private List<GroupScheduleEntryRequest> schedules;
+    private DepartmentGroupStatus status;
 }

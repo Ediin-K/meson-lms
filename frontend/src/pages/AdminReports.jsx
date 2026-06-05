@@ -269,15 +269,15 @@ export default function AdminReports() {
                   <Card elevation={0} className="rounded-2xl border border-slate-200/80 bg-white dark:!bg-slate-900/60 dark:!border-slate-700/80 shadow-sm">
                     <CardContent className="!p-6">
                       <Typography variant="h6" className="!font-bold !text-slate-900 dark:!text-white !mb-0.5">
-                        Lëndët sipas Kategorisë
+                        Lëndët sipas Departamentit
                       </Typography>
                       <Typography variant="caption" className="!text-slate-500">
-                        Numri i Lëndëve për çdo kategori
+                        Numri i Lëndëve për çdo departament
                       </Typography>
                       <Box className="mt-5 h-56">
                         <ResponsiveContainer width="100%" height="100%">
                           <BarChart
-                            data={stats.subjectsByCategory}
+                            data={stats.subjectsByDepartment}
                             margin={{ top: 4, right: 8, left: -20, bottom: 0 }}
                           >
                             <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
@@ -285,13 +285,13 @@ export default function AdminReports() {
                               dataKey="name"
                               tick={{ ...axisStyle, fontSize: 10 }}
                               interval={0}
-                              angle={stats.subjectsByCategory.length > 5 ? -20 : 0}
-                              textAnchor={stats.subjectsByCategory.length > 5 ? "end" : "middle"}
+                              angle={stats.subjectsByDepartment.length > 5 ? -20 : 0}
+                              textAnchor={stats.subjectsByDepartment.length > 5 ? "end" : "middle"}
                             />
                             <YAxis tick={axisStyle} allowDecimals={false} />
                             <Tooltip content={<ChartTooltip />} />
                             <Bar dataKey="value" name="Lëndë" radius={[6, 6, 0, 0]}>
-                              {stats.subjectsByCategory.map((entry, i) => (
+                              {stats.subjectsByDepartment.map((entry, i) => (
                                 <Cell key={entry.name} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                               ))}
                             </Bar>

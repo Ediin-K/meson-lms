@@ -1,6 +1,6 @@
 package com.meson.entity;
 
-public enum DirectionGroupStatus {
+public enum DepartmentGroupStatus {
     ACTIVE,
     CLOSED
 }

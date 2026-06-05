@@ -20,18 +20,18 @@ export const normalizeStatus = (raw) => {
   if (!raw || typeof raw !== "object") {
     return {
       hasApprovedGroup: false,
-      categoryAssigned: false,
-      categoryId: null,
-      categoryName: null,
+      departmentAssigned: false,
+      departmentId: null,
+      departmentName: null,
       approvedGroup: null,
       pendingRequest: null,
     };
   }
   return {
     hasApprovedGroup: Boolean(raw.hasApprovedGroup),
-    categoryAssigned: Boolean(raw.categoryAssigned),
-    categoryId: raw.categoryId ?? null,
-    categoryName: raw.categoryName ?? null,
+    departmentAssigned: Boolean(raw.departmentAssigned),
+    departmentId: raw.departmentId ?? null,
+    departmentName: raw.departmentName ?? null,
     approvedGroup: raw.approvedGroup ?? null,
     pendingRequest: raw.pendingRequest ?? null,
     currentSemester: raw.currentSemester ?? null,
@@ -73,7 +73,7 @@ export const normalizeAvailableGroup = (raw) => {
       id: groupId,
       name: groupSource?.name ?? "Grup",
       description: groupSource?.description ?? "",
-      categoryName: groupSource?.categoryName ?? "",
+      departmentName: groupSource?.departmentName ?? "",
       status: groupSource?.status ?? "ACTIVE",
       maxCapacity: Number(groupSource?.maxCapacity ?? 0),
       currentStudents: Number(groupSource?.currentStudents ?? 0),

@@ -17,5 +17,5 @@ public class StudentProfileResponse {
     private LocalDateTime dataKrijimit;
     private String role;
     private Integer currentSemester;
-    private String categoryName;
+    private String departmentName;
 }

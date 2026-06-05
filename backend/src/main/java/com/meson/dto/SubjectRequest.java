@@ -24,16 +24,12 @@ public class SubjectRequest {
     private Long teacherId;
 
     @NotNull
-    private Long categoryId;
+    private Long departmentId;
 
     @NotNull
     private Integer semester;
 
     private String enrollmentKey;
-
-    @Builder.Default
-    @DecimalMin(value = "0.0", message = "Cmimi nuk mund te jet negativ")
-    private Double cmimi = 0.0;
 
     @NotNull
     @Min(value = 1, message = "ECTS duhet te jete te pakten 1")

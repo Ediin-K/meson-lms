@@ -8,7 +8,7 @@ const files = [
   'src/pages/AssignmentPage.jsx',
   'src/pages/teacher/TeacherModules.jsx',
   'src/pages/Notifications.jsx',
-  'src/pages/AdminCategories.jsx'
+  'src/pages/AdminDepartments.jsx'
 ];
 
 const regex = /(^|['"\s])((?:[a-z0-9-]+:)*)!([a-zA-Z0-9-\[\]\.\/]+)/g;

@@ -57,7 +57,7 @@ export default function StudentGradesPage() {
         error?.response?.data?.message ||
         error?.response?.data?.error ||
         error?.message ||
-        "Gabim gjatë marrjes së notave";
+        t("studentGrades.errorLoad");
       setSnackbar({ open: true, message, severity: "error" });
     } finally {
       setLoading(false);
@@ -88,27 +88,27 @@ export default function StudentGradesPage() {
   return (
     <GradesPageShell
       backTo="/student"
-      backLabel="Kthehu te Paneli"
+      backLabel={t("studentGrades.backToPanel")}
       breadcrumbs={[
         { label: t("header.navDashboard", "Paneli"), to: "/student" },
         { label: t("header.grades", "Notat") },
       ]}
       title={t("header.grades", "Notat e mia")}
-      subtitle="Shikoni notat, komentet dhe mesataren tuaj akademike."
+      subtitle={t("studentGrades.subtitle")}
       icon={GradeRounded}
     >
       <Box className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatItem label="Mesatarja (GPA)" value={gpaLabel} highlight />
-        <StatItem label="Lëndë me notë" value={summary.totalGrades || 0} />
-        <StatItem label="ECTS (me notë)" value={gradedEcts} />
-        <StatItem label="ECTS (regjistruar)" value={enrolledEcts} />
+        <StatItem label={t("studentGrades.statGpa")} value={gpaLabel} highlight />
+        <StatItem label={t("studentGrades.statGraded")} value={summary.totalGrades || 0} />
+        <StatItem label={t("studentGrades.statEctsGraded")} value={gradedEcts} />
+        <StatItem label={t("studentGrades.statEctsEnrolled")} value={enrolledEcts} />
       </Box>
 
       <Box className="mb-4 rounded-lg border border-slate-300 bg-white px-4 py-3 dark:border-slate-700 dark:bg-slate-900 sm:px-5">
         <TextField
           size="small"
           fullWidth
-          placeholder="Kërko lëndë, profesor ose koment..."
+          placeholder={t("studentGrades.searchPlaceholder")}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           InputProps={{

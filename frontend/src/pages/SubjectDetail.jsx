@@ -432,7 +432,7 @@ export default function SubjectDetail() {
                 {}
                 <Box className="mb-8">
                     <Typography variant="overline" className="font-bold! tracking-widest! text-sky-600! dark:text-sky-400!">
-                        {subject.categoryName}
+                        {subject.departmentName}
                     </Typography>
                     <Typography variant="h3" component="h1" className="mt-1! font-extrabold! text-slate-900! dark:text-white!">
                         {subject.titulli}

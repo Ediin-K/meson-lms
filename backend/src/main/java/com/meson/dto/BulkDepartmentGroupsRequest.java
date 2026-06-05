@@ -9,7 +9,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class BulkDirectionGroupsRequest {
+public class BulkDepartmentGroupsRequest {
     @NotNull
     @Min(1)
     @Max(12)
@@ -17,5 +17,5 @@ public class BulkDirectionGroupsRequest {
 
     @NotEmpty
     @Valid
-    private List<DirectionGroupRequest> groups;
+    private List<DepartmentGroupRequest> groups;
 }

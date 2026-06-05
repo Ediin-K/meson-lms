@@ -40,11 +40,10 @@ import DeleteRounded from "@mui/icons-material/DeleteRounded";
 import PeopleRounded from "@mui/icons-material/PeopleRounded";
 import PersonAddRounded from "@mui/icons-material/PersonAddRounded";
 import FilterListRounded from "@mui/icons-material/FilterListRounded";
-import MoreVertRounded from "@mui/icons-material/MoreVertRounded";
 import VerifiedUserRounded from "@mui/icons-material/VerifiedUserRounded";
 import Footer from "../components/ui/Footer";
 import axiosInstance from "../services/axiosInstance";
-import { getDirectionGroups } from "../services/directionGroupService";
+import { getDepartmentGroups } from "../services/departmentGroupService";
 import {
   assignStudentToGroup,
   getStudentGroupStatus,
@@ -76,7 +75,7 @@ const EMPTY_FORM = {
   password: "",
   role: "student",
   statusi: "active",
-  categoryId: "",
+  departmentId: "",
   currentSemester: 1,
 };
 export default function AdminUsers() {
@@ -121,7 +120,7 @@ export default function AdminUsers() {
     setLoading(true);
     Promise.all([
       axiosInstance.get("/users"),
-      axiosInstance.get("/categories").catch(() => ({ data: [] })),
+      axiosInstance.get("/departments").catch(() => ({ data: [] })),
     ])
       .then(([usersRes, catsRes]) => {
         setUsers(usersRes.data);
@@ -139,7 +138,7 @@ export default function AdminUsers() {
   };
 
   const loadStudentGroupContext = async (user) => {
-    if (user.role !== "student" || !user.categoryId) {
+    if (user.role !== "student" || !user.departmentId) {
       setStudentGroups([]);
       setApprovedGroupLabel("");
       setGroupAssignId("");
@@ -147,7 +146,7 @@ export default function AdminUsers() {
     }
     try {
       const [groups, status] = await Promise.all([
-        getDirectionGroups(user.categoryId, user.currentSemester || 1),
+        getDepartmentGroups(user.departmentId, user.currentSemester || 1),
         getStudentGroupStatus(user.id),
       ]);
       setStudentGroups(groups);
@@ -174,7 +173,7 @@ export default function AdminUsers() {
       role: user.role || "student",
       statusi: user.statusi || "active",
       passwordHash: "",
-      categoryId: user.categoryId || "",
+      departmentId: user.departmentId || "",
       currentSemester: user.currentSemester || 1,
     });
     setGroupAssignId("");
@@ -189,13 +188,13 @@ export default function AdminUsers() {
       await assignStudentToGroup(selectedUser.id, Number(groupAssignId));
       await loadStudentGroupContext({
         ...selectedUser,
-        categoryId: formData.categoryId,
+        departmentId: formData.departmentId,
         currentSemester: formData.currentSemester,
       });
       setGroupAssignId("");
-      alert("Studenti u caktua ne grup me sukses");
+      alert(t("adminUsers.toast.assignSuccess"));
     } catch (err) {
-      alert(err?.response?.data?.message || err?.message || "Gabim gjate caktimit");
+      alert(err?.response?.data?.message || err?.message || t("adminUsers.toast.assignError"));
     } finally {
       setGroupAssignLoading(false);
     }
@@ -203,14 +202,14 @@ export default function AdminUsers() {
 
   const handleRemoveGroup = async () => {
     if (!selectedUser?.id) return;
-    if (!window.confirm("Hiq studentin nga grupi aktual?")) return;
+    if (!window.confirm(t("adminUsers.toast.removeConfirm"))) return;
     setGroupAssignLoading(true);
     try {
       await removeStudentFromGroup(selectedUser.id);
       await loadStudentGroupContext(selectedUser);
-      alert("Studenti u hoq nga grupi");
+      alert(t("adminUsers.toast.removeSuccess"));
     } catch (err) {
-      alert(err?.response?.data?.message || err?.message || "Gabim");
+      alert(err?.response?.data?.message || err?.message || t("adminUsers.toast.removeError"));
     } finally {
       setGroupAssignLoading(false);
     }
@@ -228,7 +227,7 @@ export default function AdminUsers() {
           phoneNumber: formData.phoneNumber || "",
           statusi: formData.statusi,
           role: formData.role,
-          categoryId: formData.role === "student" && formData.categoryId ? Number(formData.categoryId) : null,
+          departmentId: formData.role === "student" && formData.departmentId ? Number(formData.departmentId) : null,
           currentSemester: formData.role === "student" ? Number(formData.currentSemester || 1) : null,
         }
       : {
@@ -238,7 +237,7 @@ export default function AdminUsers() {
           password: formData.password,
           statusi: formData.statusi,
           role: formData.role,
-          categoryId: formData.role === "student" && formData.categoryId ? Number(formData.categoryId) : null,
+          departmentId: formData.role === "student" && formData.departmentId ? Number(formData.departmentId) : null,
           currentSemester: formData.role === "student" ? Number(formData.currentSemester || 1) : null,
         };
 
@@ -250,11 +249,11 @@ export default function AdminUsers() {
       }
       const { data } = await axiosInstance.get("/users");
       setUsers(data);
-      showToast(isEdit ? "Useri u përditësua me sukses." : "Useri u krijua me sukses.");
+      showToast(isEdit ? t("adminUsers.toast.updated") : t("adminUsers.toast.created"));
       setOpenDialog(false);
     } catch (err) {
-      const msg = err.response?.data?.message || err.response?.data || err.message || "Gabim gjatë ruajtjes";
-      showToast(typeof msg === "string" ? msg : "Gabim gjatë ruajtjes", "error");
+      const msg = err.response?.data?.message || err.response?.data || err.message || t("adminUsers.toast.saveError");
+      showToast(typeof msg === "string" ? msg : t("adminUsers.toast.saveError"), "error");
     }
   };
 
@@ -268,12 +267,12 @@ export default function AdminUsers() {
     try {
       await axiosInstance.delete(`/users/${deleteTarget.id}`);
       setUsers((prev) => prev.filter((u) => u.id !== deleteTarget.id));
-      showToast(`${deleteTarget.emri} ${deleteTarget.mbiemri} u fshi me sukses.`);
+      showToast(`${deleteTarget.emri} ${deleteTarget.mbiemri} ${t("adminUsers.toast.deleted")}`);
       setDeleteTarget(null);
       setOpenDeleteConfirm(false);
     } catch (err) {
-      const msg = err.response?.data?.message || err.response?.data || err.message || "Gabim gjatë fshirjes";
-      showToast(typeof msg === "string" ? msg : "Gabim gjatë fshirjes", "error");
+      const msg = err.response?.data?.message || err.response?.data || err.message || t("adminUsers.toast.deleteError");
+      showToast(typeof msg === "string" ? msg : t("adminUsers.toast.deleteError"), "error");
     }
   };
 
@@ -287,10 +286,10 @@ export default function AdminUsers() {
             onClick={() => navigate("/admin")}
             className="rounded-2xl! px-6! py-2! normal-case! font-bold! text-slate-600! dark:text-slate-400! hover:bg-slate-200/50! dark:hover:bg-slate-800/50!"
           >
-            {t("home.admin.services.backToPanel", "Kthehu te Paneli")}
+            {t("home.admin.services.backToPanel")}
           </Button>
           <Box className="flex gap-2">
-            <Tooltip title="Filtra të avancuar">
+            <Tooltip title={t("adminUsers.advancedFilters")}>
               <IconButton className="bg-white! dark:bg-slate-900! border border-slate-200 dark:border-slate-800 rounded-xl!">
                 <FilterListRounded className="text-slate-500" />
               </IconButton>
@@ -305,23 +304,20 @@ export default function AdminUsers() {
               variant="overline"
               className="font-bold! tracking-[0.3em]! text-indigo-600! dark:text-indigo-400!"
             >
-              {t("adminUsers.overline", "MENAXHIMI I SISTEMIT")}
+              {t("adminUsers.overline")}
             </Typography>
             <Typography
               variant="h3"
               component="h1"
               className="mt-2! font-black! text-slate-900! dark:text-white!"
             >
-              {t("adminUsers.title", "Përdoruesit")}
+              {t("adminUsers.title")}
             </Typography>
             <Typography
               variant="body1"
               className="mt-4! max-w-2xl! text-slate-500! dark:text-slate-400! text-lg font-medium!"
             >
-              {t(
-                "adminUsers.subtitle",
-                "Mbikëqyrni llogaritë, rolet dhe aktivitetin e të gjithë anëtarëve të platformës.",
-              )}
+              {t("adminUsers.subtitle")}
             </Typography>
           </div>
 
@@ -329,10 +325,7 @@ export default function AdminUsers() {
             <TextField
               name="admin-users-search"
               autoComplete="off"
-              placeholder={t(
-                "adminUsers.searchPlaceholder",
-                "Kërko përdorues...",
-              )}
+              placeholder={t("adminUsers.searchPlaceholder")}
               variant="outlined"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -354,7 +347,7 @@ export default function AdminUsers() {
               onClick={handleOpenAdd}
               className="rounded-3xl! py-4! px-8! normal-case! font-black! bg-indigo-600! hover:bg-indigo-700! shadow-xl shadow-indigo-500/30 transition-all hover:scale-105 active:scale-95"
             >
-              {t("adminUsers.form.addTitle", "Shto Përdorues")}
+              {t("adminUsers.form.addTitle")}
             </Button>
           </Box>
         </Box>
@@ -363,25 +356,25 @@ export default function AdminUsers() {
         <Grid container spacing={3} className="mb-10">
           {[
             {
-              label: "Gjithsej",
+              label: t("adminUsers.stats.total"),
               value: users.length,
               color: "text-indigo-600",
               bg: "bg-indigo-50 dark:bg-indigo-900/20",
             },
             {
-              label: "Aktivë",
+              label: t("adminUsers.stats.active"),
               value: users.filter((u) => u.statusi === "active").length,
               color: "text-emerald-600",
               bg: "bg-emerald-50 dark:bg-emerald-900/20",
             },
             {
-              label: "Mësues",
+              label: t("adminUsers.stats.teachers"),
               value: users.filter((u) => u.role === "teacher").length,
               color: "text-sky-600",
               bg: "bg-sky-50 dark:bg-sky-900/20",
             },
             {
-              label: "Studentë",
+              label: t("adminUsers.stats.students"),
               value: users.filter((u) => u.role === "student").length,
               color: "text-amber-600",
               bg: "bg-amber-50 dark:bg-amber-900/20",
@@ -417,7 +410,7 @@ export default function AdminUsers() {
               variant="h6"
               className="font-black! text-slate-800! dark:text-white!"
             >
-              Lista e Përdoruesve
+              {t("adminUsers.listTitle")}
             </Typography>
             <Box className="flex gap-2">
               {["all", "admin", "teacher", "student", "parent"].map((role) => (
@@ -428,7 +421,7 @@ export default function AdminUsers() {
                   className={`!rounded-full px-4! py-1! normal-case! text-xs! font-bold! ${roleFilter === role ? "bg-slate-900! text-white! dark:bg-white! dark:text-slate-900!" : "text-slate-500! hover:bg-slate-100! dark:hover:bg-slate-800!"}`}
                 >
                   {role === "all"
-                    ? "Të gjithë"
+                    ? t("adminUsers.filterAll")
                     : role.charAt(0).toUpperCase() + role.slice(1)}
                 </Button>
               ))}
@@ -445,22 +438,22 @@ export default function AdminUsers() {
                 <TableHead className="bg-slate-50/50 dark:bg-slate-800/30!">
                   <TableRow>
                     <TableCell className="font-black! text-slate-400! uppercase! text-[10px]! tracking-widest! py-6! pl-8!">
-                      {t("adminUsers.table.name", "Përdoruesi")}
+                      {t("adminUsers.table.name")}
                     </TableCell>
                     <TableCell className="font-black! text-slate-400! uppercase! text-[10px]! tracking-widest! py-6!">
-                      {t("adminUsers.table.role", "Roli")}
+                      {t("adminUsers.table.role")}
                     </TableCell>
                     <TableCell className="font-black! text-slate-400! uppercase! text-[10px]! tracking-widest! py-6!">
-                      {t("adminUsers.table.status", "Statusi")}
+                      {t("adminUsers.table.status")}
                     </TableCell>
                     <TableCell className="font-black! text-slate-400! uppercase! text-[10px]! tracking-widest! py-6!">
-                      {t("adminUsers.table.joined", "Anëtarësuar")}
+                      {t("adminUsers.table.joined")}
                     </TableCell>
                     <TableCell
                       align="right"
                       className="font-black! text-slate-400! uppercase! text-[10px]! tracking-widest! py-6! pr-8!"
                     >
-                      {t("adminUsers.table.actions", "Veprime")}
+                      {t("adminUsers.table.actions")}
                     </TableCell>
                   </TableRow>
                 </TableHead>
@@ -477,13 +470,13 @@ export default function AdminUsers() {
                               variant="h6"
                               className="font-black! text-slate-800! dark:text-white! mb-1"
                             >
-                              Nuk u gjet asnjë përdorues
+                              {t("adminUsers.empty.title")}
                             </Typography>
                             <Typography
                               variant="body2"
                               className="text-slate-400!"
                             >
-                              Provo të ndryshosh filtrat ose kërkimin tend.
+                              {t("adminUsers.empty.description")}
                             </Typography>
                           </div>
                         </Box>
@@ -539,8 +532,8 @@ export default function AdminUsers() {
                               className={`!font-black uppercase! tracking-widest! ${user.statusi === "active" ? "text-emerald-600" : "text-slate-400"}`}
                             >
                               {user.statusi === "active"
-                                ? t("adminUsers.status.active", "Aktiv")
-                                : t("adminUsers.status.inactive", "Joaktiv")}
+                                ? t("adminUsers.status.active")
+                                : t("adminUsers.status.inactive")}
                             </Typography>
                           </Box>
                         </TableCell>
@@ -607,7 +600,7 @@ export default function AdminUsers() {
                   : "font-black! text-slate-900!"
               }
             >
-              {isEdit ? "Përditëso Përdoruesin" : "Shto Përdorues të Ri"}
+              {isEdit ? t("adminUsers.form.editTitle") : t("adminUsers.form.addTitle")}
             </Typography>
             <Typography
               variant="body2"
@@ -616,8 +609,8 @@ export default function AdminUsers() {
               }
             >
               {isEdit
-                ? "Ndryshoni të dhënat e llogarisë ekzistuese."
-                : "Plotësoni të dhënat për të krijuar një llogari të re."}
+                ? t("adminUsers.form.editSubtitle")
+                : t("adminUsers.form.addSubtitle")}
             </Typography>
           </DialogTitle>
           <DialogContent
@@ -628,7 +621,7 @@ export default function AdminUsers() {
                 <TextField
                   name="new-user-firstname"
                   autoComplete="off"
-                  label="Emri"
+                  label={t("adminUsers.form.firstName")}
                   fullWidth
                   value={formData.emri}
                   onChange={field("emri")}
@@ -643,10 +636,6 @@ export default function AdminUsers() {
                         borderColor: isDark ? "#475569" : "#cbd5e1",
                       },
                     },
-                    "& .MuiInputBase-input::placeholder": {
-                      color: isDark ? "#94a3b8" : "#94a3b8",
-                      opacity: 1,
-                    },
                     "& .MuiInputLabel-root": {
                       color: isDark ? "#cbd5e1" : "#64748b",
                     },
@@ -655,7 +644,7 @@ export default function AdminUsers() {
                 <TextField
                   name="new-user-lastname"
                   autoComplete="off"
-                  label="Mbiemri"
+                  label={t("adminUsers.form.lastName")}
                   fullWidth
                   value={formData.mbiemri}
                   onChange={field("mbiemri")}
@@ -670,10 +659,6 @@ export default function AdminUsers() {
                         borderColor: isDark ? "#475569" : "#cbd5e1",
                       },
                     },
-                    "& .MuiInputBase-input::placeholder": {
-                      color: isDark ? "#94a3b8" : "#94a3b8",
-                      opacity: 1,
-                    },
                     "& .MuiInputLabel-root": {
                       color: isDark ? "#cbd5e1" : "#64748b",
                     },
@@ -683,7 +668,7 @@ export default function AdminUsers() {
               <TextField
                 name="new-user-email"
                 autoComplete="off"
-                label="Email Adresa"
+                label={t("adminUsers.form.email")}
                 type="email"
                 fullWidth
                 value={formData.email}
@@ -699,10 +684,6 @@ export default function AdminUsers() {
                       borderColor: isDark ? "#475569" : "#cbd5e1",
                     },
                   },
-                  "& .MuiInputBase-input::placeholder": {
-                    color: isDark ? "#94a3b8" : "#94a3b8",
-                    opacity: 1,
-                  },
                   "& .MuiInputLabel-root": {
                     color: isDark ? "#cbd5e1" : "#64748b",
                   },
@@ -712,7 +693,7 @@ export default function AdminUsers() {
                 <TextField
                   name="new-user-password"
                   autoComplete="new-password"
-                  label="Fjalëkalimi"
+                  label={t("adminUsers.form.password")}
                   type="password"
                   fullWidth
                   value={formData.password}
@@ -728,10 +709,6 @@ export default function AdminUsers() {
                         borderColor: isDark ? "#475569" : "#cbd5e1",
                       },
                     },
-                    "& .MuiInputBase-input::placeholder": {
-                      color: isDark ? "#94a3b8" : "#94a3b8",
-                      opacity: 1,
-                    },
                     "& .MuiInputLabel-root": {
                       color: isDark ? "#cbd5e1" : "#64748b",
                     },
@@ -741,11 +718,11 @@ export default function AdminUsers() {
               <Box className="flex gap-4">
                 <FormControl fullWidth>
                   <InputLabel sx={{ color: isDark ? "#cbd5e1" : "#64748b" }}>
-                    Roli i Përdoruesit
+                    {t("adminUsers.form.role")}
                   </InputLabel>
                   <Select variant="outlined"
                     value={formData.role}
-                    label="Roli i Përdoruesit"
+                    label={t("adminUsers.form.role")}
                     onChange={field("role")}
                     sx={{
                       borderRadius: "1rem",
@@ -753,27 +730,24 @@ export default function AdminUsers() {
                       "& .MuiOutlinedInput-notchedOutline": {
                         borderColor: isDark ? "#334155" : "#cbd5e1",
                       },
-                      "&:hover .MuiOutlinedInput-notchedOutline": {
-                        borderColor: isDark ? "#475569" : "#cbd5e1",
-                      },
                       "& .MuiSvgIcon-root": {
                         color: isDark ? "#cbd5e1" : "#64748b",
                       },
                     }}
                   >
-                    <MenuItem value="student">Student</MenuItem>
-                    <MenuItem value="teacher">Mësues</MenuItem>
-                    <MenuItem value="parent">Prind</MenuItem>
-                    <MenuItem value="admin">Administrator</MenuItem>
+                    <MenuItem value="student">{t("adminUsers.form.roleStudent")}</MenuItem>
+                    <MenuItem value="teacher">{t("adminUsers.form.roleTeacher")}</MenuItem>
+                    <MenuItem value="parent">{t("adminUsers.form.roleParent")}</MenuItem>
+                    <MenuItem value="admin">{t("adminUsers.form.roleAdmin")}</MenuItem>
                   </Select>
                 </FormControl>
                 <FormControl fullWidth>
                   <InputLabel sx={{ color: isDark ? "#cbd5e1" : "#64748b" }}>
-                    Statusi
+                    {t("adminUsers.table.status")}
                   </InputLabel>
                   <Select variant="outlined"
                     value={formData.statusi}
-                    label="Statusi"
+                    label={t("adminUsers.table.status")}
                     onChange={field("statusi")}
                     sx={{
                       borderRadius: "1rem",
@@ -781,16 +755,13 @@ export default function AdminUsers() {
                       "& .MuiOutlinedInput-notchedOutline": {
                         borderColor: isDark ? "#334155" : "#cbd5e1",
                       },
-                      "&:hover .MuiOutlinedInput-notchedOutline": {
-                        borderColor: isDark ? "#475569" : "#cbd5e1",
-                      },
                       "& .MuiSvgIcon-root": {
                         color: isDark ? "#cbd5e1" : "#64748b",
                       },
                     }}
                   >
-                    <MenuItem value="active">Aktiv</MenuItem>
-                    <MenuItem value="inactive">Joaktiv</MenuItem>
+                    <MenuItem value="active">{t("adminUsers.form.statusActive")}</MenuItem>
+                    <MenuItem value="inactive">{t("adminUsers.form.statusInactive")}</MenuItem>
                   </Select>
                 </FormControl>
               </Box>
@@ -798,13 +769,13 @@ export default function AdminUsers() {
                 <Box className="flex gap-4">
                   <FormControl fullWidth>
                     <InputLabel sx={{ color: isDark ? "#cbd5e1" : "#64748b" }}>
-                      Kategoria
+                      {t("adminUsers.form.department")}
                     </InputLabel>
                     <Select
                       variant="outlined"
-                      value={formData.categoryId}
-                      label="Kategoria"
-                      onChange={field("categoryId")}
+                      value={formData.departmentId}
+                      label={t("adminUsers.form.department")}
+                      onChange={field("departmentId")}
                       sx={{
                         borderRadius: "1rem",
                         color: isDark ? "#f1f5f9" : "#1e293b",
@@ -813,7 +784,7 @@ export default function AdminUsers() {
                         },
                       }}
                     >
-                      <MenuItem value="">Zgjidh kategori</MenuItem>
+                      <MenuItem value="">{t("adminUsers.form.chooseDept")}</MenuItem>
                       {categories.map((category) => (
                         <MenuItem key={category.id} value={category.id}>
                           {category.emertimi}
@@ -822,16 +793,16 @@ export default function AdminUsers() {
                     </Select>
                   </FormControl>
                   <TextField
-                    label="Semestri aktual"
+                    label={t("adminUsers.form.currentSemester")}
                     type="number"
                     fullWidth
                     value={formData.currentSemester}
                     onChange={(e) => {
                       field("currentSemester")(e);
-                      if (isEdit && selectedUser?.role === "student" && formData.categoryId) {
+                      if (isEdit && selectedUser?.role === "student" && formData.departmentId) {
                         loadStudentGroupContext({
                           ...selectedUser,
-                          categoryId: formData.categoryId,
+                          departmentId: formData.departmentId,
                           currentSemester: Number(e.target.value),
                         });
                       }
@@ -852,29 +823,29 @@ export default function AdminUsers() {
                   />
                 </Box>
               )}
-              {isEdit && formData.role === "student" && formData.categoryId && (
+              {isEdit && formData.role === "student" && formData.departmentId && (
                 <Box className="rounded-2xl border border-slate-200 dark:border-slate-700 p-4 flex flex-col gap-3">
                   <Typography className="!font-black !text-slate-800 dark:!text-white">
-                    Caktimi i grupit (vetem admin)
+                    {t("adminUsers.form.groupAssignTitle")}
                   </Typography>
                   {approvedGroupLabel ? (
                     <Typography className="!text-emerald-700 dark:!text-emerald-400 !font-semibold">
-                      Grupi aktual: {approvedGroupLabel}
+                      {t("adminUsers.form.currentGroup")}{approvedGroupLabel}
                     </Typography>
                   ) : (
                     <Typography className="!text-slate-500 !text-sm">
-                      Studenti nuk eshte ne asnje grup. Cakto direkt ose prit aplikimin.
+                      {t("adminUsers.form.noGroupMsg")}
                     </Typography>
                   )}
                   {!approvedGroupLabel && (
                     <FormControl fullWidth size="small">
-                      <InputLabel>Grupi</InputLabel>
+                      <InputLabel>{t("adminUsers.form.groupLabel")}</InputLabel>
                       <Select
-                        label="Grupi"
+                        label={t("adminUsers.form.groupLabel")}
                         value={groupAssignId}
                         onChange={(e) => setGroupAssignId(e.target.value)}
                       >
-                        <MenuItem value="">Zgjidh grupin</MenuItem>
+                        <MenuItem value="">{t("adminUsers.form.chooseGroup")}</MenuItem>
                         {studentGroups.map((g) => (
                           <MenuItem
                             key={g.id}
@@ -896,7 +867,7 @@ export default function AdminUsers() {
                         onClick={handleAssignGroup}
                         className="!rounded-xl !normal-case !font-bold"
                       >
-                        Cakto ne grup
+                        {t("adminUsers.form.assignGroup")}
                       </Button>
                     )}
                     {approvedGroupLabel && (
@@ -908,7 +879,7 @@ export default function AdminUsers() {
                         onClick={handleRemoveGroup}
                         className="!rounded-xl !normal-case !font-bold"
                       >
-                        Hiq nga grupi
+                        {t("adminUsers.form.removeGroup")}
                       </Button>
                     )}
                   </Box>
@@ -921,7 +892,7 @@ export default function AdminUsers() {
               onClick={() => setOpenDialog(false)}
               className="rounded-2xl! px-6! py-3! normal-case! font-bold! text-slate-500! hover:bg-slate-100! dark:hover:bg-slate-800!"
             >
-              {t("adminUsers.form.cancel", "Anulo")}
+              {t("adminUsers.form.cancel")}
             </Button>
             <Button
               variant="contained"
@@ -929,7 +900,7 @@ export default function AdminUsers() {
               onClick={handleSubmit}
               className="rounded-2xl! px-10! py-3! normal-case! font-black! bg-indigo-600! hover:bg-indigo-700! shadow-lg shadow-indigo-500/20"
             >
-              {isEdit ? "Përditëso" : "Krijo Llogarinë"}
+              {isEdit ? t("adminUsers.form.update") : t("adminUsers.form.createAccount")}
             </Button>
           </DialogActions>
         </Dialog>
@@ -965,7 +936,7 @@ export default function AdminUsers() {
                   : "font-black! text-slate-900!"
               }
             >
-              A jeni i sigurt?
+              {t("adminUsers.deleteTitle")}
             </Typography>
           </DialogTitle>
           <DialogContent className="px-6! py-4!">
@@ -973,7 +944,7 @@ export default function AdminUsers() {
               variant="body2"
               className={isDark ? "text-slate-300!" : "text-slate-600!"}
             >
-              Do të fshihet përhershëm përdoruesi:
+              {t("adminUsers.deleteBodyPrefix")}
             </Typography>
             <Typography
               variant="body1"
@@ -1002,7 +973,7 @@ export default function AdminUsers() {
               }}
               className="rounded-2xl! px-6! py-3! normal-case! font-bold! text-slate-500! hover:bg-slate-100! dark:hover:bg-slate-800!"
             >
-              Anulo
+              {t("adminUsers.deleteCancel")}
             </Button>
             <Button
               variant="contained"
@@ -1010,7 +981,7 @@ export default function AdminUsers() {
               onClick={handleConfirmDelete}
               className="rounded-2xl! px-10! py-3! normal-case! font-black!"
             >
-              Fshi
+              {t("adminUsers.deleteConfirm")}
             </Button>
           </DialogActions>
         </Dialog>
