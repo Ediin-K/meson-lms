@@ -18,7 +18,7 @@ import java.util.stream.IntStream;
 public class AdminStatsService {
 
     private final UserRepository       userRepository;
-    private final CourseRepository     courseRepository;
+    private final SubjectRepository     subjectRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final CertificateRepository certificateRepository;
 
@@ -28,7 +28,7 @@ public class AdminStatsService {
 
     public AdminStatsDTO getStats() {
         long totalUsers       = userRepository.count();
-        long totalCourses     = courseRepository.count();
+        long totalSubjects     = subjectRepository.count();
         long totalEnrollments = enrollmentRepository.count();
         long totalStudents    = userRepository.countByRole("STUDENT");
         long totalTeachers    = userRepository.countByRole("TEACHER");
@@ -36,13 +36,13 @@ public class AdminStatsService {
 
         return new AdminStatsDTO(
             totalUsers,
-            totalCourses,
+            totalSubjects,
             totalEnrollments,
             totalStudents,
             totalTeachers,
             totalCertificates,
             buildEnrollmentsByMonth(),
-            buildCoursesByCategory(),
+            buildsubjectsByCategory(),
             buildEnrollmentsByStatus()
         );
     }
@@ -64,11 +64,11 @@ public class AdminStatsService {
             .collect(Collectors.toList());
     }
 
-    private List<NameValueDTO> buildCoursesByCategory() {
-        return courseRepository.findAll().stream()
+    private List<NameValueDTO> buildsubjectsByCategory() {
+        return subjectRepository.findAll().stream()
             .collect(Collectors.groupingBy(
-                c -> c.getCourseCategory() != null
-                    ? c.getCourseCategory().getEmertimi()
+                c -> c.getDirection() != null
+                    ? c.getDirection().getEmertimi()
                     : "Pa kategori",
                 Collectors.counting()
             ))

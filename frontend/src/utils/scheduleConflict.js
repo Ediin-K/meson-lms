@@ -1,4 +1,4 @@
-const SESSION_MINUTES = 90;
+﻿const SESSION_MINUTES = 90;
 
 const normalizeTime = (time) => {
   if (!time) return "";
@@ -29,8 +29,8 @@ const timesOverlap = (startA, endA, startB, endB) => {
 };
 
 const sameGroupKey = (a, b) => {
-  if (a.courseId && b.courseId && a.courseId === b.courseId) return true;
-  if (a.courseGroupId && b.courseGroupId && a.courseGroupId === b.courseGroupId) return true;
+  if (a.subjectId && b.subjectId && a.subjectId === b.subjectId) return true;
+  if (a.subjectGroupId && b.subjectGroupId && a.subjectGroupId === b.subjectGroupId) return true;
   return false;
 };
 

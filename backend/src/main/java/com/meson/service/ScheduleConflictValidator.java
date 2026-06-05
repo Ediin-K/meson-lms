@@ -17,7 +17,7 @@ public class ScheduleConflictValidator {
     private final ScheduleSessionRepository scheduleSessionRepository;
 
     public void validateSlot(
-            Long courseGroupId,
+            Long subjectGroupId,
             Long professorId,
             Long assistantId,
             DayOfWeek dayOfWeek,
@@ -33,8 +33,8 @@ public class ScheduleConflictValidator {
             throw new BadRequestException("Ora e perfundimit duhet te jete pas ores se fillimit");
         }
 
-        if (courseGroupId != null) {
-            assertNoGroupConflict(courseGroupId, dayOfWeek, startTime, endTime, batchPending, excludeSessionId);
+        if (subjectGroupId != null) {
+            assertNoGroupConflict(subjectGroupId, dayOfWeek, startTime, endTime, batchPending, excludeSessionId);
         }
 
         if (professorId != null) {
@@ -64,7 +64,7 @@ public class ScheduleConflictValidator {
         requireValidCandidate(candidate);
         Long assistantId = null;
         validateSlot(
-                candidate.getCourseGroup() != null ? candidate.getCourseGroup().getId() : null,
+                candidate.getSubjectGroup() != null ? candidate.getSubjectGroup().getId() : null,
                 candidate.getTeacher().getId(),
                 assistantId,
                 candidate.getDayOfWeek(),
@@ -81,7 +81,7 @@ public class ScheduleConflictValidator {
             Long excludeSessionId) {
         requireValidCandidate(candidate);
         validateSlot(
-                candidate.getCourseGroup() != null ? candidate.getCourseGroup().getId() : null,
+                candidate.getSubjectGroup() != null ? candidate.getSubjectGroup().getId() : null,
                 candidate.getTeacher().getId(),
                 assistantId,
                 candidate.getDayOfWeek(),
@@ -92,15 +92,15 @@ public class ScheduleConflictValidator {
     }
 
     private void assertNoGroupConflict(
-            Long courseGroupId,
+            Long subjectGroupId,
             DayOfWeek day,
             LocalTime start,
             LocalTime end,
             List<ScheduleSession> batchPending,
             Long excludeSessionId) {
 
-        for (ScheduleSession existing : scheduleSessionRepository.findOverlappingForCourseGroup(
-                courseGroupId, day, start, end)) {
+        for (ScheduleSession existing : scheduleSessionRepository.findOverlappingForSubjectGroup(
+                subjectGroupId, day, start, end)) {
             if (excludeSessionId != null && existing.getId().equals(excludeSessionId)) {
                 continue;
             }
@@ -108,8 +108,8 @@ public class ScheduleConflictValidator {
         }
 
         for (ScheduleSession pending : batchPending) {
-            if (pending.getCourseGroup() == null
-                    || !pending.getCourseGroup().getId().equals(courseGroupId)) {
+            if (pending.getSubjectGroup() == null
+                    || !pending.getSubjectGroup().getId().equals(subjectGroupId)) {
                 continue;
             }
             if (pending.getDayOfWeek() != day) {

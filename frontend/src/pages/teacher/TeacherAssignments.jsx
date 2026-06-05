@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+﻿import { useCallback, useEffect, useState } from 'react'
 import {
     Alert, Box, Button, Card, CardContent, Chip, CircularProgress,
     Container, Dialog, DialogActions, DialogContent, DialogTitle,
@@ -289,7 +289,7 @@ export default function TeacherAssignments() {
                         >
                             {lessons.map(l => (
                                 <MenuItem key={l.id} value={l.id}>
-                                    {l.courseTitle} › {l.moduleTitle} › {l.title}
+                                    {l.subjectTitle} › {l.moduleTitle} › {l.title}
                                 </MenuItem>
                             ))}
                         </Select>

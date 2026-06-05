@@ -11,21 +11,21 @@ import java.util.Optional;
 @Repository
 public interface GradeRepository extends JpaRepository<Grade, Long> {
 
-    @EntityGraph(attributePaths = {"student", "course", "professor"})
+    @EntityGraph(attributePaths = {"student", "subject", "professor"})
     List<Grade> findByStudentId(Long studentId);
 
-    @EntityGraph(attributePaths = {"student", "course", "professor"})
-    List<Grade> findByCourseId(Long courseId);
+    @EntityGraph(attributePaths = {"student", "subject", "professor"})
+    List<Grade> findBySubjectId(Long subjectId);
 
-    @EntityGraph(attributePaths = {"student", "course", "professor"})
-    Optional<Grade> findByIdAndCourseTeacherId(Long id, Long teacherId);
+    @EntityGraph(attributePaths = {"student", "subject", "professor"})
+    Optional<Grade> findByIdAndSubjectTeacherId(Long id, Long teacherId);
 
-    @EntityGraph(attributePaths = {"student", "course", "professor"})
-    List<Grade> findByCourseTeacherId(Long teacherId);
+    @EntityGraph(attributePaths = {"student", "subject", "professor"})
+    List<Grade> findBySubjectTeacherId(Long teacherId);
 
-    boolean existsByStudentIdAndCourseId(Long studentId, Long courseId);
+    boolean existsByStudentIdAndSubjectId(Long studentId, Long subjectId);
 
-    Optional<Grade> findByStudentIdAndCourseId(Long studentId, Long courseId);
+    Optional<Grade> findByStudentIdAndSubjectId(Long studentId, Long subjectId);
 
     void deleteByStudentId(Long studentId);
 

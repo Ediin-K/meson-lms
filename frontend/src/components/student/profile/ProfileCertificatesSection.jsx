@@ -1,4 +1,4 @@
-import { Box, Card, CardContent, Typography } from '@mui/material'
+﻿import { Box, Card, CardContent, Typography } from '@mui/material'
 import WorkspacePremiumRounded from '@mui/icons-material/WorkspacePremiumRounded'
 
 export default function ProfileCertificatesSection({ certificates, t }) {
@@ -21,7 +21,7 @@ export default function ProfileCertificatesSection({ certificates, t }) {
                 className="rounded-xl border border-green-100 bg-green-50/50 p-4 dark:border-green-900/40 dark:bg-green-900/10"
               >
                 <Typography variant="body2" className="!font-semibold !text-slate-800 dark:!text-white">
-                  {cert.courseTitulli}
+                  {cert.subjectTitulli}
                 </Typography>
                 <Typography variant="caption" className="!mt-1 !block !text-slate-500">
                   {t('studentProfile.issued')}: {new Date(cert.dataLeshimit).toLocaleDateString()}

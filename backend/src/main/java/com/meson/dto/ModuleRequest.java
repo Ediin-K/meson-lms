@@ -19,8 +19,8 @@ public class ModuleRequest{
     @Size(max = 500, message = "Pershkrimi nuk mund te kaloj 500 karaktere")
     private String pershkrimi;
 
-    @NotNull(message = "Kursi nuk mund te jet bosh")
-    private Long courseId;
+    @NotNull(message = "Lënda nuk mund te jet bosh")
+    private Long subjectId;
 
     @NotNull(message = "Rradhitja nuk mund te jet bosh")
     @Min(value = 1, message = "Rradhitja duhet te jet me e madhe se 0")

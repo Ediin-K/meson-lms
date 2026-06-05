@@ -11,7 +11,7 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(exclude = {"course", "courseGroup", "courseSubgroup", "teacher"})
+@EqualsAndHashCode(exclude = {"subject", "subjectGroup", "subjectSubgroup", "teacher"})
 public class ScheduleSession {
 
     @Id
@@ -19,16 +19,16 @@ public class ScheduleSession {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "course_id", nullable = false)
-    private Course course;
+    @JoinColumn(name = "subject_id", nullable = false)
+    private Subject subject;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_group_id")
-    private CourseGroup courseGroup;
+    @JoinColumn(name = "subject_group_id")
+    private SubjectGroup subjectGroup;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_subgroup_id")
-    private CourseSubgroup courseSubgroup;
+    @JoinColumn(name = "subject_subgroup_id")
+    private SubjectSubgroup subjectSubgroup;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "teacher_id", nullable = false)

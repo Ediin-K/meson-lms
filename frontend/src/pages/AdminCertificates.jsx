@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppPreferences } from "../context/appPreferencesContext";
 import {
@@ -117,11 +117,11 @@ export default function AdminCertificates() {
   const filtered = certificates.filter((cert) => {
     const term = searchTerm.toLowerCase();
     const matchStudent = (cert.userEmri?.toLowerCase() || "").includes(term);
-    const matchCourse = (cert.courseTitulli?.toLowerCase() || "").includes(
+    const matchSubject = (cert.subjectTitulli?.toLowerCase() || "").includes(
       term,
     );
     const matchCode = (cert.kodiUnik?.toLowerCase() || "").includes(term);
-    return matchStudent || matchCourse || matchCode;
+    return matchStudent || matchSubject || matchCode;
   });
 
   const openAddDialog = () => {
@@ -260,7 +260,7 @@ export default function AdminCertificates() {
                       Studenti
                     </TableCell>
                     <TableCell className="!font-bold !text-slate-700 dark:!text-slate-200">
-                      Kursi
+                      Lënda
                     </TableCell>
                     <TableCell className="!font-bold !text-slate-700 dark:!text-slate-200">
                       Data lëshimit
@@ -309,7 +309,7 @@ export default function AdminCertificates() {
                           </Box>
                         </TableCell>
                         <TableCell className="!text-slate-700 dark:!text-slate-300 !font-medium max-w-[220px]">
-                          <p className="truncate">{cert.courseTitulli}</p>
+                          <p className="truncate">{cert.subjectTitulli}</p>
                         </TableCell>
                         <TableCell className="!text-slate-500 !text-sm">
                           {cert.dataLeshimit
@@ -378,7 +378,7 @@ export default function AdminCertificates() {
                 <MenuItem value="">Zgjidh</MenuItem>
                 {availableEnrollments.map((enr) => (
                   <MenuItem key={enr.id} value={enr.id}>
-                    {enr.userEmri} — {enr.courseTitulli}
+                    {enr.userEmri} — {enr.subjectTitulli}
                   </MenuItem>
                 ))}
               </Select>

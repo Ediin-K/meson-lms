@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+﻿import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Typography from "@mui/material/Typography"
 import Card from "@mui/material/Card"
@@ -35,7 +35,7 @@ export default function StudentDashboard() {
     const [certificates, setCertificates] = useState([])
     const [submissions, setSubmissions] = useState([])
     const [quizAttempts, setQuizAttempts] = useState([])
-    const [courseProgressById, setCourseProgressById] = useState({})
+    const [subjectProgressById, setsubjectProgressById] = useState({})
 
     useEffect(() => {
         let ignore = false
@@ -66,8 +66,8 @@ export default function StudentDashboard() {
 
                 const progressResults = await Promise.allSettled(
                     loadedEnrollments
-                        .filter((enrollment) => enrollment.courseId)
-                        .map((enrollment) => progressService.getCourseProgress(enrollment.courseId)),
+                        .filter((enrollment) => enrollment.subjectId)
+                        .map((enrollment) => progressService.getSubjectProgress(enrollment.subjectId)),
                 )
 
                 if (ignore) return
@@ -76,10 +76,10 @@ export default function StudentDashboard() {
                 progressResults.forEach((result) => {
                     if (result.status === 'fulfilled') {
                         const progress = result.value.data
-                        progressMap[String(progress.courseId)] = progress
+                        progressMap[String(progress.subjectId)] = progress
                     }
                 })
-                setCourseProgressById(progressMap)
+                setsubjectProgressById(progressMap)
             }
             if (results[1].status === 'fulfilled') setCertificates(results[1].value)
             if (results[2].status === 'fulfilled') setSubmissions(results[2].value)
@@ -99,28 +99,28 @@ export default function StudentDashboard() {
     )
 
     const progressEnrollments = useMemo(
-        () => enrollments.filter((enrollment) => enrollment.courseId && enrollment.statusi !== 'ANULUAR'),
+        () => enrollments.filter((enrollment) => enrollment.subjectId && enrollment.statusi !== 'ANULUAR'),
         [enrollments],
     )
 
     const averageProgress = useMemo(() => {
         const values = progressEnrollments
             .map((enrollment) => {
-                const courseProgress = courseProgressById[String(enrollment.courseId)]?.progressPercent
-                return courseProgress ?? enrollment.progresi
+                const subjectProgress = subjectProgressById[String(enrollment.subjectId)]?.progressPercent
+                return subjectProgress ?? enrollment.progresi
             })
             .filter((progress) => progress != null)
         if (!values.length) return 0
         return Math.round(values.reduce((sum, progress) => sum + progress, 0) / values.length)
-    }, [courseProgressById, progressEnrollments])
+    }, [subjectProgressById, progressEnrollments])
 
     const latestEnrollment = activeEnrollments[0] || enrollments[0]
-    const lastCourseId = localStorage.getItem('lastCourseId') || latestEnrollment?.courseId
+    const lastSubjectId = localStorage.getItem('lastSubjectId') || latestEnrollment?.subjectId
     const latestTasks = submissions.slice(0, 3)
 
     const studentStats = [
         {
-            label: "Kurse aktive",
+            label: "Lëndë aktive",
             value: activeEnrollments.length,
             icon: MenuBookOutlined,
             color: "text-sky-600",
@@ -239,9 +239,9 @@ export default function StudentDashboard() {
                         <Typography variant="subtitle1" className="!font-bold !text-slate-900 dark:!text-white">
                             {t('home.student.continueTitle')}
                         </Typography>
-                        {latestEnrollment?.courseTitulli && (
+                        {latestEnrollment?.subjectTitulli && (
                             <Typography variant="body2" className="!mt-2 !font-medium !text-slate-600 dark:!text-slate-300">
-                                {latestEnrollment.courseTitulli}
+                                {latestEnrollment.subjectTitulli}
                             </Typography>
                         )}
                         <Button
@@ -249,9 +249,9 @@ export default function StudentDashboard() {
                             size="large"
                             className="!mt-5 !w-full !rounded-full !bg-sky-600 !py-2.5 !font-semibold !normal-case hover:!bg-sky-700 sm:!mt-6 sm:!w-auto"
                             startIcon={<MenuBookOutlined />}
-                            disabled={!lastCourseId}
+                            disabled={!lastSubjectId}
                             onClick={() => {
-                                if (lastCourseId) navigate(`/course/${lastCourseId}`)
+                                if (lastSubjectId) navigate(`/subject/${lastSubjectId}`)
                             }}
                         >
                             {t('home.student.continueBtn')}
@@ -348,7 +348,7 @@ export default function StudentDashboard() {
                         {t('home.student.semesters.title', 'Choose Semester')}
                     </Typography>
                     <Typography variant="body1" className="!mt-2 !max-w-2xl !text-slate-600 md:mx-0 mx-auto dark:!text-slate-400">
-                        {t('home.student.semesters.body', 'Select a semester to view your courses, assignments, and grades.')}
+                        {t('home.student.semesters.body', 'Select a semester to view your subjects, assignments, and grades.')}
                     </Typography>
                 </Box>
 

@@ -1,4 +1,4 @@
-import { Typography, Container, Box, Button } from "@mui/material";
+﻿import { Typography, Container, Box, Button } from "@mui/material";
 import ArrowBackRounded from "@mui/icons-material/ArrowBackRounded";
 import { useNavigate } from "react-router-dom";
 import AutoStoriesRounded from "@mui/icons-material/AutoStoriesRounded";
@@ -31,7 +31,7 @@ export default function TeacherLessons() {
             </div>
           </Box>
           <Typography variant="body2" className="text-slate-400 dark:text-slate-600 italic">
-            Përdorni menunë e kurseve për të hapur një kurs dhe për të shtuar leksione në modulet përkatëse.
+            Përdorni menunë e Lëndëve për të hapur një kurs dhe për të shtuar leksione në modulet përkatëse.
           </Typography>
         </Box>
 

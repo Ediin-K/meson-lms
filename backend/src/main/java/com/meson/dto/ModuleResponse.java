@@ -17,7 +17,7 @@ public class ModuleResponse{
     private String pershkrimi;
     private Integer rradhitja;
     private LocalDateTime createdAt;
-    private Long courseId;
-    private String courseTitulli;
+    private Long subjectId;
+    private String subjectTitulli;
     private Integer lessonCount;
 }

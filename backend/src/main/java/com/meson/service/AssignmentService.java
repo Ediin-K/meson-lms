@@ -62,7 +62,7 @@ public class AssignmentService {
     }
 
     public List<AssignmentResponse> getTeacherAssignments(Long teacherId) {
-        return assignmentRepository.findByLessonModuleCourseTeacherId(teacherId)
+        return assignmentRepository.findByLessonModuleSubjectTeacherId(teacherId)
                 .stream().map(this::toResponse).toList();
     }
 
@@ -150,18 +150,18 @@ public class AssignmentService {
     }
 
     private Assignment findTeacherAssignment(Long id, Long teacherId) {
-        return assignmentRepository.findByIdAndLessonModuleCourseTeacherId(id, teacherId)
+        return assignmentRepository.findByIdAndLessonModuleSubjectTeacherId(id, teacherId)
                 .orElseThrow(() -> new RuntimeException("Detyra nuk u gjet ose nuk keni akses"));
     }
 
     private Assignment findTeacherAssignmentByLesson(Long lessonId, Long teacherId) {
         return assignmentRepository.findByLessonId(lessonId)
-                .filter(a -> a.getLesson().getModule().getCourse().getTeacher().getId().equals(teacherId))
+                .filter(a -> a.getLesson().getModule().getSubject().getTeacher().getId().equals(teacherId))
                 .orElseThrow(() -> new RuntimeException("Detyra nuk u gjet ose nuk keni akses"));
     }
 
     private void verifyTeacherOwnsLesson(Lesson lesson, Long teacherId) {
-        if (!lesson.getModule().getCourse().getTeacher().getId().equals(teacherId))
+        if (!lesson.getModule().getSubject().getTeacher().getId().equals(teacherId))
             throw new RuntimeException("Nuk keni akses në këtë leksion");
     }
 

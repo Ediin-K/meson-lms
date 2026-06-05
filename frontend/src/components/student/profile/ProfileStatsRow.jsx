@@ -1,4 +1,4 @@
-import { Card, CardContent, Typography } from '@mui/material'
+﻿import { Card, CardContent, Typography } from '@mui/material'
 import SchoolRounded from '@mui/icons-material/SchoolRounded'
 import WorkspacePremiumRounded from '@mui/icons-material/WorkspacePremiumRounded'
 import TrendingUpRounded from '@mui/icons-material/TrendingUpRounded'
@@ -29,8 +29,8 @@ export default function ProfileStatsRow({ stats, t }) {
     <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
       <StatCard
         icon={SchoolRounded}
-        label={t('studentProfile.stats.courses')}
-        value={stats.courseCount}
+        label={t('studentProfile.stats.subjects')}
+        value={stats.subjectCount}
         colorClass="bg-sky-100 text-sky-600 dark:bg-sky-900/40 dark:text-sky-400"
       />
       <StatCard

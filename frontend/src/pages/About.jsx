@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+﻿import { Link } from 'react-router-dom'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
@@ -45,7 +45,7 @@ const FEATURE_ICONS = [
   ForumRounded,
 ]
 
-const FEATURE_KEYS = ['featureCourses', 'featureAssignments', 'featureGrades', 'featureCommunication']
+const FEATURE_KEYS = ['featuresubjects', 'featureAssignments', 'featureGrades', 'featureCommunication']
 
 const WHY_ICONS = [AutoAwesomeRounded, HubRounded, TrendingUpRounded, SupportAgentRounded]
 const WHY_KEYS = ['why1', 'why2', 'why3', 'why4']
@@ -277,7 +277,7 @@ export default function About() {
             <div className="mt-8 grid gap-4 sm:grid-cols-3">
               {[
                 { label: 'statStudents', value: 'statStudentsVal', icon: SchoolRounded },
-                { label: 'statCourses', value: 'statCoursesVal', icon: MenuBookRounded },
+                { label: 'statsubjects', value: 'statSubjectsVal', icon: MenuBookRounded },
                 { label: 'statInstructors', value: 'statInstructorsVal', icon: GroupsRounded },
               ].map((stat) => {
                 const Glyph = stat.icon

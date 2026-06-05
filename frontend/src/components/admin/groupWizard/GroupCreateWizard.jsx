@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+﻿import { useMemo } from "react";
 import {
   Alert,
   Box,
@@ -27,7 +27,7 @@ import ScheduleEntryCard from "./ScheduleEntryCard";
 import WizardReviewPanel from "./WizardReviewPanel";
 import {
   WIZARD_STEPS,
-  buildStaffByCourse,
+  buildStaffBySubject,
   getGroupsTheme,
   getMenuPaperSx,
   getWizardFieldSx,
@@ -51,7 +51,7 @@ export default function GroupCreateWizard({
   setCategoryId,
   semester,
   setSemester,
-  courses,
+  subjects,
   teachers,
   groupName,
   setGroupName,
@@ -63,7 +63,7 @@ export default function GroupCreateWizard({
   setStaffRows,
   scheduleRows,
   onScheduleChange,
-  staffCourseIds,
+  staffSubjectIds,
   selectedCategory,
   onBack,
   onNext,
@@ -79,22 +79,22 @@ export default function GroupCreateWizard({
   const progress = ((wizardStep + 1) / WIZARD_STEPS.length) * 100;
   const stepMeta = WIZARD_STEPS[wizardStep];
 
-  const staffByCourse = useMemo(
-    () => buildStaffByCourse(staffRows, courses, teachers),
-    [staffRows, courses, teachers],
+  const staffBySubject = useMemo(
+    () => buildStaffBySubject(staffRows, subjects, teachers),
+    [staffRows, subjects, teachers],
   );
-  const courseOptions = useMemo(() => courses.map((c) => ({ value: c.id, label: c.titulli })), [courses]);
+  const subjectOptions = useMemo(() => subjects.map((c) => ({ value: c.id, label: c.titulli })), [subjects]);
   const teacherOptions = useMemo(
     () => teachers.map((t) => ({ value: t.id, label: `${t.emri} ${t.mbiemri}`.trim() })),
     [teachers],
   );
-  const scheduleCourseOptions = useMemo(
+  const schedulesubjectOptions = useMemo(
     () =>
-      [...staffCourseIds]
-        .map((cid) => courses.find((x) => x.id === cid))
+      [...staffSubjectIds]
+        .map((cid) => subjects.find((x) => x.id === cid))
         .filter(Boolean)
         .map((c) => ({ value: c.id, label: c.titulli })),
-    [staffCourseIds, courses],
+    [staffSubjectIds, subjects],
   );
 
   const scheduleRowErrors = useMemo(() => {
@@ -102,7 +102,7 @@ export default function GroupCreateWizard({
     const valid = [];
     const rowIndexes = [];
     scheduleRows.forEach((row, idx) => {
-      if (row.courseId && row.professorId && row.startTime) {
+      if (row.subjectId && row.professorId && row.startTime) {
         rowIndexes.push(idx);
         valid.push(row);
       }
@@ -133,11 +133,11 @@ export default function GroupCreateWizard({
             <Box className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 items-start">
               <TruncatedSelect
                 label="Lenda"
-                value={row.courseId}
+                value={row.subjectId}
                 onChange={(e) =>
-                  setStaffRows((rows) => rows.map((r, i) => (i === idx ? { ...r, courseId: e.target.value } : r)))
+                  setStaffRows((rows) => rows.map((r, i) => (i === idx ? { ...r, subjectId: e.target.value } : r)))
                 }
-                options={courseOptions}
+                options={subjectOptions}
                 isDark={isDark}
                 maxLabelLen={40}
               />
@@ -202,8 +202,8 @@ export default function GroupCreateWizard({
             row={row}
             index={idx}
             isDark={isDark}
-            courseOptions={scheduleCourseOptions}
-            staffForCourse={staffByCourse[String(row.courseId)]}
+            subjectOptions={schedulesubjectOptions}
+            staffForSubject={staffBySubject[String(row.subjectId)]}
             dayOptions={dayOptions}
             onChange={onScheduleChange}
             onRemove={(i) => onScheduleChange(i, "_remove", null)}
@@ -217,7 +217,7 @@ export default function GroupCreateWizard({
         onClick={() => onScheduleChange(-1, "_add", emptyScheduleRow())}
         className="!mt-3 !rounded-xl !normal-case !font-bold"
         variant="outlined"
-        disabled={scheduleCourseOptions.length === 0}
+        disabled={schedulesubjectOptions.length === 0}
       >
         Shto sesion orari
       </Button>
@@ -366,7 +366,7 @@ export default function GroupCreateWizard({
                       </Box>
                     ) : (
                       <>
-                        <strong>{courses.length}</strong> lende per{" "}
+                        <strong>{subjects.length}</strong> lende per{" "}
                         <strong>{selectedCategory?.emertimi || "drejtimin"}</strong> - Semestri{" "}
                         <strong>{semester}</strong>
                       </>
@@ -393,8 +393,8 @@ export default function GroupCreateWizard({
                 maxCapacity={maxCapacity}
                 staffRows={staffRows}
                 scheduleRows={scheduleRows}
-                staffByCourse={staffByCourse}
-                courses={courses}
+                staffBySubject={staffBySubject}
+                subjects={subjects}
               />
             )}
           </Box>

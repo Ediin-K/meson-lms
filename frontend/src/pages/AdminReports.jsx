@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppPreferences } from "../context/appPreferencesContext";
 import {
@@ -131,7 +131,7 @@ export default function AdminReports() {
           {[
             { key: "overview", label: "Pasqyrë" },
             { key: "users",    label: "Përdoruesit" },
-            { key: "courses",  label: "Kurset" },
+            { key: "subjects",  label: "Lëndët" },
           ].map(({ key, label }) => (
             <button
               key={key}
@@ -264,20 +264,20 @@ export default function AdminReports() {
               )}
 
               {}
-              {(activeTab === "overview" || activeTab === "courses") && (
+              {(activeTab === "overview" || activeTab === "subjects") && (
                 <Grid item xs={12} md={activeTab === "overview" ? 12 : 12}>
                   <Card elevation={0} className="rounded-2xl border border-slate-200/80 bg-white dark:!bg-slate-900/60 dark:!border-slate-700/80 shadow-sm">
                     <CardContent className="!p-6">
                       <Typography variant="h6" className="!font-bold !text-slate-900 dark:!text-white !mb-0.5">
-                        Kurset sipas Kategorisë
+                        Lëndët sipas Kategorisë
                       </Typography>
                       <Typography variant="caption" className="!text-slate-500">
-                        Numri i kurseve për çdo kategori
+                        Numri i Lëndëve për çdo kategori
                       </Typography>
                       <Box className="mt-5 h-56">
                         <ResponsiveContainer width="100%" height="100%">
                           <BarChart
-                            data={stats.coursesByCategory}
+                            data={stats.subjectsByCategory}
                             margin={{ top: 4, right: 8, left: -20, bottom: 0 }}
                           >
                             <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
@@ -285,13 +285,13 @@ export default function AdminReports() {
                               dataKey="name"
                               tick={{ ...axisStyle, fontSize: 10 }}
                               interval={0}
-                              angle={stats.coursesByCategory.length > 5 ? -20 : 0}
-                              textAnchor={stats.coursesByCategory.length > 5 ? "end" : "middle"}
+                              angle={stats.subjectsByCategory.length > 5 ? -20 : 0}
+                              textAnchor={stats.subjectsByCategory.length > 5 ? "end" : "middle"}
                             />
                             <YAxis tick={axisStyle} allowDecimals={false} />
                             <Tooltip content={<ChartTooltip />} />
-                            <Bar dataKey="value" name="Kurse" radius={[6, 6, 0, 0]}>
-                              {stats.coursesByCategory.map((entry, i) => (
+                            <Bar dataKey="value" name="Lëndë" radius={[6, 6, 0, 0]}>
+                              {stats.subjectsByCategory.map((entry, i) => (
                                 <Cell key={entry.name} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                               ))}
                             </Bar>

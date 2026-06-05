@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+﻿import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Box,
   TextField,
@@ -71,7 +71,7 @@ export default function StudentGradesPage() {
   const filteredGrades = useMemo(() => {
     const term = searchTerm.toLowerCase();
     return (summary.grades || []).filter((g) => {
-      const course = (g.courseTitulli || "").toLowerCase();
+      const course = (g.subjectTitulli || "").toLowerCase();
       const professor = (g.professorEmri || "").toLowerCase();
       const comment = (g.comment || "").toLowerCase();
       return course.includes(term) || professor.includes(term) || comment.includes(term);
@@ -80,7 +80,7 @@ export default function StudentGradesPage() {
 
   const gpaLabel = summary.averageGrade > 0 ? summary.averageGrade.toFixed(2) : "—";
   const gradedEcts = summary.totalEcts ?? filteredGrades.reduce(
-    (sum, g) => sum + (g.courseEcts ?? 5),
+    (sum, g) => sum + (g.subjectEcts ?? 5),
     0,
   );
   const enrolledEcts = summary.totalEnrolledEcts ?? 0;

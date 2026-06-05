@@ -1,4 +1,4 @@
-import axiosInstance from "./axiosInstance";
+﻿import axiosInstance from "./axiosInstance";
 
 const TEACHER_API = "/admin/teachers";
 
@@ -33,6 +33,6 @@ export const searchTeachers = async (term) => {
   return response.data;
 };
 
-export const assignTeacherToCourse = async (assignRequest) => {
-  await axiosInstance.post(`${TEACHER_API}/assign-course`, assignRequest);
+export const assignTeacherToSubject = async (assignRequest) => {
+  await axiosInstance.post(`${TEACHER_API}/assign-subject`, assignRequest);
 };

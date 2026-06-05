@@ -4,16 +4,16 @@ import com.meson.dto.UserDTO;
 import com.meson.dto.CreateUserDTO;
 import com.meson.dto.UpdateUserDTO;
 import com.meson.entity.Role;
-import com.meson.entity.CourseCategory;
+import com.meson.entity.Direction;
 import com.meson.entity.StudentProfile;
 import com.meson.entity.User;
 import com.meson.entity.UserRole;
 import com.meson.repository.AssignmentSubmissionRepository;
 import com.meson.repository.CertificateRepository;
-import com.meson.repository.CourseCategoryRepository;
-import com.meson.repository.CourseGroupTeacherRepository;
-import com.meson.repository.CourseRepository;
-import com.meson.repository.CourseSubgroupTeacherRepository;
+import com.meson.repository.DirectionRepository;
+import com.meson.repository.SubjectGroupTeacherRepository;
+import com.meson.repository.SubjectRepository;
+import com.meson.repository.SubjectSubgroupTeacherRepository;
 import com.meson.repository.EnrollmentRepository;
 import com.meson.repository.GradeRepository;
 import com.meson.repository.LessonProgressRepository;
@@ -47,9 +47,9 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
     private final UserRoleRepository userRoleRepository;
-    private final CourseCategoryRepository courseCategoryRepository;
+    private final DirectionRepository directionRepository;
     private final StudentProfileRepository studentProfileRepository;
-    private final CourseRepository courseRepository;
+    private final SubjectRepository subjectRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final CertificateRepository certificateRepository;
     private final GradeRepository gradeRepository;
@@ -58,8 +58,8 @@ public class UserService {
     private final AssignmentSubmissionRepository assignmentSubmissionRepository;
     private final StudentGroupRequestRepository studentGroupRequestRepository;
     private final StudentGroupSelectionRepository studentGroupSelectionRepository;
-    private final CourseGroupTeacherRepository courseGroupTeacherRepository;
-    private final CourseSubgroupTeacherRepository courseSubgroupTeacherRepository;
+    private final SubjectGroupTeacherRepository subjectGroupTeacherRepository;
+    private final SubjectSubgroupTeacherRepository subjectSubgroupTeacherRepository;
     private final ScheduleSessionRepository scheduleSessionRepository;
     private final UserTokenRepository userTokenRepository;
     private Role resolveAllowedRole(String requestedRole) {
@@ -183,16 +183,16 @@ public class UserService {
     }
 
     public void delete(Long id) {
-        // Block deletion if teacher has courses (teacher_id NOT NULL in Course)
-        if (courseRepository.countByTeacherId(id) > 0) {
+        // Block deletion if teacher has subjects (teacher_id NOT NULL in Subject)
+        if (subjectRepository.countByTeacherId(id) > 0) {
             throw new RuntimeException(
                 "Ky mësues ka lëndë të caktuara. Fshij ose ricakto lëndët para se të fshish mësuesin.");
         }
 
         // Teacher-specific: schedule sessions and group assignments
         scheduleSessionRepository.deleteByTeacherId(id);
-        courseGroupTeacherRepository.deleteByTeacherId(id);
-        courseSubgroupTeacherRepository.deleteByTeacherId(id);
+        subjectGroupTeacherRepository.deleteByTeacherId(id);
+        subjectSubgroupTeacherRepository.deleteByTeacherId(id);
 
         // Student-specific and general: all user-owned data
         lessonProgressRepository.deleteByStudentId(id);
@@ -232,8 +232,8 @@ public class UserService {
                 user.getEmail(),
                 user.getStatusi(),
                 role,
-                profile != null && profile.getCourseCategory() != null ? profile.getCourseCategory().getId() : null,
-                profile != null && profile.getCourseCategory() != null ? profile.getCourseCategory().getEmertimi() : null,
+                profile != null && profile.getDirection() != null ? profile.getDirection().getId() : null,
+                profile != null && profile.getDirection() != null ? profile.getDirection().getEmertimi() : null,
                 profile != null ? profile.getCurrentSemester() : null,
                 user.getDataKrijimit()
         );
@@ -251,9 +251,9 @@ public class UserService {
                         .build());
 
         if (categoryId != null) {
-            CourseCategory category = courseCategoryRepository.findById(categoryId)
+            Direction category = directionRepository.findById(categoryId)
                     .orElseThrow(() -> new RuntimeException("Kategoria nuk u gjet"));
-            profile.setCourseCategory(category);
+            profile.setDirection(category);
         }
 
         profile.setCurrentSemester(currentSemester != null ? currentSemester : profile.getCurrentSemester());

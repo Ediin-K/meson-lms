@@ -19,48 +19,48 @@ public class DirectionGroupWizardService {
     private static final String ASSISTANT_SUBGROUP_NAME = "Ushtrime";
 
     private final DirectionGroupRepository directionGroupRepository;
-    private final CourseCategoryRepository courseCategoryRepository;
-    private final CourseRepository courseRepository;
-    private final CourseGroupRepository courseGroupRepository;
-    private final CourseSubgroupRepository courseSubgroupRepository;
-    private final CourseGroupTeacherRepository courseGroupTeacherRepository;
-    private final CourseSubgroupTeacherRepository courseSubgroupTeacherRepository;
+    private final DirectionRepository directionRepository;
+    private final SubjectRepository subjectRepository;
+    private final SubjectGroupRepository subjectGroupRepository;
+    private final SubjectSubgroupRepository subjectSubgroupRepository;
+    private final SubjectGroupTeacherRepository subjectGroupTeacherRepository;
+    private final SubjectSubgroupTeacherRepository subjectSubgroupTeacherRepository;
     private final ScheduleSessionRepository scheduleSessionRepository;
     private final UserRepository userRepository;
     private final DirectionGroupService directionGroupService;
-    private final CourseGroupService courseGroupService;
+    private final SubjectGroupService subjectGroupService;
     private final ScheduleSessionService scheduleSessionService;
     private final TeacherService teacherService;
     private final ScheduleConflictValidator conflictValidator;
 
     @Transactional(readOnly = true)
     public DirectionGroupWizardContextResponse getContext(Long categoryId, Integer semester) {
-        CourseCategory category = courseCategoryRepository.findById(categoryId)
+        Direction category = directionRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Kategoria nuk u gjet"));
 
-        List<Course> courses = courseRepository.findByCourseCategoryIdAndSemester(categoryId, semester);
+        List<Subject> subjects = subjectRepository.findByDirectionIdAndSemester(categoryId, semester);
 
         return DirectionGroupWizardContextResponse.builder()
                 .categoryId(category.getId())
                 .categoryName(category.getEmertimi())
                 .semester(semester)
-                .courses(courses.stream().map(this::toCourseResponse).toList())
+                .subjects(subjects.stream().map(this::toSubjectResponse).toList())
                 .teachers(teacherService.getAllTeachers())
                 .build();
     }
 
     @Transactional
     public DirectionGroupWizardResponse createGroupWithSchedule(CreateDirectionGroupWizardRequest request) {
-        CourseCategory category = courseCategoryRepository.findById(request.getCategoryId())
+        Direction category = directionRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Kategoria nuk u gjet"));
 
-        if (directionGroupRepository.existsByCourseCategoryIdAndSemesterAndNameIgnoreCase(
+        if (directionGroupRepository.existsByDirectionIdAndSemesterAndNameIgnoreCase(
                 request.getCategoryId(), request.getSemester(), request.getName())) {
             throw new BadRequestException("Ky grup ekziston tashme per kete drejtim dhe semestrin");
         }
 
         DirectionGroup directionGroup = directionGroupRepository.save(DirectionGroup.builder()
-                .courseCategory(category)
+                .direction(category)
                 .semester(request.getSemester())
                 .name(request.getName().trim())
                 .description(trimToNull(request.getDescription()))
@@ -68,53 +68,53 @@ public class DirectionGroupWizardService {
                 .status(DirectionGroupStatus.ACTIVE)
                 .build());
 
-        Map<Long, CourseGroup> courseGroupByCourseId = new LinkedHashMap<>();
+        Map<Long, SubjectGroup> subjectGroupBySubjectId = new LinkedHashMap<>();
 
         for (GroupStaffAssignmentRequest staff : request.getStaff()) {
-            Course course = resolveCourseForContext(staff.getCourseId(), request.getCategoryId(), request.getSemester());
+            Subject subject = resolveSubjectForContext(staff.getSubjectId(), request.getCategoryId(), request.getSemester());
             validateTeacher(staff.getProfessorId());
             if (staff.getAssistantId() != null) {
                 validateTeacher(staff.getAssistantId());
             }
 
-            CourseGroup courseGroup = courseGroupByCourseId.computeIfAbsent(course.getId(), cid -> {
-                if (courseGroupRepository.existsByCourseIdAndNameIgnoreCase(cid, request.getName())) {
+            SubjectGroup subjectGroup = subjectGroupBySubjectId.computeIfAbsent(subject.getId(), cid -> {
+                if (subjectGroupRepository.existsBySubjectIdAndNameIgnoreCase(cid, request.getName())) {
                     throw new BadRequestException(
-                            "Ekziston tashme nje grup kursi me emrin '" + request.getName() + "' per lenden "
-                                    + course.getTitulli());
+                            "Ekziston tashme nje grup Lënda me emrin '" + request.getName() + "' per lenden "
+                                    + subject.getTitulli());
                 }
-                return courseGroupRepository.save(CourseGroup.builder()
-                        .course(course)
+                return subjectGroupRepository.save(SubjectGroup.builder()
+                        .subject(subject)
                         .name(request.getName())
                         .capacity(request.getMaxCapacity())
                         .directionGroup(directionGroup)
                         .build());
             });
 
-            syncProfessor(courseGroup, staff.getProfessorId());
+            syncProfessor(subjectGroup, staff.getProfessorId());
             if (staff.getAssistantId() != null) {
-                syncAssistantSubgroup(courseGroup, staff.getAssistantId());
+                syncAssistantSubgroup(subjectGroup, staff.getAssistantId());
             }
         }
 
-        Set<Long> staffCourseIds = new HashSet<>();
+        Set<Long> staffSubjectIds = new HashSet<>();
         for (GroupStaffAssignmentRequest staff : request.getStaff()) {
-            staffCourseIds.add(staff.getCourseId());
+            staffSubjectIds.add(staff.getSubjectId());
         }
 
         List<ScheduleSession> pending = new ArrayList<>();
         List<ScheduleSession> savedSessions = new ArrayList<>();
 
         for (GroupScheduleEntryRequest entry : request.getSchedules()) {
-            if (!staffCourseIds.contains(entry.getCourseId())) {
+            if (!staffSubjectIds.contains(entry.getSubjectId())) {
                 throw new BadRequestException(
                         "Lenda e orarit duhet te kete staf te caktuar ne seksionin e stafit akademik");
             }
 
-            Course course = resolveCourseForContext(entry.getCourseId(), request.getCategoryId(), request.getSemester());
-            CourseGroup courseGroup = courseGroupByCourseId.get(course.getId());
-            if (courseGroup == null) {
-                throw new BadRequestException("Grupi i lendes nuk u gjet per orarin: " + course.getTitulli());
+            Subject subject = resolveSubjectForContext(entry.getSubjectId(), request.getCategoryId(), request.getSemester());
+            SubjectGroup subjectGroup = subjectGroupBySubjectId.get(subject.getId());
+            if (subjectGroup == null) {
+                throw new BadRequestException("Grupi i lendes nuk u gjet per orarin: " + subject.getTitulli());
             }
 
             validateTeacher(entry.getProfessorId());
@@ -135,8 +135,8 @@ public class DirectionGroupWizardService {
                     .orElseThrow(() -> new ResourceNotFoundException("Mesuesi nuk u gjet"));
 
             ScheduleSession session = ScheduleSession.builder()
-                    .course(course)
-                    .courseGroup(courseGroup)
+                    .subject(subject)
+                    .subjectGroup(subjectGroup)
                     .teacher(teacher)
                     .sessionType(entry.getSessionType())
                     .dayOfWeek(entry.getDayOfWeek())
@@ -155,17 +155,17 @@ public class DirectionGroupWizardService {
             savedSessions.add(scheduleSessionRepository.save(session));
         }
 
-        List<CourseGroupResponse> courseGroupResponses = new ArrayList<>();
-        for (CourseGroup cg : courseGroupByCourseId.values()) {
-            courseGroupResponses.add(courseGroupService.getByCourse(cg.getCourse().getId()).stream()
+        List<SubjectGroupResponse> subjectGroupResponses = new ArrayList<>();
+        for (SubjectGroup cg : subjectGroupBySubjectId.values()) {
+            subjectGroupResponses.add(subjectGroupService.getBySubject(cg.getSubject().getId()).stream()
                     .filter(g -> Objects.equals(g.getId(), cg.getId()))
                     .findFirst()
-                    .orElseThrow(() -> new ResourceNotFoundException("Grupi i kursit nuk u gjet")));
+                    .orElseThrow(() -> new ResourceNotFoundException("Grupi i Lëndat nuk u gjet")));
         }
 
         return DirectionGroupWizardResponse.builder()
                 .group(directionGroupService.toResponse(directionGroup))
-                .courseGroups(courseGroupResponses)
+                .subjectGroups(subjectGroupResponses)
                 .schedules(savedSessions.stream()
                         .map(scheduleSessionService::toResponse)
                         .filter(Objects::nonNull)
@@ -183,10 +183,10 @@ public class DirectionGroupWizardService {
                 .filter(Objects::nonNull)
                 .toList();
 
-        List<CourseGroupResponse> courseGroups = courseGroupRepository
+        List<SubjectGroupResponse> subjectGroups = subjectGroupRepository
                 .findByDirectionGroupId(group.getId())
                 .stream()
-                .map(cg -> courseGroupService.getByCourse(cg.getCourse().getId()).stream()
+                .map(cg -> subjectGroupService.getBySubject(cg.getSubject().getId()).stream()
                         .filter(g -> Objects.equals(g.getId(), cg.getId()))
                         .findFirst()
                         .orElse(null))
@@ -195,22 +195,22 @@ public class DirectionGroupWizardService {
 
         return DirectionGroupWizardResponse.builder()
                 .group(directionGroupService.toResponse(group))
-                .courseGroups(courseGroups)
+                .subjectGroups(subjectGroups)
                 .schedules(schedules)
                 .build();
     }
 
-    private Course resolveCourseForContext(Long courseId, Long categoryId, Integer semester) {
-        Course course = courseRepository.findById(courseId)
+    private Subject resolveSubjectForContext(Long subjectId, Long categoryId, Integer semester) {
+        Subject subject = subjectRepository.findById(subjectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Lenda nuk u gjet"));
-        if (course.getCourseCategory() == null
-                || !course.getCourseCategory().getId().equals(categoryId)) {
+        if (subject.getDirection() == null
+                || !subject.getDirection().getId().equals(categoryId)) {
             throw new BadRequestException("Lenda nuk i perket drejtimit te zgjedhur");
         }
-        if (course.getSemester() == null || !semester.equals(course.getSemester())) {
+        if (subject.getSemester() == null || !semester.equals(subject.getSemester())) {
             throw new BadRequestException("Lenda nuk i perket semestrit te zgjedhur");
         }
-        return course;
+        return subject;
     }
 
     private void validateTeacher(Long teacherId) {
@@ -218,53 +218,53 @@ public class DirectionGroupWizardService {
                 .orElseThrow(() -> new ResourceNotFoundException("Mesuesi nuk u gjet"));
     }
 
-    private void syncProfessor(CourseGroup group, Long professorId) {
+    private void syncProfessor(SubjectGroup group, Long professorId) {
         if (group == null || group.getId() == null || professorId == null) {
             throw new BadRequestException("Grupi ose profesori mungon");
         }
-        if (!courseGroupTeacherRepository.existsByCourseGroupIdAndTeacherId(group.getId(), professorId)) {
+        if (!subjectGroupTeacherRepository.existsBySubjectGroupIdAndTeacherId(group.getId(), professorId)) {
             User teacher = userRepository.findById(professorId)
                     .orElseThrow(() -> new ResourceNotFoundException("Profesori nuk u gjet"));
-            courseGroupTeacherRepository.save(CourseGroupTeacher.builder()
-                    .courseGroup(group)
+            subjectGroupTeacherRepository.save(SubjectGroupTeacher.builder()
+                    .subjectGroup(group)
                     .teacher(teacher)
                     .role("PROFESSOR")
                     .build());
         }
     }
 
-    private void syncAssistantSubgroup(CourseGroup group, Long assistantId) {
-        CourseSubgroup subgroup = courseSubgroupRepository
-                .findByCourseGroupId(group.getId())
+    private void syncAssistantSubgroup(SubjectGroup group, Long assistantId) {
+        SubjectSubgroup subgroup = subjectSubgroupRepository
+                .findBySubjectGroupId(group.getId())
                 .stream()
                 .filter(s -> ASSISTANT_SUBGROUP_NAME.equalsIgnoreCase(s.getName()))
                 .findFirst()
-                .orElseGet(() -> courseSubgroupRepository.save(CourseSubgroup.builder()
-                        .courseGroup(group)
+                .orElseGet(() -> subjectSubgroupRepository.save(SubjectSubgroup.builder()
+                        .subjectGroup(group)
                         .name(ASSISTANT_SUBGROUP_NAME)
                         .capacity(group.getCapacity())
                         .build()));
 
-        boolean exists = courseSubgroupTeacherRepository.findByCourseSubgroupId(subgroup.getId()).stream()
+        boolean exists = subjectSubgroupTeacherRepository.findBySubjectSubgroupId(subgroup.getId()).stream()
                 .anyMatch(t -> t.getTeacher() != null && Objects.equals(t.getTeacher().getId(), assistantId));
         if (!exists) {
             User assistant = userRepository.findById(assistantId)
                     .orElseThrow(() -> new ResourceNotFoundException("Asistenti nuk u gjet"));
-            courseSubgroupTeacherRepository.save(CourseSubgroupTeacher.builder()
-                    .courseSubgroup(subgroup)
+            subjectSubgroupTeacherRepository.save(SubjectSubgroupTeacher.builder()
+                    .subjectSubgroup(subgroup)
                     .teacher(assistant)
                     .role("ASSISTANT")
                     .build());
         }
     }
 
-    private CourseResponse toCourseResponse(Course course) {
-        return CourseResponse.builder()
-                .id(course.getId())
-                .titulli(course.getTitulli())
-                .semester(course.getSemester())
-                .categoryId(course.getCourseCategory() != null ? course.getCourseCategory().getId() : null)
-                .categoryName(course.getCourseCategory() != null ? course.getCourseCategory().getEmertimi() : null)
+    private SubjectResponse toSubjectResponse(Subject subject) {
+        return SubjectResponse.builder()
+                .id(subject.getId())
+                .titulli(subject.getTitulli())
+                .semester(subject.getSemester())
+                .categoryId(subject.getDirection() != null ? subject.getDirection().getId() : null)
+                .categoryName(subject.getDirection() != null ? subject.getDirection().getEmertimi() : null)
                 .build();
     }
 

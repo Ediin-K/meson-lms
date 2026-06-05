@@ -30,7 +30,7 @@ public class TeacherFileService {
     public List<LessonResourceResponse> getResourcesByLesson(Long lessonId) {
         User teacher = getCurrentUser();
         
-        lessonRepository.findByIdAndModuleCourseTeacherId(lessonId, teacher.getId())
+        lessonRepository.findByIdAndModuleSubjectTeacherId(lessonId, teacher.getId())
                 .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses në këtë lëndë."));
 
         return lessonResourceRepository.findByLessonId(lessonId).stream()
@@ -41,7 +41,7 @@ public class TeacherFileService {
     @Transactional
     public LessonResourceResponse uploadFile(Long lessonId, MultipartFile file) {
         User teacher = getCurrentUser();
-        Lesson lesson = lessonRepository.findByIdAndModuleCourseTeacherId(lessonId, teacher.getId())
+        Lesson lesson = lessonRepository.findByIdAndModuleSubjectTeacherId(lessonId, teacher.getId())
                 .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses në këtë lëndë."));
 
         String originalFilename = file.getOriginalFilename();
@@ -49,7 +49,7 @@ public class TeacherFileService {
             throw new RuntimeException("Tipi i skedarit nuk lejohet.");
         }
 
-        String subPath = "courses/" + lesson.getModule().getCourse().getId() + "/lessons/" + lessonId;
+        String subPath = "subjects/" + lesson.getModule().getSubject().getId() + "/lessons/" + lessonId;
         String storedPath = fileStorageService.store(file, subPath);
 
         LessonResource resource = LessonResource.builder()
@@ -71,7 +71,7 @@ public class TeacherFileService {
         LessonResource resource = lessonResourceRepository.findById(resourceId)
                 .orElseThrow(() -> new RuntimeException("Skedari nuk u gjet."));
 
-        if (!resource.getLesson().getModule().getCourse().getTeacher().getId().equals(teacher.getId())) {
+        if (!resource.getLesson().getModule().getSubject().getTeacher().getId().equals(teacher.getId())) {
             throw new AccessDeniedException("Ju nuk keni akses për të fshirë këtë skedar.");
         }
 

@@ -155,7 +155,7 @@ export default function Contact() {
                         slotProps={SELECT_SLOT_PROPS}
                     >
                         <MenuItem value="access">{t('contact.topic.t1')}</MenuItem>
-                        <MenuItem value="course">{t('contact.topic.t2')}</MenuItem>
+                        <MenuItem value="subject">{t('contact.topic.t2')}</MenuItem>
                         <MenuItem value="grade">{t('contact.topic.t3')}</MenuItem>
                         <MenuItem value="technical">{t('contact.topic.t4')}</MenuItem>
                         <MenuItem value="billing">{t('contact.topic.t5')}</MenuItem>

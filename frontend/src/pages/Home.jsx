@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react'
+﻿import { useMemo, useRef } from 'react'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Autoplay, Pagination, EffectFade, Navigation } from 'swiper/modules'
 import 'swiper/css'
@@ -59,10 +59,10 @@ const universities = [
 ]
 
 const categories = [
-  { title: 'Histori e artit', meta: '-50% · 3 kurse', icon: PaletteRounded, chipKey: 'offer', chipColor: 'error' },
-  { title: 'UI & UX', meta: 'Së shpejti · 16 kurse', icon: ViewQuiltRounded, chipKey: 'soon', chipColor: 'default' },
-  { title: 'Programim', meta: 'E re · 2 kurse', icon: CodeRounded, chipKey: 'new', chipColor: 'success' },
-  { title: 'Dizajn 3D', meta: '4 kurse', icon: ThreeDRotationRounded, chipKey: null, chipColor: 'default' },
+  { title: 'Histori e artit', meta: '-50% · 3 Lëndë', icon: PaletteRounded, chipKey: 'offer', chipColor: 'error' },
+  { title: 'UI & UX', meta: 'Së shpejti · 16 Lëndë', icon: ViewQuiltRounded, chipKey: 'soon', chipColor: 'default' },
+  { title: 'Programim', meta: 'E re · 2 Lëndë', icon: CodeRounded, chipKey: 'new', chipColor: 'success' },
+  { title: 'Dizajn 3D', meta: '4 Lëndë', icon: ThreeDRotationRounded, chipKey: null, chipColor: 'default' },
 ]
 
 export function SpotlightCard({ title, meta, icon, chip, chipColor, imgLoading }) {
@@ -106,7 +106,7 @@ export function SpotlightCard({ title, meta, icon, chip, chipColor, imgLoading }
 function StatsSection({ t }) {
   const stats = [
     { label: t('home.stats.students'), value: '12k+', icon: GroupsRounded, color: 'text-blue-600' },
-    { label: t('home.stats.courses'), value: '500+', icon: CastForEducationRounded, color: 'text-indigo-600' },
+    { label: t('home.stats.subjects'), value: '500+', icon: CastForEducationRounded, color: 'text-indigo-600' },
     { label: t('home.stats.mentors'), value: '300+', icon: SchoolRounded, color: 'text-sky-600' },
     { label: t('home.stats.satisfaction'), value: '98%', icon: StarRounded, color: 'text-amber-500' },
   ]
@@ -273,7 +273,7 @@ export default function Home() {
                     </div>
                     <div className="flex flex-wrap gap-3">
                       <Button onClick={() => navigate('/admin/users')} variant="outlined" startIcon={<GroupsRounded />} className="!rounded-2xl !border-slate-200 !text-slate-700 !font-bold hover:!bg-sky-50 transition-all">{t('home.admin.services.users.title')}</Button>
-                      <Button onClick={() => navigate('/admin/courses')} variant="outlined" startIcon={<CastForEducationRounded />} className="!rounded-2xl !border-slate-200 !text-slate-700 !font-bold hover:!bg-sky-50 transition-all">{t('home.admin.services.courses.title')}</Button>
+                      <Button onClick={() => navigate('/admin/subjects')} variant="outlined" startIcon={<CastForEducationRounded />} className="!rounded-2xl !border-slate-200 !text-slate-700 !font-bold hover:!bg-sky-50 transition-all">{t('home.admin.services.subjects.title')}</Button>
                       <Button onClick={() => navigate('/admin/reports')} variant="contained" startIcon={<ArrowForwardRounded />} className="!rounded-2xl !bg-sky-600 !font-black shadow-lg shadow-sky-200/40">{t('header.navAdminDashboard')}</Button>
                     </div>
                   </div>
@@ -282,7 +282,7 @@ export default function Home() {
                     {[
                       { label: 'Përdorues të rinj', value: '+12', color: 'bg-emerald-50 text-emerald-600' },
                       { label: 'Kërkesa certifikatash', value: '5', color: 'bg-amber-50 text-amber-600' },
-                      { label: 'Kurse në pritje', value: '2', color: 'bg-sky-50 text-sky-600' },
+                      { label: 'Lëndë në pritje', value: '2', color: 'bg-sky-50 text-sky-600' },
                       { label: 'Server Status', value: 'Online', color: 'bg-blue-50 text-blue-600' },
                     ].map((m, i) => (
                       <div key={i} className={`p-4 rounded-3xl ${m.color} flex flex-col items-center justify-center border border-current/10`}>

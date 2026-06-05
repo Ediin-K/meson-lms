@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import axiosInstance from '../services/axiosInstance'
 import { Box, Button, CircularProgress, Container, Typography } from '@mui/material'
@@ -62,7 +62,7 @@ export default function CertificateVerify() {
                             Certifikatë e Përfundimit
                         </Typography>
                         <Typography variant="h4" className="!font-black !text-white !mt-1 !leading-tight">
-                            {cert.courseTitulli}
+                            {cert.subjectTitulli}
                         </Typography>
                     </div>
 

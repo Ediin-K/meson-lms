@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -20,7 +20,7 @@ const GRADE_OPTIONS = [5, 6, 7, 8, 9, 10];
 
 const emptyForm = {
   studentId: "",
-  courseId: "",
+  subjectId: "",
   grade: "",
   comment: "",
 };
@@ -42,9 +42,9 @@ export default function GradeFormDialog({
   onSubmit,
   initialData = null,
   students = [],
-  courses = [],
-  fixedCourseId = null,
-  fixedCourseTitle = "",
+  subjects = [],
+  fixedSubjectId = null,
+  fixedSubjectTitle = "",
   submitting = false,
 }) {
   const [form, setForm] = useState(emptyForm);
@@ -55,15 +55,15 @@ export default function GradeFormDialog({
       if (initialData) {
         setForm({
           studentId: initialData.studentId || "",
-          courseId: initialData.courseId || fixedCourseId || "",
+          subjectId: initialData.subjectId || fixedSubjectId || "",
           grade: initialData.grade ?? "",
           comment: initialData.comment || "",
         });
       } else {
-        setForm({ ...emptyForm, courseId: fixedCourseId || "" });
+        setForm({ ...emptyForm, subjectId: fixedSubjectId || "" });
       }
     }
-  }, [open, initialData, fixedCourseId]);
+  }, [open, initialData, fixedSubjectId]);
 
   const handleChange = (field) => (e) => {
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
@@ -73,7 +73,7 @@ export default function GradeFormDialog({
     e.preventDefault();
     onSubmit({
       studentId: Number(form.studentId),
-      courseId: Number(form.courseId),
+      subjectId: Number(form.subjectId),
       grade: Number(form.grade),
       comment: form.comment.trim() || null,
     });
@@ -81,7 +81,7 @@ export default function GradeFormDialog({
 
   const isValid =
     form.studentId &&
-    form.courseId &&
+    form.subjectId &&
     form.grade &&
     GRADE_OPTIONS.includes(Number(form.grade));
 
@@ -104,28 +104,28 @@ export default function GradeFormDialog({
         </DialogTitle>
 
         <DialogContent className="!pt-5">
-          {fixedCourseId && fixedCourseTitle && (
+          {fixedSubjectId && fixedSubjectTitle && (
             <Box className="mb-4 rounded-lg bg-slate-100 px-4 py-3 dark:bg-slate-800">
               <Typography variant="caption" className="!font-semibold !uppercase !tracking-wide !text-slate-500">
-                Kursi
+                Lënda
               </Typography>
               <Typography className="!mt-0.5 !font-semibold !text-[#1e3a5f] dark:!text-white">
-                {fixedCourseTitle}
+                {fixedSubjectTitle}
               </Typography>
             </Box>
           )}
 
           <Box className="flex flex-col gap-4">
-            {!fixedCourseId && (
+            {!fixedSubjectId && (
               <FormControl fullWidth required size="small">
-                <InputLabel>Kursi</InputLabel>
+                <InputLabel>Lënda</InputLabel>
                 <Select
-                  value={form.courseId}
-                  label="Kursi"
-                  onChange={handleChange("courseId")}
+                  value={form.subjectId}
+                  label="Lënda"
+                  onChange={handleChange("subjectId")}
                   disabled={isEdit}
                 >
-                  {courses.map((c) => (
+                  {subjects.map((c) => (
                     <MenuItem key={c.id} value={c.id}>{c.titulli}</MenuItem>
                   ))}
                 </Select>

@@ -1,4 +1,4 @@
-import Box from '@mui/material/Box'
+﻿import Box from '@mui/material/Box'
 import Container from '@mui/material/Container'
 import Divider from '@mui/material/Divider'
 import IconButton from '@mui/material/IconButton'
@@ -37,7 +37,7 @@ export default function Footer() {
 
   const quick = [
     [t('header.navHome'), '#'],
-    [t('header.navCourses'), '#'],
+    [t('header.navsubjects'), '#'],
     [t('header.navAssignments'), '#'],
     [t('header.navLibrary'), 'https://www.ubt-uni.net/sq/ubt/jeta-ne-kampus/ubt-biblioteka/'],
   ]

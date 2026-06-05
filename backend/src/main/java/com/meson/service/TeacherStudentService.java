@@ -21,16 +21,16 @@ public class TeacherStudentService {
 
     public List<EnrollmentResponse> getStudentsByTeacher() {
         User teacher = getCurrentUser();
-        return enrollmentRepository.findByCourseTeacherId(teacher.getId()).stream()
+        return enrollmentRepository.findBySubjectTeacherId(teacher.getId()).stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
 
-    public List<EnrollmentResponse> getStudentsByCourse(Long courseId) {
+    public List<EnrollmentResponse> getStudentsBySubject(Long subjectId) {
         User teacher = getCurrentUser();
         
-        return enrollmentRepository.findByCourseId(courseId).stream()
-                .filter(e -> e.getCourse().getTeacher().getId().equals(teacher.getId()))
+        return enrollmentRepository.findBySubjectId(subjectId).stream()
+                .filter(e -> e.getSubject().getTeacher().getId().equals(teacher.getId()))
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
@@ -46,8 +46,8 @@ public class TeacherStudentService {
                 .id(enrollment.getId())
                 .userId(enrollment.getUser().getId())
                 .userEmri(enrollment.getUser().getEmri() + " " + enrollment.getUser().getMbiemri())
-                .courseId(enrollment.getCourse().getId())
-                .courseTitulli(enrollment.getCourse().getTitulli())
+                .subjectId(enrollment.getSubject().getId())
+                .subjectTitulli(enrollment.getSubject().getTitulli())
                 .progresi(enrollment.getProgresi())
                 .statusi(enrollment.getStatusi())
                 .dataRegjistrimit(enrollment.getDataRegjistrimit())

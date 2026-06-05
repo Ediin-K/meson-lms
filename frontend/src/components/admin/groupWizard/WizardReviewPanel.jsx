@@ -1,4 +1,4 @@
-import { Alert, Box, Chip, Typography } from "@mui/material";
+﻿import { Alert, Box, Chip, Typography } from "@mui/material";
 import { truncateText, getGroupsTheme } from "./wizardUi";
 
 const DAY_LABELS = {
@@ -38,12 +38,12 @@ export default function WizardReviewPanel({
   maxCapacity,
   staffRows,
   scheduleRows,
-  staffByCourse,
-  courses,
+  staffBySubject,
+  subjects,
 }) {
   const t = getGroupsTheme(isDark);
-  const validStaff = staffRows.filter((r) => r.courseId && r.professorId);
-  const validSchedules = scheduleRows.filter((r) => r.courseId && r.professorId && r.startTime);
+  const validStaff = staffRows.filter((r) => r.subjectId && r.professorId);
+  const validSchedules = scheduleRows.filter((r) => r.subjectId && r.professorId && r.startTime);
 
   return (
     <Box className="flex flex-col gap-3">
@@ -85,8 +85,8 @@ export default function WizardReviewPanel({
         ) : (
           <Box className="flex flex-col gap-2">
             {validStaff.map((row, idx) => {
-              const staff = staffByCourse[String(row.courseId)];
-              const course = courses.find((c) => String(c.id) === String(row.courseId));
+              const staff = staffBySubject[String(row.subjectId)];
+              const course = subjects.find((c) => String(c.id) === String(row.subjectId));
               return (
                 <Box
                   key={idx}
@@ -94,7 +94,7 @@ export default function WizardReviewPanel({
                   sx={{ borderColor: t.border, bgcolor: t.card }}
                 >
                   <Typography sx={{ color: t.text, fontWeight: 600, minWidth: 0 }} title={course?.titulli}>
-                    {truncateText(course?.titulli || staff?.courseLabel, 36)}
+                    {truncateText(course?.titulli || staff?.subjectLabel, 36)}
                   </Typography>
                   <Chip size="small" label={`Prof: ${staff?.professorLabel || "—"}`} variant="outlined" />
                   {staff?.assistantLabel && staff.assistantLabel !== "—" && (
@@ -115,8 +115,8 @@ export default function WizardReviewPanel({
         ) : (
           <Box className="flex flex-col gap-2">
             {validSchedules.map((row, idx) => {
-              const staff = staffByCourse[String(row.courseId)];
-              const course = courses.find((c) => String(c.id) === String(row.courseId));
+              const staff = staffBySubject[String(row.subjectId)];
+              const course = subjects.find((c) => String(c.id) === String(row.subjectId));
               const teacherForSession =
                 row.sessionType === "EXERCISE" && staff?.assistantLabel && staff.assistantLabel !== "—"
                   ? staff.assistantLabel

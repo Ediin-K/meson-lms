@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   Typography, Box, Card, CardContent, CircularProgress, 
@@ -35,10 +35,10 @@ export default function TeacherDashboard() {
 
   const teacherServices = [
     {
-      title: "Kurset e Mia",
+      title: "Lëndët e Mia",
       desc: "Menaxhoni të gjitha lëndët tuaja, materialet dhe studentët në një vend.",
       icon: SchoolRounded,
-      path: "/teacher/courses",
+      path: "/teacher/subjects",
       color: "text-indigo-600",
       bg: "bg-indigo-100 dark:bg-indigo-900/40",
     },
@@ -52,7 +52,7 @@ export default function TeacherDashboard() {
     },
     {
       title: "Statistikat",
-      desc: "Analizoni performancën e studentëve dhe angazhimin në kurse.",
+      desc: "Analizoni performancën e studentëve dhe angazhimin në Lëndë.",
       icon: AnalyticsRounded,
       path: "/teacher/reports",
       color: "text-sky-600",
@@ -73,7 +73,7 @@ export default function TeacherDashboard() {
               Mirësevini, Mësues!
             </Typography>
             <Typography variant="body1" className="!mt-3 !max-w-2xl !text-slate-600 dark:!text-slate-400 text-lg !font-medium">
-              Menaxhoni kurset tuaja, studentët dhe aktivitetet mësimore në një vend.
+              Menaxhoni Lëndët tuaja, studentët dhe aktivitetet mësimore në një vend.
             </Typography>
           </div>
           <Box className="h-16 w-16 rounded-3xl bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shadow-inner">
@@ -91,7 +91,7 @@ export default function TeacherDashboard() {
         {!loading && stats ? (
           <Box className="mt-10 grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { label: "Kurse", value: stats.totalCourses, icon: SchoolRounded, color: "text-indigo-600", bg: "bg-indigo-50 dark:bg-indigo-900/20" },
+              { label: "Lëndë", value: stats.totalSubjects, icon: SchoolRounded, color: "text-indigo-600", bg: "bg-indigo-50 dark:bg-indigo-900/20" },
               { label: "Studentë", value: stats.totalStudents, icon: PeopleRounded, color: "text-sky-600", bg: "bg-sky-50 dark:bg-sky-900/20" },
               { label: "Kuize", value: stats.totalQuizzes, icon: QuizRounded, color: "text-amber-600", bg: "bg-amber-50 dark:bg-amber-900/20" },
               { label: "Detyra", value: stats.totalAssignments, icon: AssignmentRounded, color: "text-emerald-600", bg: "bg-emerald-50 dark:bg-emerald-900/20" },

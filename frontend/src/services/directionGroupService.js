@@ -2,7 +2,7 @@ import axiosInstance from "./axiosInstance";
 
 export const getDirectionGroups = async (categoryId, semester) => {
   const params = semester != null ? { semester } : {};
-  const response = await axiosInstance.get(`/categories/${categoryId}/direction-groups`, { params });
+  const response = await axiosInstance.get(`/directions/${categoryId}/direction-groups`, { params });
   return response.data;
 };
 

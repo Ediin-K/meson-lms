@@ -7,11 +7,11 @@ import com.meson.dto.AssignTeacherRequest;
 import com.meson.entity.User;
 import com.meson.entity.Role;
 import com.meson.entity.UserRole;
-import com.meson.entity.Course;
+import com.meson.entity.Subject;
 import com.meson.repository.UserRepository;
 import com.meson.repository.RoleRepository;
 import com.meson.repository.UserRoleRepository;
-import com.meson.repository.CourseRepository;
+import com.meson.repository.SubjectRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +27,7 @@ public class TeacherService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final UserRoleRepository userRoleRepository;
-    private final CourseRepository courseRepository;
+    private final SubjectRepository subjectRepository;
     private final PasswordEncoder passwordEncoder;
 
     public TeacherResponse createTeacher(CreateTeacherRequest request) {
@@ -80,17 +80,17 @@ public class TeacherService {
         }
 
         User updatedTeacher = userRepository.save(teacher);
-        Long courseCount = (long) courseRepository.findByTeacherId(id).size();
-        return toTeacherResponse(updatedTeacher, courseCount);
+        Long subjectCount = (long) subjectRepository.findByTeacherId(id).size();
+        return toTeacherResponse(updatedTeacher, subjectCount);
     }
 
     public void deleteTeacher(Long id) {
         User teacher = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Mësuesi nuk u gjet"));
 
-        List<Course> courses = courseRepository.findByTeacherId(id);
-        if (!courses.isEmpty()) {
-            throw new RuntimeException("Nuk mund ta fshish mësuesin; i ka kurse të lidhura. Hiq fillimisht të gjitha kurset ose zhvendo mësuesin.");
+        List<Subject> subjects = subjectRepository.findByTeacherId(id);
+        if (!subjects.isEmpty()) {
+            throw new RuntimeException("Nuk mund ta fshish mësuesin; i ka Lëndë të lidhura. Hiq fillimisht të gjitha Lëndët ose zhvendo mësuesin.");
         }
 
         userRepository.deleteById(id);
@@ -100,8 +100,8 @@ public class TeacherService {
         List<User> teachers = userRepository.findAllByRoleNormalizedName("TEACHER");
         return teachers.stream()
                 .map(t -> {
-                    Long courseCount = (long) courseRepository.findByTeacherId(t.getId()).size();
-                    return toTeacherResponse(t, courseCount);
+                    Long subjectCount = (long) subjectRepository.findByTeacherId(t.getId()).size();
+                    return toTeacherResponse(t, subjectCount);
                 })
                 .toList();
     }
@@ -118,23 +118,23 @@ public class TeacherService {
             throw new RuntimeException("Përdoruesi nuk ka rolin e mësuesit");
         }
 
-        Long courseCount = (long) courseRepository.findByTeacherId(id).size();
-        return toTeacherResponse(teacher, courseCount);
+        Long subjectCount = (long) subjectRepository.findByTeacherId(id).size();
+        return toTeacherResponse(teacher, subjectCount);
     }
 
     public List<TeacherResponse> searchTeachers(String term) {
         List<User> teachers = userRepository.searchByRoleNormalizedNameAndTerm("TEACHER", term);
         return teachers.stream()
                 .map(t -> {
-                    Long courseCount = (long) courseRepository.findByTeacherId(t.getId()).size();
-                    return toTeacherResponse(t, courseCount);
+                    Long subjectCount = (long) subjectRepository.findByTeacherId(t.getId()).size();
+                    return toTeacherResponse(t, subjectCount);
                 })
                 .toList();
     }
 
-    public void assignTeacherToCourse(AssignTeacherRequest request) {
-        Course course = courseRepository.findById(request.getCourseId())
-                .orElseThrow(() -> new RuntimeException("Kursi nuk u gjet"));
+    public void assignTeacherToSubject(AssignTeacherRequest request) {
+        Subject course = subjectRepository.findById(request.getSubjectId())
+                .orElseThrow(() -> new RuntimeException("Lënda nuk u gjet"));
 
         User teacher = userRepository.findById(request.getTeacherId())
                 .orElseThrow(() -> new RuntimeException("Mësuesi nuk u gjet"));
@@ -148,10 +148,10 @@ public class TeacherService {
         }
 
         course.setTeacher(teacher);
-        courseRepository.save(course);
+        subjectRepository.save(course);
     }
 
-    private TeacherResponse toTeacherResponse(User teacher, Long courseCount) {
+    private TeacherResponse toTeacherResponse(User teacher, Long subjectCount) {
         return TeacherResponse.builder()
                 .id(teacher.getId())
                 .emri(teacher.getEmri())
@@ -160,7 +160,7 @@ public class TeacherService {
                 .phoneNumber(teacher.getPhoneNumber())
                 .statusi(teacher.getStatusi())
                 .dataKrijimit(teacher.getDataKrijimit())
-                .courseCount(courseCount.intValue())
+                .subjectCount(subjectCount.intValue())
                 .build();
     }
 }

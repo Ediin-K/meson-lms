@@ -1,4 +1,3 @@
-
 export const STRINGS = {
   sq: {
     months: {
@@ -19,7 +18,7 @@ export const STRINGS = {
       skip: "Kalo te përmbajtja kryesore",
       mainNav: "Navigimi kryesor",
       navHome: "Ballina",
-      navCourses: "Lendet e mia",
+      navSubjects: "Lëndët e mia",
       navAssignments: "Detyrat",
       navLibrary: "Biblioteka",
       navAbout: "Rreth nesh",
@@ -37,7 +36,6 @@ export const STRINGS = {
       roleLabel: "Roli (demo)",
       roleGuest: "Vizitor",
       roleStudent: "Student",
-
       roleAdmin: "Administrator",
       profile: "Profili",
       accountSettings: "Cilësimet e llogarisë",
@@ -66,14 +64,14 @@ export const STRINGS = {
       saveSuccess: "Profili u përditësua",
       saveError: "Profili nuk u ruajt",
       stats: {
-        courses: "Kurse",
+        subjects: "Lëndë",
         certificates: "Certifikata",
         progress: "Progres mesatar",
         submissions: "Detyra",
       },
-      courses: "Kurset e mia",
-      noCourses: "Nuk je i regjistruar në asnjë kurs",
-      browseCourses: "Shfleto kurset",
+      subjects: "Lëndët e mia",
+      noSubjects: "Nuk je i regjistruar në asnjë lëndë",
+      browseSubjects: "Shfleto lëndët",
       progressLabel: "përfunduar",
       certificates: "Certifikatat e mia",
       noCertificates: "Nuk ke asnjë certifikatë ende",
@@ -117,7 +115,7 @@ export const STRINGS = {
     },
     auth: {
       loginTitle: "Hyr në Meson",
-      loginSubtitle: "Mirë se u ktheve—vazhdo me kurset dhe detyrat e tua.",
+      loginSubtitle: "Mirë se u ktheve—vazhdo me lëndët dhe detyrat e tua.",
       emailLabel: "Email",
       passwordLabel: "Fjalëkalimi",
       forgotPassword: "Ke harruar fjalëkalimin?",
@@ -133,7 +131,7 @@ export const STRINGS = {
     cookies: {
       title: "Privatësia & Cookies",
       bannerText:
-        "Ne përdorim cookies për të përmirësuar përvojën tuaj. Duke vazhduar, ju pranoni",
+          "Ne përdorim cookies për të përmirësuar përvojën tuaj. Duke vazhduar, ju pranoni",
       rulesLink: "rregullat tona",
       privacySuffix: "të privatësisë.",
       acceptAll: "Prano të gjitha",
@@ -149,22 +147,22 @@ export const STRINGS = {
       slides: [
         {
           title: "Fillo tani",
-          subtitle: "Kurse, detyra dhe progresi yt — në një vend të thjeshtë.",
+          subtitle: "Lëndët, detyrat dhe progresi yt — në një vend të thjeshtë.",
           cta: "Regjistrohu",
           secondary: null,
         },
         {
           title: "Pse ky LMS është më i miri",
           subtitle:
-            "Ndërfaqe e shpejtë dhe e qartë, për studentë dhe pedagogë — pa zhurmë.",
+              "Ndërfaqe e shpejtë dhe e qartë, për studentë dhe pedagogë — pa zhurmë.",
           cta: "Zbulo arsyet",
           secondary: "Më shumë",
         },
         {
           title: "Mëso nga kudo",
           subtitle:
-            "Celular, tablet apo shfletues — përmbajtja gjithmonë me ty.",
-          cta: "Hyr në kurset",
+              "Celular, tablet apo shfletues — përmbajtja gjithmonë me ty.",
+          cta: "Hyr në lëndët",
           secondary: "Më shumë",
         },
         {
@@ -177,21 +175,21 @@ export const STRINGS = {
       univOverline: "Bashkëpunëtorë akademikë",
       univTitle: "Universitetet në rrjetin tonë",
       univBody:
-        "Shembuj nga Kosova dhe Shqipëria — nga UBT në Prishtinë deri te universitetet publike. I njëjti stil kartash si më poshtë.",
+          "Shembuj nga Kosova dhe Shqipëria — nga UBT në Prishtinë deri te universitetet publike. I njëjti stil kartash si më poshtë.",
       catOverline: "Kategori",
       catTitle: "Tema të zgjedhura sipas kategorisë",
       catBody:
-        "Përzgjidhni shtigjin tuaj — nga dizajni dhe programimi deri te gjuhët dhe muzika.",
+          "Përzgjidhni shtigjin tuaj — nga dizajni dhe programimi deri te gjuhët dhe muzika.",
       viewCampuses: "Shiko kampuset",
-      viewCourses: "Shiko kurse",
+      viewSubjects: "Shiko lëndët",
       chipPartner: "Partner",
       chipOffer: "Ofertë",
       chipSoon: "Së shpejti",
       chipNew: "E re",
-      searchPlaceholder: "Kërko kurse, tema ose universitete...",
+      searchPlaceholder: "Kërko lëndë, tema ose universitete...",
       stats: {
         students: "Studentë aktivë",
-        courses: "Kurse online",
+        subjects: "Lëndë online",
         mentors: "Mentorë ekspertë",
         satisfaction: "Kënaqësi",
       },
@@ -216,7 +214,7 @@ export const STRINGS = {
           {
             name: "Dr. Elena Berisha",
             role: "Pedagoge, UP",
-            text: "Një platformë shumë intuitive dhe e lehtë për t’u përdorur për ne dhe studentët.",
+            text: "Një platformë shumë intuitive dhe e lehtë për t'u përdorur për ne dhe studentët.",
           },
           {
             name: "Luan Krasniqi",
@@ -228,7 +226,7 @@ export const STRINGS = {
       ctaFinal: {
         title: "Gati për të filluar rrugëtimin tënd?",
         subtitle:
-          "Bashkohu me mijëra studentë dhe pedagogë në platformën më moderne të mësimit.",
+            "Bashkohu me mijëra studentë dhe pedagogë në platformën më moderne të mësimit.",
         btn: "Krijo llogari falas",
       },
       partnersTitle: "Institucionet që na besojnë",
@@ -236,47 +234,47 @@ export const STRINGS = {
         overline: "Pulti yt",
         welcome: "Mirë se erdhe përsëri",
         continueTitle: "Vazhdo ku e le",
-        continueCourse: "Hyrje në programim — Moduli 4",
+        continueSubject: "Hyrje në programim — Moduli 4",
         continueBtn: "Vazhdo mësimin",
         assignLink: "Shiko të gjitha detyrat",
-        browseTitle: "Eksploro kurse",
+        browseTitle: "Eksploro lëndët",
         browseBody: "Kategori të përzgjedhura për ty.",
 
         facultyOverline: "Regjistrimi yt",
         facultyTitle: "Fakulteti dhe programi",
         facultyBody:
-          "Sheh vetëm institucionin ku je i regjistruar — pa lista të tjera universitetesh.",
+            "Sheh vetëm institucionin ku je i regjistruar — pa lista të tjera universitetesh.",
         facultyName: "Universiteti UBT",
         facultyMeta: "Fakulteti i inxhinierisë · Prishtinë",
         facultyProgram: "Inxhinieri kompjuterike — viti II, semestri IV",
         announcementsTitle: "Njoftime të shpejta",
-        announcement1: "Mbledhje kursi “Struktura diskrete” — e premte 10:00.",
+        announcement1: "Mbledhje lënde Struktura diskrete — e premte 10:00.",
         announcement2:
-          "Materialet e javës 7 janë publikuar në “Sisteme dhe sinjale”.",
+            "Materialet e javës 7 janë publikuar në Sisteme dhe sinjale.",
         viewAllNotifications: "Shiko të gjitha",
         noNotifications: "Nuk keni njoftime",
         tasks: {
           panelTitle: "Detyrat & progresi",
           panelSubtitle:
-            "Afate, zgjatje dhe sa për qind është përfunduar sipas lëndës.",
+              "Afate, zgjatje dhe sa për qind është përfunduar sipas lëndës.",
           progressLabel: "gati",
           task1: {
             name: "Detyrë 3 · Grafe",
-            course: "Struktura diskrete",
+            subject: "Struktura diskrete",
             due: "Afati: 12 prill, 23:59",
             extension: "Zgjatja: 14 prill (miratuar)",
             progress: "72",
           },
           task2: {
             name: "Kuiz i shpejtë",
-            course: "Shkenca kompjuterike",
+            subject: "Shkenca kompjuterike",
             due: "Afati: 15 prill, 20:00",
             extension: "Pa zgjatje",
             progress: "40",
           },
           task3: {
             name: "Projekt mini · FFT",
-            course: "Sisteme dhe sinjale",
+            subject: "Sisteme dhe sinjale",
             due: "Afati: 22 prill",
             extension: "Zgjatja: 25 prill",
             progress: "15",
@@ -325,10 +323,10 @@ export const STRINGS = {
         title: "Përmbledhje e shpejtë",
         body: "Statistika dhe veprime të shpeshta për institucionin.",
         users: "Përdoruesit",
-        browseCategories: "Katalogu i kurseve sipas kategorisë",
+        browseCategories: "Katalogu i lëndëve sipas kategorisë",
         stats: {
           users: "Përdorues",
-          courses: "Kurse",
+          subjects: "Lëndë",
           enrollments: "Regjistrime",
         },
         services: {
@@ -337,13 +335,13 @@ export const STRINGS = {
             title: "Menaxhimi i Përdoruesve",
             desc: "Menaxho llogaritë, rolet dhe qasjen e përdoruesve në platformë.",
           },
-          courses: {
-            title: "Menaxhimi i Kurseve",
-            desc: "Krijo kurse të reja, ndrysho përmbajtjen dhe organizo planin mësimor.",
+          subjects: {
+            title: "Menaxhimi i Lëndëve",
+            desc: "Krijo lëndë të reja, ndrysho përmbajtjen dhe organizo planin mësimor.",
           },
           categories: {
             title: "Kategoritë",
-            desc: "Organizoni kurset në kategori dhe tema për navigim më të lehtë.",
+            desc: "Organizoni lëndët në kategori dhe tema për navigim më të lehtë.",
           },
           teachers: {
             title: "Mësuesit",
@@ -363,14 +361,14 @@ export const STRINGS = {
           },
           enter: "Hyr në shërbim",
           comingSoon:
-            "Ky modul është në fazën e zhvillimit dhe do të jetë i disponueshëm së shpejti.",
+              "Ky modul është në fazën e zhvillimit dhe do të jetë i disponueshëm së shpejti.",
           backToPanel: "Kthehu te Paneli",
           charts: {
             registrations: "Trendi i Regjistrimeve",
             categories: "Shpërndarja sipas Kategorisë",
             enrollments: "Gjendja e Regjistrimeve",
             students: "Studentë",
-            courses: "Kurse",
+            subjects: "Lëndë",
             month: "Muaji",
             total: "Gjithsej",
             active: "Aktive",
@@ -395,7 +393,7 @@ export const STRINGS = {
         schedule: "Orari im",
         announcementsTitle: "Njoftimet e mia",
         announcement1:
-          'Provimi i ndërmjetëm në "Programim" është caktuar më 20 prill.',
+            'Provimi i ndërmjetëm në "Programim" është caktuar më 20 prill.',
       },
       parent: {
         overline: "Paneli i prindit",
@@ -461,19 +459,19 @@ export const STRINGS = {
       noUsers: "Nuk u gjet asnjë përdorues.",
       errors: {
         fetchFailed:
-          "Dështoi ngarkimi i përdoruesve. Ju lutem kontrolloni serverin.",
+            "Dështoi ngarkimi i përdoruesve. Ju lutem kontrolloni serverin.",
       },
       confirmDelete: "A jeni i sigurt që dëshironi ta fshini këtë përdorues?",
     },
-    adminCourses: {
+    adminSubjects: {
       overline: "KURIKULA AKADEMIKE",
       title: "Lëndët",
       subtitle:
-        "Menaxhoni planin mësimor, kreditet ECTS dhe instruktorët për çdo lëndë.",
+          "Menaxhoni planin mësimor, kreditet ECTS dhe instruktorët për çdo lëndë.",
       searchPlaceholder: "Kërko lëndët...",
       addTitle: "Shto Lëndë",
       editTitle: "Ndrysho Lëndën",
-      noCourses: "Nuk u gjet asnjë lëndë",
+      noSubjects: "Nuk u gjet asnjë lëndë",
       stats: {
         total: "Gjithsej Lëndë",
         credits: "Kreditet Totale",
@@ -509,23 +507,23 @@ export const STRINGS = {
       heroOverline: "Meson LMS",
       heroTitle: "Mësimi ynë, i thjeshtë dhe i fuqishëm",
       heroSubtitle:
-        "Ndërtojmë një platformë që bashkon studentët, pedagogët dhe institucionet — me fokus te qartësia, besimi dhe rezultatet.",
+          "Ndërtojmë një platformë që bashkon studentët, pedagogët dhe institucionet — me fokus te qartësia, besimi dhe rezultatet.",
       ctaGetStarted: "Fillo tani",
       missionTitle: "Misioni",
       missionBody:
-        "Të ofrojmë një mjedis mësimor dixhital të qartë dhe të aksesueshëm, ku çdo përdorues — student apo pedagog — gjen shpejt atë që i nevojitet dhe ndjek progresin pa humbur kohë.",
+          "Të ofrojmë një mjedis mësimor dixhital të qartë dhe të aksesueshëm, ku çdo përdorues — student apo pedagog — gjen shpejt atë që i nevojitet dhe ndjek progresin pa humbur kohë.",
       visionTitle: "Vizioni",
       visionBody:
-        "Një rrjet mësimor në rajon ku institucionet bashkëpunojnë lehtë, materialet janë të organizuara dhe komunikimi mbetet profesional dhe i sigurt.",
+          "Një rrjet mësimor në rajon ku institucionet bashkëpunojnë lehtë, materialet janë të organizuara dhe komunikimi mbetet profesional dhe i sigurt.",
       whatTitle: "Çfarë është Meson?",
       whatBody:
-        "Meson është një sistem për menaxhimin e mësimit (LMS) për kurse, detyra, vlerësime dhe komunikim brenda institucionit. Gjithçka në një ndërfaqe moderne, të përshtatur për ekrane të ndryshme.",
+          "Meson është një sistem për menaxhimin e mësimit (LMS) për lëndë, detyra, vlerësime dhe komunikim brenda institucionit. Gjithçka në një ndërfaqe moderne, të përshtatur për ekrane të ndryshme.",
       featuresTitle: "Çfarë ofron platforma",
-      featureCourses:
-        "Kurse dhe materiale të strukturuara sipas moduleve dhe semestrit.",
+      featureSubjects:
+          "Lëndë dhe materiale të strukturuara sipas moduleve dhe semestrit.",
       featureAssignments: "Detyra me afate, njoftime dhe gjurmim progresi.",
       featureGrades: "Nota dhe feedback i centralizuar për studentët.",
-      featureCommunication: "Mesazhe dhe njoftime për klasën dhe kursin.",
+      featureCommunication: "Mesazhe dhe njoftime për klasën dhe lëndën.",
       teamTitle: "Ekipi",
       teamSubtitle: "Një grup i përkushtuar ndaj produktit dhe përdoruesve.",
       team1Name: "Arben Krasniqi",
@@ -538,13 +536,13 @@ export const STRINGS = {
       team4Role: "Mbështetje akademike",
       trustTitle: "Besim dhe privatësi",
       trustBody:
-        "Të dhënat trajtohen me kujdes: lidhje të enkriptuara (HTTPS), kontroll aksesi sipas rolit dhe parime të qarta për ruajtjen e informacionit. Privatësia e studentëve dhe institucionit është prioritet.",
+          "Të dhënat trajtohen me kujdes: lidhje të enkriptuara (HTTPS), kontroll aksesi sipas rolit dhe parime të qarta për ruajtjen e informacionit. Privatësia e studentëve dhe institucionit është prioritet.",
       statsTitle: "Në numra (shembull)",
       statStudents: "Studentë aktivë",
-      statCourses: "Kurse",
+      statSubjects: "Lëndë",
       statInstructors: "Pedagogë",
       statStudentsVal: "12 400+",
-      statCoursesVal: "480+",
+      statSubjectsVal: "480+",
       statInstructorsVal: "320+",
       whyTitle: "Pse Meson?",
       why1Title: "Ndërfaqe e pastër",
@@ -555,14 +553,14 @@ export const STRINGS = {
       why3Body: "Studentët shohin afate dhe përfundim sipas lëndëve.",
       why4Title: "Mbështetje",
       why4Body:
-        "Ekipi ynë përgjigjet në kohë për pyetje teknike dhe përdorimi.",
+          "Ekipi ynë përgjigjet në kohë për pyetje teknike dhe përdorimi.",
       ctaFinalTitle: "Gati të bashkohesh?",
-      ctaFinalBody: "Hyr në platformë dhe eksploro kurset dhe mjedisin e Meson.",
+      ctaFinalBody: "Hyr në platformë dhe eksploro lëndët dhe mjedisin e Meson.",
       ctaLogin: "Hyr në platformë",
     },
     footer: {
       tagline:
-        "Një LMS i fokusuar te përdoruesi: mësim i organizuar, komunikim i qartë dhe ndihmë kur ju nevojitet.",
+          "Një LMS i fokusuar te përdoruesi: mësim i organizuar, komunikim i qartë dhe ndihmë kur ju nevojitet.",
       quick: "Shpejt",
       support: "Mbështetje",
       email: "Email",
@@ -576,7 +574,7 @@ export const STRINGS = {
       cookies: "Cookies",
       copy: "Të gjitha të drejtat e rezervuara.",
       helpNote:
-        "Ndihmë e shpejtë — përgjigje brenda 24 orëve në ditët e punës.",
+          "Ndihmë e shpejtë — përgjigje brenda 24 orëve në ditët e punës.",
     },
     notifications: {
       title: "Të gjitha njoftimet",
@@ -591,17 +589,17 @@ export const STRINGS = {
       overline: "LËNDËT E SEMESTRIT",
       title: "Semestri",
       subtitle:
-        "Eksploroni dhe menaxhoni lëndët ku jeni të regjistruar për këtë semestër.",
+          "Eksploroni dhe menaxhoni lëndët ku jeni të regjistruar për këtë semestër.",
       empty: {
         title: "Nuk u gjetën lëndë",
         desc: "Nuk gjetëm lëndë aktive për këtë semestër. Ju lutem kontrolloni më vonë ose kontaktoni administratorin.",
       },
-      courseBadge: "Lënda",
+      subjectBadge: "Lënda",
       noDescription: "Nuk ka përshkrim për këtë lëndë.",
-      viewCourse: "Shiko Kursin",
+      viewSubject: "Shiko Lëndën",
     },
-    courseDetail: {
-      noModules: "Nuk ka module në këtë kurs",
+    subjectDetail: {
+      noModules: "Nuk ka module në këtë lëndë",
       noLessons: "Nuk ka leksione në këtë modul",
       teacher: "",
       semester: "Semestri ",
@@ -610,7 +608,7 @@ export const STRINGS = {
     lessonDetail: {
       notFound: "Leksioni nuk u gjet",
       back: "Kthehu mbrapa",
-      backToCourse: "Kthehu te kursi",
+      backToSubject: "Kthehu te lënda",
       video: "Video",
       content: "Përmbajtja",
       extraMaterial: "Material shtesë",
@@ -634,8 +632,8 @@ export const STRINGS = {
       nextBtn: "Tjetër",
       minutes: "minuta",
     },
-    course: {
-      notFound: "Kursi nuk u gjet.",
+    subject: {
+      notFound: "Lënda nuk u gjet.",
       backToHome: "Kthehu në fillim",
       backToSubjects: "Kthehu te lëndët",
       subjectDetail: "Detajet e lëndës",
@@ -670,7 +668,7 @@ export const STRINGS = {
       topic: {
         t: "Tema",
         t1: "Probleme me qasjen",
-        t2: "Pyetje për kurset",
+        t2: "Pyetje për lëndët",
         t3: "Pyetje për notat",
         t4: "Ndihmë teknike",
         t5: "Pagesat / Faturimi",
@@ -702,7 +700,7 @@ export const STRINGS = {
       skip: "Skip to main content",
       mainNav: "Main navigation",
       navHome: "Home",
-      navCourses: "My courses",
+      navSubjects: "My subjects",
       navAssignments: "Assignments",
       navLibrary: "Library",
       navAbout: "About",
@@ -720,7 +718,6 @@ export const STRINGS = {
       roleLabel: "Role (demo)",
       roleGuest: "Guest",
       roleStudent: "Student",
-
       roleAdmin: "Admin",
       profile: "Profile",
       accountSettings: "Account settings",
@@ -749,14 +746,14 @@ export const STRINGS = {
       saveSuccess: "Profile updated",
       saveError: "Could not save profile",
       stats: {
-        courses: "Courses",
+        subjects: "Subjects",
         certificates: "Certificates",
         progress: "Avg. progress",
         submissions: "Assignments",
       },
-      courses: "My courses",
-      noCourses: "You are not enrolled in any course",
-      browseCourses: "Browse courses",
+      subjects: "My subjects",
+      noSubjects: "You are not enrolled in any subject",
+      browseSubjects: "Browse subjects",
       progressLabel: "complete",
       certificates: "My certificates",
       noCertificates: "No certificates yet",
@@ -800,7 +797,7 @@ export const STRINGS = {
     },
     auth: {
       loginTitle: "Log in to Meson",
-      loginSubtitle: "Welcome back—continue your courses and assignments.",
+      loginSubtitle: "Welcome back—continue your subjects and assignments.",
       emailLabel: "Email",
       passwordLabel: "Password",
       forgotPassword: "Forgot password?",
@@ -816,7 +813,7 @@ export const STRINGS = {
     cookies: {
       title: "Privacy & Cookies",
       bannerText:
-        "We use cookies to enhance your experience. By continuing, you agree to",
+          "We use cookies to enhance your experience. By continuing, you agree to",
       rulesLink: "our rules",
       privacySuffix: "regarding privacy.",
       acceptAll: "Accept All",
@@ -832,27 +829,27 @@ export const STRINGS = {
       slides: [
         {
           title: "Get started",
-          subtitle: "Your courses, tasks, and progress — in one simple place.",
+          subtitle: "Your subjects, tasks, and progress — in one simple place.",
           cta: "Sign up",
           secondary: null,
         },
         {
           title: "Why this LMS stands out",
           subtitle:
-            "Fast, clear UI for learners and teachers — without clutter.",
+              "Fast, clear UI for learners and teachers — without clutter.",
           cta: "See why",
           secondary: "More",
         },
         {
           title: "Learn anywhere",
           subtitle: "Phone, tablet, or browser — your content follows you.",
-          cta: "Open courses",
+          cta: "Open subjects",
           secondary: "More",
         },
         {
           title: "For schools & universities",
           subtitle:
-            "Partners, categories, and reporting — built for institutions.",
+              "Partners, categories, and reporting — built for institutions.",
           cta: "Contact us",
           secondary: "More",
         },
@@ -860,21 +857,21 @@ export const STRINGS = {
       univOverline: "Academic partners",
       univTitle: "Universities in our network",
       univBody:
-        "Examples from Kosovo and Albania — from UBT in Prishtina to major public universities.",
+          "Examples from Kosovo and Albania — from UBT in Prishtina to major public universities.",
       catOverline: "Categories",
       catTitle: "Featured topics by category",
       catBody:
-        "Pick your path — from design and coding to languages and music.",
+          "Pick your path — from design and coding to languages and music.",
       viewCampuses: "View campuses",
-      viewCourses: "Browse courses",
+      viewSubjects: "Browse subjects",
       chipPartner: "Partner",
       chipOffer: "Sale",
       chipSoon: "Soon",
       chipNew: "New",
-      searchPlaceholder: "Search courses, topics or universities...",
+      searchPlaceholder: "Search subjects, topics or universities...",
       stats: {
         students: "Active students",
-        courses: "Online courses",
+        subjects: "Online subjects",
         mentors: "Expert mentors",
         satisfaction: "Satisfaction",
       },
@@ -911,7 +908,7 @@ export const STRINGS = {
       ctaFinal: {
         title: "Ready to start your journey?",
         subtitle:
-          "Join thousands of students and teachers on the most modern learning platform.",
+            "Join thousands of students and teachers on the most modern learning platform.",
         btn: "Create free account",
       },
       partnersTitle: "Institutions that trust us",
@@ -919,15 +916,15 @@ export const STRINGS = {
         overline: "Your dashboard",
         welcome: "Welcome back",
         continueTitle: "Continue where you left off",
-        continueCourse: "Intro to programming — Module 4",
+        continueSubject: "Intro to programming — Module 4",
         continueBtn: "Resume learning",
         assignLink: "View all assignments",
-        browseTitle: "Explore courses",
+        browseTitle: "Explore subjects",
         browseBody: "Hand-picked categories for you.",
         facultyOverline: "Your enrolment",
         facultyTitle: "Faculty and programme",
         facultyBody:
-          "Only the institution you’re registered with — no other university list.",
+            "Only the institution you're registered with — no other university list.",
         facultyName: "University of Business and Technology (UBT)",
         facultyMeta: "Faculty of Engineering · Prishtina",
         facultyProgram: "Computer Engineering — Year II, Semester IV",
@@ -938,25 +935,25 @@ export const STRINGS = {
         noNotifications: "You have no notifications",
         tasks: {
           panelTitle: "Tasks & progress",
-          panelSubtitle: "Deadlines, extensions, and completion by module.",
+          panelSubtitle: "Deadlines, extensions, and completion by subject.",
           progressLabel: "done",
           task1: {
             name: "Assignment 3 · Graphs",
-            course: "Discrete structures",
+            subject: "Discrete structures",
             due: "Due: 12 Apr, 23:59",
             extension: "Extended to: 14 Apr (approved)",
             progress: "72",
           },
           task2: {
             name: "Quick quiz",
-            course: "Computer science",
+            subject: "Computer science",
             due: "Due: 15 Apr, 20:00",
             extension: "No extension",
             progress: "40",
           },
           task3: {
             name: "Mini project · FFT",
-            course: "Signals and systems",
+            subject: "Signals and systems",
             due: "Due: 22 Apr",
             extension: "Extended to: 25 Apr",
             progress: "15",
@@ -965,15 +962,15 @@ export const STRINGS = {
         semesters: {
           overline: "STUDY PLAN",
           title: "Select Semester",
-          body: "Choose a semester to view your courses",
+          body: "Choose a semester to view your subjects",
           semester: "Semester ",
         },
         subjects: {
           overline: "Current semester",
-          title: "Your modules",
-          body: "Open any module for materials, notices, and assignments.",
+          title: "Your subjects",
+          body: "Open any subject for materials, notices, and assignments.",
           chipActive: "Active",
-          openSubject: "Open module",
+          openSubject: "Open subject",
           cs: {
             title: "Computer science",
             meta: "Prof. · 6 ECTS · Sem. IV",
@@ -1005,10 +1002,10 @@ export const STRINGS = {
         title: "Quick overview",
         body: "Key numbers and shortcuts for your institution.",
         users: "Users",
-        browseCategories: "Course catalog by category",
+        browseCategories: "Subject catalog by category",
         stats: {
           users: "Users",
-          courses: "Courses",
+          subjects: "Subjects",
           enrollments: "Enrollments",
         },
         services: {
@@ -1017,13 +1014,13 @@ export const STRINGS = {
             title: "User Management",
             desc: "Manage user accounts, roles, and platform access.",
           },
-          courses: {
-            title: "Course Management",
-            desc: "Create new courses, edit content, and organize curricula.",
+          subjects: {
+            title: "Subject Management",
+            desc: "Create new subjects, edit content, and organize curricula.",
           },
           categories: {
             title: "Categories",
-            desc: "Organize courses into categories and topics for easier navigation.",
+            desc: "Organize subjects into categories and topics for easier navigation.",
           },
           teachers: {
             title: "Teacher Management",
@@ -1043,14 +1040,14 @@ export const STRINGS = {
           },
           enter: "Enter service",
           comingSoon:
-            "This module is under development and will be available soon.",
+              "This module is under development and will be available soon.",
           backToPanel: "Back to Panel",
           charts: {
             registrations: "Registration Trends",
             categories: "Category Distribution",
             enrollments: "Enrollment Status",
             students: "Students",
-            courses: "Courses",
+            subjects: "Subjects",
             month: "Month",
             total: "Total",
             active: "Active",
@@ -1075,7 +1072,7 @@ export const STRINGS = {
         schedule: "My Schedule",
         announcementsTitle: "My Announcements",
         announcement1:
-          'Midterm exam for "Programming" scheduled for April 20th.',
+            'Midterm exam for "Programming" scheduled for April 20th.',
       },
       parent: {
         overline: "Parent Panel",
@@ -1131,15 +1128,15 @@ export const STRINGS = {
       },
       confirmDelete: "Are you sure you want to delete this user?",
     },
-    adminCourses: {
+    adminSubjects: {
       overline: "ACADEMIC CURRICULUM",
       title: "Subjects",
       subtitle:
-        "Manage the curriculum, ECTS credits, and instructors for each subject.",
+          "Manage the curriculum, ECTS credits, and instructors for each subject.",
       searchPlaceholder: "Search subjects...",
       addTitle: "Add Subject",
       editTitle: "Edit Subject",
-      noCourses: "No subjects found",
+      noSubjects: "No subjects found",
       stats: {
         total: "Total Subjects",
         credits: "Total Credits",
@@ -1175,23 +1172,23 @@ export const STRINGS = {
       heroOverline: "Meson LMS",
       heroTitle: "Learning that stays simple — and scales",
       heroSubtitle:
-        "We build a platform that connects students, educators, and institutions with clarity, trust, and measurable outcomes.",
+          "We build a platform that connects students, educators, and institutions with clarity, trust, and measurable outcomes.",
       ctaGetStarted: "Get started",
       missionTitle: "Mission",
       missionBody:
-        "Deliver a clear, accessible digital learning environment where every user — learner or educator — finds what they need quickly and tracks progress without friction.",
+          "Deliver a clear, accessible digital learning environment where every user — learner or educator — finds what they need quickly and tracks progress without friction.",
       visionTitle: "Vision",
       visionBody:
-        "A regional learning network where institutions collaborate smoothly, content stays organised, and communication remains professional and secure.",
+          "A regional learning network where institutions collaborate smoothly, content stays organised, and communication remains professional and secure.",
       whatTitle: "What is Meson?",
       whatBody:
-        "Meson is a learning management system for courses, assignments, assessments, and in-institution communication — in one modern interface that works across devices.",
+          "Meson is a learning management system for subjects, assignments, assessments, and in-institution communication — in one modern interface that works across devices.",
       featuresTitle: "What the platform includes",
-      featureCourses: "Structured courses and materials by module and term.",
+      featureSubjects: "Structured subjects and materials by module and term.",
       featureAssignments:
-        "Tasks with deadlines, notices, and progress tracking.",
+          "Tasks with deadlines, notices, and progress tracking.",
       featureGrades: "Centralised grades and feedback for learners.",
-      featureCommunication: "Messaging and announcements for class and course.",
+      featureCommunication: "Messaging and announcements for class and subject.",
       teamTitle: "Team",
       teamSubtitle: "People focused on product and user success.",
       team1Name: "Arben Krasniqi",
@@ -1204,13 +1201,13 @@ export const STRINGS = {
       team4Role: "Academic success",
       trustTitle: "Trust & privacy",
       trustBody:
-        "Data is handled carefully: encrypted connections (HTTPS), role-based access, and clear principles for how information is stored. Student and institutional privacy come first.",
+          "Data is handled carefully: encrypted connections (HTTPS), role-based access, and clear principles for how information is stored. Student and institutional privacy come first.",
       statsTitle: "By the numbers (illustrative)",
       statStudents: "Active learners",
-      statCourses: "Courses",
+      statSubjects: "Subjects",
       statInstructors: "Instructors",
       statStudentsVal: "12,400+",
-      statCoursesVal: "480+",
+      statSubjectsVal: "480+",
       statInstructorsVal: "320+",
       whyTitle: "Why Meson?",
       why1Title: "Clean interface",
@@ -1223,12 +1220,12 @@ export const STRINGS = {
       why4Body: "Our team responds quickly to technical and usage questions.",
       ctaFinalTitle: "Ready to join?",
       ctaFinalBody:
-        "Sign in and explore courses and the Meson experience.",
+          "Sign in and explore subjects and the Meson experience.",
       ctaLogin: "Sign in",
     },
     footer: {
       tagline:
-        "A user-focused LMS: organised learning, clear communication, and help when you need it.",
+          "A user-focused LMS: organised learning, clear communication, and help when you need it.",
       quick: "Quick links",
       support: "Support",
       email: "Email",
@@ -1253,19 +1250,19 @@ export const STRINGS = {
     },
     semester: {
       back: "Back to Dashboard",
-      overline: "COURSE BROWSER",
+      overline: "SUBJECT BROWSER",
       title: "Semester",
       subtitle: "Explore and manage your enrolled subjects for this semester.",
       empty: {
-        title: "No Courses Found",
-        desc: "We couldn't find any active courses for this semester. Please check back later or contact your administrator.",
+        title: "No Subjects Found",
+        desc: "We couldn't find any active subjects for this semester. Please check back later or contact your administrator.",
       },
-      courseBadge: "Subject",
-      noDescription: "No description provided for this course.",
-      viewCourse: "View Course",
+      subjectBadge: "Subject",
+      noDescription: "No description provided for this subject.",
+      viewSubject: "View Subject",
     },
-    courseDetail: {
-      noModules: "No modules in this course",
+    subjectDetail: {
+      noModules: "No modules in this subject",
       noLessons: "No lessons in this module",
       teacher: "",
       semester: "Semester ",
@@ -1274,7 +1271,7 @@ export const STRINGS = {
     lessonDetail: {
       notFound: "Lesson not found",
       back: "Go back",
-      backToCourse: "Back to course",
+      backToSubject: "Back to subject",
       video: "Video",
       content: "Content",
       extraMaterial: "Extra material",
@@ -1298,8 +1295,8 @@ export const STRINGS = {
       nextBtn: "Next",
       minutes: "minutes",
     },
-    course: {
-      notFound: "Course not found.",
+    subject: {
+      notFound: "Subject not found.",
       backToHome: "Back to home",
       backToSubjects: "Back to subjects",
       subjectDetail: "Subject details",
@@ -1334,7 +1331,7 @@ export const STRINGS = {
       topic: {
         t: "Topic",
         t1: "Access issues",
-        t2: "Course questions",
+        t2: "Subject questions",
         t3: "Grade questions",
         t4: "Technical support",
         t5: "Billing / Payments",

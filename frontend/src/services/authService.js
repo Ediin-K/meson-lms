@@ -1,4 +1,4 @@
-import axiosInstance from './axiosInstance'
+﻿import axiosInstance from './axiosInstance'
 
 const API_URL = 'http://localhost:8080/api/auth';
 
@@ -34,7 +34,7 @@ export const logout = async () => {
     localStorage.removeItem('email')
     localStorage.removeItem('meson-role')
     localStorage.removeItem('userId')
-    localStorage.removeItem('lastCourseId')
+    localStorage.removeItem('lastSubjectId')
 };
 
 export const isAuthenticated = () => {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppPreferences } from "../context/appPreferencesContext";
 import {
@@ -230,7 +230,7 @@ export default function AdminCategories() {
             >
               {t(
                 "home.admin.services.categories.desc",
-                "Organizoni kurset në kategori dhe tema.",
+                "Organizoni Lëndët në kategori dhe tema.",
               )}
             </Typography>
           </div>

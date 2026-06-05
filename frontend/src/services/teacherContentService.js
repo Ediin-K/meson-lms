@@ -1,12 +1,12 @@
-import axiosInstance from "./axiosInstance";
+﻿import axiosInstance from "./axiosInstance";
 
 const teacherContentService = {
     getStats: () => axiosInstance.get("/teacher/dashboard/stats"),
-    getCourses: () => axiosInstance.get("/teacher/courses"),
-    getCourseById: (id) => axiosInstance.get(`/teacher/courses/${id}`),
-    updateCourse: (id, data) => axiosInstance.put(`/teacher/courses/${id}`, data),
+    getSubjects: () => axiosInstance.get("/teacher/subjects"),
+    getSubjectById: (id) => axiosInstance.get(`/teacher/subjects/${id}`),
+    updateSubject: (id, data) => axiosInstance.put(`/teacher/subjects/${id}`, data),
     
-    getModules: (courseId) => axiosInstance.get(`/teacher/courses/${courseId}/modules`),
+    getModules: (subjectId) => axiosInstance.get(`/teacher/subjects/${subjectId}/modules`),
     createModule: (data) => axiosInstance.post("/teacher/modules", data),
     updateModule: (id, data) => axiosInstance.put(`/teacher/modules/${id}`, data),
     deleteModule: (id) => axiosInstance.delete(`/teacher/modules/${id}`),
@@ -34,7 +34,7 @@ const teacherContentService = {
     gradeSubmission: (id, data) => axiosInstance.put(`/teacher/submissions/${id}/grade`, data),
     
     getStudents: () => axiosInstance.get("/teacher/students"),
-    getStudentsByCourse: (courseId) => axiosInstance.get(`/teacher/courses/${courseId}/students`),
+    getStudentsBySubject: (subjectId) => axiosInstance.get(`/teacher/subjects/${subjectId}/students`),
     
     uploadLessonFile: (lessonId, file) => {
         const formData = new FormData();

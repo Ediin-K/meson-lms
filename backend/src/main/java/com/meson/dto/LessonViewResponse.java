@@ -6,7 +6,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class LessonViewResponse {
-    private boolean courseCompleted;
+    private boolean subjectCompleted;
     private String  certificateCode;
-    private String  courseTitulli;
+    private String  subjectTitulli;
 }

@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(exclude = {"user", "course", "courseGroup", "courseSubgroup"})
+@EqualsAndHashCode(exclude = {"user", "subject", "subjectGroup", "subjectSubgroup"})
 public class Enrollment {
 
     @Id
@@ -22,26 +22,27 @@ public class Enrollment {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id", nullable = false)
-    private Course course;
+    @JoinColumn(name = "subject_id", nullable = false)
+    private Subject subject;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_group_id")
-    private CourseGroup courseGroup;
+    @JoinColumn(name = "subject_group_id")
+    private SubjectGroup subjectGroup;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_subgroup_id")
-    private CourseSubgroup courseSubgroup;
+    @JoinColumn(name = "subject_subgroup_id")
+    private SubjectSubgroup subjectSubgroup;
 
     @Builder.Default
+    @Column(name = "progress")
     private Double progresi = 0.0;
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "status", nullable = false)
     private EnrollmentStatus statusi = EnrollmentStatus.AKTIV;
 
-    @Column(nullable = false, updatable = false)
+    @Column(name = "enrollment_date", nullable = false, updatable = false)
     private LocalDateTime dataRegjistrimit;
 
     @PrePersist

@@ -1,11 +1,11 @@
 package com.meson.service;
 
-import com.meson.entity.Course;
+import com.meson.entity.Subject;
 import com.meson.entity.Module;
 import com.meson.repository.ModuleRepository;
 import com.meson.dto.ModuleRequest;
 import com.meson.dto.ModuleResponse;
-import com.meson.repository.CourseRepository;
+import com.meson.repository.SubjectRepository;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import java.util.List;
@@ -15,7 +15,7 @@ import java.util.List;
 public class ModuleService{
 
     private final ModuleRepository moduleRepository;
-    private final CourseRepository courseRepository;
+    private final SubjectRepository subjectRepository;
 
     public List<ModuleResponse> getAll(){
         return moduleRepository.findAll()
@@ -30,24 +30,24 @@ public class ModuleService{
         return toResponse(module);
     }
 
-    public List<ModuleResponse> getByCourseId(Long courseId){
-        return moduleRepository.findByCourseIdOrderByRradhitjaAsc(courseId)
+    public List<ModuleResponse> getBySubjectId(Long subjectId){
+        return moduleRepository.findBySubjectIdOrderByRradhitjaAsc(subjectId)
                 .stream()
                 .map(this::toResponse)
                 .toList();
     }
 
     public ModuleResponse create(ModuleRequest request){
-        if(moduleRepository.existsByTitulliAndCourseId(request.getTitulli(),request.getCourseId())){
+        if(moduleRepository.existsByTitulliAndSubjectId(request.getTitulli(),request.getSubjectId())){
             throw new RuntimeException("Moduli tashme ekziston ne kete kurs");
         }
         Module module = new Module();
         module.setTitulli(request.getTitulli());
         module.setPershkrimi(request.getPershkrimi());
         module.setRradhitja(request.getRradhitja());
-        Course course = courseRepository.findById(request.getCourseId())
-                .orElseThrow(() -> new RuntimeException("Kursi nuk u gjet"));
-        module.setCourse(course);
+        Subject course = subjectRepository.findById(request.getSubjectId())
+                .orElseThrow(() -> new RuntimeException("Lënda nuk u gjet"));
+        module.setSubject(course);
         return toResponse(moduleRepository.save(module));
     }
 
@@ -57,9 +57,9 @@ public class ModuleService{
         module.setTitulli(request.getTitulli());
         module.setPershkrimi(request.getPershkrimi());
         module.setRradhitja(request.getRradhitja());
-        Course course = courseRepository.findById(request.getCourseId())
-                .orElseThrow(() -> new RuntimeException("Kursi nuk u gjet"));
-        module.setCourse(course);
+        Subject course = subjectRepository.findById(request.getSubjectId())
+                .orElseThrow(() -> new RuntimeException("Lënda nuk u gjet"));
+        module.setSubject(course);
         return toResponse(moduleRepository.save(module));
     }
 
@@ -77,8 +77,8 @@ public class ModuleService{
                 .pershkrimi(module.getPershkrimi())
                 .rradhitja(module.getRradhitja())
                 .createdAt(module.getCreatedAt())
-                .courseId(module.getCourse().getId())
-                .courseTitulli(module.getCourse().getTitulli())
+                .subjectId(module.getSubject().getId())
+                .subjectTitulli(module.getSubject().getTitulli())
                 .build();
     }
 }

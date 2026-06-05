@@ -55,9 +55,9 @@ public class TeacherController {
         return ResponseEntity.ok(teacherService.searchTeachers(term));
     }
 
-    @PostMapping("/assign-course")
-    public ResponseEntity<Void> assignTeacherToCourse(@Valid @RequestBody AssignTeacherRequest request) {
-        teacherService.assignTeacherToCourse(request);
+    @PostMapping("/assign-subject")
+    public ResponseEntity<Void> assignTeacherToSubject(@Valid @RequestBody AssignTeacherRequest request) {
+        teacherService.assignTeacherToSubject(request);
         return ResponseEntity.noContent().build();
     }
 }

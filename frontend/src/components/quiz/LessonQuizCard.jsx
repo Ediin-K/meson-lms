@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Button, Chip, Typography } from '@mui/material';
 import QuizRounded from '@mui/icons-material/QuizRounded';
@@ -13,7 +13,7 @@ const ATTEMPT_LABELS = {
   ABANDONED: { label: 'Braktisur', color: 'default' },
 };
 
-export default function LessonQuizCard({ lessonId, courseId, compact = false }) {
+export default function LessonQuizCard({ lessonId, subjectId, compact = false }) {
   const navigate = useNavigate();
   const [quizzes, setQuizzes] = useState([]);
   const [attempts, setAttempts] = useState({});
@@ -56,7 +56,7 @@ export default function LessonQuizCard({ lessonId, courseId, compact = false }) 
     );
   }
 
-  const startPath = (quizId) => (courseId ? `/course/${courseId}/quiz/${quizId}` : `/quiz/${quizId}`);
+  const startPath = (quizId) => (subjectId ? `/subject/${subjectId}/quiz/${quizId}` : `/quiz/${quizId}`);
 
   const getAction = (quiz) => {
     const att = attempts[quiz.id];
