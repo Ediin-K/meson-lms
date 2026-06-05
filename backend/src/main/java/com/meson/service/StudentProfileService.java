@@ -41,8 +41,8 @@ public class StudentProfileService {
 
         studentProfileRepository.findByUserIdWithDetails(userId).ifPresent(profile -> {
             builder.currentSemester(profile.getCurrentSemester());
-            if (profile.getDirection() != null) {
-                builder.categoryName(profile.getDirection().getEmertimi());
+            if (profile.getDepartment() != null) {
+                builder.departmentName(profile.getDepartment().getEmertimi());
             }
         });
 

@@ -47,8 +47,8 @@ export default function GroupCreateWizard({
   submitting,
   contextLoading,
   categories,
-  categoryId,
-  setCategoryId,
+  departmentId,
+  setDepartmentId,
   semester,
   setSemester,
   subjects,
@@ -293,12 +293,12 @@ export default function GroupCreateWizard({
                 <Box>
                   <Typography sx={{ color: theme.text, fontWeight: 800, mb: 2 }}>Basic Group Info</Typography>
                   <Box className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <FormControl fullWidth sx={getWizardFieldSx(isDark)} error={Boolean(fieldErrors.categoryId)}>
-                      <InputLabel>Drejtimi</InputLabel>
+                    <FormControl fullWidth sx={getWizardFieldSx(isDark)} error={Boolean(fieldErrors.departmentId)}>
+                      <InputLabel>Departamenti</InputLabel>
                       <Select
-                        label="Drejtimi"
-                        value={categoryId}
-                        onChange={(e) => setCategoryId(e.target.value)}
+                        label="Departamenti"
+                        value={departmentId}
+                        onChange={(e) => setDepartmentId(e.target.value)}
                         className={wizardFieldClass()}
                         MenuProps={getMenuPaperSx(isDark)}
                       >

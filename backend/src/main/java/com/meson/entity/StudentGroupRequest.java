@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(exclude = {"student", "directionGroup", "approvedBy"})
+@EqualsAndHashCode(exclude = {"student", "departmentGroup", "approvedBy"})
 public class StudentGroupRequest {
 
     @Id
@@ -22,8 +22,8 @@ public class StudentGroupRequest {
     private User student;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "direction_group_id", nullable = false)
-    private DirectionGroup directionGroup;
+    @JoinColumn(name = "department_group_id", nullable = false)
+    private DepartmentGroup departmentGroup;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

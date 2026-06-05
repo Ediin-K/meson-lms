@@ -9,8 +9,9 @@ import lombok.Builder;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class DirectionResponse {
+public class DepartmentResponse {
     private Long id;
     private String emertimi;
     private String pershkrimi;
+    private Integer numSemesters;
 }

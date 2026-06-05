@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppPreferences } from "../context/appPreferencesContext";
 import {
@@ -39,7 +39,6 @@ import EditRounded from "@mui/icons-material/EditRounded";
 import DeleteRounded from "@mui/icons-material/DeleteRounded";
 import SchoolRounded from "@mui/icons-material/SchoolRounded";
 import PeopleRounded from "@mui/icons-material/PeopleRounded";
-import MoreVertRounded from "@mui/icons-material/MoreVertRounded";
 import BadgeRounded from "@mui/icons-material/BadgeRounded";
 import EmailRounded from "@mui/icons-material/EmailRounded";
 import PhoneRounded from "@mui/icons-material/PhoneRounded";
@@ -78,13 +77,14 @@ export default function AdminTeachers() {
   const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
-  const filtered = teachers.filter((t) => {
+
+  const filtered = teachers.filter((tc) => {
     const matchesSearch =
-      `${t.emri} ${t.mbiemri} ${t.email}`
+      `${tc.emri} ${tc.mbiemri} ${tc.email}`
         .toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
-      t.subjectCount?.toString().includes(searchTerm);
-    const matchesStatus = statusFilter === "all" || t.statusi === statusFilter;
+      tc.subjectCount?.toString().includes(searchTerm);
+    const matchesStatus = statusFilter === "all" || tc.statusi === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
@@ -99,7 +99,7 @@ export default function AdminTeachers() {
       setTeachers(data);
     } catch (err) {
       console.error("Error fetching teachers:", err);
-      setSnackbarMessage("Gabim gjatë marrjes së mësuesve");
+      setSnackbarMessage(t("adminTeachers.toast.fetchError"));
       setOpenSnackbar(true);
     } finally {
       setLoading(false);
@@ -144,16 +144,16 @@ export default function AdminTeachers() {
 
         await teacherService.updateTeacher(selectedTeacher.id, updateData);
         await fetchTeachers();
-        setSnackbarMessage("Mësuesi u përditësua me sukses");
+        setSnackbarMessage(t("adminTeachers.toast.updated"));
       } else {
         await teacherService.createTeacher(formData);
         await fetchTeachers();
-        setSnackbarMessage("Mësuesi u krijua me sukses");
+        setSnackbarMessage(t("adminTeachers.toast.created"));
       }
       setOpenSnackbar(true);
       setOpenDialog(false);
     } catch (err) {
-      setSnackbarMessage(err.message || "Gabim gjatë ruajtjes");
+      setSnackbarMessage(err.message || t("adminTeachers.toast.saveError"));
       setOpenSnackbar(true);
     }
   };
@@ -167,13 +167,13 @@ export default function AdminTeachers() {
     if (!deleteTarget) return;
     try {
       await teacherService.deleteTeacher(deleteTarget.id);
-      setTeachers((prev) => prev.filter((t) => t.id !== deleteTarget.id));
+      setTeachers((prev) => prev.filter((tc) => tc.id !== deleteTarget.id));
       setSnackbarMessage(
-        `${deleteTarget.emri} ${deleteTarget.mbiemri} u fshi me sukses`,
+        `${deleteTarget.emri} ${deleteTarget.mbiemri} ${t("adminTeachers.toast.deleted")}`,
       );
       setOpenSnackbar(true);
     } catch (err) {
-      setSnackbarMessage(err.message || "Gabim gjatë fshirjes");
+      setSnackbarMessage(err.message || t("adminTeachers.toast.deleteError"));
       setOpenSnackbar(true);
     } finally {
       setOpenDeleteConfirm(false);
@@ -192,7 +192,7 @@ export default function AdminTeachers() {
   };
 
   const statusLabel = (status) => {
-    return status === "active" ? "Aktiv" : "Joaktiv";
+    return status === "active" ? t("adminTeachers.statusActive") : t("adminTeachers.statusInactive");
   };
 
   return (
@@ -205,7 +205,7 @@ export default function AdminTeachers() {
             onClick={() => navigate("/admin")}
             className="rounded-2xl! px-6! py-2! normal-case! font-bold! text-slate-600! dark:text-slate-400! hover:bg-slate-200/50! dark:hover:bg-slate-800/50!"
           >
-            Kthehu te Paneli
+            {t("adminTeachers.backToPanel")}
           </Button>
         </Box>
 
@@ -216,27 +216,26 @@ export default function AdminTeachers() {
               variant="overline"
               className="font-bold! tracking-[0.3em]! text-indigo-600! dark:text-indigo-400!"
             >
-              MENAXHIMI I MËSUESVE
+              {t("adminTeachers.overline")}
             </Typography>
             <Typography
               variant="h3"
               component="h1"
               className="mt-2! font-black! text-slate-900! dark:text-white!"
             >
-              Mësuesit
+              {t("adminTeachers.title")}
             </Typography>
             <Typography
               variant="body1"
               className="mt-4! max-w-2xl! text-slate-500! dark:text-slate-400! text-lg font-medium!"
             >
-              Menaxhoni mësuesit, caktoni Lëndët dhe monitoroni aktivitetin në
-              sistem.
+              {t("adminTeachers.subtitle")}
             </Typography>
           </div>
 
           <Box className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
             <TextField
-              placeholder="Kërko mësuesit..."
+              placeholder={t("adminTeachers.searchPlaceholder")}
               variant="outlined"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -258,7 +257,7 @@ export default function AdminTeachers() {
               onClick={handleOpenAdd}
               className="rounded-3xl! py-4! px-8! normal-case! font-black! bg-indigo-600! hover:bg-indigo-700! shadow-xl shadow-indigo-500/30 transition-all hover:scale-105 active:scale-95"
             >
-              Shto Mësues
+              {t("adminTeachers.addBtn")}
             </Button>
           </Box>
         </Box>
@@ -267,22 +266,22 @@ export default function AdminTeachers() {
         <Grid container spacing={3} className="mb-10">
           {[
             {
-              label: "Gjithsej Mësues",
+              label: t("adminTeachers.statsTotal"),
               value: teachers.length,
               icon: PeopleRounded,
               color: "text-indigo-600",
               bg: "bg-indigo-50 dark:bg-indigo-900/20",
             },
             {
-              label: "Lëndë Të Lidhura",
-              value: teachers.reduce((sum, t) => sum + (t.subjectCount || 0), 0),
+              label: t("adminTeachers.statsSubjects"),
+              value: teachers.reduce((sum, tc) => sum + (tc.subjectCount || 0), 0),
               icon: SchoolRounded,
               color: "text-sky-600",
               bg: "bg-sky-50 dark:bg-sky-900/20",
             },
             {
-              label: "Mësues Aktiv",
-              value: teachers.filter((t) => t.statusi === "active").length,
+              label: t("adminTeachers.statsActive"),
+              value: teachers.filter((tc) => tc.statusi === "active").length,
               icon: BadgeRounded,
               color: "text-emerald-600",
               bg: "bg-emerald-50 dark:bg-emerald-900/20",
@@ -325,32 +324,29 @@ export default function AdminTeachers() {
                 variant="h6"
                 className="font-black! text-slate-800! dark:text-white!"
               >
-                Lista e Mësuesve
+                {t("adminTeachers.listTitle")}
               </Typography>
               <FormControl size="small" className="w-40">
                 <InputLabel sx={{ color: isDark ? "#cbd5e1" : "#64748b" }}>
-                  Statusi
+                  {t("adminTeachers.statusLabel")}
                 </InputLabel>
                 <Select variant="outlined"
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  label="Statusi"
+                  label={t("adminTeachers.statusLabel")}
                   sx={{
                     color: isDark ? "#f1f5f9" : "#1e293b",
                     "& .MuiOutlinedInput-notchedOutline": {
                       borderColor: isDark ? "#334155" : "#cbd5e1",
-                    },
-                    "&:hover .MuiOutlinedInput-notchedOutline": {
-                      borderColor: isDark ? "#475569" : "#cbd5e1",
                     },
                     "& .MuiSvgIcon-root": {
                       color: isDark ? "#cbd5e1" : "#64748b",
                     },
                   }}
                 >
-                  <MenuItem value="all">Të Gjithë</MenuItem>
-                  <MenuItem value="active">Aktiv</MenuItem>
-                  <MenuItem value="inactive">Joaktiv</MenuItem>
+                  <MenuItem value="all">{t("adminTeachers.statusAll")}</MenuItem>
+                  <MenuItem value="active">{t("adminTeachers.statusActive")}</MenuItem>
+                  <MenuItem value="inactive">{t("adminTeachers.statusInactive")}</MenuItem>
                 </Select>
               </FormControl>
             </Box>
@@ -366,25 +362,25 @@ export default function AdminTeachers() {
                 <TableHead className="bg-slate-50/50 dark:bg-slate-800/30!">
                   <TableRow>
                     <TableCell className="font-black! text-slate-400! uppercase! text-[10px]! tracking-widest! py-6! pl-8!">
-                      Emri
+                      {t("adminTeachers.tableEmri")}
                     </TableCell>
                     <TableCell className="font-black! text-slate-400! uppercase! text-[10px]! tracking-widest! py-6!">
-                      Email
+                      {t("adminTeachers.tableEmail")}
                     </TableCell>
                     <TableCell className="font-black! text-slate-400! uppercase! text-[10px]! tracking-widest! py-6!">
-                      Telefon
+                      {t("adminTeachers.tableTelefon")}
                     </TableCell>
                     <TableCell className="font-black! text-slate-400! uppercase! text-[10px]! tracking-widest! py-6!">
-                      Lëndë
+                      {t("adminTeachers.tableLende")}
                     </TableCell>
                     <TableCell className="font-black! text-slate-400! uppercase! text-[10px]! tracking-widest! py-6!">
-                      Statusi
+                      {t("adminTeachers.tableStatusi")}
                     </TableCell>
                     <TableCell
                       align="right"
                       className="font-black! text-slate-400! uppercase! text-[10px]! tracking-widest! py-6! pr-8!"
                     >
-                      Veprime
+                      {t("adminTeachers.tableVeprime")}
                     </TableCell>
                   </TableRow>
                 </TableHead>
@@ -401,14 +397,13 @@ export default function AdminTeachers() {
                               variant="h6"
                               className="font-black! text-slate-800! dark:text-white! mb-1"
                             >
-                              Nuk u gjet asnjë mësues
+                              {t("adminTeachers.emptyTitle")}
                             </Typography>
                             <Typography
                               variant="body2"
                               className="text-slate-400!"
                             >
-                              Provo të ndryshosh kërkimin ose shto një mësues të
-                              ri.
+                              {t("adminTeachers.emptyDesc")}
                             </Typography>
                           </div>
                         </Box>
@@ -492,7 +487,7 @@ export default function AdminTeachers() {
                           </Box>
                         </TableCell>
                         <TableCell align="right" className="pr-2!">
-                          <Tooltip title="Redakto">
+                          <Tooltip title={t("adminTeachers.tooltipEdit")}>
                             <IconButton
                               size="small"
                               onClick={() => handleOpenEdit(teacher)}
@@ -501,7 +496,7 @@ export default function AdminTeachers() {
                               <EditRounded fontSize="small" />
                             </IconButton>
                           </Tooltip>
-                          <Tooltip title="Fshij">
+                          <Tooltip title={t("adminTeachers.tooltipDelete")}>
                             <IconButton
                               size="small"
                               onClick={() => handleOpenDelete(teacher)}
@@ -550,7 +545,7 @@ export default function AdminTeachers() {
               isDark ? "font-black! text-white!" : "font-black! text-slate-900!"
             }
           >
-            {isEdit ? "Përditëso Mësuesin" : "Shto Mësues të Ri"}
+            {isEdit ? t("adminTeachers.editDialogTitle") : t("adminTeachers.addDialogTitle")}
           </Typography>
           <Typography
             variant="body2"
@@ -559,8 +554,8 @@ export default function AdminTeachers() {
             }
           >
             {isEdit
-              ? "Ndryshoni të dhënat e llogarisë ekzistuese."
-              : "Plotësoni të dhënat për të krijuar një llogari të re."}
+              ? t("adminTeachers.dialogEditSubtitle")
+              : t("adminTeachers.dialogSubtitle")}
           </Typography>
         </DialogTitle>
         <DialogContent
@@ -569,7 +564,7 @@ export default function AdminTeachers() {
           <Box className="flex flex-col gap-5 mt-4">
             <Box className="flex gap-4">
               <TextField
-                label="Emri"
+                label={t("adminTeachers.fieldEmri")}
                 fullWidth
                 value={formData.emri}
                 onChange={field("emri")}
@@ -584,17 +579,13 @@ export default function AdminTeachers() {
                       borderColor: isDark ? "#475569" : "#cbd5e1",
                     },
                   },
-                  "& .MuiInputBase-input::placeholder": {
-                    color: isDark ? "#94a3b8" : "#94a3b8",
-                    opacity: 1,
-                  },
                   "& .MuiInputLabel-root": {
                     color: isDark ? "#cbd5e1" : "#64748b",
                   },
                 }}
               />
               <TextField
-                label="Mbiemri"
+                label={t("adminTeachers.fieldMbiemri")}
                 fullWidth
                 value={formData.mbiemri}
                 onChange={field("mbiemri")}
@@ -609,10 +600,6 @@ export default function AdminTeachers() {
                       borderColor: isDark ? "#475569" : "#cbd5e1",
                     },
                   },
-                  "& .MuiInputBase-input::placeholder": {
-                    color: isDark ? "#94a3b8" : "#94a3b8",
-                    opacity: 1,
-                  },
                   "& .MuiInputLabel-root": {
                     color: isDark ? "#cbd5e1" : "#64748b",
                   },
@@ -620,7 +607,7 @@ export default function AdminTeachers() {
               />
             </Box>
             <TextField
-              label="Email Adresa"
+              label={t("adminTeachers.fieldEmail")}
               type="email"
               fullWidth
               value={formData.email}
@@ -636,17 +623,13 @@ export default function AdminTeachers() {
                     borderColor: isDark ? "#475569" : "#cbd5e1",
                   },
                 },
-                "& .MuiInputBase-input::placeholder": {
-                  color: isDark ? "#94a3b8" : "#94a3b8",
-                  opacity: 1,
-                },
                 "& .MuiInputLabel-root": {
                   color: isDark ? "#cbd5e1" : "#64748b",
                 },
               }}
             />
             <TextField
-              label="Numri i Telefonit"
+              label={t("adminTeachers.fieldPhone")}
               fullWidth
               value={formData.phoneNumber}
               onChange={field("phoneNumber")}
@@ -661,10 +644,6 @@ export default function AdminTeachers() {
                     borderColor: isDark ? "#475569" : "#cbd5e1",
                   },
                 },
-                "& .MuiInputBase-input::placeholder": {
-                  color: isDark ? "#94a3b8" : "#94a3b8",
-                  opacity: 1,
-                },
                 "& .MuiInputLabel-root": {
                   color: isDark ? "#cbd5e1" : "#64748b",
                 },
@@ -672,7 +651,7 @@ export default function AdminTeachers() {
             />
             {!isEdit && (
               <TextField
-                label="Fjalëkalimi"
+                label={t("adminTeachers.fieldPassword")}
                 type="password"
                 fullWidth
                 value={formData.password}
@@ -687,10 +666,6 @@ export default function AdminTeachers() {
                     "&:hover fieldset": {
                       borderColor: isDark ? "#475569" : "#cbd5e1",
                     },
-                  },
-                  "& .MuiInputBase-input::placeholder": {
-                    color: isDark ? "#94a3b8" : "#94a3b8",
-                    opacity: 1,
                   },
                   "& .MuiInputLabel-root": {
                     color: isDark ? "#cbd5e1" : "#64748b",
@@ -700,7 +675,7 @@ export default function AdminTeachers() {
             )}
             {isEdit && (
               <TextField
-                label="Fjalëkalim (lëre bosh nëse nuk dëshiron ta ndryshosh)"
+                label={t("adminTeachers.fieldPasswordEdit")}
                 type="password"
                 fullWidth
                 value={formData.password}
@@ -716,10 +691,6 @@ export default function AdminTeachers() {
                       borderColor: isDark ? "#475569" : "#cbd5e1",
                     },
                   },
-                  "& .MuiInputBase-input::placeholder": {
-                    color: isDark ? "#94a3b8" : "#94a3b8",
-                    opacity: 1,
-                  },
                   "& .MuiInputLabel-root": {
                     color: isDark ? "#cbd5e1" : "#64748b",
                   },
@@ -728,11 +699,11 @@ export default function AdminTeachers() {
             )}
             <FormControl fullWidth>
               <InputLabel sx={{ color: isDark ? "#cbd5e1" : "#64748b" }}>
-                Statusi
+                {t("adminTeachers.fieldStatusi")}
               </InputLabel>
               <Select variant="outlined"
                 value={formData.statusi}
-                label="Statusi"
+                label={t("adminTeachers.fieldStatusi")}
                 onChange={field("statusi")}
                 sx={{
                   borderRadius: "1rem",
@@ -740,16 +711,13 @@ export default function AdminTeachers() {
                   "& .MuiOutlinedInput-notchedOutline": {
                     borderColor: isDark ? "#334155" : "#cbd5e1",
                   },
-                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: isDark ? "#475569" : "#cbd5e1",
-                  },
                   "& .MuiSvgIcon-root": {
                     color: isDark ? "#cbd5e1" : "#64748b",
                   },
                 }}
               >
-                <MenuItem value="active">Aktiv</MenuItem>
-                <MenuItem value="inactive">Joaktiv</MenuItem>
+                <MenuItem value="active">{t("adminTeachers.statusActive")}</MenuItem>
+                <MenuItem value="inactive">{t("adminTeachers.statusInactive")}</MenuItem>
               </Select>
             </FormControl>
           </Box>
@@ -759,7 +727,7 @@ export default function AdminTeachers() {
             onClick={() => setOpenDialog(false)}
             className="rounded-2xl! px-6! py-3! normal-case! font-bold! text-slate-500! hover:bg-slate-100! dark:hover:bg-slate-800!"
           >
-            {t("adminUsers.form.cancel", "Anulo")}
+            {t("adminTeachers.cancel")}
           </Button>
           <Button
             variant="contained"
@@ -767,7 +735,7 @@ export default function AdminTeachers() {
             onClick={handleSubmit}
             className="rounded-2xl! px-10! py-3! normal-case! font-black! bg-indigo-600! hover:bg-indigo-700! shadow-lg shadow-indigo-500/20"
           >
-            {isEdit ? "Përditëso" : "Krijo Llogarinë"}
+            {isEdit ? t("adminTeachers.update") : t("adminTeachers.createAccount")}
           </Button>
         </DialogActions>
       </Dialog>
@@ -803,7 +771,7 @@ export default function AdminTeachers() {
               isDark ? "font-black! text-white!" : "font-black! text-slate-900!"
             }
           >
-            A jeni i sigurt?
+            {t("adminTeachers.deleteTitle")}
           </Typography>
         </DialogTitle>
         <DialogContent className="px-6! py-4!">
@@ -811,7 +779,7 @@ export default function AdminTeachers() {
             variant="body2"
             className={isDark ? "text-slate-300!" : "text-slate-600!"}
           >
-            Do të fshihet përhershëm mësuesi:
+            {t("adminTeachers.deleteBodyPrefix")}
           </Typography>
           <Typography
             variant="body1"
@@ -838,7 +806,7 @@ export default function AdminTeachers() {
             }}
             className="rounded-2xl! px-6! py-3! normal-case! font-bold! text-slate-500! hover:bg-slate-100! dark:hover:bg-slate-800!"
           >
-            Anulo
+            {t("adminTeachers.cancel")}
           </Button>
           <Button
             variant="contained"
@@ -846,7 +814,7 @@ export default function AdminTeachers() {
             onClick={handleConfirmDelete}
             className="rounded-2xl! px-10! py-3! normal-case! font-black!"
           >
-            Fshi
+            {t("adminUsers.deleteConfirm")}
           </Button>
         </DialogActions>
       </Dialog>
@@ -861,10 +829,10 @@ export default function AdminTeachers() {
       >
         <Alert
           onClose={() => setOpenSnackbar(false)}
-          severity={snackbarMessage.includes("Gabim") ? "error" : "success"}
+          severity={snackbarMessage.includes("Gabim") || snackbarMessage.includes("Error") ? "error" : "success"}
           variant="filled"
-          sx={{ 
-            width: "100%", 
+          sx={{
+            width: "100%",
             borderRadius: "1.25rem",
             fontWeight: "bold",
             boxShadow: "0 10px 30px rgba(0,0,0,0.1)"

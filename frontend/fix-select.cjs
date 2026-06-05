@@ -10,7 +10,7 @@ const files = [
   'src/pages/AssignmentPage.jsx',
   'src/pages/teacher/TeacherModules.jsx',
   'src/pages/Notifications.jsx',
-  'src/pages/AdminCategories.jsx'
+  'src/pages/AdminDepartments.jsx'
 ];
 
 for (const file of files) {

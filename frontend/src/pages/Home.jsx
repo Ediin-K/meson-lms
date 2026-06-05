@@ -430,8 +430,8 @@ export default function Home() {
           {}
           <Container maxWidth="lg" className="mt-32">
             <Box className="mb-12">
-              <Typography variant="overline" className="!font-black !tracking-widest !text-sky-600 dark:!text-sky-400">{t('home.catOverline')}</Typography>
-              <Typography variant="h3" className="!font-black !text-slate-800 dark:!text-white">{t('home.catTitle')}</Typography>
+              <Typography variant="overline" className="!font-black !tracking-widest !text-sky-600 dark:!text-sky-400">{t('home.departmentOverline')}</Typography>
+              <Typography variant="h3" className="!font-black !text-slate-800 dark:!text-white">{t('home.departmentTitle')}</Typography>
             </Box>
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
               {categories.map((c, i) => (

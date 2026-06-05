@@ -52,7 +52,7 @@ const EMPTY_MODULE = {
 export default function TeacherModules() {
   const { subjectId } = useParams();
   const navigate = useNavigate();
-  const { mode } = useAppPreferences();
+  const { mode, t } = useAppPreferences();
   const isDark = mode === "dark";
 
   const [subjects, setSubjects] = useState([]);
@@ -94,7 +94,7 @@ export default function TeacherModules() {
       const res = await teacherContentService.getSubjects();
       setSubjects(res.data);
     } catch {
-      setError("Gabim gjatë marrjes së Lëndëve.");
+      setError(t("teacherModules.toast.fetchSubjectsError"));
     } finally {
       setLoading(false);
     }
@@ -110,7 +110,7 @@ export default function TeacherModules() {
       setSelectedSubject(subjectRes.data);
       setModules(modulesRes.data);
     } catch {
-      setError("Gabim gjatë marrjes së të dhënave.");
+      setError(t("teacherModules.toast.fetchDataError"));
     } finally {
       setLoading(false);
     }

@@ -67,13 +67,13 @@ export default function SubjectsPage() {
                 <TableHead className="bg-slate-50/50 dark:!bg-slate-800/30">
                   <TableRow>
                     <TableCell className="!font-bold !text-slate-400 !uppercase !text-[11px] !tracking-widest !py-5 !pl-8">
-                      Titulli i Lëndat
+                      {t("subjectsPage.titleCol")}
                     </TableCell>
                     <TableCell className="!font-bold !text-slate-400 !uppercase !text-[11px] !tracking-widest !py-5">
-                      Statusi
+                      {t("subjectsPage.statusCol")}
                     </TableCell>
                     <TableCell align="right" className="!font-bold !text-slate-400 !uppercase !text-[11px] !tracking-widest !py-5 !pr-8">
-                      Veprimi
+                      {t("subjectsPage.actionCol")}
                     </TableCell>
                   </TableRow>
                 </TableHead>
@@ -81,7 +81,7 @@ export default function SubjectsPage() {
                   {subjects.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={3} align="center" className="!py-20 text-slate-400">
-                        Nuk u gjet asnjë kurs.
+                        {t("subjectsPage.noSubjects")}
                       </TableCell>
                     </TableRow>
                   ) : (

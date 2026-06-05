@@ -18,11 +18,10 @@ public class SubjectResponse {
     private String pershkrimi;
     private Long teacherId;
     private String teacherName;
-    private Long categoryId;
+    private Long departmentId;
     private Integer semester;
     private String enrollmentKey;
-    private String categoryName;
-    private Double cmimi;
+    private String departmentName;
     private Integer ects;
     private SubjectLevel niveli;
     private SubjectStatus statusi;

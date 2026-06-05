@@ -1,12 +1,12 @@
 package com.meson.service;
 
 import com.meson.dto.*;
-import com.meson.entity.Direction;
-import com.meson.entity.DirectionGroup;
-import com.meson.entity.DirectionGroupStatus;
+import com.meson.entity.Department;
+import com.meson.entity.DepartmentGroup;
+import com.meson.entity.DepartmentGroupStatus;
 import com.meson.entity.StudentProfile;
-import com.meson.repository.DirectionRepository;
-import com.meson.repository.DirectionGroupRepository;
+import com.meson.repository.DepartmentRepository;
+import com.meson.repository.DepartmentGroupRepository;
 import com.meson.repository.StudentProfileRepository;
 import com.meson.exception.BadRequestException;
 import com.meson.exception.ResourceNotFoundException;
@@ -17,35 +17,35 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class DirectionGroupService {
+public class DepartmentGroupService {
 
-    private final DirectionGroupRepository directionGroupRepository;
-    private final DirectionRepository directionRepository;
+    private final DepartmentGroupRepository departmentGroupRepository;
+    private final DepartmentRepository departmentRepository;
     private final StudentProfileRepository studentProfileRepository;
 
     @Transactional(readOnly = true)
-    public List<DirectionGroupResponse> getByCategory(Long categoryId, Integer semester) {
-        List<DirectionGroup> groups = semester != null
-                ? directionGroupRepository.findByCategoryIdAndSemesterWithCategory(categoryId, semester)
-                : directionGroupRepository.findByCategoryIdWithCategory(categoryId);
+    public List<DepartmentGroupResponse> getByDepartment(Long departmentId, Integer semester) {
+        List<DepartmentGroup> groups = semester != null
+                ? departmentGroupRepository.findByDepartmentIdAndSemesterWithDepartment(departmentId, semester)
+                : departmentGroupRepository.findByDepartmentIdWithDepartment(departmentId);
         return groups.stream().map(this::toResponse).toList();
     }
 
     @Transactional
-    public DirectionGroupResponse create(Long categoryId, DirectionGroupRequest request) {
-        Direction category = directionRepository.findById(categoryId)
-                .orElseThrow(() -> new ResourceNotFoundException("Drejtimi nuk u gjet"));
+    public DepartmentGroupResponse create(Long departmentId, DepartmentGroupRequest request) {
+        Department department = departmentRepository.findById(departmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Departamenti nuk u gjet"));
 
         validateRequest(request);
         int semester = request.getSemester();
 
-        if (directionGroupRepository.existsByDirectionIdAndSemesterAndNameIgnoreCase(
-                categoryId, semester, request.getName())) {
-            throw new BadRequestException("Ky grup ekziston tashme per kete drejtim dhe semestrin");
+        if (departmentGroupRepository.existsByDepartmentIdAndSemesterAndNameIgnoreCase(
+                departmentId, semester, request.getName())) {
+            throw new BadRequestException("Ky grup ekziston tashme per kete departament dhe semestrin");
         }
 
-        DirectionGroup group = DirectionGroup.builder()
-                .direction(category)
+        DepartmentGroup group = DepartmentGroup.builder()
+                .department(department)
                 .semester(semester)
                 .name(request.getName().trim())
                 .description(trimToNull(request.getDescription()))
@@ -53,22 +53,22 @@ public class DirectionGroupService {
                 .status(resolveStoredStatus(request.getStatus()))
                 .build();
 
-        return toResponse(directionGroupRepository.save(group));
+        return toResponse(departmentGroupRepository.save(group));
     }
 
     @Transactional
-    public DirectionGroupResponse update(Long groupId, DirectionGroupRequest request) {
-        DirectionGroup group = directionGroupRepository.findByIdWithCategory(groupId)
-                .orElseThrow(() -> new ResourceNotFoundException("Grupi i drejtimit nuk u gjet"));
+    public DepartmentGroupResponse update(Long groupId, DepartmentGroupRequest request) {
+        DepartmentGroup group = departmentGroupRepository.findByIdWithDepartment(groupId)
+                .orElseThrow(() -> new ResourceNotFoundException("Grupi i departamentit nuk u gjet"));
 
         validateRequest(request);
-        Long categoryId = group.getDirection().getId();
+        Long departmentId = group.getDepartment().getId();
         int semester = request.getSemester() != null ? request.getSemester() : group.getSemester();
 
         if (!group.getName().equalsIgnoreCase(request.getName())
-                && directionGroupRepository.existsByDirectionIdAndSemesterAndNameIgnoreCase(
-                        categoryId, semester, request.getName())) {
-            throw new BadRequestException("Ky grup ekziston tashme per kete drejtim dhe semestrin");
+                && departmentGroupRepository.existsByDepartmentIdAndSemesterAndNameIgnoreCase(
+                        departmentId, semester, request.getName())) {
+            throw new BadRequestException("Ky grup ekziston tashme per kete departament dhe semestrin");
         }
 
         if (request.getMaxCapacity() < getCurrentStudents(groupId)) {
@@ -82,7 +82,7 @@ public class DirectionGroupService {
         if (request.getStatus() != null) {
             group.setStatus(resolveStoredStatus(request.getStatus()));
         }
-        return toResponse(directionGroupRepository.save(group));
+        return toResponse(departmentGroupRepository.save(group));
     }
 
     @Transactional
@@ -90,24 +90,24 @@ public class DirectionGroupService {
         if (getCurrentStudents(groupId) > 0) {
             throw new BadRequestException("Grupi ka studente te aprovuar dhe nuk mund te fshihet");
         }
-        directionGroupRepository.deleteById(groupId);
+        departmentGroupRepository.deleteById(groupId);
     }
 
     @Transactional(readOnly = true)
-    public DirectionGroup getEntity(Long groupId) {
-        return directionGroupRepository.findByIdWithCategory(groupId)
-                .orElseThrow(() -> new ResourceNotFoundException("Grupi i drejtimit nuk u gjet"));
+    public DepartmentGroup getEntity(Long groupId) {
+        return departmentGroupRepository.findByIdWithDepartment(groupId)
+                .orElseThrow(() -> new ResourceNotFoundException("Grupi i departamentit nuk u gjet"));
     }
 
-    public int getCurrentStudents(Long directionGroupId) {
-        return (int) studentProfileRepository.countByApprovedDirectionGroupId(directionGroupId);
+    public int getCurrentStudents(Long departmentGroupId) {
+        return (int) studentProfileRepository.countByApprovedDepartmentGroupId(departmentGroupId);
     }
 
-    public void assertGroupAcceptsStudents(DirectionGroup group) {
-        if (group.getStatus() == DirectionGroupStatus.CLOSED) {
+    public void assertGroupAcceptsStudents(DepartmentGroup group) {
+        if (group.getStatus() == DepartmentGroupStatus.CLOSED) {
             throw new BadRequestException("Grupi eshte i mbyllur");
         }
-        DirectionGroupResponse info = toResponse(group);
+        DepartmentGroupResponse info = toResponse(group);
         if (Boolean.TRUE.equals(info.getIsFull())) {
             throw new BadRequestException("Grupi eshte plote");
         }
@@ -115,13 +115,13 @@ public class DirectionGroupService {
 
     public List<StudentGroupMemberResponse> getMembers(Long groupId) {
         getEntity(groupId);
-        return studentProfileRepository.findMembersByDirectionGroupId(groupId).stream()
+        return studentProfileRepository.findMembersByDepartmentGroupId(groupId).stream()
                 .map(this::toMemberResponse)
                 .filter(java.util.Objects::nonNull)
                 .toList();
     }
 
-    public DirectionGroupResponse toResponse(DirectionGroup group) {
+    public DepartmentGroupResponse toResponse(DepartmentGroup group) {
         if (group == null) {
             return null;
         }
@@ -129,12 +129,12 @@ public class DirectionGroupService {
         int max = group.getMaxCapacity() != null ? group.getMaxCapacity() : 0;
         int remaining = Math.max(0, max - current);
         boolean isFull = max > 0 && current >= max;
-        Direction direction = group.getDirection();
+        Department department = group.getDepartment();
 
-        return DirectionGroupResponse.builder()
+        return DepartmentGroupResponse.builder()
                 .id(group.getId())
-                .categoryId(direction != null ? direction.getId() : null)
-                .categoryName(direction != null ? direction.getEmertimi() : null)
+                .departmentId(department != null ? department.getId() : null)
+                .departmentName(department != null ? department.getEmertimi() : null)
                 .semester(group.getSemester())
                 .name(group.getName())
                 .description(group.getDescription())
@@ -160,7 +160,7 @@ public class DirectionGroupService {
                 .build();
     }
 
-    private void validateRequest(DirectionGroupRequest request) {
+    private void validateRequest(DepartmentGroupRequest request) {
         if (request.getSemester() == null || request.getSemester() < 1 || request.getSemester() > 12) {
             throw new BadRequestException("Semestri duhet te jete midis 1 dhe 12");
         }
@@ -169,8 +169,8 @@ public class DirectionGroupService {
         }
     }
 
-    private DirectionGroupStatus resolveStoredStatus(DirectionGroupStatus status) {
-        return status == DirectionGroupStatus.CLOSED ? DirectionGroupStatus.CLOSED : DirectionGroupStatus.ACTIVE;
+    private DepartmentGroupStatus resolveStoredStatus(DepartmentGroupStatus status) {
+        return status == DepartmentGroupStatus.CLOSED ? DepartmentGroupStatus.CLOSED : DepartmentGroupStatus.ACTIVE;
     }
 
     private String trimToNull(String value) {
@@ -180,8 +180,8 @@ public class DirectionGroupService {
         return value.trim();
     }
 
-    private String computeDisplayStatus(DirectionGroupStatus stored, boolean isFull) {
-        if (stored == DirectionGroupStatus.CLOSED) {
+    private String computeDisplayStatus(DepartmentGroupStatus stored, boolean isFull) {
+        if (stored == DepartmentGroupStatus.CLOSED) {
             return "CLOSED";
         }
         if (isFull) {

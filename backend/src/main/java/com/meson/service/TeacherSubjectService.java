@@ -46,7 +46,6 @@ public class TeacherSubjectService {
 
         subject.setTitulli(request.getTitulli());
         subject.setPershkrimi(request.getPershkrimi());
-        subject.setCmimi(request.getCmimi());
         subject.setEcts(request.getEcts() != null ? request.getEcts() : 5);
         subject.setNiveli(request.getNiveli());
         subject.setStatusi(request.getStatusi());
@@ -78,10 +77,9 @@ public class TeacherSubjectService {
                 .pershkrimi(subject.getPershkrimi())
                 .teacherId(subject.getTeacher().getId())
                 .teacherName(subject.getTeacher().getEmri() + " " + subject.getTeacher().getMbiemri())
-                .categoryId(subject.getDirection() != null ? subject.getDirection().getId() : null)
-                .categoryName(subject.getDirection() != null ? subject.getDirection().getEmertimi() : null)
+                .departmentId(subject.getDepartment() != null ? subject.getDepartment().getId() : null)
+                .departmentName(subject.getDepartment() != null ? subject.getDepartment().getEmertimi() : null)
                 .semester(subject.getSemester())
-                .cmimi(subject.getCmimi())
                 .ects(subject.getEcts())
                 .niveli(subject.getNiveli())
                 .statusi(subject.getStatusi())

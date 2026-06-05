@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(exclude = {"teacher", "direction", "enrollments", "groups"})
+@EqualsAndHashCode(exclude = {"teacher", "department", "enrollments", "groups"})
 public class Subject {
 
     @Id
@@ -28,18 +28,14 @@ public class Subject {
     private User teacher;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
-    private Direction direction;
+    @JoinColumn(name = "department_id")
+    private Department department;
 
     @Column(nullable=false)
     private Integer semester;
 
     @Column
     private String enrollmentKey;
-
-    @Builder.Default
-    @Column(name = "price")
-    private double cmimi = 0.0;
 
     @Builder.Default
     @Column(nullable = false)

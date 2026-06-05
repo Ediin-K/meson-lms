@@ -11,10 +11,10 @@ import java.util.List;
 
 @Repository
 public interface ScheduleSessionRepository extends JpaRepository<ScheduleSession, Long> {
-    List<ScheduleSession> findBySubjectDirectionIdAndSubjectSemester(Long directionId, Integer semester);
-    List<ScheduleSession> findBySubjectDirectionIdAndSubjectSemesterAndSubjectGroupDirectionGroupId(
-            Long directionId, Integer semester, Long directionGroupId);
-    List<ScheduleSession> findBySubjectGroupDirectionGroupId(Long directionGroupId);
+    List<ScheduleSession> findBySubjectDepartmentIdAndSubjectSemester(Long departmentId, Integer semester);
+    List<ScheduleSession> findBySubjectDepartmentIdAndSubjectSemesterAndSubjectGroupDepartmentGroupId(
+            Long departmentId, Integer semester, Long departmentGroupId);
+    List<ScheduleSession> findBySubjectGroupDepartmentGroupId(Long departmentGroupId);
 
     @Query("""
             SELECT DISTINCT s FROM ScheduleSession s
@@ -22,12 +22,12 @@ public interface ScheduleSessionRepository extends JpaRepository<ScheduleSession
             JOIN FETCH s.teacher
             LEFT JOIN FETCH s.subjectGroup cg
             LEFT JOIN FETCH s.subjectSubgroup
-            WHERE cg.directionGroup.id = :directionGroupId
+            WHERE cg.departmentGroup.id = :departmentGroupId
               AND c.semester = :semester
               AND s.status = 'ACTIVE'
             """)
-    List<ScheduleSession> findByDirectionGroupIdAndSemester(
-            @Param("directionGroupId") Long directionGroupId,
+    List<ScheduleSession> findByDepartmentGroupIdAndSemester(
+            @Param("departmentGroupId") Long departmentGroupId,
             @Param("semester") Integer semester);
 
     @Query("""
@@ -36,15 +36,15 @@ public interface ScheduleSessionRepository extends JpaRepository<ScheduleSession
             JOIN FETCH s.teacher
             LEFT JOIN FETCH s.subjectGroup cg
             LEFT JOIN FETCH s.subjectSubgroup
-            WHERE c.direction.id = :categoryId
+            WHERE c.department.id = :departmentId
               AND c.semester = :semester
-              AND cg.directionGroup.id = :directionGroupId
+              AND cg.departmentGroup.id = :departmentGroupId
               AND s.status = 'ACTIVE'
             """)
     List<ScheduleSession> findApprovedSchedulesForStudent(
-            @Param("categoryId") Long categoryId,
+            @Param("departmentId") Long departmentId,
             @Param("semester") Integer semester,
-            @Param("directionGroupId") Long directionGroupId);
+            @Param("departmentGroupId") Long departmentGroupId);
 
     List<ScheduleSession> findByTeacherId(Long teacherId);
     List<ScheduleSession> findByDayOfWeek(DayOfWeek dayOfWeek);
@@ -54,7 +54,7 @@ public interface ScheduleSessionRepository extends JpaRepository<ScheduleSession
     @Query("""
             SELECT DISTINCT s FROM ScheduleSession s
             JOIN FETCH s.subject c
-            LEFT JOIN FETCH c.direction
+            LEFT JOIN FETCH c.department
             JOIN FETCH s.teacher
             LEFT JOIN FETCH s.subjectGroup
             LEFT JOIN FETCH s.subjectSubgroup
@@ -64,7 +64,7 @@ public interface ScheduleSessionRepository extends JpaRepository<ScheduleSession
     @Query("""
             SELECT DISTINCT s FROM ScheduleSession s
             JOIN FETCH s.subject c
-            LEFT JOIN FETCH c.direction
+            LEFT JOIN FETCH c.department
             JOIN FETCH s.teacher
             LEFT JOIN FETCH s.subjectGroup
             LEFT JOIN FETCH s.subjectSubgroup

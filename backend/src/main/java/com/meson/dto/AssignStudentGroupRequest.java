@@ -9,5 +9,5 @@ import lombok.*;
 @Builder
 public class AssignStudentGroupRequest {
     @NotNull
-    private Long directionGroupId;
+    private Long departmentGroupId;
 }

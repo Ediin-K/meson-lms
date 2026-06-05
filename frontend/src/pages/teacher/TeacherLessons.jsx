@@ -1,11 +1,13 @@
-﻿import { Typography, Container, Box, Button } from "@mui/material";
+import { Typography, Container, Box, Button } from "@mui/material";
 import ArrowBackRounded from "@mui/icons-material/ArrowBackRounded";
 import { useNavigate } from "react-router-dom";
 import AutoStoriesRounded from "@mui/icons-material/AutoStoriesRounded";
 import Footer from "../../components/ui/Footer";
+import { useAppPreferences } from "../../context/appPreferencesContext";
 
 export default function TeacherLessons() {
   const navigate = useNavigate();
+  const { t } = useAppPreferences();
 
   return (
     <Box className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -16,7 +18,7 @@ export default function TeacherLessons() {
             onClick={() => navigate("/teacher")}
             className="!rounded-2xl !px-6 !py-2 !normal-case !font-bold !text-slate-600 dark:!text-slate-400 hover:!bg-slate-200/50 dark:hover:!bg-slate-800/50"
           >
-            Kthehu te Paneli
+            {t("teacherLessons.backToPanel")}
           </Button>
         </Box>
 
@@ -26,12 +28,12 @@ export default function TeacherLessons() {
               <AutoStoriesRounded />
             </Box>
             <div>
-              <Typography variant="h4" className="!font-black dark:!text-white">Leksionet</Typography>
-              <Typography variant="body1" className="text-slate-500 dark:text-slate-400">Menaxhoni përmbajtjen e leksioneve.</Typography>
+              <Typography variant="h4" className="!font-black dark:!text-white">{t("teacherLessons.title")}</Typography>
+              <Typography variant="body1" className="text-slate-500 dark:text-slate-400">{t("teacherLessons.subtitle")}</Typography>
             </div>
           </Box>
           <Typography variant="body2" className="text-slate-400 dark:text-slate-600 italic">
-            Përdorni menunë e Lëndëve për të hapur një kurs dhe për të shtuar leksione në modulet përkatëse.
+            {t("teacherLessons.hint")}
           </Typography>
         </Box>
 

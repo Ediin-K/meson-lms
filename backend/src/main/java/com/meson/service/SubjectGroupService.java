@@ -18,7 +18,7 @@ public class SubjectGroupService {
     private final SubjectSubgroupRepository subjectSubgroupRepository;
     private final SubjectGroupTeacherRepository subjectGroupTeacherRepository;
     private final SubjectSubgroupTeacherRepository subjectSubgroupTeacherRepository;
-    private final DirectionGroupRepository directionGroupRepository;
+    private final DepartmentGroupRepository departmentGroupRepository;
 
     public List<SubjectGroupResponse> getBySubject(Long subjectId) {
         return subjectGroupRepository.findBySubjectId(subjectId)
@@ -41,7 +41,7 @@ public class SubjectGroupService {
                 .name(request.getName())
                 .capacity(request.getCapacity())
                 .schedule(request.getSchedule())
-                .directionGroup(resolveDirectionGroup(subject, request.getDirectionGroupId()))
+                .departmentGroup(resolveDepartmentGroup(subject, request.getDepartmentGroupId()))
                 .build();
 
         SubjectGroup saved = subjectGroupRepository.save(group);
@@ -57,7 +57,7 @@ public class SubjectGroupService {
         group.setName(request.getName());
         group.setCapacity(request.getCapacity());
         group.setSchedule(request.getSchedule());
-        group.setDirectionGroup(resolveDirectionGroup(group.getSubject(), request.getDirectionGroupId()));
+        group.setDepartmentGroup(resolveDepartmentGroup(group.getSubject(), request.getDepartmentGroupId()));
         SubjectGroup saved = subjectGroupRepository.save(group);
         syncGroupTeachers(saved, request.getTeacherIds());
         return toGroupResponse(saved);
@@ -143,17 +143,17 @@ public class SubjectGroupService {
         }
     }
 
-    private DirectionGroup resolveDirectionGroup(Subject subject, Long directionGroupId) {
-        if (directionGroupId == null) {
+    private DepartmentGroup resolveDepartmentGroup(Subject subject, Long departmentGroupId) {
+        if (departmentGroupId == null) {
             return null;
         }
-        DirectionGroup directionGroup = directionGroupRepository.findById(directionGroupId)
-                .orElseThrow(() -> new RuntimeException("Grupi i drejtimit nuk u gjet"));
-        if (subject.getDirection() == null
-                || !subject.getDirection().getId().equals(directionGroup.getDirection().getId())) {
-            throw new RuntimeException("Grupi i drejtimit nuk i perket drejtimit te lendes");
+        DepartmentGroup departmentGroup = departmentGroupRepository.findById(departmentGroupId)
+                .orElseThrow(() -> new RuntimeException("Grupi i departamentit nuk u gjet"));
+        if (subject.getDepartment() == null
+                || !subject.getDepartment().getId().equals(departmentGroup.getDepartment().getId())) {
+            throw new RuntimeException("Grupi i departamentit nuk i perket departamentit te lendes");
         }
-        return directionGroup;
+        return departmentGroup;
     }
 
     private SubjectGroupResponse toGroupResponse(SubjectGroup group) {
@@ -163,8 +163,8 @@ public class SubjectGroupService {
                 .name(group.getName())
                 .capacity(group.getCapacity())
                 .schedule(group.getSchedule())
-                .directionGroupId(group.getDirectionGroup() != null ? group.getDirectionGroup().getId() : null)
-                .directionGroupName(group.getDirectionGroup() != null ? group.getDirectionGroup().getName() : null)
+                .departmentGroupId(group.getDepartmentGroup() != null ? group.getDepartmentGroup().getId() : null)
+                .departmentGroupName(group.getDepartmentGroup() != null ? group.getDepartmentGroup().getName() : null)
                 .teachers(subjectGroupTeacherRepository.findBySubjectGroupId(group.getId()).stream()
                         .map(this::toTeacherResponse)
                         .toList())

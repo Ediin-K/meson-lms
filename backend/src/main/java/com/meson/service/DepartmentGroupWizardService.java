@@ -13,13 +13,13 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-public class DirectionGroupWizardService {
+public class DepartmentGroupWizardService {
 
     private static final int DEFAULT_SESSION_MINUTES = 90;
     private static final String ASSISTANT_SUBGROUP_NAME = "Ushtrime";
 
-    private final DirectionGroupRepository directionGroupRepository;
-    private final DirectionRepository directionRepository;
+    private final DepartmentGroupRepository departmentGroupRepository;
+    private final DepartmentRepository departmentRepository;
     private final SubjectRepository subjectRepository;
     private final SubjectGroupRepository subjectGroupRepository;
     private final SubjectSubgroupRepository subjectSubgroupRepository;
@@ -27,22 +27,22 @@ public class DirectionGroupWizardService {
     private final SubjectSubgroupTeacherRepository subjectSubgroupTeacherRepository;
     private final ScheduleSessionRepository scheduleSessionRepository;
     private final UserRepository userRepository;
-    private final DirectionGroupService directionGroupService;
+    private final DepartmentGroupService departmentGroupService;
     private final SubjectGroupService subjectGroupService;
     private final ScheduleSessionService scheduleSessionService;
     private final TeacherService teacherService;
     private final ScheduleConflictValidator conflictValidator;
 
     @Transactional(readOnly = true)
-    public DirectionGroupWizardContextResponse getContext(Long categoryId, Integer semester) {
-        Direction category = directionRepository.findById(categoryId)
-                .orElseThrow(() -> new ResourceNotFoundException("Kategoria nuk u gjet"));
+    public DepartmentGroupWizardContextResponse getContext(Long departmentId, Integer semester) {
+        Department department = departmentRepository.findById(departmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Departamenti nuk u gjet"));
 
-        List<Subject> subjects = subjectRepository.findByDirectionIdAndSemester(categoryId, semester);
+        List<Subject> subjects = subjectRepository.findByDepartmentIdAndSemester(departmentId, semester);
 
-        return DirectionGroupWizardContextResponse.builder()
-                .categoryId(category.getId())
-                .categoryName(category.getEmertimi())
+        return DepartmentGroupWizardContextResponse.builder()
+                .departmentId(department.getId())
+                .departmentName(department.getEmertimi())
                 .semester(semester)
                 .subjects(subjects.stream().map(this::toSubjectResponse).toList())
                 .teachers(teacherService.getAllTeachers())
@@ -50,28 +50,28 @@ public class DirectionGroupWizardService {
     }
 
     @Transactional
-    public DirectionGroupWizardResponse createGroupWithSchedule(CreateDirectionGroupWizardRequest request) {
-        Direction category = directionRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new ResourceNotFoundException("Kategoria nuk u gjet"));
+    public DepartmentGroupWizardResponse createGroupWithSchedule(CreateDepartmentGroupWizardRequest request) {
+        Department department = departmentRepository.findById(request.getDepartmentId())
+                .orElseThrow(() -> new ResourceNotFoundException("Departamenti nuk u gjet"));
 
-        if (directionGroupRepository.existsByDirectionIdAndSemesterAndNameIgnoreCase(
-                request.getCategoryId(), request.getSemester(), request.getName())) {
-            throw new BadRequestException("Ky grup ekziston tashme per kete drejtim dhe semestrin");
+        if (departmentGroupRepository.existsByDepartmentIdAndSemesterAndNameIgnoreCase(
+                request.getDepartmentId(), request.getSemester(), request.getName())) {
+            throw new BadRequestException("Ky grup ekziston tashme per kete departament dhe semestrin");
         }
 
-        DirectionGroup directionGroup = directionGroupRepository.save(DirectionGroup.builder()
-                .direction(category)
+        DepartmentGroup departmentGroup = departmentGroupRepository.save(DepartmentGroup.builder()
+                .department(department)
                 .semester(request.getSemester())
                 .name(request.getName().trim())
                 .description(trimToNull(request.getDescription()))
                 .maxCapacity(request.getMaxCapacity())
-                .status(DirectionGroupStatus.ACTIVE)
+                .status(DepartmentGroupStatus.ACTIVE)
                 .build());
 
         Map<Long, SubjectGroup> subjectGroupBySubjectId = new LinkedHashMap<>();
 
         for (GroupStaffAssignmentRequest staff : request.getStaff()) {
-            Subject subject = resolveSubjectForContext(staff.getSubjectId(), request.getCategoryId(), request.getSemester());
+            Subject subject = resolveSubjectForContext(staff.getSubjectId(), request.getDepartmentId(), request.getSemester());
             validateTeacher(staff.getProfessorId());
             if (staff.getAssistantId() != null) {
                 validateTeacher(staff.getAssistantId());
@@ -87,7 +87,7 @@ public class DirectionGroupWizardService {
                         .subject(subject)
                         .name(request.getName())
                         .capacity(request.getMaxCapacity())
-                        .directionGroup(directionGroup)
+                        .departmentGroup(departmentGroup)
                         .build());
             });
 
@@ -111,7 +111,7 @@ public class DirectionGroupWizardService {
                         "Lenda e orarit duhet te kete staf te caktuar ne seksionin e stafit akademik");
             }
 
-            Subject subject = resolveSubjectForContext(entry.getSubjectId(), request.getCategoryId(), request.getSemester());
+            Subject subject = resolveSubjectForContext(entry.getSubjectId(), request.getDepartmentId(), request.getSemester());
             SubjectGroup subjectGroup = subjectGroupBySubjectId.get(subject.getId());
             if (subjectGroup == null) {
                 throw new BadRequestException("Grupi i lendes nuk u gjet per orarin: " + subject.getTitulli());
@@ -163,8 +163,8 @@ public class DirectionGroupWizardService {
                     .orElseThrow(() -> new ResourceNotFoundException("Grupi i Lëndat nuk u gjet")));
         }
 
-        return DirectionGroupWizardResponse.builder()
-                .group(directionGroupService.toResponse(directionGroup))
+        return DepartmentGroupWizardResponse.builder()
+                .group(departmentGroupService.toResponse(departmentGroup))
                 .subjectGroups(subjectGroupResponses)
                 .schedules(savedSessions.stream()
                         .map(scheduleSessionService::toResponse)
@@ -174,17 +174,17 @@ public class DirectionGroupWizardService {
     }
 
     @Transactional(readOnly = true)
-    public DirectionGroupWizardResponse getGroupDetail(Long directionGroupId) {
-        DirectionGroup group = directionGroupService.getEntity(directionGroupId);
+    public DepartmentGroupWizardResponse getGroupDetail(Long departmentGroupId) {
+        DepartmentGroup group = departmentGroupService.getEntity(departmentGroupId);
         List<ScheduleSessionResponse> schedules = scheduleSessionRepository
-                .findByDirectionGroupIdAndSemester(group.getId(), group.getSemester())
+                .findByDepartmentGroupIdAndSemester(group.getId(), group.getSemester())
                 .stream()
                 .map(scheduleSessionService::toResponse)
                 .filter(Objects::nonNull)
                 .toList();
 
         List<SubjectGroupResponse> subjectGroups = subjectGroupRepository
-                .findByDirectionGroupId(group.getId())
+                .findByDepartmentGroupId(group.getId())
                 .stream()
                 .map(cg -> subjectGroupService.getBySubject(cg.getSubject().getId()).stream()
                         .filter(g -> Objects.equals(g.getId(), cg.getId()))
@@ -193,19 +193,19 @@ public class DirectionGroupWizardService {
                 .filter(Objects::nonNull)
                 .toList();
 
-        return DirectionGroupWizardResponse.builder()
-                .group(directionGroupService.toResponse(group))
+        return DepartmentGroupWizardResponse.builder()
+                .group(departmentGroupService.toResponse(group))
                 .subjectGroups(subjectGroups)
                 .schedules(schedules)
                 .build();
     }
 
-    private Subject resolveSubjectForContext(Long subjectId, Long categoryId, Integer semester) {
+    private Subject resolveSubjectForContext(Long subjectId, Long departmentId, Integer semester) {
         Subject subject = subjectRepository.findById(subjectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Lenda nuk u gjet"));
-        if (subject.getDirection() == null
-                || !subject.getDirection().getId().equals(categoryId)) {
-            throw new BadRequestException("Lenda nuk i perket drejtimit te zgjedhur");
+        if (subject.getDepartment() == null
+                || !subject.getDepartment().getId().equals(departmentId)) {
+            throw new BadRequestException("Lenda nuk i perket departamentit te zgjedhur");
         }
         if (subject.getSemester() == null || !semester.equals(subject.getSemester())) {
             throw new BadRequestException("Lenda nuk i perket semestrit te zgjedhur");
@@ -263,8 +263,8 @@ public class DirectionGroupWizardService {
                 .id(subject.getId())
                 .titulli(subject.getTitulli())
                 .semester(subject.getSemester())
-                .categoryId(subject.getDirection() != null ? subject.getDirection().getId() : null)
-                .categoryName(subject.getDirection() != null ? subject.getDirection().getEmertimi() : null)
+                .departmentId(subject.getDepartment() != null ? subject.getDepartment().getId() : null)
+                .departmentName(subject.getDepartment() != null ? subject.getDepartment().getEmertimi() : null)
                 .build();
     }
 

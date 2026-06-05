@@ -11,8 +11,9 @@ import FileDownloadRounded from '@mui/icons-material/FileDownloadRounded'
 import UploadFileRounded from '@mui/icons-material/UploadFileRounded'
 import CheckCircleRounded from '@mui/icons-material/CheckCircleRounded'
 import assignmentService from '../services/assignmentService'
+import { useAppPreferences } from '../context/appPreferencesContext'
 
-function DeadlineChip({ deadline, isOpen }) {
+function DeadlineChip({ deadline, isOpen, deadlinePrefix }) {
     const date = new Date(deadline)
     const label = date.toLocaleString('sq-AL', {
         day: '2-digit', month: 'short', year: 'numeric',
@@ -20,7 +21,7 @@ function DeadlineChip({ deadline, isOpen }) {
     })
     return (
         <Chip
-            label={`Afati: ${label}`}
+            label={`${deadlinePrefix}${label}`}
             size="small"
             color={isOpen ? 'success' : 'error'}
             variant="outlined"
@@ -32,6 +33,7 @@ function DeadlineChip({ deadline, isOpen }) {
 export default function AssignmentPage() {
     const { assignmentId } = useParams()
     const navigate = useNavigate()
+    const { t } = useAppPreferences()
 
     const [assignment, setAssignment]   = useState(null)
     const [submission, setSubmission]   = useState(null)
@@ -52,7 +54,7 @@ export default function AssignmentPage() {
                 if (aRes.status === 'fulfilled') setAssignment(aRes.value.data)
                 if (sRes.status === 'fulfilled') setSubmission(sRes.value.data)
             } catch {
-                setError('Detyra nuk u gjet.')
+                setError(t('assignmentPage.errorNotFound'))
             } finally {
                 setLoading(false)
             }
@@ -71,7 +73,7 @@ export default function AssignmentPage() {
             a.click()
             URL.revokeObjectURL(url)
         } catch {
-            setError('Shkarkimi dështoi.')
+            setError(t('assignmentPage.errorDownload'))
         } finally {
             setDownloading(false)
         }
@@ -85,9 +87,9 @@ export default function AssignmentPage() {
             const res = await assignmentService.submit(assignmentId, selectedFile)
             setSubmission(res.data)
             setSelectedFile(null)
-            setSuccess('Detyra u dorëzua me sukses!')
+            setSuccess(t('assignmentPage.successSubmit'))
         } catch (err) {
-            setError(err.response?.data?.message || 'Dorëzimi dështoi.')
+            setError(err.response?.data?.message || t('assignmentPage.errorSubmit'))
         } finally {
             setUploading(false)
         }
@@ -104,8 +106,8 @@ export default function AssignmentPage() {
     if (!assignment) {
         return (
             <Container maxWidth="lg" sx={{ mt: 6 }}>
-                <Typography className="!text-slate-800 dark:!text-white">Detyra nuk u gjet.</Typography>
-                <Button startIcon={<ArrowBackRounded />} onClick={() => navigate(-1)} className="!mt-4 !normal-case">Kthehu</Button>
+                <Typography className="!text-slate-800 dark:!text-white">{t('assignmentPage.notFound')}</Typography>
+                <Button startIcon={<ArrowBackRounded />} onClick={() => navigate(-1)} className="!mt-4 !normal-case">{t('assignmentPage.backBtn')}</Button>
             </Container>
         )
     }
@@ -119,7 +121,7 @@ export default function AssignmentPage() {
                 onClick={() => navigate(-1)}
                 className="!mb-6 !normal-case !text-slate-600 dark:!text-slate-400"
             >
-                Kthehu te leksioni
+                {t('assignmentPage.backToLesson')}
             </Button>
 
             {}
@@ -135,12 +137,12 @@ export default function AssignmentPage() {
                                 {assignment.lessonTitle}
                             </Typography>
                         </div>
-                        <DeadlineChip deadline={assignment.deadline} isOpen={isOpen} />
+                        <DeadlineChip deadline={assignment.deadline} isOpen={isOpen} deadlinePrefix={t('assignmentPage.deadlinePrefix')} />
                     </div>
 
                     {!isOpen && (
                         <Alert severity="error" className="!mb-4 !rounded-xl">
-                            Afati i dorëzimit ka kaluar. Nuk mund të dorëzoni më.
+                            {t('assignmentPage.deadlinePassed')}
                         </Alert>
                     )}
 
@@ -155,7 +157,7 @@ export default function AssignmentPage() {
                         <div className="flex items-center gap-3 p-3 rounded-xl bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800">
                             <AttachFileRounded className="text-sky-600" fontSize="small" />
                             <Typography variant="body2" className="!flex-1 !text-slate-700 dark:!text-slate-300 !font-medium truncate">
-                                {assignment.attachmentName || 'Udhëzime'}
+                                {assignment.attachmentName || t('assignmentPage.attachmentDefault')}
                             </Typography>
                             <Button
                                 size="small"
@@ -165,7 +167,7 @@ export default function AssignmentPage() {
                                 disabled={downloading}
                                 className="!rounded-lg !normal-case !bg-sky-600 hover:!bg-sky-700 !shrink-0"
                             >
-                                {downloading ? <CircularProgress size={16} className="!text-white" /> : 'Shkarko'}
+                                {downloading ? <CircularProgress size={16} className="!text-white" /> : t('assignmentPage.downloadBtn')}
                             </Button>
                         </div>
                     )}
@@ -176,7 +178,7 @@ export default function AssignmentPage() {
             <Card elevation={0} className="rounded-2xl border border-slate-200 dark:!bg-slate-900/50 dark:!border-slate-700">
                 <CardContent className="!p-6">
                     <Typography variant="subtitle1" className="!font-bold !text-slate-900 dark:!text-white !mb-4">
-                        Dorëzimi juaj
+                        {t('assignmentPage.submissionTitle')}
                     </Typography>
 
                     {success && <Alert severity="success" className="!mb-4 !rounded-xl">{success}</Alert>}
@@ -187,7 +189,7 @@ export default function AssignmentPage() {
                             <CheckCircleRounded className="text-emerald-600" />
                             <div className="flex-1 min-w-0">
                                 <Typography variant="body2" className="!font-semibold !text-emerald-800 dark:!text-emerald-300">
-                                    Dorëzuar me sukses
+                                    {t('assignmentPage.submittedSuccess')}
                                 </Typography>
                                 <Typography variant="caption" className="!text-slate-500 truncate !block">
                                     {submission.fileName} · {new Date(submission.submittedAt).toLocaleString('sq-AL')}
@@ -200,7 +202,7 @@ export default function AssignmentPage() {
                                 <div className="flex items-center gap-3 px-4 py-3 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-600 hover:border-sky-400 dark:hover:border-sky-600 cursor-pointer transition-colors">
                                     <UploadFileRounded className="text-sky-600" />
                                     <span className="text-sm text-slate-600 dark:text-slate-400 flex-1 truncate">
-                                        {selectedFile ? selectedFile.name : 'Zgjidhni skedarin për dorëzim…'}
+                                        {selectedFile ? selectedFile.name : t('assignmentPage.chooseFile')}
                                     </span>
                                 </div>
                                 <input
@@ -215,12 +217,12 @@ export default function AssignmentPage() {
                                 onClick={handleSubmit}
                                 className="!rounded-xl !normal-case !bg-sky-600 hover:!bg-sky-700 !py-2"
                             >
-                                {uploading ? <CircularProgress size={20} className="!text-white" /> : 'Dorëzo detyrën'}
+                                {uploading ? <CircularProgress size={20} className="!text-white" /> : t('assignmentPage.submitBtn')}
                             </Button>
                         </div>
                     ) : (
                         <Typography variant="body2" className="!text-slate-500">
-                            Afati ka kaluar dhe nuk keni dorëzuar detyrën.
+                            {t('assignmentPage.deadlinePassedNoSubmit')}
                         </Typography>
                     )}
                 </CardContent>

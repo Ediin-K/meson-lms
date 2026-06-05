@@ -131,7 +131,7 @@ export default function SemesterPage() {
                                         
                                         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", pt: 3, borderTop: "1px solid", borderColor: "divider", flexShrink: 0 }}>
                                             <span style={{ fontSize: "11px", fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.25em", color: "gray" }}>
-                                                {course.categoryName || t('semester.subjectBadge', 'SUBJECT')}
+                                                {course.departmentName || t('semester.subjectBadge', 'SUBJECT')}
                                             </span>
                                             <PlayCircleFilledRounded className="!text-sky-600 dark:!text-sky-400 !text-2xl transition-all duration-300 group-hover:translate-x-3" />
                                         </Box>

@@ -4,10 +4,10 @@ import com.meson.dto.SubjectResponse;
 import com.meson.dto.SubjectRequest;
 import com.meson.entity.Subject;
 import com.meson.entity.User;
-import com.meson.entity.Direction;
+import com.meson.entity.Department;
 import com.meson.repository.SubjectRepository;
 import com.meson.repository.UserRepository;
-import com.meson.repository.DirectionRepository;
+import com.meson.repository.DepartmentRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ public class SubjectService {
 
     private final SubjectRepository subjectRepository;
     private final UserRepository userRepository;
-    private final DirectionRepository directionRepository;
+    private final DepartmentRepository departmentRepository;
 
     public List<SubjectResponse> getAll() {
         return subjectRepository.findAll()
@@ -42,18 +42,17 @@ public class SubjectService {
         User teacher = userRepository.findById(request.getTeacherId())
                 .orElseThrow(() -> new RuntimeException("Mesuesi nuk u gjet"));
 
-        Direction direction = directionRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Drejtimi nuk u gjet"));
+        Department department = departmentRepository.findById(request.getDepartmentId())
+                .orElseThrow(() -> new RuntimeException("Departamenti nuk u gjet"));
 
         Subject subject = new Subject();
         subject.setTitulli(request.getTitulli());
         subject.setPershkrimi(request.getPershkrimi());
-        subject.setCmimi(request.getCmimi());
         subject.setEcts(request.getEcts() != null ? request.getEcts() : 5);
         subject.setNiveli(request.getNiveli());
         subject.setStatusi(request.getStatusi());
         subject.setTeacher(teacher);
-        subject.setDirection(direction);
+        subject.setDepartment(department);
         subject.setSemester(request.getSemester());
         subject.setEnrollmentKey(normalizeEnrollmentKey(request.getEnrollmentKey()));
 
@@ -67,17 +66,16 @@ public class SubjectService {
         User teacher = userRepository.findById(request.getTeacherId())
                 .orElseThrow(() -> new RuntimeException("Mesuesi nuk u gjet"));
 
-        Direction direction = directionRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Drejtimi nuk u gjet"));
+        Department department = departmentRepository.findById(request.getDepartmentId())
+                .orElseThrow(() -> new RuntimeException("Departamenti nuk u gjet"));
 
         subject.setTitulli(request.getTitulli());
         subject.setPershkrimi(request.getPershkrimi());
-        subject.setCmimi(request.getCmimi());
         subject.setEcts(request.getEcts() != null ? request.getEcts() : 5);
         subject.setNiveli(request.getNiveli());
         subject.setStatusi(request.getStatusi());
         subject.setTeacher(teacher);
-        subject.setDirection(direction);
+        subject.setDepartment(department);
         subject.setSemester(request.getSemester());
         subject.setEnrollmentKey(normalizeEnrollmentKey(request.getEnrollmentKey()));
 
@@ -99,11 +97,10 @@ public class SubjectService {
                 .pershkrimi(subject.getPershkrimi())
                 .teacherId(subject.getTeacher().getId())
                 .teacherName(subject.getTeacher().getEmri())
-                .categoryId(subject.getDirection().getId())
-                .categoryName(subject.getDirection().getEmertimi())
+                .departmentId(subject.getDepartment().getId())
+                .departmentName(subject.getDepartment().getEmertimi())
                 .semester(subject.getSemester())
                 .enrollmentKey(subject.getEnrollmentKey())
-                .cmimi(subject.getCmimi())
                 .ects(subject.getEcts())
                 .niveli(subject.getNiveli())
                 .statusi(subject.getStatusi())
@@ -111,9 +108,9 @@ public class SubjectService {
                 .build();
     }
 
-    public List<SubjectResponse> getByDirectionAndSemester(Long directionId, Integer semester) {
+    public List<SubjectResponse> getByDepartmentAndSemester(Long departmentId, Integer semester) {
         return subjectRepository
-                .findByDirectionIdAndSemester(directionId, semester)
+                .findByDepartmentIdAndSemester(departmentId, semester)
                 .stream()
                 .map(this::toResponse)
                 .toList();

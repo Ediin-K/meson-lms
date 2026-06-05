@@ -42,7 +42,7 @@ public class AdminStatsService {
             totalTeachers,
             totalCertificates,
             buildEnrollmentsByMonth(),
-            buildsubjectsByCategory(),
+            buildSubjectsByDepartment(),
             buildEnrollmentsByStatus()
         );
     }
@@ -64,12 +64,12 @@ public class AdminStatsService {
             .collect(Collectors.toList());
     }
 
-    private List<NameValueDTO> buildsubjectsByCategory() {
+    private List<NameValueDTO> buildSubjectsByDepartment() {
         return subjectRepository.findAll().stream()
             .collect(Collectors.groupingBy(
-                c -> c.getDirection() != null
-                    ? c.getDirection().getEmertimi()
-                    : "Pa kategori",
+                c -> c.getDepartment() != null
+                    ? c.getDepartment().getEmertimi()
+                    : "Pa departament",
                 Collectors.counting()
             ))
             .entrySet().stream()

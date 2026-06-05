@@ -49,7 +49,7 @@ export default function WizardReviewPanel({
     <Box className="flex flex-col gap-3">
       <Box className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "Drejtimi", value: `${selectedCategory?.emertimi || "—"}` },
+          { label: "Departamenti", value: `${selectedCategory?.emertimi || "—"}` },
           { label: "Semestri", value: String(semester) },
           { label: "Grupi", value: groupName || "—" },
           { label: "Kapaciteti", value: String(maxCapacity) },

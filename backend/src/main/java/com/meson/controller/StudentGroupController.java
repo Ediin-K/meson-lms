@@ -31,7 +31,7 @@ public class StudentGroupController {
 
     @PreAuthorize("hasRole('ADMIN') or @securityAccessService.canAccessStudent(#userId)")
     @GetMapping("/{userId}/groups/available")
-    public ResponseEntity<List<AvailableDirectionGroupResponse>> getAvailable(@PathVariable Long userId) {
+    public ResponseEntity<List<AvailableDepartmentGroupResponse>> getAvailable(@PathVariable Long userId) {
         return ResponseEntity.ok(studentGroupRequestService.getAvailableGroups(userId));
     }
 
@@ -46,7 +46,7 @@ public class StudentGroupController {
 
     @PreAuthorize("hasRole('ADMIN') or @securityAccessService.canAccessStudent(#userId)")
     @PostMapping("/{userId}/groups/select")
-    public ResponseEntity<DirectionGroupResponse> select(
+    public ResponseEntity<DepartmentGroupResponse> select(
             @PathVariable Long userId,
             @Valid @RequestBody ApplyGroupRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)

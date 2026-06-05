@@ -1,5 +1,6 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAppPreferences } from "../context/appPreferencesContext";
 import {
   Alert,
   Box,
@@ -13,25 +14,27 @@ import GroupsRounded from "@mui/icons-material/GroupsRounded";
 import { getAllSchedules } from "../services/scheduleService";
 
 const DAYS = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
-const DAY_LABELS = {
-  MONDAY: "E Hene",
-  TUESDAY: "E Marte",
-  WEDNESDAY: "E Merkure",
-  THURSDAY: "E Enjte",
-  FRIDAY: "E Premte",
-  SATURDAY: "E Shtune",
-  SUNDAY: "E Diele",
-};
 
 export default function AdminSchedules() {
   const navigate = useNavigate();
+  const { t } = useAppPreferences();
   const [schedules, setSchedules] = useState([]);
   const [error, setError] = useState("");
+
+  const DAY_LABELS = {
+    MONDAY: t("adminSchedules.days.MONDAY"),
+    TUESDAY: t("adminSchedules.days.TUESDAY"),
+    WEDNESDAY: t("adminSchedules.days.WEDNESDAY"),
+    THURSDAY: t("adminSchedules.days.THURSDAY"),
+    FRIDAY: t("adminSchedules.days.FRIDAY"),
+    SATURDAY: t("adminSchedules.days.SATURDAY"),
+    SUNDAY: t("adminSchedules.days.SUNDAY"),
+  };
 
   useEffect(() => {
     getAllSchedules()
       .then(setSchedules)
-      .catch((err) => setError(err.message || "Gabim gjate ngarkimit"));
+      .catch((err) => setError(err.message || t("adminSchedules.fetchError")));
   }, []);
 
   return (
@@ -42,16 +45,16 @@ export default function AdminSchedules() {
           onClick={() => navigate("/admin")}
           className="rounded-2xl! px-6! py-2! normal-case! font-bold! text-slate-600! dark:text-slate-400!"
         >
-          Kthehu te Paneli
+          {t("adminSchedules.backToPanel")}
         </Button>
 
         <Box className="my-4 flex flex-col md:flex-row md:items-end md:justify-between gap-3">
           <div>
             <Typography variant="overline" className="font-bold! tracking-[0.3em]! text-indigo-600! dark:text-indigo-400!">
-              PAMJE E PERGJITHSHME
+              {t("adminSchedules.overline")}
             </Typography>
             <Typography variant="h3" className="font-black! text-slate-900! dark:text-white!">
-              Oraret (vetem lexim)
+              {t("adminSchedules.title")}
             </Typography>
           </div>
           <Button
@@ -60,14 +63,12 @@ export default function AdminSchedules() {
             onClick={() => navigate("/admin/groups")}
             className="rounded-2xl! bg-sky-600! normal-case! font-bold!"
           >
-            Menaxho grupet & oraret
+            {t("adminSchedules.manageBtn")}
           </Button>
         </Box>
 
         <Alert severity="info" className="mb-6 rounded-2xl!">
-          Oraret krijohen vetem brenda wizard-it te grupit. Hapni{" "}
-          <strong>Menaxhimi i Grupeve → Krijo grup (wizard)</strong> per te shtuar staf dhe orar
-          javor me validim konfliktesh.
+          {t("adminSchedules.infoAlert")}
         </Alert>
 
         {error && <Alert severity="error" className="mb-4 rounded-2xl!">{error}</Alert>}
@@ -94,14 +95,14 @@ export default function AdminSchedules() {
                         {String(schedule.endTime).slice(0, 5)} · {schedule.subjectTitle}
                       </Typography>
                       <Typography variant="body2" className="text-slate-500! dark:text-slate-300!">
-                        {schedule.sessionType === "LECTURE" ? "Ligjerate" : "Ushtrime"} ·{" "}
+                        {schedule.sessionType === "LECTURE" ? t("adminSchedules.sessionLecture") : t("adminSchedules.sessionExercise")} ·{" "}
                         {schedule.subjectGroupName || "—"} · {schedule.teacherName}
                         {schedule.room ? ` · ${schedule.room}` : ""}
                       </Typography>
                     </Box>
                   ))}
                 {schedules.filter((s) => s.dayOfWeek === day).length === 0 && (
-                  <Typography className="text-slate-400!">Nuk ka orare.</Typography>
+                  <Typography className="text-slate-400!">{t("adminSchedules.noSchedules")}</Typography>
                 )}
               </Box>
             </Card>

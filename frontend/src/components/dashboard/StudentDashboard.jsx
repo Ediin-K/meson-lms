@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Typography from "@mui/material/Typography"
 import Card from "@mui/material/Card"
@@ -120,28 +120,28 @@ export default function StudentDashboard() {
 
     const studentStats = [
         {
-            label: "Lëndë aktive",
+            label: t('home.student.subjects.overline') || "Lëndë aktive",
             value: activeEnrollments.length,
             icon: MenuBookOutlined,
             color: "text-sky-600",
             bg: "bg-sky-100 dark:bg-sky-900/40",
         },
         {
-            label: "Progresi mesatar",
+            label: t('studentProfile.stats.progress'),
             value: `${averageProgress}%`,
             icon: AssignmentTurnedInRounded,
             color: "text-indigo-600",
             bg: "bg-indigo-100 dark:bg-indigo-900/40",
         },
         {
-            label: "Certifikata",
+            label: t('studentProfile.stats.certificates'),
             value: certificates.length,
             icon: WorkspacePremiumRounded,
             color: "text-emerald-600",
             bg: "bg-emerald-100 dark:bg-emerald-900/40",
         },
         {
-            label: "Kuize",
+            label: t('studentProfile.quizzes'),
             value: quizAttempts.length,
             icon: QuizRounded,
             color: "text-amber-700",
@@ -220,9 +220,9 @@ export default function StudentDashboard() {
                                 </Typography>
                             </li>
                         </ul>
-                        <Button 
+                        <Button
                             onClick={() => navigate('/notifications')}
-                            size="small" 
+                            size="small"
                             className="!mt-4 !w-full !rounded-xl !bg-white/60 !py-1.5 !font-semibold !text-amber-800 shadow-sm ring-1 ring-amber-200/50 transition-colors hover:!bg-amber-50 hover:!text-amber-900 dark:!bg-slate-800/60 dark:!text-amber-400 dark:ring-amber-900/30 dark:hover:!bg-slate-800 dark:hover:!text-amber-300"
                         >
                             {t('home.student.viewAllNotifications')}
@@ -262,7 +262,7 @@ export default function StudentDashboard() {
                             className="!mt-3 !w-full !rounded-full !py-2.5 !font-semibold !normal-case !border-sky-300 !text-sky-700 hover:!bg-sky-50 dark:!border-sky-500 dark:!text-sky-300 dark:hover:!bg-sky-950 sm:!w-auto"
                             onClick={() => navigate('/student/groups')}
                         >
-                            Grupet & Orari
+                            {t('studentDashboard.groupsSchedule')}
                         </Button>
                     </Card>
                 </div>
@@ -289,7 +289,7 @@ export default function StudentDashboard() {
                         <div className="flex flex-col gap-3">
                             {latestTasks.length === 0 && (
                                 <Typography variant="body2" className="!rounded-xl !border !border-dashed !border-slate-300 !p-3 !text-slate-500 dark:!border-slate-700 dark:!text-slate-400">
-                                    Nuk ka dorezime detyrash per momentin.
+                                    {t('studentDashboard.noSubmissions')}
                                 </Typography>
                             )}
                             {latestTasks.map((task) => {
@@ -303,10 +303,10 @@ export default function StudentDashboard() {
                                             {task.assignmentTitle || t('home.student.tasks.panelTitle')}
                                         </Typography>
                                         <Typography variant="caption" className="!mt-0.5 !block !font-medium !text-sky-700 dark:!text-sky-400">
-                                            {task.lessonTitle || "Mesim"}
+                                            {task.lessonTitle || t('studentDashboard.lessonFallback')}
                                         </Typography>
                                         <Typography variant="caption" className="!mt-1.5 !block !text-slate-600 dark:!text-slate-400">
-                                            {task.deadline ? new Date(task.deadline).toLocaleDateString() : "Pa afat"}
+                                            {task.deadline ? new Date(task.deadline).toLocaleDateString() : t('studentDashboard.noDeadline')}
                                         </Typography>
                                         <div className="mt-2.5 flex items-center gap-2">
                                             <LinearProgress
@@ -341,14 +341,14 @@ export default function StudentDashboard() {
             <Container maxWidth="lg" className="!px-0 sm:!px-3" sx={{ mt: 4, mb: 6 }}>
                 <Box className="mb-8 text-center md:text-left">
                     <Typography variant="overline" className="!font-semibold !tracking-widest !text-sky-600 dark:!text-sky-400">
-                        {t('home.student.semesters.overline', 'SEMESTERS')}
+                        {t('home.student.semesters.overline')}
                     </Typography>
 
                     <Typography variant="h4" component="h2" className="!mt-1 !font-bold !text-slate-800 dark:!text-white">
-                        {t('home.student.semesters.title', 'Choose Semester')}
+                        {t('home.student.semesters.title')}
                     </Typography>
                     <Typography variant="body1" className="!mt-2 !max-w-2xl !text-slate-600 md:mx-0 mx-auto dark:!text-slate-400">
-                        {t('home.student.semesters.body', 'Select a semester to view your subjects, assignments, and grades.')}
+                        {t('home.student.semesters.body')}
                     </Typography>
                 </Box>
 
@@ -381,7 +381,7 @@ export default function StudentDashboard() {
                             "
                         >
                             <div className="absolute inset-0 bg-gradient-to-tr from-sky-500/0 via-sky-500/0 to-sky-500/5 dark:to-sky-400/5 group-hover:to-sky-500/10 transition-colors duration-300"></div>
-                            
+
                             <div className="relative z-10 flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-100/80 text-sky-600 dark:bg-sky-900/50 dark:text-sky-400 mb-4 group-hover:scale-110 group-hover:bg-sky-600 group-hover:text-white dark:group-hover:bg-sky-500 transition-all duration-300 shadow-sm">
                                 <MenuBookOutlined fontSize="small" />
                             </div>
@@ -397,7 +397,7 @@ export default function StudentDashboard() {
                                     transition-colors
                                 "
                             >
-                                {t('home.student.semesters.semester', 'Semester')} {sem}
+                                {t('home.student.semesters.semester')} {sem}
                             </Typography>
                         </div>
                     ))}

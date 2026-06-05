@@ -12,14 +12,14 @@ import java.util.Optional;
 public interface SubjectRepository extends JpaRepository<Subject, Long> {
     Optional<Subject> findByTitulli(String titulli);
     List<Subject> findByStatusi(SubjectStatus statusi);
-    List<Subject> findByDirectionIdAndStatusi(Long directionId, SubjectStatus statusi);
+    List<Subject> findByDepartmentIdAndStatusi(Long departmentId, SubjectStatus statusi);
 
-    @EntityGraph(attributePaths = {"teacher", "direction"})
+    @EntityGraph(attributePaths = {"teacher", "department"})
     List<Subject> findByTeacherId(Long teacherId);
 
     List<Subject> findByTitulliContainingIgnoreCase(String titulli);
     List<Subject> findBySemester(Integer semester);
-    List<Subject> findByDirectionIdAndSemester(Long directionId, Integer semester);
+    List<Subject> findByDepartmentIdAndSemester(Long departmentId, Integer semester);
     boolean existsByTitulli(String titulli);
 
     long countByTeacherId(Long teacherId);

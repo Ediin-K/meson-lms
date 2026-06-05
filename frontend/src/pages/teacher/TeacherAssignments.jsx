@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
     Alert, Box, Button, Card, CardContent, Chip, CircularProgress,
     Container, Dialog, DialogActions, DialogContent, DialogTitle,
@@ -17,6 +17,7 @@ import DeleteOutlineRounded from '@mui/icons-material/DeleteOutlineRounded'
 import UploadFileRounded    from '@mui/icons-material/UploadFileRounded'
 import assignmentService    from '../../services/assignmentService'
 import Footer               from '../../components/ui/Footer'
+import { useAppPreferences } from '../../context/appPreferencesContext'
 
 function fmtDeadline(dl) {
     return new Date(dl).toLocaleString('sq-AL', {
@@ -25,20 +26,11 @@ function fmtDeadline(dl) {
     })
 }
 
-function openStatusChip(isOpen) {
-    return (
-        <Chip
-            label={isOpen ? 'Hapur' : 'Mbyllur'}
-            size="small"
-            color={isOpen ? 'success' : 'default'}
-            className="!font-semibold"
-        />
-    )
-}
-
 const EMPTY_FORM = { title: '', description: '', deadline: '', lessonId: '' }
 
 export default function TeacherAssignments() {
+    const { t } = useAppPreferences()
+
     const [assignments, setAssignments]   = useState([])
     const [lessons, setLessons]           = useState([])
     const [loading, setLoading]           = useState(true)
@@ -61,6 +53,17 @@ export default function TeacherAssignments() {
 
     const [deleteId, setDeleteId]         = useState(null)
 
+    function openStatusChip(isOpen) {
+        return (
+            <Chip
+                label={isOpen ? t('teacherAssignments.statusOpen') : t('teacherAssignments.statusClosed')}
+                size="small"
+                color={isOpen ? 'success' : 'default'}
+                className="!font-semibold"
+            />
+        )
+    }
+
     const load = useCallback(async () => {
         setLoading(true)
         try {
@@ -71,7 +74,7 @@ export default function TeacherAssignments() {
             setAssignments(aRes.data)
             setLessons(lRes.data)
         } catch {
-            setError('Ngarkimi dështoi.')
+            setError(t('teacherAssignments.errorLoading'))
         } finally {
             setLoading(false)
         }
@@ -114,7 +117,7 @@ export default function TeacherAssignments() {
             setFormOpen(false)
             load()
         } catch (err) {
-            setError(err.response?.data?.message || 'Ruajtja dështoi.')
+            setError(err.response?.data?.message || t('teacherAssignments.errorSave'))
         } finally {
             setSaving(false)
         }
@@ -126,7 +129,7 @@ export default function TeacherAssignments() {
             setDeleteId(null)
             load()
         } catch {
-            setError('Fshirja dështoi.')
+            setError(t('teacherAssignments.errorDelete'))
         }
     }
 
@@ -144,7 +147,7 @@ export default function TeacherAssignments() {
             setAttachOpen(false)
             load()
         } catch {
-            setError('Ngarkimi i skedarit dështoi.')
+            setError(t('teacherAssignments.errorUpload'))
         } finally {
             setAttachSaving(false)
         }
@@ -155,7 +158,7 @@ export default function TeacherAssignments() {
             await assignmentService.removeAttachment(id)
             load()
         } catch {
-            setError('Heqja e skedarit dështoi.')
+            setError(t('teacherAssignments.errorRemoveFile'))
         }
     }
 
@@ -183,7 +186,7 @@ export default function TeacherAssignments() {
             a.click()
             URL.revokeObjectURL(url)
         } catch {
-            setError('Shkarkimi dështoi.')
+            setError(t('teacherAssignments.errorDownload'))
         }
     }
 
@@ -195,7 +198,7 @@ export default function TeacherAssignments() {
                     <div className="flex items-center gap-3">
                         <AssignmentRounded className="text-sky-600 !text-3xl" />
                         <Typography variant="h5" className="!font-extrabold !text-slate-900 dark:!text-white">
-                            Detyrat
+                            {t('teacherAssignments.title')}
                         </Typography>
                     </div>
                     <Button
@@ -204,7 +207,7 @@ export default function TeacherAssignments() {
                         onClick={openCreate}
                         className="!rounded-xl !normal-case !bg-sky-600 hover:!bg-sky-700"
                     >
-                        Detyrë e re
+                        {t('teacherAssignments.addBtn')}
                     </Button>
                 </div>
 
@@ -213,7 +216,7 @@ export default function TeacherAssignments() {
                 {loading ? (
                     <Box className="flex justify-center py-16"><CircularProgress className="!text-sky-500" /></Box>
                 ) : assignments.length === 0 ? (
-                    <div className="text-center py-16 text-slate-500">Nuk keni detyra ende.</div>
+                    <div className="text-center py-16 text-slate-500">{t('teacherAssignments.noAssignments')}</div>
                 ) : (
                     <div className="flex flex-col gap-4">
                         {assignments.map(a => (
@@ -241,22 +244,22 @@ export default function TeacherAssignments() {
                                         </div>
 
                                         <div className="flex items-center gap-1 shrink-0 flex-wrap justify-end">
-                                            <Tooltip title="Dorëzimet">
+                                            <Tooltip title={t('teacherAssignments.tooltipSubmissions')}>
                                                 <IconButton size="small" onClick={() => openSubs(a)} className="!text-slate-600 dark:!text-slate-400">
                                                     <PeopleRounded fontSize="small" />
                                                 </IconButton>
                                             </Tooltip>
-                                            <Tooltip title={a.hasAttachment ? 'Menaxho skedarin' : 'Bashkëngjit skedar'}>
+                                            <Tooltip title={a.hasAttachment ? t('teacherAssignments.tooltipFile') : t('teacherAssignments.tooltipAttach')}>
                                                 <IconButton size="small" onClick={() => openAttach(a)} className={a.hasAttachment ? '!text-sky-600' : '!text-slate-400'}>
                                                     <AttachFileRounded fontSize="small" />
                                                 </IconButton>
                                             </Tooltip>
-                                            <Tooltip title="Ndrysho">
+                                            <Tooltip title={t('teacherAssignments.tooltipEdit')}>
                                                 <IconButton size="small" onClick={() => openEdit(a)} className="!text-slate-600 dark:!text-slate-400">
                                                     <EditRounded fontSize="small" />
                                                 </IconButton>
                                             </Tooltip>
-                                            <Tooltip title="Fshi">
+                                            <Tooltip title={t('teacherAssignments.tooltipDelete')}>
                                                 <IconButton size="small" onClick={() => setDeleteId(a.id)} className="!text-red-500">
                                                     <DeleteRounded fontSize="small" />
                                                 </IconButton>
@@ -276,15 +279,15 @@ export default function TeacherAssignments() {
             <Dialog open={formOpen} onClose={() => setFormOpen(false)} maxWidth="sm" fullWidth
                 PaperProps={{ className: 'rounded-2xl! dark:bg-slate-900!' }}>
                 <DialogTitle className="!font-bold dark:!text-white">
-                    {editing ? 'Ndrysho detyrën' : 'Detyrë e re'}
+                    {editing ? t('teacherAssignments.formEditTitle') : t('teacherAssignments.formTitle')}
                 </DialogTitle>
                 <DialogContent className="flex flex-col gap-4 !pt-2">
                     <FormControl fullWidth size="small">
-                        <InputLabel>Leksioni</InputLabel>
+                        <InputLabel>{t('teacherAssignments.formLesson')}</InputLabel>
                         <Select
                             value={form.lessonId}
                             onChange={e => setForm(f => ({ ...f, lessonId: e.target.value }))}
-                            label="Leksioni"
+                            label={t('teacherAssignments.formLesson')}
                             disabled={!!editing}
                         >
                             {lessons.map(l => (
@@ -295,14 +298,14 @@ export default function TeacherAssignments() {
                         </Select>
                     </FormControl>
                     <TextField
-                        label="Titulli"
+                        label={t('teacherAssignments.formTitulli')}
                         size="small"
                         fullWidth
                         value={form.title}
                         onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
                     />
                     <TextField
-                        label="Përshkrimi (opsional)"
+                        label={t('teacherAssignments.formDesc')}
                         size="small"
                         fullWidth
                         multiline
@@ -311,7 +314,7 @@ export default function TeacherAssignments() {
                         onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                     />
                     <TextField
-                        label="Afati"
+                        label={t('teacherAssignments.formDeadline')}
                         type="datetime-local"
                         size="small"
                         fullWidth
@@ -321,14 +324,14 @@ export default function TeacherAssignments() {
                     />
                 </DialogContent>
                 <DialogActions className="!px-6 !pb-4">
-                    <Button onClick={() => setFormOpen(false)} className="!normal-case !text-slate-600">Anulo</Button>
+                    <Button onClick={() => setFormOpen(false)} className="!normal-case !text-slate-600">{t('teacherAssignments.cancel')}</Button>
                     <Button
                         variant="contained"
                         onClick={handleSave}
                         disabled={saving || !form.title.trim() || !form.deadline || !form.lessonId}
                         className="!rounded-xl !normal-case !bg-sky-600 hover:!bg-sky-700"
                     >
-                        {saving ? <CircularProgress size={18} className="!text-white" /> : 'Ruaj'}
+                        {saving ? <CircularProgress size={18} className="!text-white" /> : t('teacherAssignments.save')}
                     </Button>
                 </DialogActions>
             </Dialog>
@@ -337,7 +340,7 @@ export default function TeacherAssignments() {
             <Dialog open={attachOpen} onClose={() => setAttachOpen(false)} maxWidth="xs" fullWidth
                 PaperProps={{ className: 'rounded-2xl! dark:bg-slate-900!' }}>
                 <DialogTitle className="!font-bold dark:!text-white flex items-center justify-between">
-                    Skedari i udhëzimeve
+                    {t('teacherAssignments.attachTitle')}
                     <IconButton size="small" onClick={() => setAttachOpen(false)}><CloseRounded fontSize="small" /></IconButton>
                 </DialogTitle>
                 <DialogContent className="!pt-2">
@@ -347,7 +350,7 @@ export default function TeacherAssignments() {
                             <Typography variant="body2" className="!flex-1 truncate dark:!text-slate-300">
                                 {attachTarget.attachmentName}
                             </Typography>
-                            <Tooltip title="Hiq skedarin">
+                            <Tooltip title={t('teacherAssignments.removeFile')}>
                                 <IconButton size="small" onClick={() => { handleRemoveAttachment(attachTarget.id); setAttachOpen(false) }} className="!text-red-500">
                                     <DeleteOutlineRounded fontSize="small" />
                                 </IconButton>
@@ -358,21 +361,21 @@ export default function TeacherAssignments() {
                         <div className="flex items-center gap-3 px-4 py-3 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-600 hover:border-sky-400 transition-colors">
                             <UploadFileRounded className="text-sky-600" />
                             <span className="text-sm text-slate-600 dark:text-slate-400 flex-1 truncate">
-                                {attachFile ? attachFile.name : 'Zgjidhni skedarin e ri…'}
+                                {attachFile ? attachFile.name : t('teacherAssignments.chooseFile')}
                             </span>
                         </div>
                         <input type="file" className="sr-only" onChange={e => setAttachFile(e.target.files?.[0] || null)} />
                     </label>
                 </DialogContent>
                 <DialogActions className="!px-6 !pb-4">
-                    <Button onClick={() => setAttachOpen(false)} className="!normal-case !text-slate-600">Anulo</Button>
+                    <Button onClick={() => setAttachOpen(false)} className="!normal-case !text-slate-600">{t('teacherAssignments.cancel')}</Button>
                     <Button
                         variant="contained"
                         disabled={!attachFile || attachSaving}
                         onClick={handleUploadAttachment}
                         className="!rounded-xl !normal-case !bg-sky-600 hover:!bg-sky-700"
                     >
-                        {attachSaving ? <CircularProgress size={18} className="!text-white" /> : 'Ngarko'}
+                        {attachSaving ? <CircularProgress size={18} className="!text-white" /> : t('teacherAssignments.upload')}
                     </Button>
                 </DialogActions>
             </Dialog>
@@ -382,7 +385,7 @@ export default function TeacherAssignments() {
                 PaperProps={{ className: 'rounded-2xl! dark:bg-slate-900!' }}>
                 <DialogTitle className="!font-bold dark:!text-white flex items-center justify-between">
                     <span>
-                        Dorëzimet · <span className="text-sky-600">{subsTarget?.title}</span>
+                        {t('teacherAssignments.submissionsTitle')}<span className="text-sky-600">{subsTarget?.title}</span>
                     </span>
                     <IconButton size="small" onClick={() => setSubsOpen(false)}><CloseRounded fontSize="small" /></IconButton>
                 </DialogTitle>
@@ -391,7 +394,7 @@ export default function TeacherAssignments() {
                         <Box className="flex justify-center py-8"><CircularProgress className="!text-sky-500" /></Box>
                     ) : submissions.length === 0 ? (
                         <Typography variant="body2" className="!text-slate-500 text-center py-8">
-                            Asnjë student nuk ka dorëzuar ende.
+                            {t('teacherAssignments.noSubmissions')}
                         </Typography>
                     ) : (
                         <div className="flex flex-col gap-3">
@@ -405,13 +408,13 @@ export default function TeacherAssignments() {
                                             {sub.studentEmail}
                                         </Typography>
                                         <Typography variant="caption" className="!text-slate-500 !block">
-                                            Leksioni: {sub.lessonTitle} · {new Date(sub.submittedAt).toLocaleString('sq-AL')}
+                                            {t('teacherAssignments.lessonLabel')}{sub.lessonTitle} · {new Date(sub.submittedAt).toLocaleString('sq-AL')}
                                         </Typography>
                                         <Typography variant="caption" className="!text-slate-400 truncate !block">
                                             {sub.fileName}
                                         </Typography>
                                     </div>
-                                    <Tooltip title="Shkarko skedarin">
+                                    <Tooltip title={t('teacherAssignments.downloadTooltip')}>
                                         <IconButton size="small" onClick={() => downloadSub(sub)} className="!text-sky-600">
                                             <FileDownloadRounded fontSize="small" />
                                         </IconButton>
@@ -426,16 +429,16 @@ export default function TeacherAssignments() {
             {}
             <Dialog open={!!deleteId} onClose={() => setDeleteId(null)} maxWidth="xs" fullWidth
                 PaperProps={{ className: 'rounded-2xl! dark:bg-slate-900!' }}>
-                <DialogTitle className="!font-bold dark:!text-white">Konfirmo fshirjen</DialogTitle>
+                <DialogTitle className="!font-bold dark:!text-white">{t('teacherAssignments.deleteTitle')}</DialogTitle>
                 <DialogContent>
                     <Typography className="dark:!text-slate-300">
-                        Jeni i sigurt që doni ta fshini këtë detyrë? Të gjitha dorëzimet do të fshihen gjithashtu.
+                        {t('teacherAssignments.deleteBody')}
                     </Typography>
                 </DialogContent>
                 <DialogActions className="!px-6 !pb-4">
-                    <Button onClick={() => setDeleteId(null)} className="!normal-case !text-slate-600">Anulo</Button>
+                    <Button onClick={() => setDeleteId(null)} className="!normal-case !text-slate-600">{t('teacherAssignments.cancel')}</Button>
                     <Button variant="contained" onClick={confirmDelete} className="!rounded-xl !normal-case !bg-red-600 hover:!bg-red-700">
-                        Fshi
+                        {t('teacherAssignments.deleteBtn')}
                     </Button>
                 </DialogActions>
             </Dialog>

@@ -39,27 +39,27 @@ import CategoryRounded from "@mui/icons-material/CategoryRounded";
 import CategoryOutlinedIcon from "@mui/icons-material/CategoryOutlined";
 import GroupsRounded from "@mui/icons-material/GroupsRounded";
 import Footer from "../components/ui/Footer";
-import { getDirectionGroups } from "../services/directionGroupService";
+import { getDepartmentGroups } from "../services/departmentGroupService";
 import {
-  getAllCategories,
-  createCategory,
-  updateCategory,
-  deleteCategory,
-} from "../services/categoryService";
+  getAllDepartments,
+  createDepartment,
+  updateDepartment,
+  deleteDepartment,
+} from "../services/departmentService";
 
-const EMPTY_FORM = { emertimi: "", pershkrimi: "" };
+const EMPTY_FORM = { emertimi: "", pershkrimi: "", numSemesters: 6 };
 
-export default function AdminCategories() {
+export default function AdminDepartments() {
   const navigate = useNavigate();
   const { t, mode } = useAppPreferences();
   const isDark = mode === "dark";
 
-  const [categories, setCategories] = useState([]);
+  const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedDepartment, setSelectedDepartment] = useState(null);
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
@@ -67,8 +67,8 @@ export default function AdminCategories() {
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [groupsDialog, setGroupsDialog] = useState({ open: false, category: null });
-  const [directionGroups, setDirectionGroups] = useState([]);
+  const [groupsDialog, setGroupsDialog] = useState({ open: false, department: null });
+  const [departmentGroups, setDepartmentGroups] = useState([]);
   const [groupsLoading, setGroupsLoading] = useState(false);
   const [groupsSemester, setGroupsSemester] = useState(1);
 
@@ -87,14 +87,14 @@ export default function AdminCategories() {
     );
   };
 
-  const loadCategories = useCallback(async () => {
+  const loadDepartments = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await getAllCategories();
-      setCategories(data);
+      const data = await getAllDepartments();
+      setDepartments(data);
     } catch (error) {
       showToast(
-        getErrorMessage(error, "Gabim gjatë marrjes së kategorive"),
+        getErrorMessage(error, t("adminDepartments.toast.fetchError")),
         "error",
       );
     } finally {
@@ -103,40 +103,41 @@ export default function AdminCategories() {
   }, []);
 
   useEffect(() => {
-    loadCategories();
-  }, [loadCategories]);
+    loadDepartments();
+  }, [loadDepartments]);
 
-  const filteredCategories = categories.filter(
-    (category) =>
-      category.emertimi?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      category.pershkrimi?.toLowerCase().includes(searchTerm.toLowerCase()),
+  const filteredDepartments = departments.filter(
+    (department) =>
+      department.emertimi?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      department.pershkrimi?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const openAddDialog = () => {
     setIsEdit(false);
-    setSelectedCategory(null);
+    setSelectedDepartment(null);
     setFormData(EMPTY_FORM);
     setOpenDialog(true);
   };
 
-  const openGroupsDialog = async (category) => {
-    setGroupsDialog({ open: true, category });
+  const openGroupsDialog = async (department) => {
+    setGroupsDialog({ open: true, department });
     setGroupsLoading(true);
     try {
-      setDirectionGroups(await getDirectionGroups(category.id, groupsSemester));
+      setDepartmentGroups(await getDepartmentGroups(department.id, groupsSemester));
     } catch (error) {
-      showToast(getErrorMessage(error, "Gabim gjate ngarkimit te grupeve"), "error");
+      showToast(getErrorMessage(error, t("adminDepartments.toast.groupsError")), "error");
     } finally {
       setGroupsLoading(false);
     }
   };
 
-  const openEditDialog = (category) => {
+  const openEditDialog = (department) => {
     setIsEdit(true);
-    setSelectedCategory(category);
+    setSelectedDepartment(department);
     setFormData({
-      emertimi: category.emertimi || "",
-      pershkrimi: category.pershkrimi || "",
+      emertimi: department.emertimi || "",
+      pershkrimi: department.pershkrimi || "",
+      numSemesters: department.numSemesters ?? 6,
     });
     setOpenDialog(true);
   };
@@ -147,25 +148,32 @@ export default function AdminCategories() {
 
   const handleSubmit = async () => {
     if (!formData.emertimi.trim()) {
-      showToast("Emertimi është i detyrueshëm", "error");
+      showToast(t("adminDepartments.toast.nameRequired"), "error");
       return;
     }
+    const numSemesters = parseInt(formData.numSemesters, 10);
+    if (!numSemesters || numSemesters < 1 || numSemesters > 12) {
+      showToast(t("adminDepartments.toast.semesterRange"), "error");
+      return;
+    }
+
+    const payload = { ...formData, numSemesters };
 
     setSubmitting(true);
 
     try {
-      if (isEdit && selectedCategory) {
-        await updateCategory(selectedCategory.id, formData);
-        showToast("Category updated successfully", "success");
+      if (isEdit && selectedDepartment) {
+        await updateDepartment(selectedDepartment.id, payload);
+        showToast(t("adminDepartments.toast.updated"), "success");
       } else {
-        await createCategory(formData);
-        showToast("Category created successfully", "success");
+        await createDepartment(payload);
+        showToast(t("adminDepartments.toast.created"), "success");
       }
       setOpenDialog(false);
-      await loadCategories();
+      await loadDepartments();
     } catch (error) {
       showToast(
-        getErrorMessage(error, "Gabim gjatë ruajtjes së kategorisë"),
+        getErrorMessage(error, t("adminDepartments.toast.saveError")),
         "error",
       );
     } finally {
@@ -179,14 +187,14 @@ export default function AdminCategories() {
     setSubmitting(true);
 
     try {
-      await deleteCategory(deleteTarget.id);
-      showToast("Category deleted successfully", "success");
+      await deleteDepartment(deleteTarget.id);
+      showToast(t("adminDepartments.toast.deleted"), "success");
       setOpenDeleteConfirm(false);
       setDeleteTarget(null);
-      await loadCategories();
+      await loadDepartments();
     } catch (error) {
       showToast(
-        getErrorMessage(error, "Gabim gjatë fshirjes së kategorisë"),
+        getErrorMessage(error, t("adminDepartments.toast.deleteError")),
         "error",
       );
     } finally {
@@ -202,7 +210,7 @@ export default function AdminCategories() {
           onClick={() => navigate("/admin")}
           className="mb-6! normal-case! text-slate-600! dark:text-slate-400!"
         >
-          {t("home.admin.services.backToPanel", "Kthehu te Paneli")}
+          {t("home.admin.services.backToPanel")}
         </Button>
 
         <Box className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -216,22 +224,19 @@ export default function AdminCategories() {
                 component="h1"
                 className="font-extrabold! text-slate-900! dark:text-white!"
               >
-                {t("home.admin.services.categories.title", "Kategoritë")}
+                {t("home.admin.services.departments.title")}
               </Typography>
             </Box>
             <Typography
               variant="body1"
               className="text-slate-600! dark:text-slate-400!"
             >
-              {t(
-                "home.admin.services.categories.desc",
-                "Organizoni Lëndët në kategori dhe tema.",
-              )}
+              {t("home.admin.services.departments.desc")}
             </Typography>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 items-center">
             <TextField
-              placeholder="Kërko kategori..."
+              placeholder={t("adminDepartments.searchPlaceholder")}
               variant="outlined"
               size="small"
               value={searchTerm}
@@ -266,7 +271,7 @@ export default function AdminCategories() {
               onClick={openAddDialog}
               className="rounded-xl! py-2.5! px-6! normal-case! font-bold! bg-amber-600! hover:bg-amber-700! shadow-lg shadow-amber-500/20"
             >
-              Shto Kategori
+              {t("adminDepartments.addBtn")}
             </Button>
           </div>
         </Box>
@@ -285,29 +290,32 @@ export default function AdminCategories() {
                 <TableHead className="bg-slate-50 dark:bg-slate-800/80!">
                   <TableRow>
                     <TableCell className="font-bold! text-slate-700! dark:text-slate-200!">
-                      Emri
+                      {t("adminDepartments.tableEmri")}
                     </TableCell>
                     <TableCell className="font-bold! text-slate-700! dark:text-slate-200!">
-                      Përshkrimi
+                      {t("adminDepartments.tablePershkrimi")}
+                    </TableCell>
+                    <TableCell className="font-bold! text-slate-700! dark:text-slate-200!">
+                      {t("adminDepartments.tableSemestra")}
                     </TableCell>
                     <TableCell
                       align="right"
                       className="font-bold! text-slate-700! dark:text-slate-200!"
                     >
-                      Veprime
+                      {t("adminDepartments.tableVeprime")}
                     </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {filteredCategories.length === 0 ? (
+                  {filteredDepartments.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={3}>
+                      <TableCell colSpan={4}>
                         <Box className="flex flex-col items-center justify-center py-20 gap-4">
                           <div className="h-16 w-16 rounded-2xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center">
                             <CategoryOutlinedIcon className="text-4xl! text-amber-400" />
                           </div>
                           <Typography className="font-semibold! text-slate-500!">
-                            Nuk ka kategori akoma.
+                            {t("adminDepartments.noData")}
                           </Typography>
                           <Button
                             variant="outlined"
@@ -315,32 +323,35 @@ export default function AdminCategories() {
                             onClick={openAddDialog}
                             className="rounded-xl! normal-case! border-amber-300! text-amber-600!"
                           >
-                            Shto Kategorinë e Parë
+                            {t("adminDepartments.addFirst")}
                           </Button>
                         </Box>
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredCategories.map((category) => (
-                      <TableRow key={category.id} hover>
+                    filteredDepartments.map((department) => (
+                      <TableRow key={department.id} hover>
                         <TableCell className="font-semibold! text-slate-800! dark:text-slate-100!">
-                          {category.emertimi}
+                          {department.emertimi}
                         </TableCell>
                         <TableCell className="text-slate-500! text-sm!">
-                          {category.pershkrimi || "—"}
+                          {department.pershkrimi || "—"}
+                        </TableCell>
+                        <TableCell className="text-slate-700! dark:text-slate-200! font-semibold! text-sm!">
+                          {department.numSemesters ?? "—"}
                         </TableCell>
                         <TableCell align="right">
                           <IconButton
                             size="small"
-                            onClick={() => openGroupsDialog(category)}
+                            onClick={() => openGroupsDialog(department)}
                             className="text-slate-400! hover:text-indigo-600!"
-                            title="Grupet e drejtimit"
+                            title={t("adminDepartments.tooltipGroups")}
                           >
                             <GroupsRounded fontSize="small" />
                           </IconButton>
                           <IconButton
                             size="small"
-                            onClick={() => openEditDialog(category)}
+                            onClick={() => openEditDialog(department)}
                             className="text-slate-400! hover:text-amber-600!"
                           >
                             <EditRounded fontSize="small" />
@@ -348,7 +359,7 @@ export default function AdminCategories() {
                           <IconButton
                             size="small"
                             onClick={() => {
-                              setDeleteTarget(category);
+                              setDeleteTarget(department);
                               setOpenDeleteConfirm(true);
                             }}
                             className="text-slate-400! hover:text-rose-600!"
@@ -394,7 +405,7 @@ export default function AdminCategories() {
                   : "font-black! text-slate-900!"
               }
             >
-              {isEdit ? "Ndrysho Kategorinë" : "Shto Kategori të Re"}
+              {isEdit ? t("adminDepartments.editDialogTitle") : t("adminDepartments.addDialogTitle")}
             </Typography>
           </DialogTitle>
           <DialogContent
@@ -402,7 +413,7 @@ export default function AdminCategories() {
           >
             <Box className="flex flex-col gap-4 mt-2">
               <TextField
-                label="Emertimi"
+                label={t("adminDepartments.fieldEmertimi")}
                 fullWidth
                 value={formData.emertimi}
                 onChange={handleFieldChange("emertimi")}
@@ -423,12 +434,35 @@ export default function AdminCategories() {
                 }}
               />
               <TextField
-                label="Përshkrimi"
+                label={t("adminDepartments.fieldPershkrimi")}
                 fullWidth
                 multiline
                 rows={4}
                 value={formData.pershkrimi}
                 onChange={handleFieldChange("pershkrimi")}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "12px",
+                    color: isDark ? "#f1f5f9" : "#1e293b",
+                    "& fieldset": {
+                      borderColor: isDark ? "#334155" : "#cbd5e1",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: isDark ? "#475569" : "#cbd5e1",
+                    },
+                  },
+                  "& .MuiInputLabel-root": {
+                    color: isDark ? "#cbd5e1" : "#64748b",
+                  },
+                }}
+              />
+              <TextField
+                label={t("adminDepartments.fieldNumSemesters")}
+                fullWidth
+                type="number"
+                inputProps={{ min: 1, max: 12 }}
+                value={formData.numSemesters}
+                onChange={handleFieldChange("numSemesters")}
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     borderRadius: "12px",
@@ -452,7 +486,7 @@ export default function AdminCategories() {
               onClick={() => setOpenDialog(false)}
               className="rounded-xl! normal-case! text-slate-600!"
             >
-              Anulo
+              {t("adminDepartments.cancel")}
             </Button>
             <Button
               variant="contained"
@@ -461,50 +495,50 @@ export default function AdminCategories() {
               className="rounded-xl! normal-case! font-bold! bg-amber-600! hover:bg-amber-700!"
             >
               {submitting
-                ? "Duke ruajtur..."
+                ? t("adminDepartments.saving")
                 : isEdit
-                  ? "Ruaj Ndryshimet"
-                  : "Shto Kategorinë"}
+                  ? t("adminDepartments.saveChanges")
+                  : t("adminDepartments.addDept")}
             </Button>
           </DialogActions>
         </Dialog>
 
         <Dialog
           open={groupsDialog.open}
-          onClose={() => setGroupsDialog({ open: false, category: null })}
+          onClose={() => setGroupsDialog({ open: false, department: null })}
           maxWidth="md"
           fullWidth
           TransitionComponent={Zoom}
         >
           <DialogTitle>
             <Typography variant="h5" className="font-black! dark:text-white!">
-              Grupet e drejtimit
+              {t("adminDepartments.groupsDialogTitle")}
             </Typography>
             <Typography variant="body2" className="text-slate-500!">
-              {groupsDialog.category?.emertimi}
+              {groupsDialog.department?.emertimi}
             </Typography>
           </DialogTitle>
           <DialogContent>
             <Box className="flex flex-wrap gap-3 mb-4 mt-2 items-center">
               <FormControl size="small" sx={{ minWidth: 140 }}>
-                <InputLabel>Semestri</InputLabel>
+                <InputLabel>{t("adminDepartments.semesterLabel")}</InputLabel>
                 <Select
-                  label="Semestri"
+                  label={t("adminDepartments.semesterLabel")}
                   value={groupsSemester}
                   onChange={(e) => {
                     setGroupsSemester(Number(e.target.value));
-                    if (groupsDialog.category) {
+                    if (groupsDialog.department) {
                       setGroupsLoading(true);
-                      getDirectionGroups(groupsDialog.category.id, Number(e.target.value))
-                        .then(setDirectionGroups)
-                        .catch(() => showToast("Gabim", "error"))
+                      getDepartmentGroups(groupsDialog.department.id, Number(e.target.value))
+                        .then(setDepartmentGroups)
+                        .catch(() => showToast(t("adminDepartments.toast.error"), "error"))
                         .finally(() => setGroupsLoading(false));
                     }
                   }}
                 >
                   {[1, 2, 3, 4, 5, 6, 7, 8].map((s) => (
                     <MenuItem key={s} value={s}>
-                      Semestri {s}
+                      {t("adminDepartments.semesterLabel")} {s}
                     </MenuItem>
                   ))}
                 </Select>
@@ -515,11 +549,11 @@ export default function AdminCategories() {
                 onClick={() => navigate("/admin/groups")}
                 className="!rounded-xl !normal-case !font-bold !bg-sky-600"
               >
-                Krijo / menaxho grupet (wizard)
+                {t("adminDepartments.createManageGroups")}
               </Button>
             </Box>
             <Alert severity="info" className="!mb-4 !rounded-2xl">
-              Grupet krijohen vetem nga wizard-i i integruar (staf + orar). Perdorni Menaxhimin e Grupeve.
+              {t("adminDepartments.groupsInfoAlert")}
             </Alert>
             {groupsLoading ? (
               <Box className="flex justify-center py-8"><CircularProgress /></Box>
@@ -528,30 +562,30 @@ export default function AdminCategories() {
                 <Table size="small">
                   <TableHead>
                     <TableRow>
-                      <TableCell className="font-bold!">Grupi</TableCell>
-                      <TableCell className="font-bold!">Kapaciteti</TableCell>
-                      <TableCell className="font-bold!">Studente</TableCell>
-                      <TableCell align="right" className="font-bold!">Veprime</TableCell>
+                      <TableCell className="font-bold!">{t("adminDepartments.groupsTableGrupi")}</TableCell>
+                      <TableCell className="font-bold!">{t("adminDepartments.groupsTableCapacity")}</TableCell>
+                      <TableCell className="font-bold!">{t("adminDepartments.groupsTableStudents")}</TableCell>
+                      <TableCell align="right" className="font-bold!">{t("adminDepartments.groupsTableActions")}</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {directionGroups.map((g) => (
+                    {departmentGroups.map((g) => (
                       <TableRow key={g.id}>
                         <TableCell className="font-semibold!">{g.name}</TableCell>
                         <TableCell>{g.maxCapacity}</TableCell>
                         <TableCell>
                           {g.currentStudents}/{g.maxCapacity}
-                          {g.isFull && " (Full)"}
+                          {g.isFull && ` ${t("adminDepartments.full")}`}
                         </TableCell>
                         <TableCell align="right">
                           <Chip size="small" label={g.status || "ACTIVE"} />
                         </TableCell>
                       </TableRow>
                     ))}
-                    {directionGroups.length === 0 && (
+                    {departmentGroups.length === 0 && (
                       <TableRow>
                         <TableCell colSpan={4} className="text-slate-400! text-center! py-6!">
-                          Nuk ka grupe. Krijoni nje grup te ri nga Menaxhimi i Grupeve (wizard).
+                          {t("adminDepartments.noGroups")}
                         </TableCell>
                       </TableRow>
                     )}
@@ -561,8 +595,8 @@ export default function AdminCategories() {
             )}
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setGroupsDialog({ open: false, category: null })} className="rounded-xl! normal-case!">
-              Mbyll
+            <Button onClick={() => setGroupsDialog({ open: false, department: null })} className="rounded-xl! normal-case!">
+              {t("adminDepartments.close")}
             </Button>
           </DialogActions>
         </Dialog>
@@ -593,15 +627,14 @@ export default function AdminCategories() {
                   : "font-black! text-slate-900!"
               }
             >
-              Fshi Kategorinë
+              {t("adminDepartments.deleteTitle")}
             </Typography>
           </DialogTitle>
           <DialogContent
             className={`!px-6 py-4! ${isDark ? "bg-slate-900/20!" : ""}`}
           >
             <Typography className="text-slate-600! dark:text-slate-300!">
-              Je i sigurt që dëshiron të fshish kategorinë "
-              {deleteTarget?.emertimi}"?
+              {t("adminDepartments.deleteBody")} "{deleteTarget?.emertimi}"?
             </Typography>
           </DialogContent>
           <DialogActions className="p-4! gap-2">
@@ -609,7 +642,7 @@ export default function AdminCategories() {
               onClick={() => setOpenDeleteConfirm(false)}
               className="rounded-xl! normal-case! text-slate-600!"
             >
-              Anulo
+              {t("adminDepartments.cancel")}
             </Button>
             <Button
               variant="contained"
@@ -618,7 +651,7 @@ export default function AdminCategories() {
               disabled={submitting}
               className="rounded-xl! normal-case! font-bold!"
             >
-              {submitting ? "Po fshihet..." : "Fshi Kategorinë"}
+              {submitting ? t("adminDepartments.deletingBtn") : t("adminDepartments.deleteBtn")}
             </Button>
           </DialogActions>
         </Dialog>
@@ -634,8 +667,8 @@ export default function AdminCategories() {
             onClose={() => setOpenSnackbar(false)}
             severity={snackbarSeverity}
             variant="filled"
-            sx={{ 
-              width: "100%", 
+            sx={{
+              width: "100%",
               borderRadius: "1.25rem",
               fontWeight: "bold",
               boxShadow: "0 10px 30px rgba(0,0,0,0.1)"

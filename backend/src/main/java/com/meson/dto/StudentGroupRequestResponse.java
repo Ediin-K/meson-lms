@@ -14,10 +14,10 @@ public class StudentGroupRequestResponse {
     private String studentFirstName;
     private String studentLastName;
     private String studentEmail;
-    private Long categoryId;
-    private String categoryName;
-    private Long directionGroupId;
-    private String directionGroupName;
+    private Long departmentId;
+    private String departmentName;
+    private Long departmentGroupId;
+    private String departmentGroupName;
     private GroupRequestStatus status;
     private LocalDateTime appliedAt;
     private LocalDateTime approvedAt;
