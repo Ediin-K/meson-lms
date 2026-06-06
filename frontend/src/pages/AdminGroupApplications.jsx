@@ -33,22 +33,11 @@ import {
 } from "../services/studentGroupService";
 import { getAllDepartments } from "../services/departmentService";
 import { getDepartmentGroups } from "../services/departmentGroupService";
-
-const STATUS_OPTIONS = [
-  { value: "", label: "Te gjitha" },
-  { value: "PENDING", label: "Ne pritje" },
-  { value: "APPROVED", label: "Aprovuar" },
-  { value: "REJECTED", label: "Refuzuar" },
-];
-
-const STATUS_CHIP = {
-  PENDING: { label: "Ne pritje", color: "warning" },
-  APPROVED: { label: "Aprovuar", color: "success" },
-  REJECTED: { label: "Refuzuar", color: "error" },
-};
+import { useAppPreferences } from "../context/appPreferencesContext";
 
 export default function AdminGroupApplications() {
   const navigate = useNavigate();
+  const { t } = useAppPreferences();
   const [requests, setRequests] = useState([]);
   const [categories, setCategories] = useState([]);
   const [departmentGroups, setDepartmentGroups] = useState([]);
@@ -57,6 +46,19 @@ export default function AdminGroupApplications() {
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState({ status: "PENDING", departmentId: "", departmentGroupId: "" });
   const [toast, setToast] = useState({ open: false, message: "", severity: "success" });
+
+  const STATUS_OPTIONS = [
+    { value: "", label: t('adminGroupApplications.statusAll') },
+    { value: "PENDING", label: t('adminGroupApplications.statusPending') },
+    { value: "APPROVED", label: t('adminGroupApplications.statusApproved') },
+    { value: "REJECTED", label: t('adminGroupApplications.statusRejected') },
+  ];
+
+  const STATUS_CHIP = {
+    PENDING: { label: t('adminGroupApplications.statusPending'), color: "warning" },
+    APPROVED: { label: t('adminGroupApplications.statusApproved'), color: "success" },
+    REJECTED: { label: t('adminGroupApplications.statusRejected'), color: "error" },
+  };
 
   const loadRequests = useCallback(async () => {
     setLoading(true);
@@ -70,7 +72,7 @@ export default function AdminGroupApplications() {
     } catch (err) {
       setToast({
         open: true,
-        message: err?.response?.data?.message || err.message || "Gabim gjate ngarkimit",
+        message: err?.response?.data?.message || err.message || t('adminGroupApplications.toast.loadError'),
         severity: "error",
       });
     } finally {
@@ -108,12 +110,12 @@ export default function AdminGroupApplications() {
     try {
       setActionId(id);
       await approveGroupRequest(id);
-      setToast({ open: true, message: "Aplikimi u aprovua", severity: "success" });
+      setToast({ open: true, message: t('adminGroupApplications.toast.approved'), severity: "success" });
       await loadRequests();
     } catch (err) {
       setToast({
         open: true,
-        message: err?.response?.data?.message || err?.response?.data || err.message || "Gabim",
+        message: err?.response?.data?.message || err?.response?.data || err.message || t('adminGroupApplications.toast.error'),
         severity: "error",
       });
     } finally {
@@ -125,12 +127,12 @@ export default function AdminGroupApplications() {
     try {
       setActionId(id);
       await rejectGroupRequest(id);
-      setToast({ open: true, message: "Aplikimi u refuzua", severity: "success" });
+      setToast({ open: true, message: t('adminGroupApplications.toast.rejected'), severity: "success" });
       await loadRequests();
     } catch (err) {
       setToast({
         open: true,
-        message: err?.response?.data?.message || err?.response?.data || err.message || "Gabim",
+        message: err?.response?.data?.message || err?.response?.data || err.message || t('adminGroupApplications.toast.error'),
         severity: "error",
       });
     } finally {
@@ -146,32 +148,32 @@ export default function AdminGroupApplications() {
           onClick={() => navigate("/admin")}
           className="rounded-2xl! px-6! py-2! normal-case! font-bold! text-slate-600! dark:text-slate-400!"
         >
-          Kthehu te Paneli
+          {t('adminGroupApplications.backToPanel')}
         </Button>
 
         <Box className="my-8">
           <Typography variant="overline" className="font-bold! tracking-[0.3em]! text-indigo-600! dark:text-indigo-400!">
-            STUDENTET & GRUPET
+            {t('adminGroupApplications.overline')}
           </Typography>
           <Typography variant="h3" className="font-black! text-slate-900! dark:text-white!">
-            Aplikimet per grupe
+            {t('adminGroupApplications.title')}
           </Typography>
         </Box>
 
         <Card className="rounded-3xl! border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/60! p-5 mb-6">
           <Box className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <TextField
-              placeholder="Kerko student, email, grup..."
+              placeholder={t('adminGroupApplications.searchPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               InputProps={{ startAdornment: <SearchRounded className="text-slate-400 mr-2" /> }}
               className="md:col-span-2"
             />
             <FormControl fullWidth>
-              <InputLabel>Statusi</InputLabel>
+              <InputLabel>{t('adminGroupApplications.statusLabel')}</InputLabel>
               <Select
                 value={filters.status}
-                label="Statusi"
+                label={t('adminGroupApplications.statusLabel')}
                 onChange={(e) => setFilters((f) => ({ ...f, status: e.target.value }))}
               >
                 {STATUS_OPTIONS.map((o) => (
@@ -180,27 +182,27 @@ export default function AdminGroupApplications() {
               </Select>
             </FormControl>
             <FormControl fullWidth>
-              <InputLabel>Departamenti</InputLabel>
+              <InputLabel>{t('adminGroupApplications.departmentLabel')}</InputLabel>
               <Select
                 value={filters.departmentId}
-                label="Departamenti"
+                label={t('adminGroupApplications.departmentLabel')}
                 onChange={(e) => setFilters((f) => ({ ...f, departmentId: e.target.value, departmentGroupId: "" }))}
               >
-                <MenuItem value="">Te gjitha</MenuItem>
+                <MenuItem value="">{t('adminGroupApplications.statusAll')}</MenuItem>
                 {categories.map((c) => (
                   <MenuItem key={c.id} value={c.id}>{c.emertimi}</MenuItem>
                 ))}
               </Select>
             </FormControl>
             <FormControl fullWidth className="md:col-span-2">
-              <InputLabel>Grupi</InputLabel>
+              <InputLabel>{t('adminGroupApplications.groupLabel')}</InputLabel>
               <Select
                 value={filters.departmentGroupId}
-                label="Grupi"
+                label={t('adminGroupApplications.groupLabel')}
                 disabled={!filters.departmentId}
                 onChange={(e) => setFilters((f) => ({ ...f, departmentGroupId: e.target.value }))}
               >
-                <MenuItem value="">Te gjitha</MenuItem>
+                <MenuItem value="">{t('adminGroupApplications.statusAll')}</MenuItem>
                 {departmentGroups.map((g) => (
                   <MenuItem key={g.id} value={g.id}>
                     {g.name} ({g.currentStudents}/{g.maxCapacity})
@@ -218,14 +220,14 @@ export default function AdminGroupApplications() {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell className="font-black!">Emri</TableCell>
-                  <TableCell className="font-black!">Mbiemri</TableCell>
-                  <TableCell className="font-black!">Email</TableCell>
-                  <TableCell className="font-black!">Departamenti</TableCell>
-                  <TableCell className="font-black!">Grupi</TableCell>
-                  <TableCell className="font-black!">Statusi</TableCell>
-                  <TableCell className="font-black!">Data</TableCell>
-                  <TableCell className="font-black!" align="right">Veprime</TableCell>
+                  <TableCell className="font-black!">{t('adminGroupApplications.tableFirstName')}</TableCell>
+                  <TableCell className="font-black!">{t('adminGroupApplications.tableLastName')}</TableCell>
+                  <TableCell className="font-black!">{t('adminGroupApplications.tableEmail')}</TableCell>
+                  <TableCell className="font-black!">{t('adminGroupApplications.tableDepartment')}</TableCell>
+                  <TableCell className="font-black!">{t('adminGroupApplications.tableGroup')}</TableCell>
+                  <TableCell className="font-black!">{t('adminGroupApplications.tableStatus')}</TableCell>
+                  <TableCell className="font-black!">{t('adminGroupApplications.tableDate')}</TableCell>
+                  <TableCell className="font-black!" align="right">{t('adminGroupApplications.tableActions')}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -258,7 +260,7 @@ export default function AdminGroupApplications() {
                               onClick={() => handleApprove(row.id)}
                               className="rounded-xl! normal-case! font-bold!"
                             >
-                              Aprovo
+                              {t('adminGroupApplications.approveBtn')}
                             </Button>
                             <Button
                               size="small"
@@ -269,7 +271,7 @@ export default function AdminGroupApplications() {
                               onClick={() => handleReject(row.id)}
                               className="rounded-xl! normal-case! font-bold!"
                             >
-                              Refuzo
+                              {t('adminGroupApplications.rejectBtn')}
                             </Button>
                           </Box>
                         )}
@@ -280,7 +282,7 @@ export default function AdminGroupApplications() {
                 {filtered.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={8} align="center" className="py-12 text-slate-400!">
-                      Nuk ka aplikime.
+                      {t('adminGroupApplications.noApplications')}
                     </TableCell>
                   </TableRow>
                 )}

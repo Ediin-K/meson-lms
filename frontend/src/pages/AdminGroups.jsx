@@ -184,7 +184,7 @@ export default function AdminGroups() {
     try {
       setGroups(await getDepartmentGroups(departmentId, semester));
     } catch (error) {
-      showToast(getErrorMessage(error, "Gabim gjate ngarkimit"), "error");
+      showToast(getErrorMessage(error, t("adminGroups.validLoadError")), "error");
     } finally {
       setLoading(false);
     }
@@ -300,22 +300,22 @@ export default function AdminGroups() {
     const errors = {};
     if (wizardStep === 0) {
       if (!departmentId) errors.departmentId = t("adminGroups.departmentLabel");
-      if (!groupName.trim()) errors.groupName = "Emri i grupit eshte i detyrueshem";
-      if (Number(maxCapacity) < 1) errors.maxCapacity = "Kapaciteti duhet te jete te pakten 1";
+      if (!groupName.trim()) errors.groupName = t("adminGroups.validGroupName");
+      if (Number(maxCapacity) < 1) errors.maxCapacity = t("adminGroups.validCapacity");
       else {
         try {
           await loadWizardContext(departmentId, semester);
         } catch (error) {
-          errors.global = getErrorMessage(error, "Gabim gjate ngarkimit");
+          errors.global = getErrorMessage(error, t("adminGroups.validLoadError"));
         }
       }
     }
     if (wizardStep === 1) {
       const validStaff = staffRows.filter((r) => r.subjectId && r.professorId);
-      if (validStaff.length === 0) errors.staff = "Shto te pakten nje rresht stafi (lende + profesor)";
+      if (validStaff.length === 0) errors.staff = t("adminGroups.validStaff");
       const validSchedules = scheduleRows.filter((r) => r.subjectId && r.professorId && r.startTime);
       if (validSchedules.length === 0) {
-        errors.schedules = "Shto te pakten nje sesion orari";
+        errors.schedules = t("adminGroups.validSchedule");
       } else {
         for (let i = 0; i < validSchedules.length; i += 1) {
           const conflict = getScheduleConflict(validSchedules, validSchedules[i], i);
@@ -327,7 +327,7 @@ export default function AdminGroups() {
         }
         const missingStaff = validSchedules.some((r) => !staffBySubject[String(r.subjectId)]?.professorId);
         if (missingStaff) {
-          errors.schedules = "Disa lende nuk kane staf te caktuar ne hapin e stafit";
+          errors.schedules = t("adminGroups.validMissingStaff");
         }
       }
     }

@@ -51,7 +51,7 @@ const SEMESTER_STYLE = {
 
 export default function TeacherSubjects() {
   const navigate = useNavigate();
-  const { mode } = useAppPreferences();
+  const { mode, t } = useAppPreferences();
   const isDark = mode === "dark";
 
   const [subjects, setSubjects] = useState([]);
@@ -133,26 +133,26 @@ export default function TeacherSubjects() {
               variant="overline"
               className="font-bold! tracking-[0.3em]! text-indigo-600! dark:text-indigo-400!"
             >
-              MENAXHIMI I LëndëVE
+              {t('teacherSubjects.overline')}
             </Typography>
             <Typography
               variant="h3"
               component="h1"
               className="mt-2! font-black! text-slate-900! dark:text-white!"
             >
-              Lëndët e Mia
+              {t('teacherSubjects.title')}
             </Typography>
             <Typography
               variant="body1"
               className="mt-4! max-w-2xl! text-slate-500! dark:text-slate-400! text-lg font-medium!"
             >
-              Mbikëqyrni Lëndët tuaja, përditësoni informacionin dhe menaxhoni përmbajtjen për studentët.
+              {t('teacherSubjects.subtitle')}
             </Typography>
           </div>
 
           <Box className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
             <TextField
-              placeholder="Kërko Lëndët..."
+              placeholder={t('teacherSubjects.searchPlaceholder')}
               variant="outlined"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -177,19 +177,19 @@ export default function TeacherSubjects() {
         <Grid container spacing={3} className="mb-10">
           {[
             {
-              label: "Gjithsej Lëndë",
+              label: t('teacherSubjects.statTotal'),
               value: subjects.length,
               color: "text-indigo-600",
               bg: "bg-indigo-50 dark:bg-indigo-900/20",
             },
             {
-              label: "Lëndë Aktive",
+              label: t('teacherSubjects.statActive'),
               value: subjects.filter((c) => c.statusi === "AKTIV").length,
               color: "text-emerald-600",
               bg: "bg-emerald-50 dark:bg-emerald-900/20",
             },
             {
-              label: "Lëndë Draft",
+              label: t('teacherSubjects.statDraft'),
               value: subjects.filter((c) => c.statusi === "DRAFT").length,
               color: "text-amber-600",
               bg: "bg-amber-50 dark:bg-amber-900/20",
@@ -225,7 +225,7 @@ export default function TeacherSubjects() {
               variant="h6"
               className="font-black! text-slate-800! dark:text-white!"
             >
-              Lista e Lëndëve
+              {t('teacherSubjects.listTitle')}
             </Typography>
             <Box className="flex gap-2">
               {["all", "AKTIV", "DRAFT"].map((status) => (
@@ -236,8 +236,8 @@ export default function TeacherSubjects() {
                   className={`!rounded-full px-4! py-1! normal-case! text-xs! font-bold! ${statusFilter === status ? "bg-slate-900! text-white! dark:bg-white! dark:text-slate-900!" : "text-slate-500! hover:bg-slate-100! dark:hover:bg-slate-800!"}`}
                 >
                   {status === "all"
-                    ? "Të gjithë"
-                    : status === "AKTIV" ? "Aktiv" : "Draft"}
+                    ? t('teacherSubjects.filterAll')
+                    : status === "AKTIV" ? t('teacherSubjects.filterActive') : t('teacherSubjects.filterDraft')}
                 </Button>
               ))}
             </Box>
@@ -253,22 +253,22 @@ export default function TeacherSubjects() {
                 <TableHead className="bg-slate-50/50 dark:bg-slate-800/30!">
                   <TableRow>
                     <TableCell className="font-black! text-slate-400! uppercase! text-[10px]! tracking-widest! py-6! pl-8! w-1/3">
-                      Lënda & Përshkrimi
+                      {t('teacherSubjects.colSubject')}
                     </TableCell>
                     <TableCell className="font-black! text-slate-400! uppercase! text-[10px]! tracking-widest! py-6!">
-                      Departamenti / Semestri
+                      {t('teacherSubjects.colDeptSem')}
                     </TableCell>
                     <TableCell className="font-black! text-slate-400! uppercase! text-[10px]! tracking-widest! py-6!">
-                      Statusi
+                      {t('teacherSubjects.colStatus')}
                     </TableCell>
                     <TableCell className="font-black! text-slate-400! uppercase! text-[10px]! tracking-widest! py-6!">
-                      Krijuar Më
+                      {t('teacherSubjects.colCreated')}
                     </TableCell>
                     <TableCell
                       align="right"
                       className="font-black! text-slate-400! uppercase! text-[10px]! tracking-widest! py-6! pr-8!"
                     >
-                      Veprime
+                      {t('teacherSubjects.colActions')}
                     </TableCell>
                   </TableRow>
                 </TableHead>
@@ -285,13 +285,13 @@ export default function TeacherSubjects() {
                               variant="h6"
                               className="font-black! text-slate-800! dark:text-white! mb-1"
                             >
-                              Nuk u gjet asnjë kurs
+                              {t('teacherSubjects.noSubjectsTitle')}
                             </Typography>
                             <Typography
                               variant="body2"
                               className="text-slate-400!"
                             >
-                              Provo të ndryshosh filtrat ose kërkimin tend.
+                              {t('teacherSubjects.noSubjectsDesc')}
                             </Typography>
                           </div>
                         </Box>
@@ -316,7 +316,7 @@ export default function TeacherSubjects() {
                               className="text-slate-500! font-medium! line-clamp-2!"
                               style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
                             >
-                              {course.pershkrimi || "Pa përshkrim"}
+                              {course.pershkrimi || t('teacherSubjects.noDescription')}
                             </Typography>
                           </Box>
                         </TableCell>
@@ -330,7 +330,7 @@ export default function TeacherSubjects() {
                             <span
                               className={`px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest ${SEMESTER_STYLE[course.semester] || "bg-slate-100 text-slate-700 dark:bg-slate-800/40 dark:text-slate-300"}`}
                             >
-                              Semestri {course.semester}
+                              {t('teacherSubjects.semesterPrefix')} {course.semester}
                             </span>
                           </Box>
                         </TableCell>
@@ -354,7 +354,7 @@ export default function TeacherSubjects() {
                         </TableCell>
                         <TableCell align="right" className="pr-8!">
                           <Box className="flex justify-end gap-1">
-                            <Tooltip title="Shiko Lëndan">
+                            <Tooltip title={t('teacherSubjects.tooltipView')}>
                               <IconButton
                                 size="small"
                                 onClick={() => navigate(`/subject/${course.id}`)}
@@ -406,7 +406,7 @@ export default function TeacherSubjects() {
                   : "font-black! text-slate-900!"
               }
             >
-              Ndrysho Lëndan
+              {t('teacherSubjects.editDialogTitle')}
             </Typography>
             <Typography
               variant="body2"
@@ -414,7 +414,7 @@ export default function TeacherSubjects() {
                 isDark ? "text-slate-300! mt-1!" : "text-slate-600! mt-1!"
               }
             >
-              Përditësoni të dhënat bazë të Lëndat.
+              {t('teacherSubjects.editDialogSubtitle')}
             </Typography>
           </DialogTitle>
           <DialogContent
@@ -422,7 +422,7 @@ export default function TeacherSubjects() {
           >
             <Box className="flex flex-col gap-5 mt-4">
               <TextField
-                label="Titulli"
+                label={t('teacherSubjects.fieldTitle')}
                 fullWidth
                 disabled
                 value={formData.titulli || ''}
@@ -438,7 +438,7 @@ export default function TeacherSubjects() {
                 }}
               />
               <TextField
-                label="Përshkrimi"
+                label={t('teacherSubjects.fieldDesc')}
                 fullWidth
                 multiline
                 rows={3}
@@ -456,10 +456,10 @@ export default function TeacherSubjects() {
               />
               <Box className="flex gap-4">
                 <FormControl fullWidth>
-                  <InputLabel sx={{ color: isDark ? "#cbd5e1" : "#64748b" }}>Semestri</InputLabel>
+                  <InputLabel sx={{ color: isDark ? "#cbd5e1" : "#64748b" }}>{t('teacherSubjects.fieldSemester')}</InputLabel>
                   <Select variant="outlined"
                     value={formData.semester || 1}
-                    label="Semestri"
+                    label={t('teacherSubjects.fieldSemester')}
                     disabled
                     onChange={e => setFormData({...formData, semester: e.target.value})}
                     sx={{
@@ -470,14 +470,14 @@ export default function TeacherSubjects() {
                       "& .MuiSvgIcon-root": { color: isDark ? "#cbd5e1" : "#64748b" },
                     }}
                   >
-                    {[1, 2, 3, 4, 5, 6].map(s => <MenuItem key={s} value={s}>Semestri {s}</MenuItem>)}
+                    {[1, 2, 3, 4, 5, 6].map(s => <MenuItem key={s} value={s}>{t('teacherSubjects.semesterOption')} {s}</MenuItem>)}
                   </Select>
                 </FormControl>
                 <FormControl fullWidth>
-                  <InputLabel sx={{ color: isDark ? "#cbd5e1" : "#64748b" }}>Statusi</InputLabel>
+                  <InputLabel sx={{ color: isDark ? "#cbd5e1" : "#64748b" }}>{t('teacherSubjects.fieldStatus')}</InputLabel>
                   <Select variant="outlined"
                     value={formData.statusi || 'DRAFT'}
-                    label="Statusi"
+                    label={t('teacherSubjects.fieldStatus')}
                     onChange={e => setFormData({...formData, statusi: e.target.value})}
                     sx={{
                       borderRadius: "1rem",
@@ -487,8 +487,8 @@ export default function TeacherSubjects() {
                       "& .MuiSvgIcon-root": { color: isDark ? "#cbd5e1" : "#64748b" },
                     }}
                   >
-                    <MenuItem value="DRAFT">Draft</MenuItem>
-                    <MenuItem value="AKTIV">Aktiv</MenuItem>
+                    <MenuItem value="DRAFT">{t('teacherSubjects.statusDraft')}</MenuItem>
+                    <MenuItem value="AKTIV">{t('teacherSubjects.statusActive')}</MenuItem>
                   </Select>
                 </FormControl>
               </Box>
@@ -499,7 +499,7 @@ export default function TeacherSubjects() {
               onClick={() => setOpenDialog(false)}
               className="rounded-2xl! px-6! py-3! normal-case! font-bold! text-slate-500! hover:bg-slate-100! dark:hover:bg-slate-800!"
             >
-              Anulo
+              {t('teacherSubjects.cancel')}
             </Button>
             <Button
               variant="contained"
@@ -507,7 +507,7 @@ export default function TeacherSubjects() {
               disabled={saving}
               className="rounded-2xl! px-10! py-3! normal-case! font-black! bg-indigo-600! hover:bg-indigo-700! shadow-lg shadow-indigo-500/20"
             >
-              {saving ? "Po Ruhet..." : "Ruaj"}
+              {saving ? t('teacherSubjects.saving') : t('teacherSubjects.save')}
             </Button>
           </DialogActions>
         </Dialog>

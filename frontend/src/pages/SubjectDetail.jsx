@@ -21,6 +21,7 @@ import VisibilityRounded from '@mui/icons-material/VisibilityRounded'
 import QuizRounded from '@mui/icons-material/QuizRounded'
 import AssignmentTurnedInRounded from '@mui/icons-material/AssignmentTurnedInRounded'
 import UploadFileRounded from '@mui/icons-material/UploadFileRounded'
+import AttachFileRounded from '@mui/icons-material/AttachFileRounded'
 import CloseRounded from '@mui/icons-material/CloseRounded'
 import teacherContentService from '../services/teacherContentService'
 import progressService from '../services/progressService'
@@ -116,6 +117,7 @@ export default function SubjectDetail() {
     const [subject, setSubject] = useState(null)
     const [modules, setModules] = useState([])
     const [lessons, setLessons] = useState({})
+    const [lessonErrors, setLessonErrors] = useState({})
     const [expandedModule, setExpandedModule] = useState(null)
     const { role, mode } = useAppPreferences()
     const isDark = mode === 'dark'
@@ -208,7 +210,7 @@ export default function SubjectDetail() {
     const availableSubgroups = selectedGroup?.subgroups || []
 
     const toggleModule = async (moduleId) => {
-        if (!isEnrolled) return
+        if (!isEnrolled && !isOwner) return
         if (expandedModule === moduleId) {
             setExpandedModule(null)
             return
@@ -216,10 +218,13 @@ export default function SubjectDetail() {
         setExpandedModule(moduleId)
         if (!lessons[moduleId]) {
             try {
+                setLessonErrors(prev => ({ ...prev, [moduleId]: null }))
                 const res = await axiosInstance.get(`/modules/${moduleId}/lessons`)
                 setLessons(prev => ({ ...prev, [moduleId]: res.data }))
             } catch (err) {
                 console.error(err)
+                const msg = err?.response?.data?.message || err?.response?.status || 'Gabim i panjohur'
+                setLessonErrors(prev => ({ ...prev, [moduleId]: `Gabim ${msg}` }))
             }
         }
     }
@@ -519,7 +524,7 @@ export default function SubjectDetail() {
                 {}
                 <Box className="flex items-center justify-between mb-6">
                     <Typography variant="h5" className="font-bold! text-slate-900! dark:text-white!">
-                        Përmbajtja e Lëndat
+                        {t('subjectDetail.subjectContent', 'Përmbajtja e Lëndës')}
                     </Typography>
                     {isOwner && (
                         <Button
@@ -531,7 +536,7 @@ export default function SubjectDetail() {
                             }}
                             className="rounded-full! bg-sky-600! normal-case!"
                         >
-                            Shto Modul
+                            {t('subjectDetail.addModule', 'Shto Modul')}
                         </Button>
                     )}
                 </Box>
@@ -608,7 +613,12 @@ export default function SubjectDetail() {
 
                                 {expandedModule === module.id && (
                                     <Box className="border-t border-slate-100 dark:border-slate-800">
-                                        {!lessons[module.id] ? (
+                                        {lessonErrors[module.id] ? (
+                                            <Box className="flex flex-col items-center py-6 gap-2">
+                                                <Typography variant="body2" className="text-red-500!">{lessonErrors[module.id]}</Typography>
+                                                <Button size="small" onClick={() => { setLessonErrors(prev => ({ ...prev, [module.id]: null })); setLessons(prev => { const n = {...prev}; delete n[module.id]; return n; }); toggleModule(module.id); }} className="normal-case! text-sky-600!">Provo përsëri</Button>
+                                            </Box>
+                                        ) : !lessons[module.id] ? (
                                             <Box className="flex justify-center py-6">
                                                 <CircularProgress size={24} className="text-sky-500!" />
                                             </Box>
@@ -851,17 +861,17 @@ export default function SubjectDetail() {
                 PaperProps={{ className: "rounded-3xl! p-2!" }}
             >
                 <DialogTitle className="font-bold!">
-                    {moduleModal.editing ? "Ndrysho Modulin" : "Shto Modul të Ri"}
+                    {moduleModal.editing ? t('subjectDetail.editModule', 'Ndrysho Modulin') : t('subjectDetail.addNewModule', 'Shto Modul të Ri')}
                 </DialogTitle>
                 <DialogContent className="flex flex-col gap-4 mt-2">
                     <TextField
-                        label="Titulli i Modulit"
+                        label={t('subjectDetail.moduleTitle', 'Titulli i Modulit')}
                         fullWidth
                         value={moduleForm.titulli}
                         onChange={e => setModuleForm({ ...moduleForm, titulli: e.target.value })}
                     />
                     <TextField
-                        label="Përshkrimi"
+                        label={t('subjectDetail.moduleDesc', 'Përshkrimi')}
                         fullWidth
                         multiline
                         rows={2}
@@ -870,9 +880,9 @@ export default function SubjectDetail() {
                     />
                 </DialogContent>
                 <DialogActions className="px-6! pb-6!">
-                    <Button onClick={() => setModuleModal({ open: false, editing: null })} className="normal-case!">Anulo</Button>
+                    <Button onClick={() => setModuleModal({ open: false, editing: null })} className="normal-case!">{t('subjectDetail.cancel', 'Anulo')}</Button>
                     <Button variant="contained" onClick={handleModuleSubmit} className="rounded-full! bg-sky-600! normal-case!">
-                        {moduleModal.editing ? "Përditëso" : "Krijo"}
+                        {moduleModal.editing ? t('subjectDetail.update', 'Përditëso') : t('subjectDetail.create', 'Krijo')}
                     </Button>
                 </DialogActions>
             </Dialog>
