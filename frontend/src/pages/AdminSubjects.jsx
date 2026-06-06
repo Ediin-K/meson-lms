@@ -1071,7 +1071,7 @@ export default function AdminSubjects() {
                     onChange={(e) => setGroupForm((prev) => ({ ...prev, capacity: e.target.value }))}
                 />
                 <TextField
-                    label="Professor IDs"
+                    label={t("adminSubjects.groups.professorIds")}
                     placeholder="2, 5"
                     value={groupForm.teacherIds}
                     onChange={(e) => setGroupForm((prev) => ({ ...prev, teacherIds: e.target.value }))}
@@ -1192,7 +1192,7 @@ export default function AdminSubjects() {
                           />
                           <TextField
                               size="small"
-                              label="Assistant IDs"
+                              label={t("adminSubjects.groups.assistantIds")}
                               placeholder="7, 9"
                               value={form.assistantIds || ""}
                               onChange={(e) =>

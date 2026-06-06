@@ -129,9 +129,9 @@ export default function AdminReports() {
         {}
         <Box className="flex gap-2 mb-8 p-1.5 bg-slate-100 dark:bg-slate-800/60 rounded-2xl w-fit">
           {[
-            { key: "overview", label: "Pasqyrë" },
-            { key: "users",    label: "Përdoruesit" },
-            { key: "subjects",  label: "Lëndët" },
+            { key: "overview", label: t('adminReports.tabOverview') },
+            { key: "users",    label: t('adminReports.tabUsers') },
+            { key: "subjects",  label: t('adminReports.tabSubjects') },
           ].map(({ key, label }) => (
             <button
               key={key}
@@ -154,7 +154,7 @@ export default function AdminReports() {
         ) : error ? (
           <Box className="rounded-2xl border border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/30 p-8 text-center">
             <Typography className="!text-red-600 dark:!text-red-400">
-              Të dhënat nuk u ngarkuan. Kontrolloni serverin.
+              {t('adminReports.errorLoad')}
             </Typography>
           </Box>
         ) : (
@@ -182,10 +182,10 @@ export default function AdminReports() {
                   <Card elevation={0} className="rounded-2xl border border-slate-200/80 bg-white dark:!bg-slate-900/60 dark:!border-slate-700/80 shadow-sm">
                     <CardContent className="!p-6">
                       <Typography variant="h6" className="!font-bold !text-slate-900 dark:!text-white !mb-0.5">
-                        Regjistrimet sipas Muajit
+                        {t('adminReports.chartEnrollmentsByMonth')}
                       </Typography>
                       <Typography variant="caption" className="!text-slate-500">
-                        Numri i regjistrimeve të reja — {new Date().getFullYear()}
+                        {t('adminReports.chartEnrollmentsYear')} — {new Date().getFullYear()}
                       </Typography>
                       <Box className="mt-5 h-56">
                         <ResponsiveContainer width="100%" height="100%">
@@ -203,7 +203,7 @@ export default function AdminReports() {
                             <Area
                               type="monotone"
                               dataKey="count"
-                              name="Regjistrime"
+                              name={t('adminReports.dataNameEnrollments')}
                               stroke="#6366f1"
                               strokeWidth={2.5}
                               fill="url(#gradArea)"
@@ -224,10 +224,10 @@ export default function AdminReports() {
                   <Card elevation={0} className="rounded-2xl border border-slate-200/80 bg-white dark:!bg-slate-900/60 dark:!border-slate-700/80 shadow-sm h-full">
                     <CardContent className="!p-6">
                       <Typography variant="h6" className="!font-bold !text-slate-900 dark:!text-white !mb-0.5">
-                        Gjendja e Regjistrimeve
+                        {t('adminReports.chartEnrollmentStatus')}
                       </Typography>
                       <Typography variant="caption" className="!text-slate-500">
-                        Aktiv · Përfunduar · Anuluar
+                        {t('adminReports.chartEnrollmentStatusSub')}
                       </Typography>
                       <Box className="mt-5 h-56 flex items-center justify-center">
                         <ResponsiveContainer width="100%" height="100%">
@@ -269,10 +269,10 @@ export default function AdminReports() {
                   <Card elevation={0} className="rounded-2xl border border-slate-200/80 bg-white dark:!bg-slate-900/60 dark:!border-slate-700/80 shadow-sm">
                     <CardContent className="!p-6">
                       <Typography variant="h6" className="!font-bold !text-slate-900 dark:!text-white !mb-0.5">
-                        Lëndët sipas Departamentit
+                        {t('adminReports.chartSubjectsByDept')}
                       </Typography>
                       <Typography variant="caption" className="!text-slate-500">
-                        Numri i Lëndëve për çdo departament
+                        {t('adminReports.chartSubjectsByDeptSub')}
                       </Typography>
                       <Box className="mt-5 h-56">
                         <ResponsiveContainer width="100%" height="100%">
@@ -290,7 +290,7 @@ export default function AdminReports() {
                             />
                             <YAxis tick={axisStyle} allowDecimals={false} />
                             <Tooltip content={<ChartTooltip />} />
-                            <Bar dataKey="value" name="Lëndë" radius={[6, 6, 0, 0]}>
+                            <Bar dataKey="value" name={t('adminReports.dataNameSubjects')} radius={[6, 6, 0, 0]}>
                               {stats.subjectsByDepartment.map((entry, i) => (
                                 <Cell key={entry.name} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                               ))}
