@@ -40,6 +40,13 @@ public class GlobalExceptionHandler {
         return error(HttpStatus.BAD_REQUEST, message);
     }
 
+    @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
+    public ResponseEntity<Map<String, Object>> handleMaxUpload(
+            org.springframework.web.multipart.MaxUploadSizeExceededException ex) {
+        return error(HttpStatus.PAYLOAD_TOO_LARGE,
+                "Skedari eshte shume i madh. Madhesia maksimale e lejuar eshte 20 MB.");
+    }
+
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<Map<String, Object>> handleNullPointer(NullPointerException ex) {
         return error(HttpStatus.INTERNAL_SERVER_ERROR, "Gabim i brendshem: te dhena mungojne");

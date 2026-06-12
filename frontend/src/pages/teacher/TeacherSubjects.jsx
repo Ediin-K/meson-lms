@@ -61,7 +61,7 @@ export default function TeacherSubjects() {
   const [statusFilter, setStatusFilter] = useState("all");
 
   const [openDialog, setOpenDialog] = useState(false);
-  const [selectedSubject, setSelectedSubject] = useState(null);
+  const [selectedSubject,setSelectedSubject] = useState(null);
   const [formData, setFormData] = useState({});
   const [saving, setSaving] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");

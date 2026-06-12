@@ -22,9 +22,92 @@ import {
     getMyQuizAttempts,
 } from "../../services/studentProfileService.js"
 import progressService from "../../services/progressService.js"
+import assignmentService from "../../services/assignmentService.js"
+import { formatDateTime } from "../../lib/dateFormat.js"
+import Chip from "@mui/material/Chip"
+
+const STATUS_STYLE = {
+    UPCOMING:  { color: 'info',    key: 'studentDash.statusUpcoming' },
+    MISSED:    { color: 'error',   key: 'studentDash.statusMissed' },
+    SUBMITTED: { color: 'success', key: 'studentDash.statusSubmitted' },
+    LATE:      { color: 'warning', key: 'studentDash.statusLate' },
+    GRADED:    { color: 'secondary', key: 'studentDash.statusGraded' },
+}
+
+function AssignmentOverviewSection({ rows, t, locale, navigate }) {
+    const recentGrades = rows
+        .filter(r => r.status === 'GRADED' && r.grade != null)
+        .sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt))
+        .slice(0, 5)
+
+    return (
+        <div className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-12">
+            <Card elevation={0} className="lg:col-span-8 rounded-2xl border border-slate-200/90 bg-slate-50/50 p-4 dark:!border-slate-700/90 dark:!bg-slate-900/50">
+                <Typography variant="subtitle2" className="!mb-3 !font-bold !text-slate-800 dark:!text-white">
+                    {t('studentDash.assignmentsTitle')}
+                </Typography>
+                {rows.length === 0 ? (
+                    <Typography variant="body2" className="!text-slate-500">{t('studentDash.noAssignments')}</Typography>
+                ) : (
+                    <div className="flex flex-col gap-2 max-h-80 overflow-y-auto pr-1">
+                        {rows.map(r => {
+                            const style = STATUS_STYLE[r.status] || STATUS_STYLE.UPCOMING
+                            return (
+                                <div key={r.assignmentId}
+                                     className="flex items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-2 cursor-pointer hover:border-sky-400 transition-colors"
+                                     onClick={() => navigate(`/assignment/${r.assignmentId}`)}>
+                                    <div className="flex-1 min-w-0">
+                                        <Typography variant="body2" className="!font-semibold !text-slate-800 dark:!text-white truncate">
+                                            {r.title}
+                                        </Typography>
+                                        <Typography variant="caption" className="!text-slate-500 !block truncate">
+                                            {r.subjectTitle} · {t('studentDash.colDeadline')}: {formatDateTime(r.deadline, locale)}
+                                        </Typography>
+                                    </div>
+                                    {r.grade != null && (
+                                        <Typography variant="body2" className="!font-bold !text-emerald-600 shrink-0">
+                                            {r.grade}
+                                        </Typography>
+                                    )}
+                                    <Chip size="small" color={style.color} label={t(style.key)} className="!font-semibold shrink-0" />
+                                </div>
+                            )
+                        })}
+                    </div>
+                )}
+            </Card>
+            <Card elevation={0} className="lg:col-span-4 rounded-2xl border border-slate-200/90 bg-slate-50/50 p-4 dark:!border-slate-700/90 dark:!bg-slate-900/50">
+                <Typography variant="subtitle2" className="!mb-3 !font-bold !text-slate-800 dark:!text-white">
+                    {t('studentDash.recentGradesTitle')}
+                </Typography>
+                {recentGrades.length === 0 ? (
+                    <Typography variant="body2" className="!text-slate-500">{t('studentDash.noGrades')}</Typography>
+                ) : (
+                    <div className="flex flex-col gap-2">
+                        {recentGrades.map(r => (
+                            <div key={r.assignmentId} className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-2">
+                                <div className="min-w-0">
+                                    <Typography variant="body2" className="!font-semibold !text-slate-800 dark:!text-white truncate">
+                                        {r.title}
+                                    </Typography>
+                                    <Typography variant="caption" className="!text-slate-500 !block truncate">
+                                        {r.subjectTitle}
+                                    </Typography>
+                                </div>
+                                <Typography variant="h6" className="!font-extrabold !text-emerald-600 shrink-0">
+                                    {r.grade}
+                                </Typography>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </Card>
+        </div>
+    )
+}
 
 export default function StudentDashboard() {
-    const { t } = useAppPreferences()
+    const { t, locale } = useAppPreferences()
     const navigate = useNavigate()
     const userId = localStorage.getItem('userId')
 
@@ -36,6 +119,7 @@ export default function StudentDashboard() {
     const [submissions, setSubmissions] = useState([])
     const [quizAttempts, setQuizAttempts] = useState([])
     const [subjectProgressById, setsubjectProgressById] = useState({})
+    const [assignmentOverview, setAssignmentOverview] = useState([])
 
     useEffect(() => {
         let ignore = false
@@ -53,10 +137,14 @@ export default function StudentDashboard() {
                 getStudentCertificates(userId),
                 getStudentAssignmentSubmissions(),
                 getMyQuizAttempts(),
+                assignmentService.getMyOverview().then(r => r.data),
             ])
 
             if (ignore) return
 
+            if (results[4]?.status === 'fulfilled') {
+                setAssignmentOverview(results[4].value)
+            }
             if (results.some((result) => result.status === 'rejected')) {
                 setError("Disa te dhena dinamike nuk u ngarkuan.")
             }
@@ -189,6 +277,8 @@ export default function StudentDashboard() {
                     </Card>
                 ))}
             </div>
+
+            <AssignmentOverviewSection rows={assignmentOverview} t={t} locale={locale} navigate={navigate} />
 
             <div className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-5 lg:items-stretch">
 

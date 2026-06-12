@@ -135,6 +135,11 @@ export default function Login() {
     try {
       const data = await login(email, password)
 
+      if (data.mustChangePassword) {
+        navigate('/change-password', { replace: true })
+        return
+      }
+
       localStorage.setItem('email', data.email)
       setIsAuthenticated(true)
 
@@ -144,6 +149,12 @@ export default function Login() {
       }
 
       const role = data.role?.toLowerCase()
+      const storedRedirect = sessionStorage.getItem('meson-post-login-redirect')
+      if (storedRedirect) {
+        sessionStorage.removeItem('meson-post-login-redirect')
+        navigate(storedRedirect, { replace: true })
+        return
+      }
       const destination =
         role === 'admin'
           ? '/admin'

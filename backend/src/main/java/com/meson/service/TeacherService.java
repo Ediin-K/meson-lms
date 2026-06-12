@@ -40,6 +40,7 @@ public class TeacherService {
         teacher.setMbiemri(request.getMbiemri());
         teacher.setEmail(request.getEmail().toLowerCase());
         teacher.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        teacher.setTemporaryPassword(true);
         teacher.setPhoneNumber(request.getPhoneNumber());
         teacher.setDataKrijimit(LocalDateTime.now());
         teacher.setStatusi(request.getStatusi());

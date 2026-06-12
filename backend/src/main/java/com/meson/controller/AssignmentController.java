@@ -68,6 +68,12 @@ public class AssignmentController {
         return assignmentService.getMySubmissions(currentUserId());
     }
 
+    @GetMapping("/my-overview")
+    @PreAuthorize("hasRole('STUDENT')")
+    public List<com.meson.dto.StudentAssignmentOverviewResponse> getMyOverview() {
+        return assignmentService.getStudentOverview(currentUserId());
+    }
+
     private Long currentUserId() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByEmail(email)

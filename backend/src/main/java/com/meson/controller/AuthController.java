@@ -28,6 +28,24 @@ public class AuthController {
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request, HttpServletResponse response) {
         AuthResponse authResponse = authService.login(request);
         setAccessTokenCookie(response, authResponse.getToken());
+        if (authResponse.getRefreshToken() != null) {
+            setRefreshTokenCookie(response, authResponse.getRefreshToken());
+        } else {
+            clearRefreshTokenCookie(response);
+        }
+        return ResponseEntity.ok(authResponse);
+    }
+
+    /** Sets a new password for users logged in with a temporary password (restricted token). */
+    @PostMapping("/change-temporary-password")
+    public ResponseEntity<AuthResponse> changeTemporaryPassword(
+            @jakarta.validation.Valid @RequestBody com.meson.dto.ChangePasswordRequest request,
+            HttpServletResponse response) {
+        String email = org.springframework.security.core.context.SecurityContextHolder
+                .getContext().getAuthentication().getName();
+        AuthResponse authResponse = authService.changeTemporaryPassword(
+                email, request.getCurrentPassword(), request.getNewPassword());
+        setAccessTokenCookie(response, authResponse.getToken());
         setRefreshTokenCookie(response, authResponse.getRefreshToken());
         return ResponseEntity.ok(authResponse);
     }

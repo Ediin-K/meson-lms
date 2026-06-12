@@ -25,6 +25,18 @@ public class UserController {
         return ResponseEntity.ok(userService.getAll());
     }
 
+    @GetMapping("/paged")
+    public ResponseEntity<org.springframework.data.domain.Page<UserDTO>> getPaged(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "") String search,
+            @RequestParam(defaultValue = "") String role,
+            @RequestParam(defaultValue = "") String status) {
+        return ResponseEntity.ok(userService.getPage(search, role, status,
+                org.springframework.data.domain.PageRequest.of(page, Math.min(size, 100),
+                        org.springframework.data.domain.Sort.by("id"))));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<User> getById(@PathVariable Long id) {
         return ResponseEntity.ok(userService.getById(id));

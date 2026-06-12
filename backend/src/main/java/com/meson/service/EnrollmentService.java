@@ -21,6 +21,16 @@ public class EnrollmentService {
     private final SubjectGroupTeacherRepository subjectGroupTeacherRepository;
     private final SubjectSubgroupTeacherRepository subjectSubgroupTeacherRepository;
 
+    public org.springframework.data.domain.Page<EnrollmentResponse> getPage(String search, String status,
+            org.springframework.data.domain.Pageable pageable) {
+        com.meson.entity.EnrollmentStatus statusFilter = null;
+        if (status != null && !status.isBlank() && !"all".equalsIgnoreCase(status)) {
+            statusFilter = com.meson.entity.EnrollmentStatus.valueOf(status.toUpperCase());
+        }
+        return enrollmentRepository.searchPage(search == null ? "" : search.trim(), statusFilter, pageable)
+                .map(this::toResponse);
+    }
+
     public List<EnrollmentResponse> getAll() {
         return enrollmentRepository.findAll()
                 .stream()

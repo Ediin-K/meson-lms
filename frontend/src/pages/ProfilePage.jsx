@@ -1,4 +1,5 @@
 ﻿import { useEffect, useState } from 'react'
+import { formatDate } from '../lib/dateFormat.js'
 import { useNavigate } from 'react-router-dom'
 import axiosInstance from '../services/axiosInstance'
 import { useAppPreferences } from '../context/appPreferencesContext'
@@ -47,7 +48,7 @@ function CertificateCard({ cert, t }) {
                             {t('profilePage.issuedDate')}
                         </Typography>
                         <Typography variant="body2" className="!font-semibold !text-slate-700 dark:!text-slate-200">
-                            {new Date(cert.dataLeshimit).toLocaleDateString('sq-AL', { day: 'numeric', month: 'long', year: 'numeric' })}
+                            {formatDate(cert.dataLeshimit, locale, { day: 'numeric', month: 'long', year: 'numeric' })}
                         </Typography>
                     </div>
                     <Chip
@@ -91,7 +92,7 @@ function CertificateCard({ cert, t }) {
 
 export default function ProfilePage() {
     const navigate = useNavigate()
-    const { t } = useAppPreferences()
+    const { t, locale } = useAppPreferences()
 
     const userId = localStorage.getItem('userId')
 

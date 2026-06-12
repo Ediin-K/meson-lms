@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { formatDateTime } from '../lib/dateFormat.js'
 import { useNavigate } from "react-router-dom";
 import {
   Alert,
@@ -37,7 +38,7 @@ import { useAppPreferences } from "../context/appPreferencesContext";
 
 export default function AdminGroupApplications() {
   const navigate = useNavigate();
-  const { t } = useAppPreferences();
+  const { t, locale } = useAppPreferences();
   const [requests, setRequests] = useState([]);
   const [categories, setCategories] = useState([]);
   const [departmentGroups, setDepartmentGroups] = useState([]);
@@ -246,7 +247,7 @@ export default function AdminGroupApplications() {
                         <Chip label={chip.label} color={chip.color} size="small" className="font-bold!" />
                       </TableCell>
                       <TableCell>
-                        {row.appliedAt ? new Date(row.appliedAt).toLocaleString("sq-AL") : "-"}
+                        {row.appliedAt ? formatDateTime(row.appliedAt, locale) : "-"}
                       </TableCell>
                       <TableCell align="right">
                         {row.status === "PENDING" && (

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { formatDateTime } from '../lib/dateFormat.js'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
     Box, Button, Card, CardContent, Chip, CircularProgress,
@@ -11,14 +12,11 @@ import FileDownloadRounded from '@mui/icons-material/FileDownloadRounded'
 import UploadFileRounded from '@mui/icons-material/UploadFileRounded'
 import CheckCircleRounded from '@mui/icons-material/CheckCircleRounded'
 import assignmentService from '../services/assignmentService'
+import { apiMessage } from '../lib/apiError.js'
 import { useAppPreferences } from '../context/appPreferencesContext'
 
-function DeadlineChip({ deadline, isOpen, deadlinePrefix }) {
-    const date = new Date(deadline)
-    const label = date.toLocaleString('sq-AL', {
-        day: '2-digit', month: 'short', year: 'numeric',
-        hour: '2-digit', minute: '2-digit',
-    })
+function DeadlineChip({ deadline, isOpen, deadlinePrefix, locale }) {
+    const label = formatDateTime(deadline, locale)
     return (
         <Chip
             label={`${deadlinePrefix}${label}`}
@@ -33,7 +31,7 @@ function DeadlineChip({ deadline, isOpen, deadlinePrefix }) {
 export default function AssignmentPage() {
     const { assignmentId } = useParams()
     const navigate = useNavigate()
-    const { t } = useAppPreferences()
+    const { t, locale } = useAppPreferences()
 
     const [assignment, setAssignment]   = useState(null)
     const [submission, setSubmission]   = useState(null)
@@ -72,8 +70,8 @@ export default function AssignmentPage() {
             a.download = assignment.attachmentName || 'attachment'
             a.click()
             URL.revokeObjectURL(url)
-        } catch {
-            setError(t('assignmentPage.errorDownload'))
+        } catch (err) {
+            setError(apiMessage(err, t('assignmentPage.errorDownload')))
         } finally {
             setDownloading(false)
         }
@@ -89,7 +87,7 @@ export default function AssignmentPage() {
             setSelectedFile(null)
             setSuccess(t('assignmentPage.successSubmit'))
         } catch (err) {
-            setError(err.response?.data?.message || t('assignmentPage.errorSubmit'))
+            setError(apiMessage(err, t('assignmentPage.errorSubmit')))
         } finally {
             setUploading(false)
         }
@@ -137,12 +135,12 @@ export default function AssignmentPage() {
                                 {assignment.lessonTitle}
                             </Typography>
                         </div>
-                        <DeadlineChip deadline={assignment.deadline} isOpen={isOpen} deadlinePrefix={t('assignmentPage.deadlinePrefix')} />
+                        <DeadlineChip deadline={assignment.deadline} isOpen={isOpen} deadlinePrefix={t('assignmentPage.deadlinePrefix')} locale={locale} />
                     </div>
 
                     {!isOpen && (
-                        <Alert severity="error" className="!mb-4 !rounded-xl">
-                            {t('assignmentPage.deadlinePassed')}
+                        <Alert severity={submission ? 'error' : 'warning'} className="!mb-4 !rounded-xl">
+                            {submission ? t('assignmentPage.deadlinePassed') : t('assignmentPage.lateWarning')}
                         </Alert>
                     )}
 
@@ -184,19 +182,59 @@ export default function AssignmentPage() {
                     {success && <Alert severity="success" className="!mb-4 !rounded-xl">{success}</Alert>}
                     {error && <Alert severity="error" className="!mb-4 !rounded-xl">{error}</Alert>}
 
-                    {submission ? (
-                        <div className="flex items-center gap-3 p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
-                            <CheckCircleRounded className="text-emerald-600" />
-                            <div className="flex-1 min-w-0">
-                                <Typography variant="body2" className="!font-semibold !text-emerald-800 dark:!text-emerald-300">
-                                    {t('assignmentPage.submittedSuccess')}
-                                </Typography>
-                                <Typography variant="caption" className="!text-slate-500 truncate !block">
-                                    {submission.fileName} · {new Date(submission.submittedAt).toLocaleString('sq-AL')}
-                                </Typography>
+                    {submission && (
+                        <div className="flex flex-col gap-3 mb-4">
+                            <div className="flex items-center gap-3 p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
+                                <CheckCircleRounded className="text-emerald-600" />
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                        <Typography variant="body2" className="!font-semibold !text-emerald-800 dark:!text-emerald-300">
+                                            {t('assignmentPage.submittedSuccess')}
+                                        </Typography>
+                                        <Chip
+                                            size="small"
+                                            label={
+                                                submission.status === 'GRADED' ? t('assignmentPage.gradedChip')
+                                                : submission.late ? t('assignmentPage.lateChip')
+                                                : t('assignmentPage.onTimeChip')
+                                            }
+                                            color={
+                                                submission.status === 'GRADED' ? 'info'
+                                                : submission.late ? 'warning'
+                                                : 'success'
+                                            }
+                                            className="!font-semibold"
+                                        />
+                                    </div>
+                                    <Typography variant="caption" className="!text-slate-500 truncate !block">
+                                        {submission.fileName} · {formatDateTime(submission.submittedAt, locale)}
+                                    </Typography>
+                                    {submission.firstSubmittedAt && submission.firstSubmittedAt !== submission.submittedAt && (
+                                        <Typography variant="caption" className="!text-slate-400 !block">
+                                            {t('assignmentPage.firstSubmittedLabel')}{formatDateTime(submission.firstSubmittedAt, locale)}
+                                        </Typography>
+                                    )}
+                                </div>
                             </div>
+
+                            {(submission.grade != null || submission.feedback) && (
+                                <div className="p-4 rounded-xl bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800">
+                                    {submission.grade != null && (
+                                        <Typography variant="body2" className="!font-bold !text-sky-800 dark:!text-sky-300">
+                                            {t('assignmentPage.gradeLabel')}: {submission.grade}
+                                        </Typography>
+                                    )}
+                                    {submission.feedback && (
+                                        <Typography variant="body2" className="!text-slate-700 dark:!text-slate-300 whitespace-pre-wrap !mt-1">
+                                            <span className="font-semibold">{t('assignmentPage.feedbackLabel')}:</span> {submission.feedback}
+                                        </Typography>
+                                    )}
+                                </div>
+                            )}
                         </div>
-                    ) : isOpen ? (
+                    )}
+
+                    {(!submission || (isOpen && submission.status !== 'GRADED')) ? (
                         <div className="flex flex-col gap-4">
                             <label className="block">
                                 <div className="flex items-center gap-3 px-4 py-3 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-600 hover:border-sky-400 dark:hover:border-sky-600 cursor-pointer transition-colors">
@@ -217,14 +255,17 @@ export default function AssignmentPage() {
                                 onClick={handleSubmit}
                                 className="!rounded-xl !normal-case !bg-sky-600 hover:!bg-sky-700 !py-2"
                             >
-                                {uploading ? <CircularProgress size={20} className="!text-white" /> : t('assignmentPage.submitBtn')}
+                                {uploading
+                                    ? <CircularProgress size={20} className="!text-white" />
+                                    : submission ? t('assignmentPage.resubmitBtn') : t('assignmentPage.submitBtn')}
                             </Button>
+                            {submission && isOpen && (
+                                <Typography variant="caption" className="!text-slate-400">
+                                    {t('assignmentPage.resubmitHint')}
+                                </Typography>
+                            )}
                         </div>
-                    ) : (
-                        <Typography variant="body2" className="!text-slate-500">
-                            {t('assignmentPage.deadlinePassedNoSubmit')}
-                        </Typography>
-                    )}
+                    ) : null}
                 </CardContent>
             </Card>
         </Container>

@@ -1,4 +1,5 @@
 ﻿import { useParams, useNavigate, Link } from 'react-router-dom'
+import { formatDateTime, formatDate } from '../lib/dateFormat.js'
 import { useEffect, useState } from 'react'
 import axiosInstance from '../services/axiosInstance'
 import { useAppPreferences } from '../context/appPreferencesContext'
@@ -112,7 +113,7 @@ function LearningResourceCard({ resource, isOwner, isDark, onPreview, onDownload
 export default function SubjectDetail() {
     const { subjectId } = useParams()
     const navigate = useNavigate()
-    const { t } = useAppPreferences()
+    const { t, locale } = useAppPreferences()
 
     const [subject, setSubject] = useState(null)
     const [modules, setModules] = useState([])
@@ -988,7 +989,7 @@ export default function SubjectDetail() {
                                 </Box>
                                 {lessonForm.deadline && (
                                     <Typography variant="caption" className="text-emerald-700! dark:text-emerald-400! mt-1 block">
-                                        Afati: {new Date(lessonForm.deadline).toLocaleString('sq-AL', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })}
+                                        Afati: {formatDateTime(lessonForm.deadline, locale)}
                                     </Typography>
                                 )}
                             </Box>
@@ -1117,7 +1118,7 @@ export default function SubjectDetail() {
                                             <TableCell className="font-semibold!">{sub.studentName}</TableCell>
                                             <TableCell className="text-slate-500!">{sub.studentEmail}</TableCell>
                                             <TableCell className="text-slate-500! text-sm! max-w-[180px] truncate">{sub.fileName}</TableCell>
-                                            <TableCell>{new Date(sub.submittedAt).toLocaleDateString('sq-AL')}</TableCell>
+                                            <TableCell>{formatDate(sub.submittedAt, locale)}</TableCell>
                                             <TableCell align="right">
                                                 <IconButton size="small" onClick={() => handleDownloadSubmission(sub)} className="text-sky-600!">
                                                     <FileDownloadRounded fontSize="small" />

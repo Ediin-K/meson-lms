@@ -20,6 +20,29 @@ public class JwtService {
     @Value("${jwt.expiration}")
     private long expiration;
 
+    /** Lifetime of the restricted must-change-password token (5 minutes). */
+    private static final long PASSWORD_CHANGE_TOKEN_EXPIRATION_MS = 5 * 60 * 1000;
+
+    /**
+     * Short-lived token issued when the user still has a temporary password.
+     * Carries no role and is only honored by the password-change endpoint.
+     */
+    public String generatePasswordChangeToken(String email) {
+        long ttl = Math.min(expiration, PASSWORD_CHANGE_TOKEN_EXPIRATION_MS);
+        return Jwts.builder()
+                .setSubject(email)
+                .claim("must_change_password", true)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + ttl))
+                .signWith(getKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public boolean isPasswordChangeToken(String token) {
+        Boolean flag = extractClaim(token, claims -> claims.get("must_change_password", Boolean.class));
+        return Boolean.TRUE.equals(flag);
+    }
+
     public String generateToken(String email, String role) {
         return Jwts.builder()
                 .setSubject(email)

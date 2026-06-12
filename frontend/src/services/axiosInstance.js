@@ -2,6 +2,9 @@ import axios from 'axios'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'
 
+/** Dispatched when the access token expired and the refresh attempt also failed. */
+export const SESSION_EXPIRED_EVENT = 'meson:session-expired'
+
 const axiosInstance = axios.create({
     baseURL: API_BASE_URL,
     withCredentials: true,
@@ -12,11 +15,10 @@ axiosInstance.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config
 
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
             originalRequest._retry = true
 
             try {
-                
                 await axios.post(
                     `${API_BASE_URL}/auth/refresh`,
                     {},
@@ -25,8 +27,11 @@ axiosInstance.interceptors.response.use(
 
                 return axiosInstance(originalRequest)
             } catch {
-                localStorage.clear()
-                window.location.href = '/login'
+                // Don't hard-redirect: forms may hold unsaved input. Let the
+                // app show a re-login prompt instead.
+                if (typeof window !== 'undefined') {
+                    window.dispatchEvent(new CustomEvent(SESSION_EXPIRED_EVENT))
+                }
             }
         }
 

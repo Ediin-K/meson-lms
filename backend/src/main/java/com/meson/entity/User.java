@@ -54,6 +54,11 @@ public class User {
     @Column(name = "status", nullable = false)
     private String statusi = "active";
 
+    /** True while the user still has the admin-issued temporary password. */
+    @Builder.Default
+    @Column(name = "temporary_password", nullable = false)
+    private boolean temporaryPassword = false;
+
     @Transient
     private String role;
 
