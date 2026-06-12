@@ -8,6 +8,9 @@ import ConsentBanner from "./components/cookies/ConsentBanner.jsx";
 
 const Home = lazy(() => import("./pages/Home.jsx"));
 const Login = lazy(() => import("./pages/Login.jsx"));
+const StudentLogin = lazy(() => import("./pages/StudentLogin.jsx"));
+const StaffLogin = lazy(() => import("./pages/StaffLogin.jsx"));
+const AdminLogin = lazy(() => import("./pages/AdminLogin.jsx"));
 const About = lazy(() => import("./pages/About.jsx"));
 const CourseDetail = lazy(() => import("./pages/CourseDetail.jsx"));
 const LessonDetail = lazy(() => import("./pages/LessonDetail.jsx"));
@@ -34,6 +37,12 @@ const AdminSchedules = lazy(() => import("./pages/AdminSchedules.jsx"));
 const StudentSchedules = lazy(() => import("./pages/StudentSchedules.jsx"));
 const StudentGroups = lazy(() => import("./pages/StudentGroups.jsx"));
 const StudentProfilePage = lazy(() => import("./pages/student/StudentProfilePage.jsx"));
+const StudentSmisLayout = lazy(() => import("./layouts/StudentSmisLayout.jsx"));
+const StudentSmisHome = lazy(() => import("./pages/student/StudentSmisHome.jsx"));
+const StudentSmisProfilePage = lazy(() => import("./pages/student/StudentSmisProfilePage.jsx"));
+const ExamRegistrationPage = lazy(() => import("./pages/student/ExamRegistrationPage.jsx"));
+const RegisteredExamsPage = lazy(() => import("./pages/student/RegisteredExamsPage.jsx"));
+const StudentPaymentsPage = lazy(() => import("./pages/student/StudentPaymentsPage.jsx"));
 const AdminGroupApplications = lazy(() => import("./pages/AdminGroupApplications.jsx"));
 const AdminGroups = lazy(() => import("./pages/AdminGroups.jsx"));
 const TeacherLayout = lazy(() => import("./layouts/TeacherLayout.jsx"));
@@ -43,7 +52,11 @@ const TeacherLessons = lazy(() => import("./pages/teacher/TeacherLessons.jsx"));
 const TeacherQuizzes = lazy(() => import("./pages/teacher/TeacherQuizzes.jsx"));
 const TeacherStudents = lazy(() => import("./pages/teacher/TeacherStudents.jsx"));
 const ProfessorGradesPage = lazy(() => import("./pages/teacher/ProfessorGradesPage.jsx"));
+const ProfessorExamPage = lazy(() => import("./pages/teacher/ProfessorExamPage.jsx"));
 const StudentGradesPage = lazy(() => import("./pages/student/StudentGradesPage.jsx"));
+const StudentTranscriptPage = lazy(() => import("./pages/student/StudentTranscriptPage.jsx"));
+const AdminSmisDashboard = lazy(() => import("./pages/AdminSmisDashboard.jsx"));
+const SmisPortalLogin = lazy(() => import("./pages/SmisPortalLogin.jsx"));
 
 function RootRedirect() {
   const { isAuthenticated, role } = useAppPreferences();
@@ -74,22 +87,27 @@ function PageFallback() {
 
 function AppLayout() {
   const location = useLocation();
-  const isLoginPage = location.pathname === "/login";
+  const isLoginPage = location.pathname === "/login" || location.pathname.startsWith("/login/");
   const isQuizPage = /\/quiz\/\d+/.test(location.pathname);
+  const isSmisPage = location.pathname.includes("/smis");
 
   return (
       <div className="flex min-h-dvh flex-col bg-gradient-to-b from-sky-50 via-[#f0f7fb] to-[#d8e8f2] transition-colors dark:from-slate-950 dark:via-slate-900 dark:to-slate-900">
-        {!isLoginPage && !isQuizPage && <Header />}
+        {!isLoginPage && !isQuizPage && !isSmisPage && <Header />}
         <main className="flex flex-col flex-grow">
           <div
             id="main-content"
-            className={`flex flex-col flex-grow ${isLoginPage || isQuizPage ? "" : "pt-[73px] sm:pt-[81px]"}`}
+            className={`flex flex-col flex-grow ${isLoginPage || isQuizPage || isSmisPage ? "" : "pt-[73px] sm:pt-[81px]"}`}
             tabIndex={-1}
           >
             <Suspense fallback={<PageFallback />}>
             <Routes>
               <Route path="/" element={<RootRedirect />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/login/student" element={<StudentLogin />} />
+              <Route path="/login/staff" element={<StaffLogin />} />
+              <Route path="/login/admin" element={<AdminLogin />} />
+              <Route path="/smis-login/:portal" element={<SmisPortalLogin />} />
               <Route path="/register" element={<Navigate to="/login" replace />} />
               <Route path="/signup" element={<Navigate to="/login" replace />} />
               <Route path="/about" element={<About />} />
@@ -217,6 +235,14 @@ function AppLayout() {
                 }
               />
               <Route
+                path="/admin/smis"
+                element={
+                  <ProtectedRoute requiredRole="admin">
+                    <AdminSmisDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/student"
                 element={
                   <ProtectedRoute requiredRole="student">
@@ -265,6 +291,21 @@ function AppLayout() {
                 }
               />
               <Route
+                path="/student/smis"
+                element={
+                  <ProtectedRoute requiredRole="student">
+                    <StudentSmisLayout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route index element={<StudentSmisHome />} />
+                <Route path="profile" element={<StudentSmisProfilePage />} />
+                <Route path="grades" element={<StudentTranscriptPage />} />
+                <Route path="exams/register" element={<ExamRegistrationPage />} />
+                <Route path="exams/registered" element={<RegisteredExamsPage />} />
+                <Route path="payments" element={<StudentPaymentsPage />} />
+              </Route>
+              <Route
                 path="/teacher"
                 element={
                   <ProtectedRoute requiredRole="teacher">
@@ -280,6 +321,7 @@ function AppLayout() {
                 <Route path="quizzes" element={<TeacherQuizzes />} />
                 <Route path="students" element={<TeacherStudents />} />
                 <Route path="grades" element={<ProfessorGradesPage />} />
+                <Route path="smis/exams" element={<ProfessorExamPage />} />
               </Route>
               <Route
                 path="/notifications"

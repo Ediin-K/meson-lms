@@ -66,7 +66,7 @@ export default function TeacherDashboard() {
               PANELI I MËSUESIT
             </Typography>
             <Typography variant="h3" component="h1" className="!mt-1 !font-black !text-slate-900 dark:!text-white">
-              Mirësevini, Mësues!
+              Mirësevini, Profesor!
             </Typography>
             <Typography variant="body1" className="!mt-3 !max-w-2xl !text-slate-600 dark:!text-slate-400 text-lg !font-medium">
               Menaxhoni kurset tuaja, studentët dhe aktivitetet mësimore në një vend.

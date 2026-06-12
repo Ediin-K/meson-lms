@@ -34,6 +34,7 @@ import CategoryRounded from "@mui/icons-material/CategoryRounded";
 import AnalyticsRounded from "@mui/icons-material/AnalyticsRounded";
 import CalendarMonthRounded from "@mui/icons-material/CalendarMonthRounded";
 import GroupsRounded from "@mui/icons-material/GroupsRounded";
+import FactCheckRounded from "@mui/icons-material/FactCheckRounded";
 import ArrowForwardRounded from "@mui/icons-material/ArrowForwardRounded";
 import Footer from "../ui/Footer";
 
@@ -176,6 +177,14 @@ export default function AdminDashboard() {
       path: "/admin/groups",
       color: "text-indigo-600",
       bg: "bg-indigo-100 dark:bg-indigo-900/40",
+    },
+    {
+      title: "SMIS",
+      desc: "Menaxhoni paraqitjet e provimeve, notat, refuzimet dhe anulimet.",
+      icon: FactCheckRounded,
+      path: "/admin/smis",
+      color: "text-sky-600",
+      bg: "bg-sky-100 dark:bg-sky-900/40",
     },
   ];
 

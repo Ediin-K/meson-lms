@@ -19,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class StudentProfileService {
 
+    private static final String DEFAULT_STUDENT_PROGRAM = "Shkenca kompjuterike dhe inxhinieri";
+
     private final UserRepository userRepository;
     private final UserRoleRepository userRoleRepository;
     private final StudentProfileRepository studentProfileRepository;
@@ -41,8 +43,15 @@ public class StudentProfileService {
 
         studentProfileRepository.findByUserIdWithDetails(userId).ifPresent(profile -> {
             builder.currentSemester(profile.getCurrentSemester());
+            builder.parentName(profile.getParentName());
+            builder.dateOfBirth(profile.getDateOfBirth());
+            builder.gender(profile.getGender());
+            builder.birthplace(profile.getBirthplace());
+            builder.academicYear(profile.getAcademicYear());
             if (profile.getCourseCategory() != null) {
                 builder.categoryName(profile.getCourseCategory().getEmertimi());
+            } else {
+                builder.categoryName(DEFAULT_STUDENT_PROGRAM);
             }
         });
 

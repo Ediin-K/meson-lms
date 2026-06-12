@@ -1,6 +1,7 @@
 package com.meson.dto;
 
 import lombok.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -18,4 +19,9 @@ public class StudentProfileResponse {
     private String role;
     private Integer currentSemester;
     private String categoryName;
+    private String parentName;
+    private LocalDate dateOfBirth;
+    private String gender;
+    private String birthplace;
+    private String academicYear;
 }

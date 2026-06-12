@@ -1,4 +1,4 @@
-package com.meson.controller;
+gitpackage com.meson.controller;
 
 import com.meson.dto.GradeRequest;
 import com.meson.dto.GradeResponse;
