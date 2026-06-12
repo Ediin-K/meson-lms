@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { useAppPreferences } from '../../context/appPreferencesContext.js'
+import { formatDateTime } from '../../lib/dateFormat.js'
 import { useNavigate } from 'react-router-dom'
 import { Box, Button, Chip, CircularProgress, Typography, Tooltip } from '@mui/material'
 import AssignmentRounded from '@mui/icons-material/AssignmentRounded'
@@ -11,6 +13,7 @@ import assignmentService from '../../services/assignmentService'
 
 export default function LessonAssignmentCard({ lessonId }) {
     const navigate = useNavigate()
+    const { locale } = useAppPreferences()
     const [assignment, setAssignment] = useState(null)
     const [submitted, setSubmitted]   = useState(false)
     const [loading, setLoading]       = useState(true)
@@ -72,10 +75,7 @@ export default function LessonAssignmentCard({ lessonId }) {
     }
 
     const isOpen = assignment.isOpen
-    const deadline = new Date(assignment.deadline).toLocaleString('sq-AL', {
-        day: '2-digit', month: 'short', year: 'numeric',
-        hour: '2-digit', minute: '2-digit',
-    })
+    const deadline = formatDateTime(assignment.deadline, locale)
 
     return (
         <Box

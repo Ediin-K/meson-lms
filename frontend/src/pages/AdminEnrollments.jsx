@@ -45,7 +45,6 @@ import Footer from "../components/ui/Footer";
 import axiosInstance from "../services/axiosInstance";
 import { getSubjectGroups } from "../services/subjectGroupService";
 import {
-  getAllEnrollments,
   createEnrollment,
   updateEnrollmentProgress,
   updateEnrollmentStatus,
@@ -116,11 +115,43 @@ export default function AdminEnrollments() {
     );
   };
 
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(20);
+  const [totalCount, setTotalCount] = useState(0);
+  const [statusCounts, setStatusCounts] = useState({ all: 0, AKTIV: 0, PERFUNDUAR: 0, ANULUAR: 0 });
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const handle = setTimeout(() => {
+      setDebouncedSearch(searchTerm.trim());
+      setPage(0);
+    }, 400);
+    return () => clearTimeout(handle);
+  }, [searchTerm]);
+
   const loadEnrollments = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await getAllEnrollments();
-      setEnrollments(data);
+      const params = {
+        page,
+        size: rowsPerPage,
+        search: debouncedSearch,
+        status: filterStatus === "all" ? "" : filterStatus,
+      };
+      const [pageRes, aktivRes, perfRes, anulRes] = await Promise.all([
+        axiosInstance.get("/enrollments/paged", { params }),
+        axiosInstance.get("/enrollments/paged", { params: { size: 1, status: "AKTIV" } }),
+        axiosInstance.get("/enrollments/paged", { params: { size: 1, status: "PERFUNDUAR" } }),
+        axiosInstance.get("/enrollments/paged", { params: { size: 1, status: "ANULUAR" } }),
+      ]);
+      setEnrollments(pageRes.data.content);
+      setTotalCount(pageRes.data.totalElements);
+      setStatusCounts({
+        all: aktivRes.data.totalElements + perfRes.data.totalElements + anulRes.data.totalElements,
+        AKTIV: aktivRes.data.totalElements,
+        PERFUNDUAR: perfRes.data.totalElements,
+        ANULUAR: anulRes.data.totalElements,
+      });
     } catch (error) {
       showToast(
         getErrorMessage(error, t("adminEnrollments.toast.fetchError")),
@@ -129,7 +160,7 @@ export default function AdminEnrollments() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [page, rowsPerPage, debouncedSearch, filterStatus]);
 
   const loadUsers = useCallback(async () => {
     try {
@@ -161,20 +192,8 @@ export default function AdminEnrollments() {
     loadSubjects();
   }, [loadEnrollments, loadUsers, loadSubjects]);
 
-  const filtered = enrollments.filter((e) => {
-    const matchSearch =
-      (e.userEmri?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
-      (e.subjectTitulli?.toLowerCase() || "").includes(searchTerm.toLowerCase());
-    const matchStatus = filterStatus === "all" || e.statusi === filterStatus;
-    return matchSearch && matchStatus;
-  });
-
-  const counts = {
-    all: enrollments.length,
-    AKTIV: enrollments.filter((e) => e.statusi === "AKTIV").length,
-    PERFUNDUAR: enrollments.filter((e) => e.statusi === "PERFUNDUAR").length,
-    ANULUAR: enrollments.filter((e) => e.statusi === "ANULUAR").length,
-  };
+  const filtered = enrollments;
+  const counts = statusCounts;
 
   const FILTERS = [
     { key: "all", label: `${t("adminEnrollments.filterAll")} (${counts.all})` },
@@ -390,7 +409,7 @@ export default function AdminEnrollments() {
           {FILTERS.map(({ key, label }) => (
             <button
               key={key}
-              onClick={() => setFilterStatus(key)}
+              onClick={() => { setFilterStatus(key); setPage(0); }}
               className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
                 filterStatus === key
                   ? "bg-rose-600 text-white shadow-md shadow-rose-500/20"
@@ -532,6 +551,17 @@ export default function AdminEnrollments() {
                 </TableBody>
               </Table>
             </TableContainer>
+          )}
+          {!loading && (
+            <TablePagination
+              component="div"
+              count={totalCount}
+              page={page}
+              onPageChange={(_, p) => setPage(p)}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
+              rowsPerPageOptions={[10, 20, 50]}
+            />
           )}
         </Card>
       </Container>

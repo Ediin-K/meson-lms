@@ -22,22 +22,7 @@ import LessonAssignmentCard from '../components/subject/LessonAssignmentCard'
 import progressService from '../services/progressService'
 import { downloadResource, openResourcePreview, getViewUrl } from '../services/resourceService'
 
-<<<<<<< HEAD
 // ── Resource helpers ──────────────────────────────────────────────────────────
-=======
-function ResourceTypeIcon({ type, className }) {
-    switch (type) {
-        case 'PDF':          return <PictureAsPdfRounded className={className} />
-        case 'IMAGE':        return <ImageRounded className={className} />
-        case 'VIDEO':        return <VideocamRounded className={className} />
-        case 'DOCUMENT':     return <DescriptionRounded className={className} />
-        case 'PRESENTATION': return <SlideshowRounded className={className} />
-        case 'SPREADSHEET':  return <TableChartRounded className={className} />
-        case 'ARCHIVE':      return <FolderZipRounded className={className} />
-        default:             return <InsertDriveFileRounded className={className} />
-    }
-}
->>>>>>> e8f52cdd10b89aff0676e24611dcdc448acda21b
 
 function formatSize(bytes) {
     if (!bytes && bytes !== 0) return ''
@@ -106,14 +91,10 @@ function ResourceCard({ resource }) {
                 {}
                 <div className={`flex items-center gap-3 px-4 py-3 ${bgColor}`}>
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white dark:bg-slate-900 shadow-sm">
-<<<<<<< HEAD
                         <ResourceTypeIcon
                             type={resource.resourceType}
                             className={`!text-xl ${iconColor}`}
                         />
-=======
-                        <ResourceTypeIcon type={resource.resourceType} className={`!text-xl ${iconColor}`} />
->>>>>>> e8f52cdd10b89aff0676e24611dcdc448acda21b
                     </div>
                     <div className="min-w-0 flex-1">
                         <Tooltip title={resource.emriOrigjinal} placement="top">

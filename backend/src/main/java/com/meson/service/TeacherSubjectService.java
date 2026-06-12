@@ -57,7 +57,7 @@ public class TeacherSubjectService {
     public TeacherStatsDTO getStats() {
         User teacher = getCurrentUser();
         long totalSubjects = subjectRepository.countByTeacherId(teacher.getId());
-        long totalStudents = enrollmentRepository.countBySubjectTeacherId(teacher.getId());
+        long totalStudents = enrollmentRepository.countDistinctStudentsByTeacherId(teacher.getId());
         long totalQuizzes = quizRepository.countByLessonModuleSubjectTeacherId(teacher.getId());
         long totalAssignments = assignmentRepository.countByLessonModuleSubjectTeacherId(teacher.getId());
 

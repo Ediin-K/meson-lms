@@ -2,7 +2,7 @@ package com.meson.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Entity
 @Table(
@@ -34,11 +34,29 @@ public class AssignmentSubmission {
     @Column(nullable = false)
     private String fileName;
 
+    /** Timestamp of the latest (current) file, UTC. */
     @Column(nullable = false)
-    private LocalDateTime submittedAt;
+    private Instant submittedAt;
+
+    /** Timestamp of the very first submission — audit trail survives resubmissions. */
+    @Column(name = "first_submitted_at", nullable = false)
+    private Instant firstSubmittedAt;
+
+    @Builder.Default
+    @Column(name = "is_late", nullable = false)
+    private boolean late = false;
+
+    private Double grade;
+
+    @Column(columnDefinition = "TEXT")
+    private String feedback;
+
+    @Column(name = "graded_at")
+    private Instant gradedAt;
 
     @PrePersist
     void onCreate() {
-        if (submittedAt == null) submittedAt = LocalDateTime.now();
+        if (submittedAt == null) submittedAt = Instant.now();
+        if (firstSubmittedAt == null) firstSubmittedAt = submittedAt;
     }
 }

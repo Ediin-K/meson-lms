@@ -1,4 +1,5 @@
 ﻿import { useEffect, useState } from 'react'
+import { formatDate } from '../lib/dateFormat.js'
 import { useParams, useNavigate } from 'react-router-dom'
 import axiosInstance from '../services/axiosInstance'
 import { Box, Button, CircularProgress, Container, Typography } from '@mui/material'
@@ -11,7 +12,7 @@ import { useAppPreferences } from '../context/appPreferencesContext'
 export default function CertificateVerify() {
     const { kodiUnik } = useParams()
     const navigate = useNavigate()
-    const { t } = useAppPreferences()
+    const { t, locale } = useAppPreferences()
 
     const [cert, setCert]     = useState(null)
     const [loading, setLoading] = useState(true)
@@ -86,7 +87,7 @@ export default function CertificateVerify() {
                                     {t('certificateVerify.issuedDate')}
                                 </Typography>
                                 <Typography variant="body2" className="!font-bold !text-slate-700 dark:!text-slate-200">
-                                    {new Date(cert.dataLeshimit).toLocaleDateString('sq-AL', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                    {formatDate(cert.dataLeshimit, locale, { day: 'numeric', month: 'long', year: 'numeric' })}
                                 </Typography>
                             </div>
                             <div className="rounded-xl bg-emerald-50 dark:bg-emerald-950/40 p-3 text-center">

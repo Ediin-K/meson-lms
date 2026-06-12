@@ -94,6 +94,14 @@ public class UserService {
         userRepository.save(user);
     }
 
+    public org.springframework.data.domain.Page<UserDTO> getPage(String search, String role, String status,
+            org.springframework.data.domain.Pageable pageable) {
+        return userRepository.searchPage(search == null ? "" : search.trim(),
+                        role == null || role.isBlank() ? "" : normalizeRoleForDB(role.trim().toLowerCase()),
+                        status == null ? "" : status.trim(), pageable)
+                .map(this::toDto);
+    }
+
     public List<UserDTO> getAll() {
         return userRepository.findAllWithRoles().stream()
                 .map(this::toDto)
@@ -118,6 +126,7 @@ public class UserService {
         user.setMbiemri(dto.getMbiemri());
         user.setEmail(dto.getEmail());
         user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
+        user.setTemporaryPassword(true);
         user.setDataKrijimit(LocalDateTime.now());
         user.setStatusi(dto.getStatusi() != null ? dto.getStatusi() : "active");
         user.setLockoutEnabled(false);

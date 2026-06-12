@@ -51,6 +51,30 @@ public class JwtFilter extends OncePerRequestFilter {
         String email = jwtService.extractEmail(token);
         String tokenRole = jwtService.extractRole(token);
 
+        // Restricted must-change-password tokens only authenticate the
+        // password-change endpoint; everywhere else they carry no authority.
+        if (jwtService.isPasswordChangeToken(token)) {
+            if ("/api/auth/change-temporary-password".equals(request.getRequestURI())
+                    && email != null
+                    && jwtService.isTokenValid(token, email)
+                    && userRepository.findByEmail(email).isPresent()
+                    && SecurityContextHolder.getContext().getAuthentication() == null) {
+
+                UserDetails userDetails = User.builder()
+                        .username(email)
+                        .password("")
+                        .authorities(java.util.List.of(
+                                new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_PASSWORD_CHANGE")))
+                        .build();
+                UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            }
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
             var userOptional = userRepository.findByEmail(email);

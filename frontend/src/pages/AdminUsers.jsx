@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppPreferences } from "../context/appPreferencesContext";
 import {
@@ -31,6 +31,7 @@ import {
   Tooltip,
   Zoom,
   Grid,
+  TablePagination,
 } from "@mui/material";
 import SearchRounded from "@mui/icons-material/SearchRounded";
 import AddRounded from "@mui/icons-material/AddRounded";
@@ -108,26 +109,55 @@ export default function AdminUsers() {
     setOpenSnackbar(true);
   };
 
-  const filtered = users.filter((u) => {
-    const matchesSearch = `${u.emri} ${u.mbiemri} ${u.email}`
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const matchesRole = roleFilter === "all" || u.role === roleFilter;
-    return matchesSearch && matchesRole;
-  });
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(20);
+  const [totalCount, setTotalCount] = useState(0);
+  const [roleCounts, setRoleCounts] = useState({ teachers: 0, students: 0, active: 0 });
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
   useEffect(() => {
+    const handle = setTimeout(() => {
+      setDebouncedSearch(searchTerm.trim());
+      setPage(0);
+    }, 400);
+    return () => clearTimeout(handle);
+  }, [searchTerm]);
+
+  const loadUsers = useCallback(async () => {
     setLoading(true);
-    Promise.all([
-      axiosInstance.get("/users"),
-      axiosInstance.get("/departments").catch(() => ({ data: [] })),
-    ])
-      .then(([usersRes, catsRes]) => {
-        setUsers(usersRes.data);
-        setCategories(catsRes.data);
-      })
-      .catch((err) => console.error("API ERROR:", err.message))
-      .finally(() => setLoading(false));
+    try {
+      const params = {
+        page,
+        size: rowsPerPage,
+        search: debouncedSearch,
+        role: roleFilter === "all" ? "" : roleFilter,
+      };
+      const [pageRes, teachersRes, studentsRes, activeRes] = await Promise.all([
+        axiosInstance.get("/users/paged", { params }),
+        axiosInstance.get("/users/paged", { params: { size: 1, role: "teacher" } }),
+        axiosInstance.get("/users/paged", { params: { size: 1, role: "student" } }),
+        axiosInstance.get("/users/paged", { params: { size: 1, status: "active" } }),
+      ]);
+      setUsers(pageRes.data.content);
+      setTotalCount(pageRes.data.totalElements);
+      setRoleCounts({
+        teachers: teachersRes.data.totalElements,
+        students: studentsRes.data.totalElements,
+        active: activeRes.data.totalElements,
+      });
+    } catch (err) {
+      console.error("API ERROR:", err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, rowsPerPage, debouncedSearch, roleFilter]);
+
+  useEffect(() => { loadUsers(); }, [loadUsers]);
+
+  useEffect(() => {
+    axiosInstance.get("/departments")
+      .then((res) => setCategories(res.data))
+      .catch(() => setCategories([]));
   }, []);
 
   const handleOpenAdd = () => {
@@ -247,8 +277,7 @@ export default function AdminUsers() {
       } else {
         await axiosInstance.post("/users", body);
       }
-      const { data } = await axiosInstance.get("/users");
-      setUsers(data);
+      await loadUsers();
       showToast(isEdit ? t("adminUsers.toast.updated") : t("adminUsers.toast.created"));
       setOpenDialog(false);
     } catch (err) {
@@ -266,7 +295,7 @@ export default function AdminUsers() {
     if (!deleteTarget) return;
     try {
       await axiosInstance.delete(`/users/${deleteTarget.id}`);
-      setUsers((prev) => prev.filter((u) => u.id !== deleteTarget.id));
+      await loadUsers();
       showToast(`${deleteTarget.emri} ${deleteTarget.mbiemri} ${t("adminUsers.toast.deleted")}`);
       setDeleteTarget(null);
       setOpenDeleteConfirm(false);
@@ -357,25 +386,25 @@ export default function AdminUsers() {
           {[
             {
               label: t("adminUsers.stats.total"),
-              value: users.length,
+              value: totalCount,
               color: "text-indigo-600",
               bg: "bg-indigo-50 dark:bg-indigo-900/20",
             },
             {
               label: t("adminUsers.stats.active"),
-              value: users.filter((u) => u.statusi === "active").length,
+              value: roleCounts.active,
               color: "text-emerald-600",
               bg: "bg-emerald-50 dark:bg-emerald-900/20",
             },
             {
               label: t("adminUsers.stats.teachers"),
-              value: users.filter((u) => u.role === "teacher").length,
+              value: roleCounts.teachers,
               color: "text-sky-600",
               bg: "bg-sky-50 dark:bg-sky-900/20",
             },
             {
               label: t("adminUsers.stats.students"),
-              value: users.filter((u) => u.role === "student").length,
+              value: roleCounts.students,
               color: "text-amber-600",
               bg: "bg-amber-50 dark:bg-amber-900/20",
             },
@@ -417,7 +446,7 @@ export default function AdminUsers() {
                 <Button
                   key={role}
                   size="small"
-                  onClick={() => setRoleFilter(role)}
+                  onClick={() => { setRoleFilter(role); setPage(0); }}
                   className={`!rounded-full px-4! py-1! normal-case! text-xs! font-bold! ${roleFilter === role ? "bg-slate-900! text-white! dark:bg-white! dark:text-slate-900!" : "text-slate-500! hover:bg-slate-100! dark:hover:bg-slate-800!"}`}
                 >
                   {role === "all"
@@ -458,7 +487,7 @@ export default function AdminUsers() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {filtered.length === 0 ? (
+                  {users.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={5}>
                         <Box className="flex flex-col items-center justify-center py-24 gap-6">
@@ -483,7 +512,7 @@ export default function AdminUsers() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filtered.map((user) => (
+                    users.map((user) => (
                       <TableRow
                         key={user.id}
                         className="group hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors"
@@ -566,6 +595,17 @@ export default function AdminUsers() {
                 </TableBody>
               </Table>
             </TableContainer>
+          )}
+          {!loading && (
+            <TablePagination
+              component="div"
+              count={totalCount}
+              page={page}
+              onPageChange={(_, p) => setPage(p)}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
+              rowsPerPageOptions={[10, 20, 50]}
+            />
           )}
         </Card>
 

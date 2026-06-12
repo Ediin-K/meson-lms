@@ -8,6 +8,8 @@ import ConsentBanner from "./components/cookies/ConsentBanner.jsx";
 
 const Home = lazy(() => import("./pages/Home.jsx"));
 const Login = lazy(() => import("./pages/Login.jsx"));
+const ChangeTemporaryPassword = lazy(() => import("./pages/ChangeTemporaryPassword.jsx"));
+import SessionExpiredDialog from "./components/ui/SessionExpiredDialog.jsx";
 const About = lazy(() => import("./pages/About.jsx"));
 const SubjectDetail = lazy(() => import("./pages/SubjectDetail.jsx"));
 const LessonDetail = lazy(() => import("./pages/LessonDetail.jsx"));
@@ -83,6 +85,7 @@ function AppLayout() {
   return (
       <div className="flex min-h-dvh flex-col bg-gradient-to-b from-sky-50 via-[#f0f7fb] to-[#d8e8f2] transition-colors dark:from-slate-950 dark:via-slate-900 dark:to-slate-900">
         {!isLoginPage && !isQuizPage && <Header />}
+        <SessionExpiredDialog />
         <main className="flex flex-col flex-grow">
           <div
             id="main-content"
@@ -93,6 +96,7 @@ function AppLayout() {
             <Routes>
               <Route path="/" element={<RootRedirect />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/change-password" element={<ChangeTemporaryPassword />} />
               <Route path="/register" element={<Navigate to="/login" replace />} />
               <Route path="/signup" element={<Navigate to="/login" replace />} />
               <Route path="/about" element={<About />} />

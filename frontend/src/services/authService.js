@@ -17,14 +17,42 @@ export const login = async (email, password) => {
     }
 
     const data = await response.json();
-    localStorage.setItem('userId', data.userId)
-    localStorage.setItem('email', email)
-    localStorage.setItem('meson-role', data.role ?? '')
+
+    // Temporary-password logins are not full sessions: don't persist auth state
+    if (!data.mustChangePassword) {
+        localStorage.setItem('userId', data.userId)
+        localStorage.setItem('email', email)
+        localStorage.setItem('meson-role', data.role ?? '')
+    }
 
     return {
         ...data,
         email: email,
     };
+};
+
+export const changeTemporaryPassword = async (currentPassword, newPassword) => {
+    const response = await fetch(`${API_URL}/change-temporary-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ currentPassword, newPassword }),
+    });
+
+    if (!response.ok) {
+        let message = 'Ndryshimi i fjalëkalimit dështoi'
+        try {
+            const body = await response.json()
+            message = body.message || message
+        } catch { void 0 }
+        throw new Error(message);
+    }
+
+    const data = await response.json();
+    localStorage.setItem('userId', data.userId)
+    localStorage.setItem('email', data.email)
+    localStorage.setItem('meson-role', data.role ?? '')
+    return data;
 };
 
 export const logout = async () => {
