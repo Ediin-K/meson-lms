@@ -19,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class StudentProfileService {
 
+    private static final String DEFAULT_STUDENT_PROGRAM = "Shkenca kompjuterike dhe inxhinieri";
+
     private final UserRepository userRepository;
     private final UserRoleRepository userRoleRepository;
     private final StudentProfileRepository studentProfileRepository;

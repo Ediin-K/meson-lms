@@ -42,6 +42,14 @@ export default function Header() {
   const langMenuId = useId()
   const profileMenuId = useId()
   const profileHref = role === 'student' ? '/student/profile' : '/profile'
+  const gradesHref =
+    role === 'student'
+      ? '/smis-login/student'
+      : role === 'teacher'
+        ? '/smis-login/staff'
+        : role === 'admin'
+          ? '/smis-login/admin'
+          : null
 
   useEffect(() => {
     const handleScroll = () => {
@@ -311,7 +319,7 @@ export default function Header() {
                     { label: t('header.accountSettings'), href: null },
                     {
                       label: t('header.grades'),
-                      href: role === 'student' ? '/student/grades' : role === 'teacher' ? '/teacher/grades' : null,
+                      href: gradesHref,
                     },
                     { label: t('header.messages'), href: null },
                     { label: t('header.help'), href: null },
@@ -449,6 +457,18 @@ export default function Header() {
               >
                 {t('header.profile')}
               </button>
+              {gradesHref ? (
+                <button
+                  type="button"
+                  className="w-full rounded-xl px-3 py-3 text-left text-sm font-medium text-slate-800 outline-none hover:bg-slate-900/[0.06] focus-visible:ring-2 focus-visible:ring-sky-500"
+                  onClick={() => {
+                    setMobileOpen(false)
+                    navigate(gradesHref)
+                  }}
+                >
+                  {t('header.grades')}
+                </button>
+              ) : null}
               <Link
                 to="/login"
                 className="w-full rounded-xl border-2 border-slate-300 bg-white py-3 text-sm font-semibold text-slate-800 outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
