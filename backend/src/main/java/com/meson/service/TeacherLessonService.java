@@ -28,6 +28,7 @@ public class TeacherLessonService {
     private final UserRepository userRepository;
     private final LessonResourceRepository lessonResourceRepository;
     private final LessonResourceMapper lessonResourceMapper;
+    private final EnrollmentCompletionService completionService;
 
     public List<LessonResponse> getLessonsByModule(Long moduleId) {
         User teacher = getCurrentUser();
@@ -55,7 +56,10 @@ public class TeacherLessonService {
                 .module(module)
                 .build();
 
-        return toResponse(lessonRepository.save(lesson));
+        LessonResponse response = toResponse(lessonRepository.save(lesson));
+        // New material may reopen students who had already completed the subject.
+        completionService.recalculateSubject(module.getSubject().getId());
+        return response;
     }
 
     public LessonResponse updateLesson(Long id, LessonRequest request) {
@@ -79,7 +83,10 @@ public class TeacherLessonService {
         Lesson lesson = lessonRepository.findByIdAndModuleSubjectTeacherId(id, teacher.getId())
                 .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses në këtë lëndë ose lënda nuk ekziston."));
 
+        Long subjectId = lesson.getModule().getSubject().getId();
         lessonRepository.delete(lesson);
+        // Removing material may push a student to 100% of what remains.
+        completionService.recalculateSubject(subjectId);
     }
 
     private User getCurrentUser() {

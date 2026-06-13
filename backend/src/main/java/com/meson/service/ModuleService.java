@@ -16,6 +16,7 @@ public class ModuleService{
 
     private final ModuleRepository moduleRepository;
     private final SubjectRepository subjectRepository;
+    private final EnrollmentCompletionService completionService;
 
     public List<ModuleResponse> getAll(){
         return moduleRepository.findAll()
@@ -64,10 +65,11 @@ public class ModuleService{
     }
 
     public void delete(Long id){
-        if(!moduleRepository.existsById(id)){
-            throw new RuntimeException("Moduli nuk u gjet");
-        }
-        moduleRepository.deleteById(id);
+        Module module = moduleRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Moduli nuk u gjet"));
+        Long subjectId = module.getSubject().getId();
+        moduleRepository.delete(module);
+        completionService.recalculateSubject(subjectId);
     }
 
     private ModuleResponse toResponse(Module module){

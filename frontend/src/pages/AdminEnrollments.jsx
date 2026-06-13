@@ -30,6 +30,7 @@ import {
   Alert,
   Zoom,
   IconButton,
+  TablePagination,
 } from "@mui/material";
 import SearchRounded from "@mui/icons-material/SearchRounded";
 import AddRounded from "@mui/icons-material/AddRounded";
@@ -705,9 +706,18 @@ export default function AdminEnrollments() {
                     onChange={handleFieldChange("statusi")}
                   >
                     <MenuItem value="AKTIV">{t("adminEnrollments.statusActive")}</MenuItem>
-                    <MenuItem value="PERFUNDUAR">{t("adminEnrollments.statusCompleted")}</MenuItem>
+                    {/* "Përfunduar" is derived from real course completion and can't be set by hand;
+                        shown disabled only when the enrollment already reached it automatically. */}
+                    {formData.statusi === "PERFUNDUAR" && (
+                      <MenuItem value="PERFUNDUAR" disabled>
+                        {t("adminEnrollments.statusCompleted")}
+                      </MenuItem>
+                    )}
                     <MenuItem value="ANULUAR">{t("adminEnrollments.statusCancelled")}</MenuItem>
                   </Select>
+                  <Typography variant="caption" className="!mt-1 !text-slate-500">
+                    {t("adminEnrollments.statusCompletedHint")}
+                  </Typography>
                 </FormControl>
               </>
             )}
