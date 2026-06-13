@@ -30,7 +30,7 @@ public class TeacherQuizService {
 
     public List<QuizResponse> getQuizzesByLesson(Long lessonId) {
         User teacher = getCurrentUser();
-        lessonRepository.findByIdAndModuleCourseTeacherId(lessonId, teacher.getId())
+        lessonRepository.findByIdAndModuleSubjectTeacherId(lessonId, teacher.getId())
                 .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses ne kete leksion."));
         return quizRepository.findByLessonId(lessonId).stream()
                 .map(quizService::toQuizResponse)
@@ -40,7 +40,7 @@ public class TeacherQuizService {
     @Transactional
     public QuizResponse createQuiz(QuizRequest request) {
         User teacher = getCurrentUser();
-        Lesson lesson = lessonRepository.findByIdAndModuleCourseTeacherId(request.getLessonId(), teacher.getId())
+        Lesson lesson = lessonRepository.findByIdAndModuleSubjectTeacherId(request.getLessonId(), teacher.getId())
                 .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses ne kete leksion."));
 
         Quiz quiz = Quiz.builder()
@@ -59,7 +59,7 @@ public class TeacherQuizService {
     @Transactional
     public QuizResponse updateQuiz(Long id, QuizRequest request) {
         User teacher = getCurrentUser();
-        Quiz quiz = quizRepository.findByIdAndLessonModuleCourseTeacherId(id, teacher.getId())
+        Quiz quiz = quizRepository.findByIdAndLessonModuleSubjectTeacherId(id, teacher.getId())
                 .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses ne kete kuiz."));
 
         if (!QuizStatus.DRAFT.equals(quiz.getStatus())) {
@@ -80,7 +80,7 @@ public class TeacherQuizService {
     @Transactional
     public QuizResponse activateQuiz(Long id) {
         User teacher = getCurrentUser();
-        Quiz quiz = quizRepository.findByIdAndLessonModuleCourseTeacherId(id, teacher.getId())
+        Quiz quiz = quizRepository.findByIdAndLessonModuleSubjectTeacherId(id, teacher.getId())
                 .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses ne kete kuiz."));
 
         if (QuizStatus.ACTIVE.equals(quiz.getStatus())) {
@@ -103,7 +103,7 @@ public class TeacherQuizService {
     @Transactional
     public QuizResponse closeQuiz(Long id) {
         User teacher = getCurrentUser();
-        Quiz quiz = quizRepository.findByIdAndLessonModuleCourseTeacherId(id, teacher.getId())
+        Quiz quiz = quizRepository.findByIdAndLessonModuleSubjectTeacherId(id, teacher.getId())
                 .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses ne kete kuiz."));
 
         if (!QuizStatus.ACTIVE.equals(quiz.getStatus())) {
@@ -122,7 +122,7 @@ public class TeacherQuizService {
 
     public List<QuizAttemptResponse> getResults(Long quizId) {
         User teacher = getCurrentUser();
-        quizRepository.findByIdAndLessonModuleCourseTeacherId(quizId, teacher.getId())
+        quizRepository.findByIdAndLessonModuleSubjectTeacherId(quizId, teacher.getId())
                 .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses ne kete kuiz."));
 
         return attemptRepository.findByQuizIdOrderBySubmittedAtDesc(quizId).stream()
@@ -133,7 +133,7 @@ public class TeacherQuizService {
 
     public List<QuizAttemptResponse> getAllAttempts(Long quizId) {
         User teacher = getCurrentUser();
-        quizRepository.findByIdAndLessonModuleCourseTeacherId(quizId, teacher.getId())
+        quizRepository.findByIdAndLessonModuleSubjectTeacherId(quizId, teacher.getId())
                 .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses ne kete kuiz."));
 
         return attemptRepository.findByQuizIdOrderByStartedAtDesc(quizId).stream()
@@ -144,7 +144,7 @@ public class TeacherQuizService {
     @Transactional
     public void deleteQuiz(Long id) {
         User teacher = getCurrentUser();
-        Quiz quiz = quizRepository.findByIdAndLessonModuleCourseTeacherId(id, teacher.getId())
+        Quiz quiz = quizRepository.findByIdAndLessonModuleSubjectTeacherId(id, teacher.getId())
                 .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses ne kete kuiz."));
 
         if (QuizStatus.ACTIVE.equals(quiz.getStatus())) {
@@ -156,7 +156,7 @@ public class TeacherQuizService {
 
     public List<QuizQuestionResponse> getQuestionsByQuiz(Long quizId) {
         User teacher = getCurrentUser();
-        quizRepository.findByIdAndLessonModuleCourseTeacherId(quizId, teacher.getId())
+        quizRepository.findByIdAndLessonModuleSubjectTeacherId(quizId, teacher.getId())
                 .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses ne kete kuiz."));
 
         return questionRepository.findByQuizIdOrderByRradhitjaAsc(quizId).stream()
@@ -166,7 +166,7 @@ public class TeacherQuizService {
 
     public QuizQuestionResponse createQuestion(QuizQuestionRequest request) {
         User teacher = getCurrentUser();
-        Quiz quiz = quizRepository.findByIdAndLessonModuleCourseTeacherId(request.getQuizId(), teacher.getId())
+        Quiz quiz = quizRepository.findByIdAndLessonModuleSubjectTeacherId(request.getQuizId(), teacher.getId())
                 .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses ne kete kuiz."));
 
         if (!QuizStatus.DRAFT.equals(quiz.getStatus())) {
@@ -190,7 +190,7 @@ public class TeacherQuizService {
         QuizQuestion question = questionRepository.findById(questionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Pyetja nuk u gjet."));
 
-        quizRepository.findByIdAndLessonModuleCourseTeacherId(question.getQuiz().getId(), teacher.getId())
+        quizRepository.findByIdAndLessonModuleSubjectTeacherId(question.getQuiz().getId(), teacher.getId())
                 .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses ne kete pyetje."));
 
         QuizAnswer answer = QuizAnswer.builder()

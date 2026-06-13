@@ -27,6 +27,25 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request, HttpServletResponse response) {
         AuthResponse authResponse = authService.login(request);
+        setAccessTokenCookie(response, authResponse.getToken());
+        if (authResponse.getRefreshToken() != null) {
+            setRefreshTokenCookie(response, authResponse.getRefreshToken());
+        } else {
+            clearRefreshTokenCookie(response);
+        }
+        return ResponseEntity.ok(authResponse);
+    }
+
+    /** Sets a new password for users logged in with a temporary password (restricted token). */
+    @PostMapping("/change-temporary-password")
+    public ResponseEntity<AuthResponse> changeTemporaryPassword(
+            @jakarta.validation.Valid @RequestBody com.meson.dto.ChangePasswordRequest request,
+            HttpServletResponse response) {
+        String email = org.springframework.security.core.context.SecurityContextHolder
+                .getContext().getAuthentication().getName();
+        AuthResponse authResponse = authService.changeTemporaryPassword(
+                email, request.getCurrentPassword(), request.getNewPassword());
+        setAccessTokenCookie(response, authResponse.getToken());
         setRefreshTokenCookie(response, authResponse.getRefreshToken());
         return ResponseEntity.ok(authResponse);
     }
@@ -40,6 +59,7 @@ public class AuthController {
         RefreshTokenRequest tokenRequest = new RefreshTokenRequest();
         tokenRequest.setRefreshToken(refreshToken);
         AuthResponse authResponse = refreshTokenService.refresh(tokenRequest);
+        setAccessTokenCookie(response, authResponse.getToken());
         setRefreshTokenCookie(response, authResponse.getRefreshToken());
         return ResponseEntity.ok(authResponse);
     }
@@ -52,8 +72,31 @@ public class AuthController {
             tokenRequest.setRefreshToken(refreshToken);
             refreshTokenService.logout(tokenRequest);
         }
+        clearAccessTokenCookie(response);
         clearRefreshTokenCookie(response);
         return ResponseEntity.noContent().build();
+    }
+
+    private void setAccessTokenCookie(HttpServletResponse response, String token) {
+        ResponseCookie cookie = ResponseCookie.from("accessToken", token)
+                .httpOnly(true)
+                .secure(false)
+                .path("/api")
+                .maxAge(Duration.ofMinutes(15))
+                .sameSite("Lax")
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+    }
+
+    private void clearAccessTokenCookie(HttpServletResponse response) {
+        ResponseCookie cookie = ResponseCookie.from("accessToken", "")
+                .httpOnly(true)
+                .secure(false)
+                .path("/api")
+                .maxAge(0)
+                .sameSite("Lax")
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
     private void setRefreshTokenCookie(HttpServletResponse response, String token) {

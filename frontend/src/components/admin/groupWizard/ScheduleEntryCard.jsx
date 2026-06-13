@@ -1,4 +1,4 @@
-import { Box, Chip, IconButton, TextField, Typography } from "@mui/material";
+﻿import { Box, Chip, IconButton, TextField, Typography } from "@mui/material";
 import DeleteRounded from "@mui/icons-material/DeleteRounded";
 import TruncatedSelect from "./TruncatedSelect";
 import RoomInput from "./RoomInput";
@@ -10,21 +10,12 @@ const SESSION_OPTIONS = [
   { value: "EXERCISE", label: "Ushtrime" },
 ];
 
-const COLOR_OPTIONS = [
-  { value: "sky", label: "Sky" },
-  { value: "emerald", label: "Emerald" },
-  { value: "violet", label: "Violet" },
-  { value: "amber", label: "Amber" },
-  { value: "rose", label: "Rose" },
-  { value: "slate", label: "Slate" },
-];
-
 export default function ScheduleEntryCard({
   row,
   index,
   isDark,
-  courseOptions,
-  staffForCourse,
+  subjectOptions,
+  staffForSubject,
   dayOptions,
   onChange,
   onRemove,
@@ -38,9 +29,9 @@ export default function ScheduleEntryCard({
       <Box className="min-w-0 lg:col-span-2">
         <TruncatedSelect
           label="Lenda"
-          value={row.courseId}
-          onChange={(e) => onChange(index, "courseId", e.target.value)}
-          options={courseOptions}
+          value={row.subjectId}
+          onChange={(e) => onChange(index, "subjectId", e.target.value)}
+          options={subjectOptions}
           emptyOption="Zgjidh lenden"
           isDark={isDark}
           maxLabelLen={36}
@@ -53,14 +44,14 @@ export default function ScheduleEntryCard({
         <Box className="flex flex-wrap gap-1">
           <Chip
             size="small"
-            label={staffForCourse?.professorLabel ? `Prof: ${staffForCourse.professorLabel}` : "Zgjidh lenden"}
+            label={staffForSubject?.professorLabel ? `Prof: ${staffForSubject.professorLabel}` : "Zgjidh lenden"}
             variant="outlined"
             sx={{ borderColor: t.border, color: t.text, maxWidth: "100%" }}
           />
-          {staffForCourse?.assistantLabel && staffForCourse.assistantLabel !== "—" && (
+          {staffForSubject?.assistantLabel && staffForSubject.assistantLabel !== "—" && (
             <Chip
               size="small"
-              label={`Asist: ${staffForCourse.assistantLabel}`}
+              label={`Asist: ${staffForSubject.assistantLabel}`}
               variant="outlined"
               sx={{ borderColor: t.border, color: t.text }}
             />
@@ -118,16 +109,6 @@ export default function ScheduleEntryCard({
       <Box className="min-w-0 lg:col-span-2">
         <RoomInput value={row.room} onChange={(v) => onChange(index, "room", v)} isDark={isDark} />
       </Box>
-      <Box className="min-w-0">
-        <TruncatedSelect
-          label="Ngjyra"
-          value={row.color || "sky"}
-          onChange={(e) => onChange(index, "color", e.target.value)}
-          options={COLOR_OPTIONS}
-          isDark={isDark}
-          maxLabelLen={12}
-        />
-      </Box>
     </>
   );
 
@@ -161,7 +142,7 @@ export default function ScheduleEntryCard({
           className="grid gap-2 min-w-[720px]"
           style={{
             gridTemplateColumns:
-              "minmax(160px,1.4fr) minmax(200px,1.2fr) minmax(100px,0.75fr) minmax(110px,0.85fr) minmax(95px,0.65fr) minmax(95px,0.65fr) minmax(130px,1fr) minmax(95px,0.65fr)",
+              "minmax(160px,1.4fr) minmax(200px,1.2fr) minmax(100px,0.75fr) minmax(110px,0.85fr) minmax(95px,0.65fr) minmax(95px,0.65fr) minmax(130px,1fr)",
           }}
         >
           {gridFields}
@@ -175,7 +156,7 @@ export default function ScheduleEntryCard({
           {rowError}
         </Typography>
       )}
-      {row.courseId && !staffForCourse?.professorId && (
+      {row.subjectId && !staffForSubject?.professorId && (
         <Typography variant="caption" sx={{ mt: 1, display: "block", color: t.warning }}>
           Kjo lende nuk ka staf ne hapin e stafit — shtojeni atje fillimisht.
         </Typography>

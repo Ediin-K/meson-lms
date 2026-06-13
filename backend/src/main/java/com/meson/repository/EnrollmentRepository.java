@@ -10,12 +10,27 @@ import java.util.Optional;
 @Repository
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     List<Enrollment> findByUserId(Long userId);
-    List<Enrollment> findByCourseId(Long courseId);
+    List<Enrollment> findBySubjectId(Long subjectId);
     List<Enrollment> findByUserIdAndStatusi(Long userId, EnrollmentStatus statusi);
-    Optional<Enrollment> findByUserIdAndCourseId(Long userId, Long courseId);
-    boolean existsByUserIdAndCourseId(Long userId, Long courseId);
+    Optional<Enrollment> findByUserIdAndSubjectId(Long userId, Long subjectId);
+    boolean existsByUserIdAndSubjectId(Long userId, Long subjectId);
 
-    List<Enrollment> findByCourseTeacherId(Long teacherId);
-    long countByCourseTeacherId(Long teacherId);
-    long countByCourseId(Long courseId);
+    @org.springframework.data.jpa.repository.Query("SELECT e FROM Enrollment e WHERE "
+            + "(LOWER(e.user.emri) LIKE CONCAT('%', LOWER(:search), '%') "
+            + "OR LOWER(e.user.mbiemri) LIKE CONCAT('%', LOWER(:search), '%') "
+            + "OR LOWER(e.user.email) LIKE CONCAT('%', LOWER(:search), '%') "
+            + "OR LOWER(e.subject.titulli) LIKE CONCAT('%', LOWER(:search), '%')) "
+            + "AND (:status IS NULL OR e.statusi = :status)")
+    org.springframework.data.domain.Page<Enrollment> searchPage(String search, EnrollmentStatus status,
+            org.springframework.data.domain.Pageable pageable);
+
+    List<Enrollment> findBySubjectTeacherId(Long teacherId);
+    long countBySubjectTeacherId(Long teacherId);
+
+    @org.springframework.data.jpa.repository.Query(
+            "SELECT COUNT(DISTINCT e.user.id) FROM Enrollment e WHERE e.subject.teacher.id = :teacherId")
+    long countDistinctStudentsByTeacherId(Long teacherId);
+    long countBySubjectId(Long subjectId);
+
+    void deleteByUserId(Long userId);
 }

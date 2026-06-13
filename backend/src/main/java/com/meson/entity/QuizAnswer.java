@@ -16,10 +16,10 @@ public class QuizAnswer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "answer", nullable = false)
     private String pergjigja;
 
-    @Column(nullable = false)
+    @Column(name = "is_correct", nullable = false)
     private Boolean eshteSakte;
 
     @ManyToOne(fetch = FetchType.LAZY)

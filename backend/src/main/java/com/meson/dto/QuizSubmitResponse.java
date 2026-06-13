@@ -11,5 +11,5 @@ public class QuizSubmitResponse {
     private Boolean submitted;
     private String message;
     private Double pikete;
-    private Long courseId;
+    private Long subjectId;
 }

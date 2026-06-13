@@ -19,9 +19,9 @@ public class ScheduleSessionService {
     private static final int DEFAULT_SESSION_MINUTES = 90;
 
     private final ScheduleSessionRepository scheduleSessionRepository;
-    private final CourseRepository courseRepository;
-    private final CourseGroupRepository courseGroupRepository;
-    private final CourseSubgroupRepository courseSubgroupRepository;
+    private final SubjectRepository subjectRepository;
+    private final SubjectGroupRepository subjectGroupRepository;
+    private final SubjectSubgroupRepository subjectSubgroupRepository;
     private final UserRepository userRepository;
     private final StudentProfileRepository studentProfileRepository;
     private final ScheduleConflictValidator conflictValidator;
@@ -38,14 +38,14 @@ public class ScheduleSessionService {
     public List<ScheduleSessionResponse> getForStudent(Long userId) {
         StudentProfile profile = studentProfileRepository.findByUserIdWithDetails(userId).orElse(null);
 
-        if (profile == null || profile.getCourseCategory() == null || profile.getApprovedDirectionGroup() == null) {
+        if (profile == null || profile.getDepartment() == null || profile.getApprovedDepartmentGroup() == null) {
             return List.of();
         }
 
         return scheduleSessionRepository.findApprovedSchedulesForStudent(
-                        profile.getCourseCategory().getId(),
+                        profile.getDepartment().getId(),
                         profile.getCurrentSemester() != null ? profile.getCurrentSemester() : 1,
-                        profile.getApprovedDirectionGroup().getId())
+                        profile.getApprovedDepartmentGroup().getId())
                 .stream()
                 .map(this::toResponse)
                 .filter(java.util.Objects::nonNull)
@@ -88,29 +88,29 @@ public class ScheduleSessionService {
     }
 
     public ScheduleSessionResponse toResponse(ScheduleSession session) {
-        if (session == null || session.getCourse() == null || session.getTeacher() == null) {
+        if (session == null || session.getSubject() == null || session.getTeacher() == null) {
             return null;
         }
 
         User teacher = session.getTeacher();
-        Course course = session.getCourse();
-        CourseCategory category = course.getCourseCategory();
-        CourseGroup courseGroup = session.getCourseGroup();
-        CourseSubgroup subgroup = session.getCourseSubgroup();
+        Subject course = session.getSubject();
+        Department category = course.getDepartment();
+        SubjectGroup courseGroup = session.getSubjectGroup();
+        SubjectSubgroup subgroup = session.getSubjectSubgroup();
 
         String teacherName = trimJoin(teacher.getEmri(), teacher.getMbiemri());
 
         return ScheduleSessionResponse.builder()
                 .id(session.getId())
-                .courseId(course.getId())
-                .courseTitle(course.getTitulli())
-                .categoryId(category != null ? category.getId() : null)
-                .categoryName(category != null ? category.getEmertimi() : null)
+                .subjectId(course.getId())
+                .subjectTitle(course.getTitulli())
+                .departmentId(category != null ? category.getId() : null)
+                .departmentName(category != null ? category.getEmertimi() : null)
                 .semester(course.getSemester())
-                .courseGroupId(courseGroup != null ? courseGroup.getId() : null)
-                .courseGroupName(courseGroup != null ? courseGroup.getName() : null)
-                .courseSubgroupId(subgroup != null ? subgroup.getId() : null)
-                .courseSubgroupName(subgroup != null ? subgroup.getName() : null)
+                .subjectGroupId(courseGroup != null ? courseGroup.getId() : null)
+                .subjectGroupName(courseGroup != null ? courseGroup.getName() : null)
+                .subjectSubgroupId(subgroup != null ? subgroup.getId() : null)
+                .subjectSubgroupName(subgroup != null ? subgroup.getName() : null)
                 .teacherId(teacher.getId())
                 .teacherName(teacherName.isEmpty() ? "—" : teacherName)
                 .sessionType(session.getSessionType())

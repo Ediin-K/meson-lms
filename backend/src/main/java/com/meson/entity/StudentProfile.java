@@ -10,7 +10,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(exclude = {"user", "courseCategory", "approvedDirectionGroup"})
+@EqualsAndHashCode(exclude = {"user", "department", "approvedDepartmentGroup"})
 public class StudentProfile {
 
     @Id
@@ -22,8 +22,8 @@ public class StudentProfile {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
-    private CourseCategory courseCategory;
+    @JoinColumn(name = "department_id")
+    private Department department;
 
     @Column(nullable = false)
     private Integer currentSemester;
@@ -42,6 +42,6 @@ public class StudentProfile {
     private String academicYear;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "approved_direction_group_id")
-    private DirectionGroup approvedDirectionGroup;
+    @JoinColumn(name = "approved_department_group_id")
+    private DepartmentGroup approvedDepartmentGroup;
 }

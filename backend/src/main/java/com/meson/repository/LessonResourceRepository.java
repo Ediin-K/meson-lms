@@ -16,9 +16,9 @@ public interface LessonResourceRepository extends JpaRepository<LessonResource, 
             SELECT r FROM LessonResource r
             JOIN FETCH r.lesson l
             JOIN FETCH l.module m
-            JOIN FETCH m.course c
+            JOIN FETCH m.subject c
             LEFT JOIN FETCH c.teacher
             WHERE r.id = :id
             """)
-    Optional<LessonResource> findByIdWithLessonCourse(@Param("id") Long id);
+    Optional<LessonResource> findByIdWithLessonSubject(@Param("id") Long id);
 }

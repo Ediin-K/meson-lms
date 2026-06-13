@@ -12,8 +12,8 @@ public class CertificateResponse {
     private Long enrollmentId;
     private Long userId;
     private String userEmri;
-    private Long courseId;
-    private String courseTitulli;
+    private Long subjectId;
+    private String subjectTitulli;
     private String kodiUnik;
     private LocalDateTime dataLeshimit;
 }

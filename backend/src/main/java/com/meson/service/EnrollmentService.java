@@ -1,4 +1,4 @@
-// EnrollmentService.java
+
 package com.meson.service;
 
 import com.meson.dto.EnrollmentRequest;
@@ -15,11 +15,22 @@ public class EnrollmentService {
 
     private final EnrollmentRepository enrollmentRepository;
     private final UserRepository userRepository;
-    private final CourseRepository courseRepository;
-    private final CourseGroupRepository courseGroupRepository;
-    private final CourseSubgroupRepository courseSubgroupRepository;
-    private final CourseGroupTeacherRepository courseGroupTeacherRepository;
-    private final CourseSubgroupTeacherRepository courseSubgroupTeacherRepository;
+    private final SubjectRepository subjectRepository;
+    private final SubjectGroupRepository subjectGroupRepository;
+    private final SubjectSubgroupRepository subjectSubgroupRepository;
+    private final EnrollmentCompletionService completionService;
+    private final SubjectGroupTeacherRepository subjectGroupTeacherRepository;
+    private final SubjectSubgroupTeacherRepository subjectSubgroupTeacherRepository;
+
+    public org.springframework.data.domain.Page<EnrollmentResponse> getPage(String search, String status,
+            org.springframework.data.domain.Pageable pageable) {
+        com.meson.entity.EnrollmentStatus statusFilter = null;
+        if (status != null && !status.isBlank() && !"all".equalsIgnoreCase(status)) {
+            statusFilter = com.meson.entity.EnrollmentStatus.valueOf(status.toUpperCase());
+        }
+        return enrollmentRepository.searchPage(search == null ? "" : search.trim(), statusFilter, pageable)
+                .map(this::toResponse);
+    }
 
     public List<EnrollmentResponse> getAll() {
         return enrollmentRepository.findAll()
@@ -35,8 +46,8 @@ public class EnrollmentService {
                 .toList();
     }
 
-    public List<EnrollmentResponse> getByCourseId(Long courseId) {
-        return enrollmentRepository.findByCourseId(courseId)
+    public List<EnrollmentResponse> getBySubjectId(Long subjectId) {
+        return enrollmentRepository.findBySubjectId(subjectId)
                 .stream()
                 .map(this::toResponse)
                 .toList();
@@ -49,12 +60,12 @@ public class EnrollmentService {
     }
 
     public EnrollmentResponse create(EnrollmentRequest request) {
-        if (enrollmentRepository.existsByUserIdAndCourseId(request.getUserId(), request.getCourseId())) {
+        if (enrollmentRepository.existsByUserIdAndSubjectId(request.getUserId(), request.getSubjectId())) {
             throw new RuntimeException("Studenti eshte tashme i regjistruar ne kete kurs");
         }
 
-        Course course = courseRepository.findById(request.getCourseId())
-                .orElseThrow(() -> new RuntimeException("Kursi nuk u gjet"));
+        Subject course = subjectRepository.findById(request.getSubjectId())
+                .orElseThrow(() -> new RuntimeException("Lënda nuk u gjet"));
 
         if (course.getEnrollmentKey() != null && !course.getEnrollmentKey().isEmpty()) {
             if (!course.getEnrollmentKey().equals(request.getEnrollmentKey())) {
@@ -65,40 +76,40 @@ public class EnrollmentService {
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new RuntimeException("Perdoruesi nuk u gjet"));
 
-        CourseGroup courseGroup = null;
-        CourseSubgroup courseSubgroup = null;
+        SubjectGroup subjectGroup = null;
+        SubjectSubgroup subjectSubgroup = null;
 
-        if (request.getCourseGroupId() != null) {
-            courseGroup = courseGroupRepository.findById(request.getCourseGroupId())
+        if (request.getSubjectGroupId() != null) {
+            subjectGroup = subjectGroupRepository.findById(request.getSubjectGroupId())
                     .orElseThrow(() -> new RuntimeException("Grupi nuk u gjet"));
 
-            if (!courseGroup.getCourse().getId().equals(course.getId())) {
-                throw new RuntimeException("Grupi nuk i perket ketij kursi");
+            if (!subjectGroup.getSubject().getId().equals(course.getId())) {
+                throw new RuntimeException("Grupi nuk i perket ketij Lënda");
             }
         }
 
-        if (request.getCourseSubgroupId() != null) {
-            courseSubgroup = courseSubgroupRepository.findById(request.getCourseSubgroupId())
+        if (request.getSubjectSubgroupId() != null) {
+            subjectSubgroup = subjectSubgroupRepository.findById(request.getSubjectSubgroupId())
                     .orElseThrow(() -> new RuntimeException("Nengrupi nuk u gjet"));
 
-            if (courseGroup == null) {
-                courseGroup = courseSubgroup.getCourseGroup();
+            if (subjectGroup == null) {
+                subjectGroup = subjectSubgroup.getSubjectGroup();
             }
 
-            if (!courseSubgroup.getCourseGroup().getId().equals(courseGroup.getId())) {
+            if (!subjectSubgroup.getSubjectGroup().getId().equals(subjectGroup.getId())) {
                 throw new RuntimeException("Nengrupi nuk i perket grupit te zgjedhur");
             }
 
-            if (!courseGroup.getCourse().getId().equals(course.getId())) {
-                throw new RuntimeException("Nengrupi nuk i perket ketij kursi");
+            if (!subjectGroup.getSubject().getId().equals(course.getId())) {
+                throw new RuntimeException("Nengrupi nuk i perket ketij Lënda");
             }
         }
 
         Enrollment enrollment = new Enrollment();
         enrollment.setUser(user);
-        enrollment.setCourse(course);
-        enrollment.setCourseGroup(courseGroup);
-        enrollment.setCourseSubgroup(courseSubgroup);
+        enrollment.setSubject(course);
+        enrollment.setSubjectGroup(subjectGroup);
+        enrollment.setSubjectSubgroup(subjectSubgroup);
 
         return toResponse(enrollmentRepository.save(enrollment));
     }
@@ -113,8 +124,23 @@ public class EnrollmentService {
     public EnrollmentResponse updateStatusi(Long id, EnrollmentStatus statusi) {
         Enrollment enrollment = enrollmentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Regjistrimi nuk u gjet"));
+
+        // "Përfunduar" is derived from actually finishing all course material — it
+        // cannot be set by hand. Admins may set only AKTIV or ANULUAR.
+        if (statusi == EnrollmentStatus.PERFUNDUAR) {
+            throw new RuntimeException(
+                "Statusi 'Përfunduar' caktohet automatikisht kur studenti përfundon të gjithë materialin e lëndës dhe nuk mund të vendoset manualisht.");
+        }
+
         enrollment.setStatusi(statusi);
-        return toResponse(enrollmentRepository.save(enrollment));
+        enrollmentRepository.save(enrollment);
+
+        // Reactivating: if the student has in fact already viewed everything, let the
+        // derived rule immediately re-complete them (and re-issue the certificate).
+        if (statusi == EnrollmentStatus.AKTIV) {
+            completionService.recalculateEnrollment(enrollment);
+        }
+        return toResponse(enrollment);
     }
 
     public void delete(Long id) {
@@ -129,13 +155,13 @@ public class EnrollmentService {
                 .id(enrollment.getId())
                 .userId(enrollment.getUser().getId())
                 .userEmri(enrollment.getUser().getEmri())
-                .courseId(enrollment.getCourse().getId())
-                .courseTitulli(enrollment.getCourse().getTitulli())
-                .courseEcts(resolveCourseEcts(enrollment.getCourse()))
-                .courseGroupId(enrollment.getCourseGroup() != null ? enrollment.getCourseGroup().getId() : null)
-                .courseGroupName(enrollment.getCourseGroup() != null ? enrollment.getCourseGroup().getName() : null)
-                .courseSubgroupId(enrollment.getCourseSubgroup() != null ? enrollment.getCourseSubgroup().getId() : null)
-                .courseSubgroupName(enrollment.getCourseSubgroup() != null ? enrollment.getCourseSubgroup().getName() : null)
+                .subjectId(enrollment.getSubject().getId())
+                .subjectTitulli(enrollment.getSubject().getTitulli())
+                .subjectEcts(resolveSubjectEcts(enrollment.getSubject()))
+                .subjectGroupId(enrollment.getSubjectGroup() != null ? enrollment.getSubjectGroup().getId() : null)
+                .subjectGroupName(enrollment.getSubjectGroup() != null ? enrollment.getSubjectGroup().getName() : null)
+                .subjectSubgroupId(enrollment.getSubjectSubgroup() != null ? enrollment.getSubjectSubgroup().getId() : null)
+                .subjectSubgroupName(enrollment.getSubjectSubgroup() != null ? enrollment.getSubjectSubgroup().getName() : null)
                 .professorName(resolveProfessorName(enrollment))
                 .assistantName(resolveAssistantName(enrollment))
                 .progresi(enrollment.getProgresi())
@@ -145,12 +171,12 @@ public class EnrollmentService {
     }
 
     private String resolveProfessorName(Enrollment enrollment) {
-        if (enrollment.getCourseGroup() == null) {
-            User teacher = enrollment.getCourse().getTeacher();
+        if (enrollment.getSubjectGroup() == null) {
+            User teacher = enrollment.getSubject().getTeacher();
             return teacher != null ? teacher.getEmri() + " " + teacher.getMbiemri() : null;
         }
 
-        return courseGroupTeacherRepository.findByCourseGroupId(enrollment.getCourseGroup().getId())
+        return subjectGroupTeacherRepository.findBySubjectGroupId(enrollment.getSubjectGroup().getId())
                 .stream()
                 .findFirst()
                 .map(assignment -> assignment.getTeacher().getEmri() + " " + assignment.getTeacher().getMbiemri())
@@ -158,18 +184,18 @@ public class EnrollmentService {
     }
 
     private String resolveAssistantName(Enrollment enrollment) {
-        if (enrollment.getCourseSubgroup() == null) {
+        if (enrollment.getSubjectSubgroup() == null) {
             return null;
         }
 
-        return courseSubgroupTeacherRepository.findByCourseSubgroupId(enrollment.getCourseSubgroup().getId())
+        return subjectSubgroupTeacherRepository.findBySubjectSubgroupId(enrollment.getSubjectSubgroup().getId())
                 .stream()
                 .findFirst()
                 .map(assignment -> assignment.getTeacher().getEmri() + " " + assignment.getTeacher().getMbiemri())
                 .orElse(null);
     }
 
-    private int resolveCourseEcts(Course course) {
+    private int resolveSubjectEcts(Subject course) {
         if (course == null || course.getEcts() == null) {
             return 5;
         }

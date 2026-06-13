@@ -2,7 +2,7 @@ package com.meson.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +26,7 @@ public class Assignment {
     private String description;
 
     @Column(nullable = false)
-    private LocalDateTime deadline;
+    private Instant deadline;
 
     private String attachmentPath;
     private String attachmentName;
@@ -36,7 +36,7 @@ public class Assignment {
     private Lesson lesson;
 
     @Column(nullable = false)
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     @Builder.Default
     @OneToMany(mappedBy = "assignment", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -44,6 +44,6 @@ public class Assignment {
 
     @PrePersist
     void onCreate() {
-        if (createdAt == null) createdAt = LocalDateTime.now();
+        if (createdAt == null) createdAt = Instant.now();
     }
 }

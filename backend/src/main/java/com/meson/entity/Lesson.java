@@ -17,22 +17,22 @@ public class Lesson {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "title", nullable = false)
     private String titulli;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "content", columnDefinition = "TEXT")
     private String permbajtja;
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "type", nullable = false)
     private LessonType lloji = LessonType.TEKST;
 
     private String videoUrl;
 
     private String resourceUrl;
 
-    @Column(nullable = false)
+    @Column(name = "sequence_order", nullable = false)
     private Integer rradhitja;
 
     @ManyToOne(fetch = FetchType.LAZY)

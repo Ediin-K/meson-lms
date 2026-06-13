@@ -1,14 +1,14 @@
 const fs = require('fs');
 const files = [
-  'src/pages/AdminCourses.jsx',
+  'src/pages/AdminSubjects.jsx',
   'src/pages/AdminUsers.jsx',
-  'src/pages/teacher/TeacherCourses.jsx',
-  'src/pages/CourseDetail.jsx',
+  'src/pages/teacher/TeacherSubjects.jsx',
+  'src/pages/SubjectDetail.jsx',
   'src/pages/AdminTeachers.jsx',
   'src/pages/AssignmentPage.jsx',
   'src/pages/teacher/TeacherModules.jsx',
   'src/pages/Notifications.jsx',
-  'src/pages/AdminCategories.jsx'
+  'src/pages/AdminDepartments.jsx'
 ];
 
 const regex = /(^|['"\s])((?:[a-z0-9-]+:)*)!([a-zA-Z0-9-\[\]\.\/]+)/g;

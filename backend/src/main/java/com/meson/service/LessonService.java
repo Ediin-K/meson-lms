@@ -19,6 +19,7 @@ public class LessonService {
     private final ModuleRepository moduleRepository;
     private final LessonResourceRepository lessonResourceRepository;
     private final LessonResourceMapper lessonResourceMapper;
+    private final EnrollmentCompletionService completionService;
 
     public List<LessonResponse> getByModuleId(Long moduleId) {
         return lessonRepository.findByModuleIdOrderByRradhitjaAsc(moduleId)
@@ -50,7 +51,9 @@ public class LessonService {
         lesson.setRradhitja(request.getRradhitja());
         lesson.setModule(module);
 
-        return toResponse(lessonRepository.save(lesson));
+        LessonResponse response = toResponse(lessonRepository.save(lesson));
+        completionService.recalculateSubject(module.getSubject().getId());
+        return response;
     }
 
     public LessonResponse update(Long id, LessonRequest request) {
@@ -72,10 +75,11 @@ public class LessonService {
     }
 
     public void delete(Long id) {
-        if (!lessonRepository.existsById(id)) {
-            throw new RuntimeException("Leksioni nuk u gjet");
-        }
-        lessonRepository.deleteById(id);
+        Lesson lesson = lessonRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Leksioni nuk u gjet"));
+        Long subjectId = lesson.getModule().getSubject().getId();
+        lessonRepository.delete(lesson);
+        completionService.recalculateSubject(subjectId);
     }
 
     private LessonResponse toResponse(Lesson lesson) {

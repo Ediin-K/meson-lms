@@ -35,10 +35,11 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/change-temporary-password").authenticated()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/error").permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/courses", "/api/courses/**").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/subjects", "/api/subjects/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/resources/*/view", "/api/resources/*/download").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/files/*/view", "/api/files/*/download", "/api/files/download/*").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/certificates/kod/**").permitAll()

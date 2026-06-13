@@ -15,13 +15,13 @@ export const getAvailableGroups = async (userId) => {
   return response.data;
 };
 
-export const applyToGroup = async (userId, directionGroupId) => {
-  const response = await axiosInstance.post(`/student/${userId}/groups/apply`, { directionGroupId });
+export const applyToGroup = async (userId, departmentGroupId) => {
+  const response = await axiosInstance.post(`/student/${userId}/groups/apply`, { departmentGroupId });
   return response.data;
 };
 
-export const selectGroup = async (userId, directionGroupId) => {
-  const response = await axiosInstance.post(`/student/${userId}/groups/select`, { directionGroupId });
+export const selectGroup = async (userId, departmentGroupId) => {
+  const response = await axiosInstance.post(`/student/${userId}/groups/select`, { departmentGroupId });
   return response.data;
 };
 
@@ -40,9 +40,9 @@ export const rejectGroupRequest = async (requestId) => {
   return response.data;
 };
 
-export const assignStudentToGroup = async (userId, directionGroupId) => {
+export const assignStudentToGroup = async (userId, departmentGroupId) => {
   const response = await axiosInstance.post(`/admin/students/${userId}/assign-group`, {
-    directionGroupId,
+    departmentGroupId,
   });
   return response.data;
 };

@@ -8,13 +8,13 @@ import java.util.Optional;
 
 @Repository
 public interface ModuleRepository extends JpaRepository<Module, Long> {
-    List<Module> findByCourseIdOrderByRradhitjaAsc(Long courseId);
-    List<Module> findByCourseId(Long courseId);
-    long countByCourseId(Long courseId);
-    boolean existsByTitulliAndCourseId(String titulli,Long courseId);
-    void deleteAllByCourseId(Long courseId);
+    List<Module> findBySubjectIdOrderByRradhitjaAsc(Long subjectId);
+    List<Module> findBySubjectId(Long subjectId);
+    long countBySubjectId(Long subjectId);
+    boolean existsByTitulliAndSubjectId(String titulli,Long subjectId);
+    void deleteAllBySubjectId(Long subjectId);
 
-    List<Module> findByCourseTeacherId(Long teacherId);
-    Optional<Module> findByIdAndCourseTeacherId(Long id, Long teacherId);
-    List<Module> findByCourseIdAndCourseTeacherId(Long courseId, Long teacherId);
+    List<Module> findBySubjectTeacherId(Long teacherId);
+    Optional<Module> findByIdAndSubjectTeacherId(Long id, Long teacherId);
+    List<Module> findBySubjectIdAndSubjectTeacherId(Long subjectId, Long teacherId);
 }

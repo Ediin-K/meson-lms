@@ -18,9 +18,9 @@ public class StudentGroupRequestService {
 
     private final StudentGroupRequestRepository studentGroupRequestRepository;
     private final StudentProfileRepository studentProfileRepository;
-    private final DirectionGroupRepository directionGroupRepository;
-    private final CourseGroupRepository courseGroupRepository;
-    private final DirectionGroupService directionGroupService;
+    private final DepartmentGroupRepository departmentGroupRepository;
+    private final SubjectGroupRepository subjectGroupRepository;
+    private final DepartmentGroupService departmentGroupService;
     private final UserRepository userRepository;
     private final ScheduleSessionRepository scheduleSessionRepository;
     private final ScheduleSessionService scheduleSessionService;
@@ -30,11 +30,11 @@ public class StudentGroupRequestService {
     public StudentScheduleOverviewResponse getScheduleOverview(Long userId) {
         StudentGroupStatusResponse status = buildStudentStatus(userId);
         List<ScheduleSessionResponse> approvedSchedules = List.of();
-        List<AvailableDirectionGroupResponse> availableGroups = List.of();
+        List<AvailableDepartmentGroupResponse> availableGroups = List.of();
 
         if (status.isHasApprovedGroup() && status.getApprovedGroup() != null) {
             approvedSchedules = loadApprovedSchedules(userId, status.getApprovedGroup().getId());
-        } else if (status.isCategoryAssigned()) {
+        } else if (status.isDepartmentAssigned()) {
             availableGroups = buildAvailableGroups(userId, status);
         }
 
@@ -51,9 +51,9 @@ public class StudentGroupRequestService {
     }
 
     @Transactional(readOnly = true)
-    public List<AvailableDirectionGroupResponse> getAvailableGroups(Long userId) {
+    public List<AvailableDepartmentGroupResponse> getAvailableGroups(Long userId) {
         StudentGroupStatusResponse status = buildStudentStatus(userId);
-        if (!status.isCategoryAssigned() || status.isHasApprovedGroup()) {
+        if (!status.isDepartmentAssigned() || status.isHasApprovedGroup()) {
             return List.of();
         }
         return buildAvailableGroups(userId, status);
@@ -62,9 +62,9 @@ public class StudentGroupRequestService {
     @Transactional
     public StudentGroupRequestResponse apply(Long userId, ApplyGroupRequest request) {
         StudentProfile profile = requireStudentProfile(userId);
-        validateStudentCategory(profile);
+        validateStudentDepartment(profile);
 
-        if (profile.getApprovedDirectionGroup() != null) {
+        if (profile.getApprovedDepartmentGroup() != null) {
             throw new RuntimeException("Ke tashme nje grup te aprovuar");
         }
 
@@ -72,16 +72,16 @@ public class StudentGroupRequestService {
             throw new RuntimeException("Ke nje aplikim ne pritje");
         }
 
-        DirectionGroup group = directionGroupService.getEntity(request.getDirectionGroupId());
+        DepartmentGroup group = departmentGroupService.getEntity(request.getDepartmentGroupId());
         validateGroupMatchesStudent(profile, group);
-        directionGroupService.assertGroupAcceptsStudents(group);
+        departmentGroupService.assertGroupAcceptsStudents(group);
 
         User student = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Studenti nuk u gjet"));
 
         StudentGroupRequest application = StudentGroupRequest.builder()
                 .student(student)
-                .directionGroup(group)
+                .departmentGroup(group)
                 .status(GroupRequestStatus.PENDING)
                 .appliedAt(LocalDateTime.now())
                 .build();
@@ -90,32 +90,32 @@ public class StudentGroupRequestService {
     }
 
     @Transactional
-    public DirectionGroupResponse selectGroup(Long userId, ApplyGroupRequest request) {
+    public DepartmentGroupResponse selectGroup(Long userId, ApplyGroupRequest request) {
         StudentProfile profile = requireStudentProfile(userId);
-        validateStudentCategory(profile);
+        validateStudentDepartment(profile);
 
-        if (profile.getApprovedDirectionGroup() != null || studentGroupSelectionRepository.existsByStudentId(userId)) {
+        if (profile.getApprovedDepartmentGroup() != null || studentGroupSelectionRepository.existsByStudentId(userId)) {
             throw new BadRequestException("Ke zgjedhur tashme nje grup");
         }
 
-        DirectionGroup group = directionGroupService.getEntity(request.getDirectionGroupId());
+        DepartmentGroup group = departmentGroupService.getEntity(request.getDepartmentGroupId());
         validateGroupMatchesStudent(profile, group);
-        directionGroupService.assertGroupAcceptsStudents(group);
+        departmentGroupService.assertGroupAcceptsStudents(group);
 
         User student = userRepository.findById(userId)
                 .orElseThrow(() -> new BadRequestException("Studenti nuk u gjet"));
 
         rejectPendingApplications(userId, null);
-        profile.setApprovedDirectionGroup(group);
+        profile.setApprovedDepartmentGroup(group);
         studentProfileRepository.save(profile);
 
         studentGroupSelectionRepository.save(StudentGroupSelection.builder()
                 .student(student)
-                .directionGroup(group)
+                .departmentGroup(group)
                 .selectedAt(LocalDateTime.now())
                 .build());
 
-        return directionGroupService.toResponse(group);
+        return departmentGroupService.toResponse(group);
     }
 
     @Transactional
@@ -125,8 +125,8 @@ public class StudentGroupRequestService {
             throw new RuntimeException("Vetem aplikimet ne pritje mund te aprovohen");
         }
 
-        DirectionGroup group = request.getDirectionGroup();
-        directionGroupService.assertGroupAcceptsStudents(group);
+        DepartmentGroup group = request.getDepartmentGroup();
+        departmentGroupService.assertGroupAcceptsStudents(group);
 
         User admin = userRepository.findById(adminUserId)
                 .orElseThrow(() -> new RuntimeException("Admini nuk u gjet"));
@@ -161,17 +161,17 @@ public class StudentGroupRequestService {
     }
 
     @Transactional
-    public DirectionGroupResponse adminAssignStudent(Long userId, AssignStudentGroupRequest request, Long adminUserId) {
+    public DepartmentGroupResponse adminAssignStudent(Long userId, AssignStudentGroupRequest request, Long adminUserId) {
         StudentProfile profile = requireStudentProfile(userId);
-        validateStudentCategory(profile);
+        validateStudentDepartment(profile);
 
-        if (profile.getApprovedDirectionGroup() != null) {
+        if (profile.getApprovedDepartmentGroup() != null) {
             throw new RuntimeException("Studenti ka tashme nje grup te aprovuar");
         }
 
-        DirectionGroup group = directionGroupService.getEntity(request.getDirectionGroupId());
+        DepartmentGroup group = departmentGroupService.getEntity(request.getDepartmentGroupId());
         validateGroupMatchesStudent(profile, group);
-        directionGroupService.assertGroupAcceptsStudents(group);
+        departmentGroupService.assertGroupAcceptsStudents(group);
 
         User admin = userRepository.findById(adminUserId)
                 .orElseThrow(() -> new RuntimeException("Admini nuk u gjet"));
@@ -179,36 +179,36 @@ public class StudentGroupRequestService {
         rejectPendingApplications(userId, admin);
         assignStudentToGroup(profile, group, admin);
 
-        return directionGroupService.toResponse(group);
+        return departmentGroupService.toResponse(group);
     }
 
     @Transactional
     public void adminRemoveStudent(Long userId) {
         StudentProfile profile = requireStudentProfile(userId);
-        if (profile.getApprovedDirectionGroup() == null) {
+        if (profile.getApprovedDepartmentGroup() == null) {
             throw new RuntimeException("Studenti nuk eshte ne asnje grup");
         }
-        profile.setApprovedDirectionGroup(null);
+        profile.setApprovedDepartmentGroup(null);
         studentProfileRepository.save(profile);
     }
 
     @Transactional(readOnly = true)
     public List<StudentGroupRequestResponse> getAdminRequests(
-            GroupRequestStatus status, Long categoryId, Long directionGroupId) {
-        return studentGroupRequestRepository.findAdminRequests(status, categoryId, directionGroupId)
+            GroupRequestStatus status, Long departmentId, Long departmentGroupId) {
+        return studentGroupRequestRepository.findAdminRequests(status, departmentId, departmentGroupId)
                 .stream()
                 .map(this::toResponse)
                 .toList();
     }
 
-    private void assignStudentToGroup(StudentProfile profile, DirectionGroup group, User admin) {
-        if (profile.getApprovedDirectionGroup() != null) {
+    private void assignStudentToGroup(StudentProfile profile, DepartmentGroup group, User admin) {
+        if (profile.getApprovedDepartmentGroup() != null) {
             throw new RuntimeException("Studenti ka tashme nje grup te aprovuar");
         }
-        directionGroupService.assertGroupAcceptsStudents(group);
+        departmentGroupService.assertGroupAcceptsStudents(group);
         validateGroupMatchesStudent(profile, group);
 
-        profile.setApprovedDirectionGroup(group);
+        profile.setApprovedDepartmentGroup(group);
         studentProfileRepository.save(profile);
     }
 
@@ -225,9 +225,9 @@ public class StudentGroupRequestService {
                 });
     }
 
-    private void validateGroupMatchesStudent(StudentProfile profile, DirectionGroup group) {
-        if (!group.getCourseCategory().getId().equals(profile.getCourseCategory().getId())) {
-            throw new RuntimeException("Ky grup nuk i perket drejtimit tend");
+    private void validateGroupMatchesStudent(StudentProfile profile, DepartmentGroup group) {
+        if (!group.getDepartment().getId().equals(profile.getDepartment().getId())) {
+            throw new RuntimeException("Ky grup nuk i perket departamentit tend");
         }
         int studentSemester = profile.getCurrentSemester() != null ? profile.getCurrentSemester() : 1;
         if (!group.getSemester().equals(studentSemester)) {
@@ -241,16 +241,16 @@ public class StudentGroupRequestService {
         if (profileOpt.isEmpty()) {
             return StudentGroupStatusResponse.builder()
                     .hasApprovedGroup(false)
-                    .categoryAssigned(false)
+                    .departmentAssigned(false)
                     .build();
         }
 
         StudentProfile profile = profileOpt.get();
-        CourseCategory category = profile.getCourseCategory();
+        Department department = profile.getDepartment();
 
-        DirectionGroupResponse approved = null;
-        if (profile.getApprovedDirectionGroup() != null) {
-            approved = directionGroupService.toResponse(profile.getApprovedDirectionGroup());
+        DepartmentGroupResponse approved = null;
+        if (profile.getApprovedDepartmentGroup() != null) {
+            approved = departmentGroupService.toResponse(profile.getApprovedDepartmentGroup());
         }
 
         StudentGroupRequestResponse pending = studentGroupRequestRepository
@@ -260,55 +260,55 @@ public class StudentGroupRequestService {
 
         return StudentGroupStatusResponse.builder()
                 .hasApprovedGroup(approved != null)
-                .categoryAssigned(category != null)
-                .categoryId(category != null ? category.getId() : null)
-                .categoryName(category != null ? category.getEmertimi() : null)
+                .departmentAssigned(department != null)
+                .departmentId(department != null ? department.getId() : null)
+                .departmentName(department != null ? department.getEmertimi() : null)
                 .currentSemester(profile.getCurrentSemester())
                 .approvedGroup(approved)
                 .pendingRequest(pending)
                 .build();
     }
 
-    private List<AvailableDirectionGroupResponse> buildAvailableGroups(
+    private List<AvailableDepartmentGroupResponse> buildAvailableGroups(
             Long userId, StudentGroupStatusResponse status) {
         Optional<StudentProfile> profileOpt = studentProfileRepository.findByUserIdWithDetails(userId);
-        if (profileOpt.isEmpty() || profileOpt.get().getCourseCategory() == null) {
+        if (profileOpt.isEmpty() || profileOpt.get().getDepartment() == null) {
             return List.of();
         }
 
         StudentProfile profile = profileOpt.get();
-        Long categoryId = profile.getCourseCategory().getId();
+        Long departmentId = profile.getDepartment().getId();
         Integer semester = profile.getCurrentSemester() != null ? profile.getCurrentSemester() : 1;
 
         boolean hasPending = status.getPendingRequest() != null;
-        List<DirectionGroup> directionGroups = resolveDirectionGroupsForCategory(categoryId, semester);
+        List<DepartmentGroup> departmentGroups = resolveDepartmentGroupsForDepartment(departmentId, semester);
 
-        List<AvailableDirectionGroupResponse> result = new ArrayList<>();
-        for (DirectionGroup group : directionGroups) {
+        List<AvailableDepartmentGroupResponse> result = new ArrayList<>();
+        for (DepartmentGroup group : departmentGroups) {
             result.add(buildAvailableGroupEntry(group, semester, false, hasPending));
         }
         return result;
     }
 
-    private List<DirectionGroup> resolveDirectionGroupsForCategory(Long categoryId, Integer semester) {
-        List<DirectionGroup> groups =
-                directionGroupRepository.findByCategoryIdAndSemesterWithCategory(categoryId, semester);
+    private List<DepartmentGroup> resolveDepartmentGroupsForDepartment(Long departmentId, Integer semester) {
+        List<DepartmentGroup> groups =
+                departmentGroupRepository.findByDepartmentIdAndSemesterWithDepartment(departmentId, semester);
         if (!groups.isEmpty()) {
             return groups;
         }
 
-        List<DirectionGroup> linked =
-                courseGroupRepository.findDistinctDirectionGroupsByCategoryId(categoryId);
+        List<DepartmentGroup> linked =
+                subjectGroupRepository.findDistinctDepartmentGroupsByDepartmentId(departmentId);
         return linked.stream()
                 .filter(g -> semester.equals(g.getSemester()))
                 .toList();
     }
 
-    private AvailableDirectionGroupResponse buildAvailableGroupEntry(
-            DirectionGroup group, Integer semester, boolean hasApproved, boolean hasPending) {
-        DirectionGroupResponse groupInfo = directionGroupService.toResponse(group);
+    private AvailableDepartmentGroupResponse buildAvailableGroupEntry(
+            DepartmentGroup group, Integer semester, boolean hasApproved, boolean hasPending) {
+        DepartmentGroupResponse groupInfo = departmentGroupService.toResponse(group);
         List<ScheduleSessionResponse> schedules = scheduleSessionRepository
-                .findByDirectionGroupIdAndSemester(group.getId(), semester)
+                .findByDepartmentGroupIdAndSemester(group.getId(), semester)
                 .stream()
                 .map(scheduleSessionService::toResponse)
                 .filter(java.util.Objects::nonNull)
@@ -331,7 +331,7 @@ public class StudentGroupRequestService {
             blockedReason = "Grupi eshte plote";
         }
 
-        return AvailableDirectionGroupResponse.builder()
+        return AvailableDepartmentGroupResponse.builder()
                 .group(groupInfo)
                 .schedules(schedules != null ? schedules : List.of())
                 .canApply(canApply)
@@ -339,17 +339,17 @@ public class StudentGroupRequestService {
                 .build();
     }
 
-    private List<ScheduleSessionResponse> loadApprovedSchedules(Long userId, Long directionGroupId) {
+    private List<ScheduleSessionResponse> loadApprovedSchedules(Long userId, Long departmentGroupId) {
         Optional<StudentProfile> profileOpt = studentProfileRepository.findByUserIdWithDetails(userId);
-        if (profileOpt.isEmpty() || profileOpt.get().getCourseCategory() == null) {
+        if (profileOpt.isEmpty() || profileOpt.get().getDepartment() == null) {
             return List.of();
         }
 
         StudentProfile profile = profileOpt.get();
         return scheduleSessionRepository.findApprovedSchedulesForStudent(
-                        profile.getCourseCategory().getId(),
+                        profile.getDepartment().getId(),
                         profile.getCurrentSemester() != null ? profile.getCurrentSemester() : 1,
-                        directionGroupId)
+                        departmentGroupId)
                 .stream()
                 .map(scheduleSessionService::toResponse)
                 .filter(java.util.Objects::nonNull)
@@ -366,9 +366,9 @@ public class StudentGroupRequestService {
                 .orElseThrow(() -> new RuntimeException("Profili i studentit nuk u gjet"));
     }
 
-    private void validateStudentCategory(StudentProfile profile) {
-        if (profile.getCourseCategory() == null) {
-            throw new RuntimeException("Drejtimi nuk eshte caktuar per kete student");
+    private void validateStudentDepartment(StudentProfile profile) {
+        if (profile.getDepartment() == null) {
+            throw new RuntimeException("Departamenti nuk eshte caktuar per kete student");
         }
     }
 
@@ -377,12 +377,12 @@ public class StudentGroupRequestService {
             return null;
         }
         User student = request.getStudent();
-        DirectionGroup group = request.getDirectionGroup();
+        DepartmentGroup group = request.getDepartmentGroup();
         User approver = request.getApprovedBy();
         if (student == null || group == null) {
             return null;
         }
-        CourseCategory category = group.getCourseCategory();
+        Department department = group.getDepartment();
 
         return StudentGroupRequestResponse.builder()
                 .id(request.getId())
@@ -390,10 +390,10 @@ public class StudentGroupRequestService {
                 .studentFirstName(student.getEmri())
                 .studentLastName(student.getMbiemri())
                 .studentEmail(student.getEmail())
-                .categoryId(category != null ? category.getId() : null)
-                .categoryName(category != null ? category.getEmertimi() : null)
-                .directionGroupId(group.getId())
-                .directionGroupName(group.getName())
+                .departmentId(department != null ? department.getId() : null)
+                .departmentName(department != null ? department.getEmertimi() : null)
+                .departmentGroupId(group.getId())
+                .departmentGroupName(group.getName())
                 .status(request.getStatus())
                 .appliedAt(request.getAppliedAt())
                 .approvedAt(request.getApprovedAt())

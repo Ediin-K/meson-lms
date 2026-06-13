@@ -26,10 +26,10 @@ public class GradeController {
         return ResponseEntity.ok(gradeService.getByStudentId(id));
     }
 
-    @GetMapping("/course/{id}")
+    @GetMapping("/subject/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
-    public ResponseEntity<List<GradeResponse>> getByCourseId(@PathVariable Long id) {
-        return ResponseEntity.ok(gradeService.getByCourseId(id));
+    public ResponseEntity<List<GradeResponse>> getBySubjectId(@PathVariable Long id) {
+        return ResponseEntity.ok(gradeService.getBySubjectId(id));
     }
 
     @PostMapping

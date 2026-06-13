@@ -4,15 +4,28 @@ import com.meson.dto.UserDTO;
 import com.meson.dto.CreateUserDTO;
 import com.meson.dto.UpdateUserDTO;
 import com.meson.entity.Role;
-import com.meson.entity.CourseCategory;
+import com.meson.entity.Department;
 import com.meson.entity.StudentProfile;
 import com.meson.entity.User;
 import com.meson.entity.UserRole;
-import com.meson.repository.CourseCategoryRepository;
+import com.meson.repository.AssignmentSubmissionRepository;
+import com.meson.repository.CertificateRepository;
+import com.meson.repository.DepartmentRepository;
+import com.meson.repository.SubjectGroupTeacherRepository;
+import com.meson.repository.SubjectRepository;
+import com.meson.repository.SubjectSubgroupTeacherRepository;
+import com.meson.repository.EnrollmentRepository;
+import com.meson.repository.GradeRepository;
+import com.meson.repository.LessonProgressRepository;
+import com.meson.repository.QuizAttemptRepository;
 import com.meson.repository.RoleRepository;
+import com.meson.repository.ScheduleSessionRepository;
+import com.meson.repository.StudentGroupRequestRepository;
+import com.meson.repository.StudentGroupSelectionRepository;
 import com.meson.repository.StudentProfileRepository;
 import com.meson.repository.UserRepository;
 import com.meson.repository.UserRoleRepository;
+import com.meson.repository.UserTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -34,8 +47,21 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
     private final UserRoleRepository userRoleRepository;
-    private final CourseCategoryRepository courseCategoryRepository;
+    private final DepartmentRepository departmentRepository;
     private final StudentProfileRepository studentProfileRepository;
+    private final SubjectRepository subjectRepository;
+    private final EnrollmentRepository enrollmentRepository;
+    private final CertificateRepository certificateRepository;
+    private final GradeRepository gradeRepository;
+    private final LessonProgressRepository lessonProgressRepository;
+    private final QuizAttemptRepository quizAttemptRepository;
+    private final AssignmentSubmissionRepository assignmentSubmissionRepository;
+    private final StudentGroupRequestRepository studentGroupRequestRepository;
+    private final StudentGroupSelectionRepository studentGroupSelectionRepository;
+    private final SubjectGroupTeacherRepository subjectGroupTeacherRepository;
+    private final SubjectSubgroupTeacherRepository subjectSubgroupTeacherRepository;
+    private final ScheduleSessionRepository scheduleSessionRepository;
+    private final UserTokenRepository userTokenRepository;
     private Role resolveAllowedRole(String requestedRole) {
         String dbRole = normalizeRoleForDB(requestedRole.trim().toLowerCase());
         if (!ALLOWED_ASSIGNABLE_ROLES.contains(dbRole)) {
@@ -68,6 +94,14 @@ public class UserService {
         userRepository.save(user);
     }
 
+    public org.springframework.data.domain.Page<UserDTO> getPage(String search, String role, String status,
+            org.springframework.data.domain.Pageable pageable) {
+        return userRepository.searchPage(search == null ? "" : search.trim(),
+                        role == null || role.isBlank() ? "" : normalizeRoleForDB(role.trim().toLowerCase()),
+                        status == null ? "" : status.trim(), pageable)
+                .map(this::toDto);
+    }
+
     public List<UserDTO> getAll() {
         return userRepository.findAllWithRoles().stream()
                 .map(this::toDto)
@@ -92,6 +126,7 @@ public class UserService {
         user.setMbiemri(dto.getMbiemri());
         user.setEmail(dto.getEmail());
         user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
+        user.setTemporaryPassword(true);
         user.setDataKrijimit(LocalDateTime.now());
         user.setStatusi(dto.getStatusi() != null ? dto.getStatusi() : "active");
         user.setLockoutEnabled(false);
@@ -106,14 +141,13 @@ public class UserService {
             userRoleRepository.save(userRole);
         }
 
-        syncStudentProfile(savedUser, dto.getRole(), dto.getCategoryId(), dto.getCurrentSemester());
+        syncStudentProfile(savedUser, dto.getRole(), dto.getDepartmentId(), dto.getCurrentSemester());
 
         return savedUser;
     }
 
     public User update(Long id, UpdateUserDTO dto) {
         User user = getById(id);
-
 
         if (dto.getEmail() != null && !dto.getEmail().equals(user.getEmail())) {
             if (userRepository.existsByEmailIgnoreCase(dto.getEmail())) {
@@ -152,12 +186,43 @@ public class UserService {
             }
         }
 
-        syncStudentProfile(user, dto.getRole(), dto.getCategoryId(), dto.getCurrentSemester());
+        syncStudentProfile(user, dto.getRole(), dto.getDepartmentId(), dto.getCurrentSemester());
 
         return userRepository.save(user);
     }
 
     public void delete(Long id) {
+        // Block deletion if teacher has subjects (teacher_id NOT NULL in Subject)
+        if (subjectRepository.countByTeacherId(id) > 0) {
+            throw new RuntimeException(
+                "Ky mësues ka lëndë të caktuara. Fshij ose ricakto lëndët para se të fshish mësuesin.");
+        }
+
+        // Teacher-specific: schedule sessions and group assignments
+        scheduleSessionRepository.deleteByTeacherId(id);
+        subjectGroupTeacherRepository.deleteByTeacherId(id);
+        subjectSubgroupTeacherRepository.deleteByTeacherId(id);
+
+        // Student-specific and general: all user-owned data
+        lessonProgressRepository.deleteByStudentId(id);
+        assignmentSubmissionRepository.deleteByStudentId(id);
+        quizAttemptRepository.deleteByUserId(id);
+        gradeRepository.deleteByStudentId(id);
+        gradeRepository.deleteByProfessorId(id);
+        studentGroupSelectionRepository.deleteByStudentId(id);
+        studentGroupRequestRepository.deleteByApprovedById(id);
+        studentGroupRequestRepository.deleteByStudentId(id);
+
+        // Certificate must be deleted before Enrollment (FK: certificate.enrollment_id)
+        certificateRepository.deleteByEnrollmentUserId(id);
+        enrollmentRepository.deleteByUserId(id);
+
+        studentProfileRepository.deleteByUserId(id);
+
+        // Fshi eksplicit para cascade (siguri shtesë)
+        userTokenRepository.deleteByUserId(id);
+
+        // UserRole, UserClaim, RefreshToken → CascadeType.ALL
         userRepository.deleteById(id);
     }
 
@@ -176,14 +241,14 @@ public class UserService {
                 user.getEmail(),
                 user.getStatusi(),
                 role,
-                profile != null && profile.getCourseCategory() != null ? profile.getCourseCategory().getId() : null,
-                profile != null && profile.getCourseCategory() != null ? profile.getCourseCategory().getEmertimi() : null,
+                profile != null && profile.getDepartment() != null ? profile.getDepartment().getId() : null,
+                profile != null && profile.getDepartment() != null ? profile.getDepartment().getEmertimi() : null,
                 profile != null ? profile.getCurrentSemester() : null,
                 user.getDataKrijimit()
         );
     }
 
-    private void syncStudentProfile(User user, String role, Long categoryId, Integer currentSemester) {
+    private void syncStudentProfile(User user, String role, Long departmentId, Integer currentSemester) {
         if (!"student".equals(normalizeRoleForFrontend(normalizeRoleForDB(role)))) {
             return;
         }
@@ -194,10 +259,10 @@ public class UserService {
                         .currentSemester(1)
                         .build());
 
-        if (categoryId != null) {
-            CourseCategory category = courseCategoryRepository.findById(categoryId)
-                    .orElseThrow(() -> new RuntimeException("Kategoria nuk u gjet"));
-            profile.setCourseCategory(category);
+        if (departmentId != null) {
+            Department department = departmentRepository.findById(departmentId)
+                    .orElseThrow(() -> new RuntimeException("Departamenti nuk u gjet"));
+            profile.setDepartment(department);
         }
 
         profile.setCurrentSemester(currentSemester != null ? currentSemester : profile.getCurrentSemester());

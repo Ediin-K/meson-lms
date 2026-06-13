@@ -1,6 +1,6 @@
 package com.meson.controller;
 
-import com.meson.dto.CourseProgressResponse;
+import com.meson.dto.SubjectProgressResponse;
 import com.meson.dto.LessonViewResponse;
 import com.meson.service.ProgressService;
 import lombok.RequiredArgsConstructor;
@@ -21,8 +21,8 @@ public class ProgressController {
         return ResponseEntity.ok(progressService.markLessonViewed(lessonId));
     }
 
-    @GetMapping("/courses/{courseId}")
-    public ResponseEntity<CourseProgressResponse> getCourseProgress(@PathVariable Long courseId) {
-        return ResponseEntity.ok(progressService.getCourseProgress(courseId));
+    @GetMapping("/subjects/{subjectId}")
+    public ResponseEntity<SubjectProgressResponse> getSubjectProgress(@PathVariable Long subjectId) {
+        return ResponseEntity.ok(progressService.getSubjectProgress(subjectId));
     }
 }

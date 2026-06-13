@@ -1,4 +1,4 @@
-// EnrollmentController.java
+
 package com.meson.controller;
 
 import com.meson.dto.EnrollmentRequest;
@@ -24,6 +24,17 @@ public class EnrollmentController {
         return ResponseEntity.ok(enrollmentService.getAll());
     }
 
+    @GetMapping("/paged")
+    public ResponseEntity<org.springframework.data.domain.Page<EnrollmentResponse>> getPaged(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "") String search,
+            @RequestParam(defaultValue = "") String status) {
+        return ResponseEntity.ok(enrollmentService.getPage(search, status,
+                org.springframework.data.domain.PageRequest.of(page, Math.min(size, 100),
+                        org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "id"))));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<EnrollmentResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(enrollmentService.getById(id));
@@ -34,9 +45,9 @@ public class EnrollmentController {
         return ResponseEntity.ok(enrollmentService.getByUserId(userId));
     }
 
-    @GetMapping("/course/{courseId}")
-    public ResponseEntity<List<EnrollmentResponse>> getByCourseId(@PathVariable Long courseId) {
-        return ResponseEntity.ok(enrollmentService.getByCourseId(courseId));
+    @GetMapping("/subject/{subjectId}")
+    public ResponseEntity<List<EnrollmentResponse>> getBySubjectId(@PathVariable Long subjectId) {
+        return ResponseEntity.ok(enrollmentService.getBySubjectId(subjectId));
     }
 
     @PostMapping

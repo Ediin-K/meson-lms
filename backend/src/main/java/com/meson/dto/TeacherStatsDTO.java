@@ -7,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class TeacherStatsDTO {
-    private long totalCourses;
+    private long totalSubjects;
     private long totalStudents;
     private long totalQuizzes;
     private long totalAssignments;

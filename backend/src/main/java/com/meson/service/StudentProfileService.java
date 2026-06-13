@@ -43,15 +43,8 @@ public class StudentProfileService {
 
         studentProfileRepository.findByUserIdWithDetails(userId).ifPresent(profile -> {
             builder.currentSemester(profile.getCurrentSemester());
-            builder.parentName(profile.getParentName());
-            builder.dateOfBirth(profile.getDateOfBirth());
-            builder.gender(profile.getGender());
-            builder.birthplace(profile.getBirthplace());
-            builder.academicYear(profile.getAcademicYear());
-            if (profile.getCourseCategory() != null) {
-                builder.categoryName(profile.getCourseCategory().getEmertimi());
-            } else {
-                builder.categoryName(DEFAULT_STUDENT_PROGRAM);
+            if (profile.getDepartment() != null) {
+                builder.departmentName(profile.getDepartment().getEmertimi());
             }
         });
 

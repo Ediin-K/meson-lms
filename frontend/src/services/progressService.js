@@ -1,11 +1,11 @@
-import axiosInstance from './axiosInstance';
+﻿import axiosInstance from './axiosInstance';
 
 const progressService = {
   markViewed:        (lessonId)  => axiosInstance.post(`/progress/lessons/${lessonId}/view`),
-  getCourseProgress: (courseId)  => axiosInstance.get(`/progress/courses/${courseId}`),
-  getStudentProgress:(courseId, studentId) =>
-    axiosInstance.get(`/teacher/courses/${courseId}/students/${studentId}/progress`),
-  getCourseStudents: (courseId)  => axiosInstance.get(`/teacher/courses/${courseId}/students`),
+  getSubjectProgress: (subjectId)  => axiosInstance.get(`/progress/subjects/${subjectId}`),
+  getStudentProgress:(subjectId, studentId) =>
+    axiosInstance.get(`/teacher/subjects/${subjectId}/students/${studentId}/progress`),
+  getSubjectStudents: (subjectId)  => axiosInstance.get(`/teacher/subjects/${subjectId}/students`),
 };
 
 export default progressService;

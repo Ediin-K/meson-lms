@@ -13,8 +13,8 @@ public class UserDTO {
     private String email;
     private String statusi;
     private String role;
-    private Long categoryId;
-    private String categoryName;
+    private Long departmentId;
+    private String departmentName;
     private Integer currentSemester;
     private LocalDateTime joined;
 }

@@ -1,0 +1,121 @@
+[33m8790e49[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeature-edin[m[33m)[m fix: replace broken SQL migrations with idempotent Java migration V25
+[33m17fa3b1[m feat: university LMS redesign - Phase 1 backend
+[33md2f5d86[m fix: resolve compilation errors before university redesign
+[33mb3d58fc[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m 
+[33m00c7cae[m Things changed since presentation.
+[33me8f52cd[m FINAL, SUKSESE
+[33mf79708c[m projekti eshte finalizaur, kerkesat minimale jan te gjitha ne rregull , suksese djema
+[33m45a2654[m minor fixes
+[33ma4841bb[m u ndryshu
+[33m965117c[m Merge branch 'main' of https://github.com/Ediin-K/meson-lms
+[33m5f314ee[m validate
+[33maebe242[m[33m ([m[1;32mfeature-ediar[m[33m)[m diqka gabim ndodhi provone tash
+[33m65e16d9[m rregullimm..
+[33m8e874cc[m rregullimi i fjales...
+[33m0fa7adb[m  tokens tani gjenden ne httpsonly cookies , per siguri
+[33mdd83798[m String Token Commented
+[33mc5df523[m .
+[33m24ce853[m Komentimi i nje pjese te kodit e nevojitshme.
+[33m8f9f08e[m Shtimi i komentit ne kod
+[33m2da1a52[m comment messages
+[33m6d848de[m[33m ([m[1;31morigin/feature-ediar[m[33m)[m Merge pull request #105 from Ediin-K/feature-edin
+[33me45ad68[m[33m ([m[1;31morigin/feature-edin[m[33m)[m Refresh tokens tani gjenden ne httpsonly cookies , per siguri
+[33m073f50b[m Merge pull request #104 from Ediin-K/feature-edin
+[33mc932753[m Assignment nga teacher dashboard
+[33m4d6327b[m Merge pull request #103 from Ediin-K/feature-edin
+[33me67e908[m Implementimi i plot i quizit, disa rregullime te sherbimeve te profesorit dhe shtimi i assignment, ende duhet pun per assignment
+[33m9a9b344[m Merge pull request #102 from Ediin-K/feature-ediar
+[33m6f586c6[m Merge pull request #101 from Ediin-K/feature-endrit
+[33m2157b22[m ndryshim ne Ects
+[33m6da70bc[m[33m ([m[1;31morigin/feature-endrit[m[33m)[m shtim i quizit dhe piket e pyetjeve dhe disa forme tjera te pyetjeve abcd dhe me true false dhe me shume se nje pergjigje te sakte, gjithashtu edhe nderfaqja e quizit ne frontend dhe backend
+[33m2273c25[m Merge branch 'main' of https://github.com/Ediin-K/meson-lms into feature-ediar
+[33ma02d6cb[m Ects added ne kurse E gzoft pronari i ri...
+[33me036e20[m Merge pull request #100 from Ediin-K/feature-ediar
+[33m76796da[m GradePages ne process...
+[33mf8fd9f3[m Grade Page krijimi i faqes se notave ne proces...
+[33m05df329[m ndryshime ne profilin e studentit
+[33mc2f0680[m Merge pull request #99 from Ediin-K/feature-ediar
+[33m25dc432[m rregullova filet v11 dhe v12 gabimme me sql , dhe assignment service minor fix
+[33mdc05927[m hello
+[33mdd3c106[m Merge pull request #98 from Ediin-K/feature-edin
+[33m0ae4589[m minor fixes
+[33m132d5d3[m Merge pull request #97 from Ediin-K/feature-edin
+[33m011fbae[m Merge branch 'main' into feature-edin
+[33m6c8c04c[m Merge pull request #96 from Ediin-K/feature-endrit
+[33m3656c04[m Shtimi i faqes se profilit tte studentit
+[33m8b9f389[m Fix Flyway V11 checksum mismatch: idempotent SQL + repair tooling
+[33m078806c[m Fix Flyway V11 konflikti - riemerto quiz_status ne V12, shto V11 cascade
+[33m0a27812[m Rishkrim i plote i sistemit te kuizeve me status DRAFT/ACTIVE/CLOSED
+[33mbea9436[m ndryshimi i assignment
+[33m53ce87c[m ndryshimi i Tekstit
+[33m3582701[m Merge pull request #95 from Ediin-K/feature-endrit
+[33mf3a653d[m rregullim i kodit per te shtuar pyetje dhe pergjigje ne quiz management
+[33m17b8a31[m Merge pull request #94 from Ediin-K/feature-edin
+[33m298e0f1[m[33m ([m[1;32magents/secure-quiz-session-implementation[m[33m)[m Quizi eshte afer perfundimit, disa kerkesa ne lidhje me projektin jane plotesuar
+[33mdff1171[m Merge pull request #93 from Ediin-K/feature-edin
+[33mb63ed1b[m Oraret me ne fund funksionojn, disa ndryshime te puna e profeosrit qe dergon file , prap ka nevoj per rregullim
+[33m6f2acf8[m minor fix
+[33m7ca356a[m disa rregullime ne backend dhe frontend, dhe shtova nje file te ri error.txt ne backend. Gjithashtu, modifikova file-in V1__init.sql per te shtuar nje table te re ne database. Ne frontend, modifikova file-in App.js per te implementuar nje funksionalitet te ri.
+[33mebf1534[m Merge pull request #92 from Ediin-K/feature-edin
+[33m0c623a9[m UI fixes and LMS improvements
+[33m3d74339[m Merge pull request #91 from Ediin-K/feature-edin
+[33m7887ba2[m Puna e orareve dhe grupeve tani eshte rregulluar plotesisht, disa dizajne kan nevoj te implementohen per UI dhe pastaj , mbeten notificaiton notat profile dhe disa tjera me te lehta dhe mbaron projekti, njeher per njeher
+[33mc3f8b2d[m Merge pull request #90 from Ediin-K/feature-edin
+[33m3319151[m minor fix
+[33maed26f6[m grupet jan shtuar
+[33m57e5c7d[m Merge pull request #89 from Ediin-K/feature-edin
+[33mb3c04a3[m Merge main into feature-edin
+[33m92ee67d[m fix kur nuk lejonte te beheshim register pa e klikuar kam lexuar dokumentat
+[33m439327a[m Merge pull request #88 from Ediin-K/feature-edin
+[33m75d69f9[m teacher tani mund te dergoj file ose folder
+[33mbdc39b1[m Merge pull request #87 from Ediin-K/feature-edin
+[33m22c4eed[m teacher dashbord
+[33m5553902[m Merge pull request #86 from Ediin-K/feature-edin
+[33m8287772[m sherbimi adminteacher.jsx
+[33m02bac16[m Merge pull request #85 from Ediin-K/feature-edin
+[33m48d7e7a[m sherbimi adminteacher.jsx
+[33m91fad27[m Merge pull request #84 from Ediin-K/feature-edin
+[33mc5d4f4b[m Sherbimet e admin tash funksionale
+[33m504184d[m Merge pull request #83 from Ediin-K/feature-edin
+[33m36ce31b[m AdminCourses.jsx plotesisht funksionale , next AdminCategories.jsx
+[33m7977a6c[m Merge pull request #82 from Ediin-K/feature-edin
+[33m50343e3[m AdminCourses.jsx plotesisht funksionale , next AdminCategories.jsx
+[33mb9a27fd[m Merge pull request #81 from Ediin-K/feature-edin
+[33mcb91326[m Admin dashboard create user
+[33mf65554c[m Merge pull request #80 from Ediin-K/feature-erjon
+[33md9fa338[m fix
+[33me3a288c[m[33m ([m[1;31morigin/feature-erjon[m[33m)[m Merge pull request #79 from ErjonD06/feature-erjon
+[33m6a96860[m cookies terms privacy te rregulluara ne footer dhe register login
+[33m91ca67f[m Merge pull request #78 from Ediin-K/feature-edin
+[33m02e23d3[m data jan dinamike plotesisht ne AdminUsers.jsx
+[33me0ff103[m data jan dinamike plotesisht ne AdminUsers.jsx
+[33me269dde[m Merge pull request #77 from Ediin-K/feature-edin
+[33mbf92fdd[m data jan dinamike plotesisht ne AdminUsers.jsx
+[33m63a4ac8[m Merge pull request #76 from Ediin-K/feature-edin
+[33maf15177[m Data dynamice deri dikund
+[33m22a4438[m Merge pull request #75 from Ediin-K/feature-edin
+[33m3ce4c54[m Admin dashboard/courses dhe /users
+[33mc13dcd2[m Merge pull request #74 from Ediin-K/feature-edin
+[33m1e2ff2d[m Admin dashboard re-design
+[33m798b9fc[m Merge pull request #73 from Ediin-K/feature-edin
+[33ma87523a[m admin page
+[33m6b24568[m Merge pull request #72 from Ediin-K/feature-edin
+[33mab8fb3f[m Admin dashboard
+[33m7040735[m Merge pull request #71 from Ediin-K/feature-edin
+[33mdc4b4d9[m flyway tani funksionon
+[33mcfa1313[m Merge pull request #70 from Ediin-K/feature-edin
+[33md617a95[m Jane krijuar:Admin dashbord fillestar,Assignment page quiz page profile page
+[33m7e92d06[m Merge pull request #69 from Ediin-K/feature-edin
+[33m35f0288[m nje rregullim shum i madh, kur bejm logout, nuk e fshinte rolin si duhet
+[33m3c75c75[m Merge pull request #68 from Ediin-K/feature-edin
+[33m81b0d56[m fixes
+[33m233bd55[m Merge pull request #67 from Ediin-K/feature-edin
+[33m5f606c4[m Notification page
+[33mbd6fd34[m Notification page
+[33mb81a9b3[m Merge pull request #66 from Ediin-K/feature-edin
+[33m9b4775d[m Sherbimet e studentit, kam filluar punimin, mbetet ende gjera
+[33m4b0838f[m Merge pull request #65 from Ediin-K/feature-edin
+[33md1506ec[m Assignment eshte krijuar, tani mbeten frontend implementimet e tyre ,Kerkesat minimale jane kryer te gjitha.
+[33m9752bb4[m Merge pull request #64 from Ediin-K/feature-edin
+[33m59edce6[m Enrollment,Certificate,Quiz jan krijuar
+[33m9698dc4

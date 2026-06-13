@@ -22,10 +22,10 @@ public class Certificate {
     @JoinColumn(name = "enrollment_id", nullable = false, unique = true)
     private Enrollment enrollment;
 
-    @Column(nullable = false, updatable = false)
+    @Column(name = "issued_date", nullable = false, updatable = false)
     private LocalDateTime dataLeshimit;
 
-    @Column(nullable = false, unique = true, updatable = false)
+    @Column(name = "unique_code", nullable = false, unique = true, updatable = false)
     private String kodiUnik;
 
     @PrePersist

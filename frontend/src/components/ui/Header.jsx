@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useRef, useState } from 'react'
+﻿import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAppPreferences } from '../../context/appPreferencesContext.js'
 import { GB, AL } from 'country-flag-icons/react/3x2'
@@ -56,7 +56,7 @@ export default function Header() {
       setIsScrolled(window.scrollY > 10)
     }
     window.addEventListener('scroll', handleScroll)
-    // check initially
+    
     handleScroll()
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
@@ -79,7 +79,7 @@ export default function Header() {
         return [
           { label: t('header.navAdminDashboard'), href: '/admin' },
           { label: t('home.admin.services.users.title'), href: '/admin/users' },
-          { label: t('home.admin.services.courses.title'), href: '/admin/courses' },
+          { label: t('home.admin.services.subjects.title'), href: '/admin/subjects' },
           contactLink,
         ]
       case 'teacher':
@@ -94,7 +94,7 @@ export default function Header() {
       default:
         return [
           { label: t('header.navDashboard'), href: '/student' },
-          { label: t('header.navCourses'), href: '/courses' },
+          { label: t('header.navsubjects'), href: '/subjects' },
           { label: t('header.navAssignments'), href: '/assignments' },
           contactLink,
           libraryLink,

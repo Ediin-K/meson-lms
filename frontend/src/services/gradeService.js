@@ -1,4 +1,4 @@
-import axiosInstance from "./axiosInstance";
+﻿import axiosInstance from "./axiosInstance";
 
 const GRADES_API = "/grades";
 
@@ -7,8 +7,8 @@ export const getGradesByStudent = async (studentId) => {
   return response.data;
 };
 
-export const getGradesByCourse = async (courseId) => {
-  const response = await axiosInstance.get(`${GRADES_API}/course/${courseId}`);
+export const getGradesBySubject = async (subjectId) => {
+  const response = await axiosInstance.get(`${GRADES_API}/subject/${subjectId}`);
   return response.data;
 };
 

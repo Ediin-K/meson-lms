@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from "react";
+﻿import React, { lazy, Suspense } from "react";
 import Header from "./components/ui/Header.jsx";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useAppPreferences } from "./context/appPreferencesContext.js";
@@ -8,17 +8,16 @@ import ConsentBanner from "./components/cookies/ConsentBanner.jsx";
 
 const Home = lazy(() => import("./pages/Home.jsx"));
 const Login = lazy(() => import("./pages/Login.jsx"));
-const StudentLogin = lazy(() => import("./pages/StudentLogin.jsx"));
-const StaffLogin = lazy(() => import("./pages/StaffLogin.jsx"));
-const AdminLogin = lazy(() => import("./pages/AdminLogin.jsx"));
+const ChangeTemporaryPassword = lazy(() => import("./pages/ChangeTemporaryPassword.jsx"));
+import SessionExpiredDialog from "./components/ui/SessionExpiredDialog.jsx";
 const About = lazy(() => import("./pages/About.jsx"));
-const CourseDetail = lazy(() => import("./pages/CourseDetail.jsx"));
+const SubjectDetail = lazy(() => import("./pages/SubjectDetail.jsx"));
 const LessonDetail = lazy(() => import("./pages/LessonDetail.jsx"));
 const Contact = lazy(() => import("./pages/ContactUs.jsx"));
 const SemesterPage = lazy(() => import("./pages/SemesterPage.jsx"));
 const QuizPage = lazy(() => import("./pages/QuizPage.jsx"));
 const QuizListPage = lazy(() => import("./pages/QuizListPage.jsx"));
-const CoursesPage = lazy(() => import("./pages/CoursesPage.jsx"));
+const SubjectsPage = lazy(() => import("./pages/SubjectsPage.jsx"));
 const Notifications = lazy(() => import("./pages/Notifications.jsx"));
 const StudentDashboard = lazy(() => import("./components/dashboard/StudentDashboard.jsx"));
 const TeacherDashboard = lazy(() => import("./pages/teacher/TeacherDashboard.jsx"));
@@ -27,8 +26,8 @@ const ProfilePage = lazy(() => import("./pages/ProfilePage.jsx"));
 const CertificateVerify = lazy(() => import("./pages/CertificateVerify.jsx"));
 const AdminDashboard = lazy(() => import("./components/dashboard/AdminDashboard.jsx"));
 const AdminUsers = lazy(() => import("./pages/AdminUsers.jsx"));
-const AdminCourses = lazy(() => import("./pages/AdminCourses.jsx"));
-const AdminCategories = lazy(() => import("./pages/AdminCategories.jsx"));
+const AdminSubjects = lazy(() => import("./pages/AdminSubjects.jsx"));
+const AdminDepartments = lazy(() => import("./pages/AdminDepartments.jsx"));
 const AdminTeachers = lazy(() => import("./pages/AdminTeachers.jsx"));
 const AdminEnrollments = lazy(() => import("./pages/AdminEnrollments.jsx"));
 const AdminCertificates = lazy(() => import("./pages/AdminCertificates.jsx"));
@@ -45,8 +44,11 @@ const RegisteredExamsPage = lazy(() => import("./pages/student/RegisteredExamsPa
 const StudentPaymentsPage = lazy(() => import("./pages/student/StudentPaymentsPage.jsx"));
 const AdminGroupApplications = lazy(() => import("./pages/AdminGroupApplications.jsx"));
 const AdminGroups = lazy(() => import("./pages/AdminGroups.jsx"));
+const AdminRoles = lazy(() => import("./pages/AdminRoles.jsx"));
+const AdminUserClaims = lazy(() => import("./pages/AdminUserClaims.jsx"));
+const AdminUserTokens = lazy(() => import("./pages/AdminUserTokens.jsx"));
 const TeacherLayout = lazy(() => import("./layouts/TeacherLayout.jsx"));
-const TeacherCourses = lazy(() => import("./pages/teacher/TeacherCourses.jsx"));
+const TeacherSubjects = lazy(() => import("./pages/teacher/TeacherSubjects.jsx"));
 const TeacherModules = lazy(() => import("./pages/teacher/TeacherModules.jsx"));
 const TeacherLessons = lazy(() => import("./pages/teacher/TeacherLessons.jsx"));
 const TeacherQuizzes = lazy(() => import("./pages/teacher/TeacherQuizzes.jsx"));
@@ -93,7 +95,8 @@ function AppLayout() {
 
   return (
       <div className="flex min-h-dvh flex-col bg-gradient-to-b from-sky-50 via-[#f0f7fb] to-[#d8e8f2] transition-colors dark:from-slate-950 dark:via-slate-900 dark:to-slate-900">
-        {!isLoginPage && !isQuizPage && !isSmisPage && <Header />}
+        {!isLoginPage && !isQuizPage && <Header />}
+        <SessionExpiredDialog />
         <main className="flex flex-col flex-grow">
           <div
             id="main-content"
@@ -104,10 +107,7 @@ function AppLayout() {
             <Routes>
               <Route path="/" element={<RootRedirect />} />
               <Route path="/login" element={<Login />} />
-              <Route path="/login/student" element={<StudentLogin />} />
-              <Route path="/login/staff" element={<StaffLogin />} />
-              <Route path="/login/admin" element={<AdminLogin />} />
-              <Route path="/smis-login/:portal" element={<SmisPortalLogin />} />
+              <Route path="/change-password" element={<ChangeTemporaryPassword />} />
               <Route path="/register" element={<Navigate to="/login" replace />} />
               <Route path="/signup" element={<Navigate to="/login" replace />} />
               <Route path="/about" element={<About />} />
@@ -115,12 +115,12 @@ function AppLayout() {
                 path="/student/semester/:semesterId"
                 element={<SemesterPage />}
               />
-              <Route path="/courses" element={<CoursesPage />} />
-              <Route path="/course/:courseId" element={<CourseDetail />} />
-              <Route path="/courses/:courseId" element={<CourseDetail />} />
+              <Route path="/subjects" element={<SubjectsPage />} />
+              <Route path="/subject/:subjectId" element={<SubjectDetail />} />
+              <Route path="/subjects/:subjectId" element={<SubjectDetail />} />
               <Route path="/lesson/:lessonId" element={<LessonDetail />} />
               <Route
-                path="/course/:courseId/quiz/:quizId"
+                path="/subject/:subjectId/quiz/:quizId"
                 element={
                   <ProtectedRoute requiredRole="student">
                     <QuizPage />
@@ -163,18 +163,18 @@ function AppLayout() {
                 }
               />
               <Route
-                path="/admin/courses"
+                path="/admin/subjects"
                 element={
                   <ProtectedRoute requiredRole="admin">
-                    <AdminCourses />
+                    <AdminSubjects />
                   </ProtectedRoute>
                 }
               />
               <Route
-                path="/admin/categories"
+                path="/admin/departments"
                 element={
                   <ProtectedRoute requiredRole="admin">
-                    <AdminCategories />
+                    <AdminDepartments />
                   </ProtectedRoute>
                 }
               />
@@ -235,10 +235,26 @@ function AppLayout() {
                 }
               />
               <Route
-                path="/admin/smis"
+                path="/admin/roles"
                 element={
                   <ProtectedRoute requiredRole="admin">
-                    <AdminSmisDashboard />
+                    <AdminRoles />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/user-claims"
+                element={
+                  <ProtectedRoute requiredRole="admin">
+                    <AdminUserClaims />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/user-tokens"
+                element={
+                  <ProtectedRoute requiredRole="admin">
+                    <AdminUserTokens />
                   </ProtectedRoute>
                 }
               />
@@ -314,9 +330,9 @@ function AppLayout() {
                 }
               >
                 <Route index element={<TeacherDashboard />} />
-                <Route path="courses" element={<TeacherCourses />} />
+                <Route path="subjects" element={<TeacherSubjects />} />
                 <Route path="modules" element={<TeacherModules />} />
-                <Route path="modules/:courseId" element={<TeacherModules />} />
+                <Route path="modules/:subjectId" element={<TeacherModules />} />
                 <Route path="lessons" element={<TeacherLessons />} />
                 <Route path="quizzes" element={<TeacherQuizzes />} />
                 <Route path="students" element={<TeacherStudents />} />

@@ -57,9 +57,9 @@ export default function ProfileHeaderCard({ profile, t, onSave, saving }) {
                 {t('studentProfile.memberSince')}: {new Date(profile.dataKrijimit).toLocaleDateString()}
               </Typography>
             ) : null}
-            {profile.categoryName ? (
+            {profile.departmentName ? (
               <Typography variant="caption" className="!mt-1 !block !text-sky-600 dark:!text-sky-400">
-                {profile.categoryName}
+                {profile.departmentName}
                 {profile.currentSemester ? ` · ${t('studentProfile.semester')} ${profile.currentSemester}` : ''}
               </Typography>
             ) : null}

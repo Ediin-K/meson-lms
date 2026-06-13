@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom'
+﻿import { useParams, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import axiosInstance from '../services/axiosInstance'
 import { useAppPreferences } from '../context/appPreferencesContext'
@@ -14,34 +14,15 @@ import LinkRounded from '@mui/icons-material/LinkRounded'
 import QuizRounded from '@mui/icons-material/QuizRounded'
 import WorkspacePremiumRounded from '@mui/icons-material/WorkspacePremiumRounded'
 import FolderOpenRounded from '@mui/icons-material/FolderOpenRounded'
-import PictureAsPdfRounded from '@mui/icons-material/PictureAsPdfRounded'
-import ImageRounded from '@mui/icons-material/ImageRounded'
-import VideocamRounded from '@mui/icons-material/VideocamRounded'
-import InsertDriveFileRounded from '@mui/icons-material/InsertDriveFileRounded'
 import FileDownloadRounded from '@mui/icons-material/FileDownloadRounded'
 import OpenInNewRounded from '@mui/icons-material/OpenInNewRounded'
-import SlideshowRounded from '@mui/icons-material/SlideshowRounded'
-import TableChartRounded from '@mui/icons-material/TableChartRounded'
-import FolderZipRounded from '@mui/icons-material/FolderZipRounded'
+import ResourceTypeIcon from '../components/common/ResourceTypeIcon'
 import LessonQuizCard from '../components/quiz/LessonQuizCard'
-import LessonAssignmentCard from '../components/course/LessonAssignmentCard'
+import LessonAssignmentCard from '../components/subject/LessonAssignmentCard'
 import progressService from '../services/progressService'
 import { downloadResource, openResourcePreview, getViewUrl } from '../services/resourceService'
 
 // ── Resource helpers ──────────────────────────────────────────────────────────
-
-function resourceIcon(type) {
-    const map = {
-        PDF:          PictureAsPdfRounded,
-        IMAGE:        ImageRounded,
-        VIDEO:        VideocamRounded,
-        DOCUMENT:     DescriptionRounded,
-        PRESENTATION: SlideshowRounded,
-        SPREADSHEET:  TableChartRounded,
-        ARCHIVE:      FolderZipRounded,
-    }
-    return map[type] || InsertDriveFileRounded
-}
 
 function formatSize(bytes) {
     if (!bytes && bytes !== 0) return ''
@@ -50,11 +31,8 @@ function formatSize(bytes) {
     return `${(bytes / 1024 / 1024).toFixed(1)} MB`
 }
 
-// ── ResourceCard component ────────────────────────────────────────────────────
-
 function ResourceCard({ resource }) {
     const [previewOpen, setPreviewOpen] = useState(false)
-    const Icon = resourceIcon(resource.resourceType)
     const canEmbedPreview = resource.resourceType === 'IMAGE' || resource.resourceType === 'VIDEO'
     const canOpenPreview  = resource.previewable || resource.resourceType === 'PDF'
 
@@ -81,7 +59,7 @@ function ResourceCard({ resource }) {
     return (
         <>
             <div className="rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-                {/* Inline preview for images */}
+                {}
                 {resource.resourceType === 'IMAGE' && (
                     <div
                         className="cursor-zoom-in bg-slate-100 dark:bg-slate-800 flex items-center justify-center max-h-64 overflow-hidden"
@@ -96,7 +74,7 @@ function ResourceCard({ resource }) {
                     </div>
                 )}
 
-                {/* Inline preview for video */}
+                {}
                 {resource.resourceType === 'VIDEO' && (
                     <div className="bg-black">
                         <video
@@ -110,10 +88,13 @@ function ResourceCard({ resource }) {
                     </div>
                 )}
 
-                {/* File info row */}
+                {}
                 <div className={`flex items-center gap-3 px-4 py-3 ${bgColor}`}>
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white dark:bg-slate-900 shadow-sm">
-                        <Icon className={`!text-xl ${iconColor}`} />
+                        <ResourceTypeIcon
+                            type={resource.resourceType}
+                            className={`!text-xl ${iconColor}`}
+                        />
                     </div>
                     <div className="min-w-0 flex-1">
                         <Tooltip title={resource.emriOrigjinal} placement="top">
@@ -171,7 +152,7 @@ function ResourceCard({ resource }) {
                 </div>
             </div>
 
-            {/* Full-screen image preview dialog */}
+            {}
             {resource.resourceType === 'IMAGE' && (
                 <Dialog
                     open={previewOpen}
@@ -194,23 +175,20 @@ function ResourceCard({ resource }) {
     )
 }
 
-// ── Main page ─────────────────────────────────────────────────────────────────
-
 export default function LessonDetail() {
     const { lessonId } = useParams()
     const navigate = useNavigate()
     const { t } = useAppPreferences()
 
     const [lesson, setLesson]     = useState(null)
-    const [courseId, setCourseId] = useState(null)
+    const [subjectId, setSubjectId] = useState(null)
     const [loading, setLoading]   = useState(true)
     const [completion, setCompletion] = useState(null)
 
-    // Mark lesson as viewed — backend auto-completes course if progress hits 100%
     useEffect(() => {
         progressService.markViewed(lessonId)
             .then(res => {
-                if (res.data?.courseCompleted) setCompletion(res.data)
+                if (res.data?.subjectCompleted) setCompletion(res.data)
             })
             .catch(() => {})
     }, [lessonId])
@@ -224,8 +202,8 @@ export default function LessonDetail() {
                 if (lessonRes.data?.moduleId) {
                     try {
                         const modRes = await axiosInstance.get(`/modules/${lessonRes.data.moduleId}`)
-                        setCourseId(modRes.data?.courseId || null)
-                    } catch { /* ignore */ }
+                        setSubjectId(modRes.data?.subjectId || null)
+                    } catch { void 0 }
                 }
             } catch (err) {
                 console.error(err)
@@ -268,10 +246,10 @@ export default function LessonDetail() {
                     onClick={() => navigate(-1)}
                     className="!mb-8 !normal-case !text-slate-600 dark:!text-slate-400 hover:!bg-sky-50 dark:hover:!bg-slate-800/50 !rounded-full !px-4 !py-2"
                 >
-                    {t('lessonDetail.backToCourse')}
+                    {t('lessonDetail.backToSubject')}
                 </Button>
 
-                {/* Header */}
+                {}
                 <Box className="mb-8">
                     <div className="flex items-center gap-3 mb-3">
                         <Chip label={lesson.lloji} size="small" className="!font-bold !bg-sky-100 !text-sky-700 dark:!bg-sky-900/50 dark:!text-sky-400" />
@@ -282,7 +260,7 @@ export default function LessonDetail() {
                     </Typography>
                 </Box>
 
-                {/* Assignment type — show submit card prominently before grid */}
+                {}
                 {lesson.lloji === 'ASSIGNMENT' && (
                     <Box className="mb-6">
                         <LessonAssignmentCard lessonId={lessonId} />
@@ -291,10 +269,10 @@ export default function LessonDetail() {
 
                 <div className="grid gap-6 lg:grid-cols-3">
 
-                    {/* ── Main content ── */}
+                    {}
                     <div className="lg:col-span-2 flex flex-col gap-6">
 
-                        {/* Video */}
+                        {}
                         {lesson.videoUrl && (
                             <Card elevation={0} className="rounded-2xl border border-slate-200/80 bg-white dark:!bg-slate-900/50 dark:!border-slate-700/80">
                                 <CardContent className="!p-5">
@@ -314,7 +292,7 @@ export default function LessonDetail() {
                             </Card>
                         )}
 
-                        {/* Text content */}
+                        {}
                         {lesson.permbajtja && (
                             <Card elevation={0} className="rounded-2xl border border-slate-200/80 bg-white dark:!bg-slate-900/50 dark:!border-slate-700/80">
                                 <CardContent className="!p-5">
@@ -329,7 +307,7 @@ export default function LessonDetail() {
                             </Card>
                         )}
 
-                        {/* External link */}
+                        {}
                         {lesson.resourceUrl && (
                             <Card elevation={0} className="rounded-2xl border border-slate-200/80 bg-white dark:!bg-slate-900/50 dark:!border-slate-700/80">
                                 <CardContent className="!p-5 flex items-center justify-between">
@@ -346,7 +324,7 @@ export default function LessonDetail() {
                             </Card>
                         )}
 
-                        {/* Uploaded resources */}
+                        {}
                         {resources.length > 0 && (
                             <Card elevation={0} className="rounded-2xl border border-slate-200/80 bg-white dark:!bg-slate-900/50 dark:!border-slate-700/80">
                                 <CardContent className="!p-5">
@@ -367,21 +345,21 @@ export default function LessonDetail() {
                         )}
                     </div>
 
-                    {/* ── Sidebar ── */}
+                    {}
                     <div className="flex flex-col gap-6">
 
-                        {/* Quizzes */}
+                        {}
                         <Card elevation={0} className="rounded-2xl border border-slate-200/80 bg-white dark:!bg-slate-900/50 dark:!border-slate-700/80">
                             <CardContent className="!p-5">
                                 <Typography variant="subtitle1" className="!font-bold !text-slate-900 dark:!text-white !mb-4 flex items-center gap-2">
                                     <QuizRounded className="text-sky-600" fontSize="small" />
                                     {t('lessonDetail.quizzes')}
                                 </Typography>
-                                <LessonQuizCard lessonId={lessonId} courseId={courseId} />
+                                <LessonQuizCard lessonId={lessonId} subjectId={subjectId} />
                             </CardContent>
                         </Card>
 
-                        {/* Assignment in sidebar only for non-ASSIGNMENT lessons (e.g. a lesson that also has an assignment) */}
+                        {}
                         {lesson.lloji !== 'ASSIGNMENT' && (
                             <LessonAssignmentCard lessonId={lessonId} />
                         )}
@@ -391,7 +369,7 @@ export default function LessonDetail() {
 
             <Footer />
 
-            {/* Course completion celebration dialog */}
+            {}
             <Dialog
                 open={!!completion}
                 onClose={() => setCompletion(null)}
@@ -403,11 +381,11 @@ export default function LessonDetail() {
                     <div className="bg-gradient-to-br from-emerald-500 to-teal-600 px-8 py-10 text-center">
                         <WorkspacePremiumRounded className="!text-6xl text-white/90 !mb-3" />
                         <Typography variant="h4" className="!font-black !text-white !leading-tight">Urime!</Typography>
-                        <Typography className="!mt-2 !text-white/80">E ke përfunduar kursin me sukses</Typography>
+                        <Typography className="!mt-2 !text-white/80">E ke përfunduar Lëndan me sukses</Typography>
                     </div>
                     <div className="px-8 py-6">
                         <Typography variant="h6" className="!font-black !text-slate-900 dark:!text-white !text-center !mb-1">
-                            {completion?.courseTitulli}
+                            {completion?.subjectTitulli}
                         </Typography>
                         <Typography variant="body2" className="!text-slate-500 !text-center !mb-5">
                             Certifikata jote është gjeneruar automatikisht.
