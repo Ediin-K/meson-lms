@@ -27,7 +27,7 @@ public class ProgressService {
     private final SubjectRepository         subjectRepository;
     private final EnrollmentRepository     enrollmentRepository;
     private final UserRepository           userRepository;
-    private final CertificateService       certificateService;
+    private final EnrollmentCompletionService completionService;
 
     @Transactional
     public LessonViewResponse markLessonViewed(Long lessonId) {
@@ -69,23 +69,7 @@ public class ProgressService {
 
     private String recalculateAndMaybeComplete(Long studentId, Long subjectId) {
         return enrollmentRepository.findByUserIdAndSubjectId(studentId, subjectId)
-                .map(enrollment -> {
-                    long total  = lessonRepository.countByModuleSubjectId(subjectId);
-                    long viewed = progressRepository.countViewedLessonsBySubject(studentId, subjectId);
-
-                    double pct = total > 0 ? Math.round(viewed * 100.0 / total) : 0;
-                    enrollment.setProgresi(pct);
-
-                    if (total > 0 && viewed >= total
-                            && EnrollmentStatus.AKTIV.equals(enrollment.getStatusi())) {
-                        enrollment.setStatusi(EnrollmentStatus.PERFUNDUAR);
-                        enrollmentRepository.save(enrollment);
-                        return certificateService.createForEnrollment(enrollment);
-                    }
-
-                    enrollmentRepository.save(enrollment);
-                    return null;
-                })
+                .map(completionService::recalculateEnrollment)
                 .orElse(null);
     }
 

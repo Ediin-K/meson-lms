@@ -79,6 +79,13 @@ public class CertificateService {
         certificateRepository.deleteById(id);
     }
 
+    /** Removes the certificate tied to an enrollment, if one exists (no-op otherwise). */
+    @org.springframework.transaction.annotation.Transactional
+    public void removeForEnrollment(Long enrollmentId) {
+        certificateRepository.findByEnrollmentId(enrollmentId)
+                .ifPresent(certificateRepository::delete);
+    }
+
     private CertificateResponse toResponse(Certificate certificate) {
         return CertificateResponse.builder()
                 .id(certificate.getId())

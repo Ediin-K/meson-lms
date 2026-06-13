@@ -25,6 +25,7 @@ public class TeacherModuleService {
     private final SubjectRepository subjectRepository;
     private final UserRepository userRepository;
     private final com.meson.repository.LessonRepository lessonRepository;
+    private final EnrollmentCompletionService completionService;
 
     public List<ModuleResponse> getModulesBySubject(Long subjectId) {
         User teacher = getCurrentUser();
@@ -66,7 +67,10 @@ public class TeacherModuleService {
         Module module = moduleRepository.findByIdAndSubjectTeacherId(id, teacher.getId())
                 .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses në këtë modul ose moduli nuk ekziston."));
 
+        Long subjectId = module.getSubject().getId();
         moduleRepository.delete(module);
+        // Deleting a module drops its lessons, changing what "complete" means.
+        completionService.recalculateSubject(subjectId);
     }
 
     private User getCurrentUser() {

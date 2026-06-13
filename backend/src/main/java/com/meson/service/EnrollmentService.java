@@ -18,6 +18,7 @@ public class EnrollmentService {
     private final SubjectRepository subjectRepository;
     private final SubjectGroupRepository subjectGroupRepository;
     private final SubjectSubgroupRepository subjectSubgroupRepository;
+    private final EnrollmentCompletionService completionService;
     private final SubjectGroupTeacherRepository subjectGroupTeacherRepository;
     private final SubjectSubgroupTeacherRepository subjectSubgroupTeacherRepository;
 
@@ -123,8 +124,23 @@ public class EnrollmentService {
     public EnrollmentResponse updateStatusi(Long id, EnrollmentStatus statusi) {
         Enrollment enrollment = enrollmentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Regjistrimi nuk u gjet"));
+
+        // "Përfunduar" is derived from actually finishing all course material — it
+        // cannot be set by hand. Admins may set only AKTIV or ANULUAR.
+        if (statusi == EnrollmentStatus.PERFUNDUAR) {
+            throw new RuntimeException(
+                "Statusi 'Përfunduar' caktohet automatikisht kur studenti përfundon të gjithë materialin e lëndës dhe nuk mund të vendoset manualisht.");
+        }
+
         enrollment.setStatusi(statusi);
-        return toResponse(enrollmentRepository.save(enrollment));
+        enrollmentRepository.save(enrollment);
+
+        // Reactivating: if the student has in fact already viewed everything, let the
+        // derived rule immediately re-complete them (and re-issue the certificate).
+        if (statusi == EnrollmentStatus.AKTIV) {
+            completionService.recalculateEnrollment(enrollment);
+        }
+        return toResponse(enrollment);
     }
 
     public void delete(Long id) {
