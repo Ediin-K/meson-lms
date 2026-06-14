@@ -70,34 +70,39 @@ export default function ExamRegistrationPage() {
                 </tr>
               </thead>
               <tbody>
-                {courses.map((course) => (
-                  <tr key={course.id} className="bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800/70">
-                    <td className="border-b border-slate-100 px-3 py-3 font-bold text-sky-800 dark:border-slate-800 dark:text-sky-300">{course.code}</td>
-                    <td className="border-b border-slate-100 px-3 py-3 font-semibold dark:border-slate-800">{course.name}</td>
-                    <td className="border-b border-slate-100 px-3 py-3 dark:border-slate-800">{course.ects}</td>
-                    <td className="border-b border-slate-100 px-3 py-3 dark:border-slate-800">Semestri {course.semester}</td>
-                    <td className="border-b border-slate-100 px-3 py-3 dark:border-slate-800">{course.category}</td>
-                    <td className="border-b border-slate-100 px-3 py-3 dark:border-slate-800">
-                      <Select
-                        value={professors[course.id] || ''}
-                        onChange={(e) => setProfessors((prev) => ({ ...prev, [course.id]: e.target.value }))}
-                        displayEmpty
-                        size="small"
-                        fullWidth
-                      >
-                        <MenuItem value="">Zgjidhe ligjeruesin</MenuItem>
-                        {(course.professors || []).map((p) => (
-                          <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>
-                        ))}
-                      </Select>
-                    </td>
-                    <td className="border-b border-slate-100 px-3 py-3 dark:border-slate-800">
-                      <Button variant="contained" disabled={submittingId === course.id} onClick={() => handleRegister(course)} className="!rounded-lg !bg-sky-700 !font-bold !normal-case hover:!bg-sky-800">
-                        Paraqite provimin
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
+                {courses.map((course) => {
+                  const hasProfessors = (course.professors || []).length > 0
+
+                  return (
+                    <tr key={course.id} className="bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800/70">
+                      <td className="border-b border-slate-100 px-3 py-3 font-bold text-sky-800 dark:border-slate-800 dark:text-sky-300">{course.code}</td>
+                      <td className="border-b border-slate-100 px-3 py-3 font-semibold dark:border-slate-800">{course.name}</td>
+                      <td className="border-b border-slate-100 px-3 py-3 dark:border-slate-800">{course.ects}</td>
+                      <td className="border-b border-slate-100 px-3 py-3 dark:border-slate-800">Semestri {course.semester}</td>
+                      <td className="border-b border-slate-100 px-3 py-3 dark:border-slate-800">{course.category}</td>
+                      <td className="border-b border-slate-100 px-3 py-3 dark:border-slate-800">
+                        <Select
+                          value={professors[course.id] || ''}
+                          onChange={(e) => setProfessors((prev) => ({ ...prev, [course.id]: e.target.value }))}
+                          displayEmpty
+                          disabled={!hasProfessors}
+                          size="small"
+                          fullWidth
+                        >
+                          <MenuItem value="">Zgjidhe ligjeruesin</MenuItem>
+                          {(course.professors || []).map((p) => (
+                            <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>
+                          ))}
+                        </Select>
+                      </td>
+                      <td className="border-b border-slate-100 px-3 py-3 dark:border-slate-800">
+                        <Button variant="contained" disabled={!hasProfessors || submittingId === course.id} onClick={() => handleRegister(course)} className="!rounded-lg !bg-sky-700 !font-bold !normal-case hover:!bg-sky-800 disabled:!bg-slate-500 disabled:!text-white">
+                          Paraqite provimin
+                        </Button>
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>

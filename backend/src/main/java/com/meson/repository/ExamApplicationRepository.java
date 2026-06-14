@@ -17,6 +17,11 @@ public interface ExamApplicationRepository extends JpaRepository<ExamApplication
     List<ExamApplication> findByStudentIdOrderByAppliedAtDesc(Long studentId);
 
     @EntityGraph(attributePaths = {"student", "course", "course.courseCategory", "professor", "grade"})
+    List<ExamApplication> findByStudentIdAndStatusInOrderByAppliedAtDesc(
+            Long studentId,
+            Collection<ExamApplicationStatus> statuses);
+
+    @EntityGraph(attributePaths = {"student", "course", "course.courseCategory", "professor", "grade"})
     List<ExamApplication> findByProfessorIdOrderByAppliedAtDesc(Long professorId);
 
     @EntityGraph(attributePaths = {"student", "course", "course.courseCategory", "professor", "grade"})

@@ -22,7 +22,8 @@ export default function RegisteredExamsPage() {
   const loadRows = useCallback(async () => {
     setLoading(true)
     try {
-      setRows(await getStudentExamApplications(userId))
+      const applications = await getStudentExamApplications(userId)
+      setRows(applications.filter((row) => row.status !== 'CANCELLED'))
     } catch (err) {
       setSnackbar({ open: true, message: err?.response?.data?.message || 'Gabim gjate leximit te provimeve', severity: 'error' })
     } finally {

@@ -11,9 +11,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -38,6 +40,15 @@ public class SmisService {
             new SmisCatalogCourse("40CNC202", "Rrjeta Kompjuterike dhe Komunikimi", "Obligative"),
             new SmisCatalogCourse("40ITA203", "Hyrje ne Algoritme", "Obligative"),
             new SmisCatalogCourse("40ADS251", "Algoritmet dhe Strukturat e të dhënave", "Obligative"),
+            new SmisCatalogCourse("40FBD250", "Bazat e Teknologjive Big Data", "Obligative"),
+            new SmisCatalogCourse("40WDD205", "Dizajni dhe Zhvillimi i Uebit", "Obligative"),
+            new SmisCatalogCourse("40SW254", "Inxhinieria Softuerike", "Obligative"),
+            new SmisCatalogCourse("40DCS153", "Qarqet Digjitale dhe Sinjalet", "Obligative"),
+            new SmisCatalogCourse("40CS2200", "Shkenca Kompjuterike 2", "Obligative"),
+            new SmisCatalogCourse("40DS201", "Sistemet e Bazës së të Dhënave", "Obligative"),
+            new SmisCatalogCourse("40DS1204", "Struktura Diskrete 1 (Matematikë)", "Obligative"),
+            new SmisCatalogCourse("40SD2252", "Struktura Diskrete 2 (Probabilitet dhe Modelim)", "Obligative"),
+            new SmisCatalogCourse("40LCP255", "Lënda Laboratorike 1 (Projekt Grupor)", "Obligative"),
             new SmisCatalogCourse("40SS253", "Sisteme dhe Sinjale", "Obligative"),
             new SmisCatalogCourse("40GP304", "Programimi i Lojerave", "Zgjedhore"),
             new SmisCatalogCourse("40DEV305", "DevOps", "Zgjedhore"),
@@ -121,7 +132,13 @@ public class SmisService {
         if (!getCurrentUser().getId().equals(studentId) && !hasRole("ADMIN") && !hasRole("TEACHER")) {
             throw new AccessDeniedException("Nuk keni qasje per kete student");
         }
-        return examApplicationRepository.findByStudentIdOrderByAppliedAtDesc(studentId)
+        return examApplicationRepository.findByStudentIdAndStatusInOrderByAppliedAtDesc(
+                        studentId,
+                        List.of(
+                                ExamApplicationStatus.REGISTERED,
+                                ExamApplicationStatus.GRADED,
+                                ExamApplicationStatus.REFUSED
+                        ))
                 .stream()
                 .map(this::toResponse)
                 .toList();
@@ -281,7 +298,7 @@ public class SmisService {
             List<SmisProfessorOptionResponse> allProfessors) {
         List<String> allowedEmails = professorEmailsForCourse(course);
         if (allowedEmails.isEmpty()) {
-            return allProfessors;
+            return List.of();
         }
         return allProfessors.stream()
                 .filter(professor -> allowedEmails.contains(professor.getEmail().toLowerCase()))
@@ -289,13 +306,113 @@ public class SmisService {
     }
 
     private List<String> professorEmailsForCourse(Course course) {
-        String title = course != null && course.getTitulli() != null ? course.getTitulli().trim().toLowerCase() : "";
-        if (title.equals("hyrje ne algoritme")
-                || title.equals("algoritmet dhe strukturat e të dhënave")
-                || title.equals("algoritmet dhe strukturat e te dhenave")) {
-            return List.of("shkelqim.berisha@meson.com");
+        return switch (normalizedCourseTitle(course)) {
+            case "algoritmet dhe strukturat e te dhenave" -> List.of("shkelqim.berisha@meson.com");
+            case "bazat e teknologjive big data" -> List.of("bertan.karahoda@meson.com");
+            case "dizajni dhe zhvillimi i uebit" -> List.of(
+                    "greta.ahma@meson.com",
+                    "erzen.talla@meson.com",
+                    "elton.boshnjaku@meson.com"
+            );
+            case "nderveprimi kompjuter-njeri",
+                    "nderveprimi kompjuter njeri" -> List.of("greta.ahma@meson.com");
+            case "hyrje ne algoritme" -> List.of("shkelqim.berisha@meson.com");
+            case "inxhinieria softuerike" -> List.of(
+                    "erzen.talla@meson.com",
+                    "ramadan.dervishi@meson.com"
+            );
+            case "sistemet e bazes se te dhenave" -> List.of(
+                    "erzen.talla@meson.com",
+                    "zijadin.krasniqi@meson.com",
+                    "elton.boshnjaku@meson.com"
+            );
+            case "arkitektura dhe organizimi i kompjutereve" -> List.of(
+                    "ramadan.dervishi@meson.com",
+                    "valdrin.haxhiu@meson.com"
+            );
+            case "shkenca kompjuterike 1" -> List.of(
+                    "lavdim.menxhiqi@meson.com",
+                    "blerim.zylfiu@meson.com"
+            );
+            case "shkenca kompjuterike 2" -> List.of(
+                    "lavdim.menxhiqi@meson.com",
+                    "blerim.zylfiu@meson.com",
+                    "lamir.shkurti@meson.com"
+            );
+            case "lenda laboratorike 1 projekt grupor" -> List.of(
+                    "lavdim.menxhiqi@meson.com",
+                    "besnik.qehaja@meson.com",
+                    "blerim.zylfiu@meson.com"
+            );
+            case "qarqe digjitale dhe sinjalet", "qarqet digjitale dhe sinjalet" -> List.of(
+                    "besnik.qehaja@meson.com",
+                    "kjani.guri@meson.com",
+                    "zhilbert.tafa@meson.com"
+            );
+            case "bazat e inxhinierise elektronike elektrike",
+                    "bazat e inxhinierise elektrike dhe elektronike" -> List.of(
+                    "kjani.guri@meson.com",
+                    "vehbi.sofiu@meson.com"
+            );
+            case "struktura diskrete 1 matematike", "struktura diskrete 1" -> List.of(
+                    "diellza.berisha@meson.com",
+                    "nazmi.misini@meson.com"
+            );
+            case "struktura diskrete 2 probabilitet dhe modelim", "struktura diskrete 2" -> List.of(
+                    "diellza.berisha@meson.com",
+                    "nazmi.misini@meson.com"
+            );
+            case "matematike 1" -> List.of(
+                    "nazmi.misini@meson.com",
+                    "hizer.leka@meson.com"
+            );
+            case "matematike 2" -> List.of("hizer.leka@meson.com");
+            case "sisteme dhe sinjale" -> List.of(
+                    "armend.ymeri@meson.com",
+                    "vehbi.sofiu@meson.com"
+            );
+            case "rrjeta kompjuterike", "rrjeta kompjuterike dhe komunikimi" -> List.of(
+                    "zhilbert.tafa@meson.com",
+                    "lavdim.beqiri@meson.com"
+            );
+            case "hyrje ne shkenca dhe programim",
+                    "hyrje ne shkenca kompjuterike dhe programim" -> List.of(
+                    "naim.llumnica@meson.com",
+                    "blerim.zylfiu@meson.com",
+                    "elita.hajrizi@meson.com"
+            );
+            case "gjuhe angleze per inxhinieri" -> List.of(
+                    "lisjeta.thaqi@meson.com",
+                    "adea.haxhiavdyli@meson.com"
+            );
+            case "gjuhe italiane" -> List.of("raffaela.vespuci@meson.com");
+            case "shkrim akademik dhe seminar" -> List.of("shejnaze.gagica@meson.com");
+            case "sistemet operative" -> List.of(
+                    "valdrin.haxhiu@meson.com",
+                    "lavdim.beqiri@meson.com"
+            );
+            case "hyrje ne sigurine e informacionit" -> List.of(
+                    "lavdim.beqiri@meson.com",
+                    "blerton.abazi@meson.com"
+            );
+            default -> List.of();
+        };
+    }
+
+    private String normalizedCourseTitle(Course course) {
+        if (course == null || course.getTitulli() == null) {
+            return "";
         }
-        return List.of();
+        String normalized = Normalizer.normalize(course.getTitulli(), Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .toLowerCase(Locale.ROOT)
+                .replace("/", " ")
+                .replace("(", " ")
+                .replace(")", " ")
+                .replace("-", " ")
+                .replaceAll("\\s+", " ")
+                .trim();
+        return normalized;
     }
 
     private ExamApplicationResponse toResponse(ExamApplication application) {
