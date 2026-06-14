@@ -54,7 +54,7 @@ export default function ProfessorGradesPage() {
   const getErrorMessage = (error, fallback) =>
     error?.response?.data?.message || error?.response?.data?.error || error?.message || fallback;
 
-  const loadsubjects = useCallback(async () => {
+  const loadSubjects = useCallback(async () => {
     try {
       const res = await teacherContentService.getSubjects();
       setSubjects(res.data || []);
@@ -82,7 +82,7 @@ export default function ProfessorGradesPage() {
 
   useEffect(() => {
     loadSubjects();
-  }, [loadsubjects]);
+  }, [loadSubjects]);
 
   useEffect(() => {
     if (selectedSubjectId) {

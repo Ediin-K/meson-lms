@@ -18,23 +18,16 @@ import GradeOutlined from "@mui/icons-material/GradeOutlined";
 
 const GRADE_OPTIONS = [5, 6, 7, 8, 9, 10];
 
-const emptyForm = {
-  studentId: "",
-  subjectId: "",
-  grade: "",
-  comment: "",
-};
-
-function buildForm(initialData, fixedCourseId) {
+function buildForm(initialData, fixedSubjectId) {
   if (initialData) {
     return {
       studentId: initialData.studentId || "",
-      courseId: initialData.courseId || fixedCourseId || "",
+      subjectId: initialData.subjectId || fixedSubjectId || "",
       grade: initialData.grade ?? "",
       comment: initialData.comment || "",
     };
   }
-  return { ...emptyForm, courseId: fixedCourseId || "" };
+  return { studentId: "", subjectId: fixedSubjectId || "", grade: "", comment: "" };
 }
 
 function gradeBtnClass(selected, value) {
@@ -58,7 +51,7 @@ function GradeFormFields({
   fixedSubjectTitle = "",
   submitting = false,
 }) {
-  const [form, setForm] = useState(() => buildForm(initialData, fixedCourseId));
+  const [form, setForm] = useState(() => buildForm(initialData, fixedSubjectId));
   const isEdit = Boolean(initialData?.id);
 
   const handleChange = (field) => (e) => {
@@ -93,29 +86,29 @@ function GradeFormFields({
       </DialogTitle>
 
       <DialogContent className="!pt-5">
-        {fixedCourseId && fixedCourseTitle && (
+        {fixedSubjectId && fixedSubjectTitle && (
           <Box className="mb-4 rounded-lg bg-slate-100 px-4 py-3 dark:bg-slate-800">
             <Typography variant="caption" className="!font-semibold !uppercase !tracking-wide !text-slate-500">
-              Kursi
+              Lënda
             </Typography>
             <Typography className="!mt-0.5 !font-semibold !text-[#1e3a5f] dark:!text-white">
-              {fixedCourseTitle}
+              {fixedSubjectTitle}
             </Typography>
           </Box>
         )}
 
         <Box className="flex flex-col gap-4">
-          {!fixedCourseId && (
+          {!fixedSubjectId && (
             <FormControl fullWidth required size="small">
-              <InputLabel>Kursi</InputLabel>
+              <InputLabel>Lënda</InputLabel>
               <Select
-                value={form.courseId}
-                label="Kursi"
-                onChange={handleChange("courseId")}
+                value={form.subjectId}
+                label="Lënda"
+                onChange={handleChange("subjectId")}
                 disabled={isEdit}
               >
-                {courses.map((c) => (
-                  <MenuItem key={c.id} value={c.id}>{c.titulli}</MenuItem>
+                {subjects.map((s) => (
+                  <MenuItem key={s.id} value={s.id}>{s.titulli}</MenuItem>
                 ))}
               </Select>
             </FormControl>
@@ -193,12 +186,12 @@ export default function GradeFormDialog({
   onSubmit,
   initialData = null,
   students = [],
-  courses = [],
-  fixedCourseId = null,
-  fixedCourseTitle = "",
+  subjects = [],
+  fixedSubjectId = null,
+  fixedSubjectTitle = "",
   submitting = false,
 }) {
-  const formKey = `${initialData?.id ?? "new"}-${fixedCourseId ?? ""}`;
+  const formKey = `${initialData?.id ?? "new"}-${fixedSubjectId ?? ""}`;
 
   return (
     <Dialog
@@ -215,9 +208,9 @@ export default function GradeFormDialog({
           onSubmit={onSubmit}
           initialData={initialData}
           students={students}
-          courses={courses}
-          fixedCourseId={fixedCourseId}
-          fixedCourseTitle={fixedCourseTitle}
+          subjects={subjects}
+          fixedSubjectId={fixedSubjectId}
+          fixedSubjectTitle={fixedSubjectTitle}
           submitting={submitting}
         />
       )}

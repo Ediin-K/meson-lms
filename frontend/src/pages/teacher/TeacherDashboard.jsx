@@ -12,6 +12,7 @@ import QuizRounded from "@mui/icons-material/QuizRounded";
 import AssignmentRounded from "@mui/icons-material/AssignmentRounded";
 import AnalyticsRounded from "@mui/icons-material/AnalyticsRounded";
 import LayersRounded from "@mui/icons-material/LayersRounded";
+import GradeRounded from "@mui/icons-material/GradeRounded";
 import ArrowForwardRounded from "@mui/icons-material/ArrowForwardRounded";
 import teacherContentService from "../../services/teacherContentService";
 
@@ -58,6 +59,14 @@ export default function TeacherDashboard() {
       path: "/teacher/reports",
       color: "text-sky-600",
       bg: "bg-sky-100 dark:bg-sky-900/40",
+    },
+    {
+      title: t("teacherDashboard.services.grades.title"),
+      desc: t("teacherDashboard.services.grades.desc"),
+      icon: GradeRounded,
+      path: "/teacher/grades",
+      color: "text-rose-600",
+      bg: "bg-rose-100 dark:bg-rose-900/40",
     },
   ];
 
