@@ -1,7 +1,7 @@
 package com.meson.dto;
 
 import lombok.*;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Data
 @NoArgsConstructor
@@ -9,6 +9,6 @@ import java.time.LocalDateTime;
 public class AssignmentCreateRequest {
     private String title;
     private String description;
-    private LocalDateTime deadline;
+    private Instant deadline;
     private Long lessonId;
 }

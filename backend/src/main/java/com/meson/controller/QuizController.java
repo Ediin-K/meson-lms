@@ -17,7 +17,6 @@ public class QuizController {
 
     private final QuizService quizService;
 
-    // QUIZ
     @GetMapping
     public ResponseEntity<List<QuizResponse>> getAll() {
         return ResponseEntity.ok(quizService.getAll());
@@ -89,7 +88,6 @@ public class QuizController {
         return ResponseEntity.noContent().build();
     }
 
-    // QUESTION
     @GetMapping("/{quizId}/questions")
     public ResponseEntity<List<QuizQuestionResponse>> getQuestions(@PathVariable Long quizId) {
         return ResponseEntity.ok(quizService.getQuestionsByQuizId(quizId));
@@ -101,6 +99,13 @@ public class QuizController {
         return ResponseEntity.status(HttpStatus.CREATED).body(quizService.createQuestion(request));
     }
 
+    @PutMapping("/questions/{id}")
+    @PreAuthorize("hasRole('TEACHER')")
+    public ResponseEntity<QuizQuestionResponse> updateQuestion(@PathVariable Long id,
+                                                               @Valid @RequestBody QuizQuestionRequest request) {
+        return ResponseEntity.ok(quizService.updateQuestion(id, request));
+    }
+
     @DeleteMapping("/questions/{id}")
     @PreAuthorize("hasRole('TEACHER')")
     public ResponseEntity<Void> deleteQuestion(@PathVariable Long id) {
@@ -108,7 +113,6 @@ public class QuizController {
         return ResponseEntity.noContent().build();
     }
 
-    // ANSWER
     @GetMapping("/questions/{questionId}/answers")
     @PreAuthorize("hasRole('TEACHER')")
     public ResponseEntity<List<QuizAnswerResponse>> getAnswers(@PathVariable Long questionId) {
@@ -121,6 +125,13 @@ public class QuizController {
         return ResponseEntity.status(HttpStatus.CREATED).body(quizService.createAnswer(request));
     }
 
+    @PutMapping("/answers/{id}")
+    @PreAuthorize("hasRole('TEACHER')")
+    public ResponseEntity<QuizAnswerResponse> updateAnswer(@PathVariable Long id,
+                                                           @Valid @RequestBody QuizAnswerRequest request) {
+        return ResponseEntity.ok(quizService.updateAnswer(id, request));
+    }
+
     @DeleteMapping("/answers/{id}")
     @PreAuthorize("hasRole('TEACHER')")
     public ResponseEntity<Void> deleteAnswer(@PathVariable Long id) {
@@ -128,7 +139,6 @@ public class QuizController {
         return ResponseEntity.noContent().build();
     }
 
-    // ATTEMPT
     @GetMapping("/{quizId}/attempts")
     @PreAuthorize("hasRole('TEACHER')")
     public ResponseEntity<List<QuizAttemptResponse>> getAttemptsByQuiz(@PathVariable Long quizId) {

@@ -19,13 +19,13 @@ public class Quiz {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "title", nullable = false)
     private String titulli;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String pershkrimi;
 
-    @Column(nullable = false)
+    @Column(name = "duration_minutes", nullable = false)
     private Integer kohezgjatjaMinuta;
 
     @Builder.Default

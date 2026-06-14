@@ -11,15 +11,15 @@ import java.time.LocalTime;
 @Builder
 public class ScheduleSessionResponse {
     private Long id;
-    private Long courseId;
-    private String courseTitle;
-    private Long categoryId;
-    private String categoryName;
+    private Long subjectId;
+    private String subjectTitle;
+    private Long departmentId;
+    private String departmentName;
     private Integer semester;
-    private Long courseGroupId;
-    private String courseGroupName;
-    private Long courseSubgroupId;
-    private String courseSubgroupName;
+    private Long subjectGroupId;
+    private String subjectGroupName;
+    private Long subjectSubgroupId;
+    private String subjectSubgroupName;
     private Long teacherId;
     private String teacherName;
     private ScheduleSessionType sessionType;

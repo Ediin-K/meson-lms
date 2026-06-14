@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAppPreferences } from '../../context/appPreferencesContext';
 import {
   Alert,
   Box,
@@ -40,36 +41,36 @@ function ProgressBar({ value, color = 'bg-sky-500', height = 'h-2' }) {
 
 export default function TeacherStudents() {
   const navigate = useNavigate();
+  const { t } = useAppPreferences();
 
-  const [courses, setCourses]           = useState([]);
-  const [selectedCourse, setSelectedCourse] = useState('');
+  const [subjects, setSubjects]           = useState([]);
+  const [selectedSubject, setselectedSubject] = useState('');
   const [students, setStudents]         = useState([]);
-  const [loadingCourses, setLoadingCourses] = useState(true);
+  const [loadingSubjects, setloadingSubjects] = useState(true);
   const [loadingStudents, setLoadingStudents] = useState(false);
   const [error, setError]               = useState('');
 
-  // Detail modal
   const [detailOpen, setDetailOpen]     = useState(false);
   const [detailStudent, setDetailStudent] = useState(null);
   const [detailProgress, setDetailProgress] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
 
   useEffect(() => {
-    teacherContentService.getCourses()
-      .then((res) => setCourses(res.data))
-      .catch(() => setError('Kurset nuk u ngarkuan.'))
-      .finally(() => setLoadingCourses(false));
+    teacherContentService.getSubjects()
+      .then((res) => setSubjects(res.data))
+      .catch(() => setError(t('teacherStudents.subjectsError')))
+      .finally(() => setloadingSubjects(false));
   }, []);
 
   useEffect(() => {
-    if (!selectedCourse) return;
+    if (!selectedSubject) return;
     setStudents([]);
     setLoadingStudents(true);
-    progressService.getCourseStudents(selectedCourse)
+    progressService.getSubjectStudents(selectedSubject)
       .then((res) => setStudents(res.data))
-      .catch(() => setError('Studentët nuk u ngarkuan.'))
+      .catch(() => setError(t('teacherStudents.studentsError')))
       .finally(() => setLoadingStudents(false));
-  }, [selectedCourse]);
+  }, [selectedSubject]);
 
   const openDetail = async (student) => {
     setDetailStudent(student);
@@ -77,7 +78,7 @@ export default function TeacherStudents() {
     setDetailProgress(null);
     setDetailLoading(true);
     try {
-      const res = await progressService.getStudentProgress(selectedCourse, student.userId);
+      const res = await progressService.getStudentProgress(selectedSubject, student.userId);
       setDetailProgress(res.data);
     } catch {
       setDetailProgress(null);
@@ -90,47 +91,47 @@ export default function TeacherStudents() {
     <Box className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-950">
       <Container maxWidth="xl" className="py-8 mt-4 sm:mt-8 flex-grow">
 
-        {/* Back button */}
+        {}
         <Box className="mb-8">
           <Button
             startIcon={<ArrowBackRounded />}
             onClick={() => navigate('/teacher')}
             className="!rounded-2xl !px-6 !py-2 !normal-case !font-bold !text-slate-600 dark:!text-slate-400 hover:!bg-slate-200/50 dark:hover:!bg-slate-800/50"
           >
-            Kthehu te Paneli
+            {t('teacherStudents.backToPanel')}
           </Button>
         </Box>
 
-        {/* Header */}
+        {}
         <Box className="mb-8 flex items-center gap-4">
           <Box className="h-12 w-12 rounded-2xl bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400 flex items-center justify-center">
             <PeopleRounded />
           </Box>
           <div>
-            <Typography variant="h4" className="!font-black dark:!text-white">Studentët</Typography>
+            <Typography variant="h4" className="!font-black dark:!text-white">{t('teacherStudents.title')}</Typography>
             <Typography variant="body1" className="text-slate-500 dark:!text-slate-400">
-              Shikoni progresin e studentëve të regjistruar.
+              {t('teacherStudents.subtitle')}
             </Typography>
           </div>
         </Box>
 
         {error && <Alert severity="error" className="!mb-6" onClose={() => setError('')}>{error}</Alert>}
 
-        {/* Course selector */}
+        {}
         <Card elevation={0} className="rounded-2xl border border-slate-200 bg-white dark:!border-slate-800 dark:!bg-slate-900 mb-6">
           <CardContent className="!p-5">
-            <Typography variant="subtitle2" className="!mb-3 !font-bold dark:!text-white">Zgjidh kursin</Typography>
-            {loadingCourses ? (
+            <Typography variant="subtitle2" className="!mb-3 !font-bold dark:!text-white">{t('teacherStudents.selectSubjectTitle')}</Typography>
+            {loadingSubjects ? (
               <CircularProgress size={24} />
             ) : (
               <FormControl size="small" fullWidth sx={{ maxWidth: 420 }}>
-                <InputLabel>Kursi</InputLabel>
+                <InputLabel>{t('teacherStudents.subjectLabel')}</InputLabel>
                 <Select
-                  label="Kursi"
-                  value={selectedCourse}
-                  onChange={(e) => setSelectedCourse(e.target.value)}
+                  label={t('teacherStudents.subjectLabel')}
+                  value={selectedSubject}
+                  onChange={(e) => setselectedSubject(e.target.value)}
                 >
-                  {courses.map((c) => (
+                  {subjects.map((c) => (
                     <MenuItem key={c.id} value={c.id}>{c.titulli}</MenuItem>
                   ))}
                 </Select>
@@ -139,11 +140,11 @@ export default function TeacherStudents() {
           </CardContent>
         </Card>
 
-        {/* Student list */}
-        {!selectedCourse && (
+        {}
+        {!selectedSubject && (
           <div className="rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-slate-800 p-16 text-center">
             <SchoolRounded className="!text-5xl text-slate-200 dark:text-slate-700 !mb-3" />
-            <Typography className="text-slate-400 dark:!text-slate-500">Zgjidh një kurs për të parë studentët.</Typography>
+            <Typography className="text-slate-400 dark:!text-slate-500">{t('teacherStudents.noSubjectPrompt')}</Typography>
           </div>
         )}
 
@@ -151,8 +152,8 @@ export default function TeacherStudents() {
           <Box className="flex justify-center py-12"><CircularProgress /></Box>
         )}
 
-        {!loadingStudents && selectedCourse && students.length === 0 && (
-          <Alert severity="info">Asnjë student i regjistruar në këtë kurs.</Alert>
+        {!loadingStudents && selectedSubject && students.length === 0 && (
+          <Alert severity="info">{t('teacherStudents.noStudents')}</Alert>
         )}
 
         {!loadingStudents && students.length > 0 && (
@@ -160,18 +161,18 @@ export default function TeacherStudents() {
             <CardContent className="!p-5">
               <div className="mb-4 flex items-center justify-between">
                 <Typography variant="subtitle1" className="!font-black dark:!text-white">
-                  {students.length} student{students.length !== 1 ? 'ë' : ''}
+                  {students.length} {students.length !== 1 ? t('teacherStudents.studentCountPlural') : t('teacherStudents.studentCount')}
                 </Typography>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
                   <thead>
                     <tr className="border-b border-slate-200 dark:border-slate-700">
-                      <th className="py-3 pr-4 font-bold text-slate-500 dark:text-slate-400">#</th>
-                      <th className="py-3 pr-4 font-bold text-slate-500 dark:text-slate-400">Studenti</th>
-                      <th className="py-3 pr-4 font-bold text-slate-500 dark:text-slate-400 min-w-[180px]">Progresi</th>
-                      <th className="py-3 pr-4 font-bold text-slate-500 dark:text-slate-400">%</th>
-                      <th className="py-3 font-bold text-slate-500 dark:text-slate-400">Detaje</th>
+                      <th className="py-3 pr-4 font-bold text-slate-500 dark:text-slate-400">{t('teacherStudents.tableIndex')}</th>
+                      <th className="py-3 pr-4 font-bold text-slate-500 dark:text-slate-400">{t('teacherStudents.tableStudent')}</th>
+                      <th className="py-3 pr-4 font-bold text-slate-500 dark:text-slate-400 min-w-[180px]">{t('teacherStudents.tableProgress')}</th>
+                      <th className="py-3 pr-4 font-bold text-slate-500 dark:text-slate-400">{t('teacherStudents.tablePercent')}</th>
+                      <th className="py-3 font-bold text-slate-500 dark:text-slate-400">{t('teacherStudents.tableDetails')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -199,7 +200,7 @@ export default function TeacherStudents() {
                               onClick={() => openDetail(s)}
                               className="!normal-case !rounded-xl"
                             >
-                              Shiko
+                              {t('teacherStudents.viewBtn')}
                             </Button>
                           </td>
                         </tr>
@@ -217,7 +218,7 @@ export default function TeacherStudents() {
         </div>
       </Container>
 
-      {/* Per-student detail modal */}
+      {}
       <Dialog
         open={detailOpen}
         onClose={() => setDetailOpen(false)}
@@ -239,14 +240,14 @@ export default function TeacherStudents() {
             <Box className="flex justify-center py-10"><CircularProgress /></Box>
           )}
           {!detailLoading && !detailProgress && (
-            <Alert severity="info">Nuk ka të dhëna progresi.</Alert>
+            <Alert severity="info">{t('teacherStudents.noProgress')}</Alert>
           )}
           {!detailLoading && detailProgress && (
             <div className="space-y-5 mt-2">
-              {/* Overall */}
+              {}
               <div className="rounded-xl bg-sky-50 dark:bg-sky-950/30 p-4">
                 <div className="mb-2 flex items-center justify-between">
-                  <Typography variant="body2" className="font-bold! dark:!text-white">Totali</Typography>
+                  <Typography variant="body2" className="font-bold! dark:!text-white">{t('teacherStudents.detailTotal')}</Typography>
                   <span className="font-black text-sky-600 dark:text-sky-400">
                     {detailProgress.viewedLessons}/{detailProgress.totalLessons} &nbsp;·&nbsp; {Math.round(detailProgress.progressPercent)}%
                   </span>
@@ -258,7 +259,7 @@ export default function TeacherStudents() {
                 />
               </div>
 
-              {/* Per module */}
+              {}
               <div className="space-y-3">
                 {detailProgress.modules.map((mod, i) => (
                   <div key={mod.moduleId}>

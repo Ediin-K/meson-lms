@@ -10,7 +10,8 @@ import java.util.Optional;
 @Repository
 public interface AssignmentRepository extends JpaRepository<Assignment, Long> {
     Optional<Assignment> findByLessonId(Long lessonId);
-    List<Assignment> findByLessonModuleCourseTeacherId(Long teacherId);
-    Optional<Assignment> findByIdAndLessonModuleCourseTeacherId(Long id, Long teacherId);
-    long countByLessonModuleCourseTeacherId(Long teacherId);
+    List<Assignment> findByLessonModuleSubjectTeacherId(Long teacherId);
+    Optional<Assignment> findByIdAndLessonModuleSubjectTeacherId(Long id, Long teacherId);
+    List<Assignment> findByLessonModuleSubjectIdIn(java.util.Collection<Long> subjectIds);
+    long countByLessonModuleSubjectTeacherId(Long teacherId);
 }

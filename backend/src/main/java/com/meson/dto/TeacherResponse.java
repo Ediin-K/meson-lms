@@ -18,5 +18,5 @@ public class TeacherResponse {
     private String phoneNumber;
     private String statusi;
     private LocalDateTime dataKrijimit;
-    private Integer courseCount;
+    private Integer subjectCount;
 }

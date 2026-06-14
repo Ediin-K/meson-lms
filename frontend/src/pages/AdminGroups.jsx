@@ -42,7 +42,7 @@ import GroupCreateWizard from "../components/admin/groupWizard/GroupCreateWizard
 import {
   DRAFT_STORAGE_KEY,
   applyStaffToScheduleRow,
-  buildStaffByCourse,
+  buildStaffBySubject,
   cardSx,
   getGroupsTheme,
   getMenuPaperSx,
@@ -52,17 +52,17 @@ import {
   seedScheduleRowsFromStaff,
   tableContainerSx,
 } from "../components/admin/groupWizard/wizardUi";
-import { getAllCategories } from "../services/categoryService";
+import { getAllDepartments } from "../services/departmentService";
 import {
   createGroupWizard,
-  deleteDirectionGroup,
-  getDirectionGroupDetail,
-  getDirectionGroupMembers,
-  getDirectionGroups,
+  deleteDepartmentGroup,
+  getDepartmentGroupDetail,
+  getDepartmentGroupMembers,
+  getDepartmentGroups,
   getWizardContext,
   GROUP_STATUS,
   statusChipColor,
-} from "../services/directionGroupService";
+} from "../services/departmentGroupService";
 import {
   getScheduleConflict,
   getScheduleConflictMessage,
@@ -70,25 +70,10 @@ import {
 
 const SEMESTERS = [1, 2, 3, 4, 5, 6, 7, 8];
 const DAYS = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
-const DAY_LABELS = {
-  MONDAY: "E Hene",
-  TUESDAY: "E Marte",
-  WEDNESDAY: "E Merkure",
-  THURSDAY: "E Enjte",
-  FRIDAY: "E Premte",
-  SATURDAY: "E Shtune",
-  SUNDAY: "E Diele",
-};
-const STATUS_FILTER_OPTIONS = [
-  { value: "", label: "Te gjitha" },
-  { value: GROUP_STATUS.ACTIVE, label: "Aktiv" },
-  { value: GROUP_STATUS.FULL, label: "Plote" },
-  { value: GROUP_STATUS.CLOSED, label: "Mbyllur" },
-];
 
-const emptyStaffRow = () => ({ courseId: "", professorId: "", assistantId: "" });
+const emptyStaffRow = () => ({ subjectId: "", professorId: "", assistantId: "" });
 const emptyScheduleRow = () => ({
-  courseId: "",
+  subjectId: "",
   professorId: "",
   assistantId: "",
   sessionType: "LECTURE",
@@ -96,10 +81,7 @@ const emptyScheduleRow = () => ({
   startTime: "10:00",
   endTime: "",
   room: "",
-  color: "sky",
 });
-
-const dayOptions = DAYS.map((d) => ({ value: d, label: DAY_LABELS[d] }));
 
 function getErrorMessage(error, fallback) {
   return error?.response?.data?.message || error?.response?.data?.error || error?.message || fallback;
@@ -107,13 +89,32 @@ function getErrorMessage(error, fallback) {
 
 export default function AdminGroups() {
   const navigate = useNavigate();
-  const { colorMode } = useAppPreferences();
+  const { t, colorMode } = useAppPreferences();
   const isDark = colorMode === "dark";
   const theme = getGroupsTheme(isDark);
 
+  const DAY_LABELS = {
+    MONDAY: t("adminGroups.days.MONDAY"),
+    TUESDAY: t("adminGroups.days.TUESDAY"),
+    WEDNESDAY: t("adminGroups.days.WEDNESDAY"),
+    THURSDAY: t("adminGroups.days.THURSDAY"),
+    FRIDAY: t("adminGroups.days.FRIDAY"),
+    SATURDAY: t("adminGroups.days.SATURDAY"),
+    SUNDAY: t("adminGroups.days.SUNDAY"),
+  };
+
+  const STATUS_FILTER_OPTIONS = [
+    { value: "", label: t("adminGroups.statusAll") },
+    { value: GROUP_STATUS.ACTIVE, label: t("adminGroups.statusActive") },
+    { value: GROUP_STATUS.FULL, label: t("adminGroups.statusFull") },
+    { value: GROUP_STATUS.CLOSED, label: t("adminGroups.statusClosed") },
+  ];
+
+  const dayOptions = DAYS.map((d) => ({ value: d, label: DAY_LABELS[d] }));
+
   const [view, setView] = useState("list");
   const [categories, setCategories] = useState([]);
-  const [categoryId, setCategoryId] = useState("");
+  const [departmentId, setDepartmentId] = useState("");
   const [semester, setSemester] = useState(1);
   const [statusFilter, setStatusFilter] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -141,21 +142,21 @@ export default function AdminGroups() {
   };
 
   const selectedCategory = useMemo(
-    () => categories.find((c) => String(c.id) === String(categoryId)),
-    [categories, categoryId],
+    () => categories.find((c) => String(c.id) === String(departmentId)),
+    [categories, departmentId],
   );
 
-  const staffCourseIds = useMemo(
-    () => new Set(staffRows.map((r) => Number(r.courseId)).filter(Boolean)),
+  const staffSubjectIds = useMemo(
+    () => new Set(staffRows.map((r) => Number(r.subjectId)).filter(Boolean)),
     [staffRows],
   );
 
-  const courses = context?.courses || [];
-  const teachers = context?.teachers || [];
+  const subjects = useMemo(() => context?.subjects || [], [context?.subjects]);
+  const teachers = useMemo(() => context?.teachers || [], [context?.teachers]);
 
-  const staffByCourse = useMemo(
-    () => buildStaffByCourse(staffRows, courses, teachers),
-    [staffRows, courses, teachers],
+  const staffBySubject = useMemo(
+    () => buildStaffBySubject(staffRows, subjects, teachers),
+    [staffRows, subjects, teachers],
   );
 
   const filteredGroups = useMemo(() => {
@@ -163,7 +164,7 @@ export default function AdminGroups() {
     return groups.filter((g) => {
       if (statusFilter && g.status !== statusFilter) return false;
       if (!q) return true;
-      const hay = [g.name, g.categoryName, String(g.semester), g.status]
+      const hay = [g.name, g.departmentName, String(g.semester), g.status]
         .filter(Boolean)
         .join(" ")
         .toLowerCase();
@@ -172,22 +173,22 @@ export default function AdminGroups() {
   }, [groups, searchQuery, statusFilter]);
 
   const loadCategories = useCallback(async () => {
-    const data = await getAllCategories();
+    const data = await getAllDepartments();
     setCategories(data);
-    if (data.length > 0 && !categoryId) setCategoryId(String(data[0].id));
-  }, [categoryId]);
+    if (data.length > 0 && !departmentId) setDepartmentId(String(data[0].id));
+  }, [departmentId]);
 
   const loadGroups = useCallback(async () => {
-    if (!categoryId) return;
+    if (!departmentId) return;
     setLoading(true);
     try {
-      setGroups(await getDirectionGroups(categoryId, semester));
+      setGroups(await getDepartmentGroups(departmentId, semester));
     } catch (error) {
-      showToast(getErrorMessage(error, "Gabim gjate ngarkimit"), "error");
+      showToast(getErrorMessage(error, t("adminGroups.validLoadError")), "error");
     } finally {
       setLoading(false);
     }
-  }, [categoryId, semester]);
+  }, [departmentId, semester]);
 
   useEffect(() => {
     loadCategories().catch(() => {});
@@ -198,9 +199,9 @@ export default function AdminGroups() {
   }, [view, loadGroups]);
 
   useEffect(() => {
-    if (view !== "wizard" || !categoryId) return;
-    loadWizardContext(categoryId, semester).catch(() => {});
-  }, [categoryId, semester, view]);
+    if (view !== "wizard" || !departmentId) return;
+    loadWizardContext(departmentId, semester).catch(() => {});
+  }, [departmentId, semester, view]);
 
   const loadWizardContext = async (catId, sem) => {
     setContextLoading(true);
@@ -227,12 +228,12 @@ export default function AdminGroups() {
         rows.map((r, i) => {
           if (i !== index) return r;
           const next = { ...r, [key]: val };
-          if (key === "courseId") return applyStaffToScheduleRow(next, staffByCourse);
+          if (key === "subjectId") return applyStaffToScheduleRow(next, staffBySubject);
           return next;
         }),
       );
     },
-    [staffByCourse],
+    [staffBySubject],
   );
 
   const restoreDraft = () => {
@@ -240,7 +241,7 @@ export default function AdminGroups() {
       const raw = localStorage.getItem(DRAFT_STORAGE_KEY);
       if (!raw) return false;
       const d = JSON.parse(raw);
-      if (d.categoryId) setCategoryId(String(d.categoryId));
+      if (d.departmentId) setDepartmentId(String(d.departmentId));
       if (d.semester) setSemester(Number(d.semester));
       if (d.groupName) setGroupName(d.groupName);
       if (d.groupDescription) setGroupDescription(d.groupDescription);
@@ -255,7 +256,7 @@ export default function AdminGroups() {
   };
 
   const startWizard = async () => {
-    if (!categoryId) return;
+    if (!departmentId) return;
     setWizardStep(0);
     setGroupName("");
     setGroupDescription("");
@@ -267,8 +268,8 @@ export default function AdminGroups() {
     setView("wizard");
     const hadDraft = restoreDraft();
     try {
-      await loadWizardContext(categoryId, semester);
-      if (hadDraft) showToast("Draft-i u ngarkua", "info");
+      await loadWizardContext(departmentId, semester);
+      if (hadDraft) showToast(t("adminGroups.draftLoaded"), "info");
     } catch (error) {
       showToast(getErrorMessage(error, "Gabim"), "error");
     }
@@ -279,7 +280,7 @@ export default function AdminGroups() {
       localStorage.setItem(
         DRAFT_STORAGE_KEY,
         JSON.stringify({
-          categoryId,
+          departmentId,
           semester,
           groupName,
           groupDescription,
@@ -289,32 +290,32 @@ export default function AdminGroups() {
           wizardStep,
         }),
       );
-      showToast("Draft-i u ruajt lokalisht");
+      showToast(t("adminGroups.draftSaved"));
     } catch {
-      showToast("Draft-i nuk u ruajt", "error");
+      showToast(t("adminGroups.draftSaveError"), "error");
     }
   };
 
   const validateStep = async () => {
     const errors = {};
     if (wizardStep === 0) {
-      if (!categoryId) errors.categoryId = "Zgjidh drejtimin";
-      if (!groupName.trim()) errors.groupName = "Emri i grupit eshte i detyrueshem";
-      if (Number(maxCapacity) < 1) errors.maxCapacity = "Kapaciteti duhet te jete te pakten 1";
+      if (!departmentId) errors.departmentId = t("adminGroups.departmentLabel");
+      if (!groupName.trim()) errors.groupName = t("adminGroups.validGroupName");
+      if (Number(maxCapacity) < 1) errors.maxCapacity = t("adminGroups.validCapacity");
       else {
         try {
-          await loadWizardContext(categoryId, semester);
+          await loadWizardContext(departmentId, semester);
         } catch (error) {
-          errors.global = getErrorMessage(error, "Gabim gjate ngarkimit");
+          errors.global = getErrorMessage(error, t("adminGroups.validLoadError"));
         }
       }
     }
     if (wizardStep === 1) {
-      const validStaff = staffRows.filter((r) => r.courseId && r.professorId);
-      if (validStaff.length === 0) errors.staff = "Shto te pakten nje rresht stafi (lende + profesor)";
-      const validSchedules = scheduleRows.filter((r) => r.courseId && r.professorId && r.startTime);
+      const validStaff = staffRows.filter((r) => r.subjectId && r.professorId);
+      if (validStaff.length === 0) errors.staff = t("adminGroups.validStaff");
+      const validSchedules = scheduleRows.filter((r) => r.subjectId && r.professorId && r.startTime);
       if (validSchedules.length === 0) {
-        errors.schedules = "Shto te pakten nje sesion orari";
+        errors.schedules = t("adminGroups.validSchedule");
       } else {
         for (let i = 0; i < validSchedules.length; i += 1) {
           const conflict = getScheduleConflict(validSchedules, validSchedules[i], i);
@@ -324,9 +325,9 @@ export default function AdminGroups() {
             break;
           }
         }
-        const missingStaff = validSchedules.some((r) => !staffByCourse[String(r.courseId)]?.professorId);
+        const missingStaff = validSchedules.some((r) => !staffBySubject[String(r.subjectId)]?.professorId);
         if (missingStaff) {
-          errors.schedules = "Disa lende nuk kane staf te caktuar ne hapin e stafit";
+          errors.schedules = t("adminGroups.validMissingStaff");
         }
       }
     }
@@ -341,11 +342,11 @@ export default function AdminGroups() {
     if (!ok) return;
 
     if (wizardStep === 1) {
-      const hasValidSchedule = scheduleRows.some((r) => r.courseId && r.startTime);
+      const hasValidSchedule = scheduleRows.some((r) => r.subjectId && r.startTime);
       if (!hasValidSchedule) {
         setScheduleRows(seedScheduleRowsFromStaff(staffRows, emptyScheduleRow));
       } else {
-        setScheduleRows((rows) => rows.map((r) => applyStaffToScheduleRow(r, staffByCourse)));
+        setScheduleRows((rows) => rows.map((r) => applyStaffToScheduleRow(r, staffBySubject)));
       }
     }
 
@@ -359,22 +360,22 @@ export default function AdminGroups() {
   };
 
   const buildPayload = () => ({
-    categoryId: Number(categoryId),
+    departmentId: Number(departmentId),
     semester: Number(semester),
     name: groupName.trim(),
     description: groupDescription.trim() || null,
     maxCapacity: Number(maxCapacity),
     staff: staffRows
-      .filter((r) => r.courseId && r.professorId)
+      .filter((r) => r.subjectId && r.professorId)
       .map((r) => ({
-        courseId: Number(r.courseId),
+        subjectId: Number(r.subjectId),
         professorId: Number(r.professorId),
         assistantId: r.assistantId ? Number(r.assistantId) : null,
       })),
     schedules: scheduleRows
-      .filter((r) => r.courseId && r.professorId && r.startTime)
+      .filter((r) => r.subjectId && r.professorId && r.startTime)
       .map((r) => ({
-        courseId: Number(r.courseId),
+        subjectId: Number(r.subjectId),
         professorId: Number(r.professorId),
         assistantId: r.assistantId ? Number(r.assistantId) : null,
         sessionType: r.sessionType,
@@ -386,7 +387,6 @@ export default function AdminGroups() {
             : r.endTime
           : null,
         room: r.room || null,
-        color: r.color || "sky",
       })),
   });
 
@@ -397,7 +397,7 @@ export default function AdminGroups() {
     try {
       await createGroupWizard(buildPayload());
       localStorage.removeItem(DRAFT_STORAGE_KEY);
-      showToast("Grupi u krijua me staf dhe orar te plote");
+      showToast(t("adminGroups.groupCreated"));
       setView("list");
       loadGroups();
     } catch (error) {
@@ -410,7 +410,7 @@ export default function AdminGroups() {
   const openDetail = async (group) => {
     try {
       setDetailDialog({ loading: true, group, data: null });
-      const data = await getDirectionGroupDetail(group.id);
+      const data = await getDepartmentGroupDetail(group.id);
       setDetailDialog({ loading: false, group, data });
     } catch (error) {
       setDetailDialog(null);
@@ -421,7 +421,7 @@ export default function AdminGroups() {
   const openMembers = async (group) => {
     setMembersDialog({ open: true, group, members: [], loading: true });
     try {
-      const members = await getDirectionGroupMembers(group.id);
+      const members = await getDepartmentGroupMembers(group.id);
       setMembersDialog({ open: true, group, members, loading: false });
     } catch (error) {
       setMembersDialog({ open: false, group: null, members: [], loading: false });
@@ -441,10 +441,10 @@ export default function AdminGroups() {
         size="small"
         color="error"
         onClick={async () => {
-          if (!window.confirm(`Fshini ${group.name}?`)) return;
+          if (!window.confirm(`${t("adminGroups.tableActions")} ${group.name}?`)) return;
           try {
-            await deleteDirectionGroup(group.id);
-            showToast("U fshi");
+            await deleteDepartmentGroup(group.id);
+            showToast(t("adminGroups.deleted"));
             loadGroups();
           } catch (error) {
             showToast(getErrorMessage(error, "Gabim"), "error");
@@ -468,12 +468,12 @@ export default function AdminGroups() {
             submitting={submitting}
             contextLoading={contextLoading}
             categories={categories}
-            categoryId={categoryId}
-            setCategoryId={setCategoryId}
+            departmentId={departmentId}
+            setDepartmentId={setDepartmentId}
             semester={semester}
             setSemester={setSemester}
             semesters={SEMESTERS}
-            courses={courses}
+            subjects={subjects}
             teachers={teachers}
             groupName={groupName}
             setGroupName={setGroupName}
@@ -485,7 +485,7 @@ export default function AdminGroups() {
             setStaffRows={setStaffRows}
             scheduleRows={scheduleRows}
             onScheduleChange={handleScheduleChange}
-            staffCourseIds={staffCourseIds}
+            staffSubjectIds={staffSubjectIds}
             selectedCategory={selectedCategory}
             onBack={() => setView("list")}
             onNext={goNext}
@@ -505,7 +505,7 @@ export default function AdminGroups() {
   return (
     <Box sx={pageShellSx(isDark)} className="flex flex-col min-h-full">
       <Container maxWidth="xl" className="py-4 mt-2 sm:mt-4 grow">
-        {/* Compact toolbar — single row on desktop */}
+        {}
         <Box
           className="mb-4 flex flex-wrap items-center gap-2 sm:gap-3"
           sx={{
@@ -519,12 +519,12 @@ export default function AdminGroups() {
             <ArrowBackRounded />
           </IconButton>
           <Typography variant="h6" sx={{ color: theme.text, fontWeight: 900, mr: 1 }}>
-            Groups
+            {t("adminGroups.title")}
           </Typography>
 
           <TextField
             size="small"
-            placeholder="Kerko grupe..."
+            placeholder={t("adminGroups.searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="flex-1 min-w-[140px]"
@@ -539,11 +539,11 @@ export default function AdminGroups() {
           />
 
           <FormControl size="small" sx={{ minWidth: 130, ...getWizardFieldSx(isDark) }}>
-            <InputLabel>Drejtimi</InputLabel>
+            <InputLabel>{t("adminGroups.departmentLabel")}</InputLabel>
             <Select
-              label="Drejtimi"
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
+              label={t("adminGroups.departmentLabel")}
+              value={departmentId}
+              onChange={(e) => setDepartmentId(e.target.value)}
               MenuProps={getMenuPaperSx(isDark)}
             >
               {categories.map((c) => (
@@ -555,9 +555,9 @@ export default function AdminGroups() {
           </FormControl>
 
           <FormControl size="small" sx={{ minWidth: 100, ...getWizardFieldSx(isDark) }}>
-            <InputLabel>Sem.</InputLabel>
+            <InputLabel>{t("adminGroups.semLabel")}</InputLabel>
             <Select
-              label="Sem."
+              label={t("adminGroups.semLabel")}
               value={semester}
               onChange={(e) => setSemester(Number(e.target.value))}
               MenuProps={getMenuPaperSx(isDark)}
@@ -571,9 +571,9 @@ export default function AdminGroups() {
           </FormControl>
 
           <FormControl size="small" sx={{ minWidth: 110, ...getWizardFieldSx(isDark) }}>
-            <InputLabel>Status</InputLabel>
+            <InputLabel>{t("adminGroups.statusLabel")}</InputLabel>
             <Select
-              label="Status"
+              label={t("adminGroups.statusLabel")}
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               MenuProps={getMenuPaperSx(isDark)}
@@ -591,11 +591,11 @@ export default function AdminGroups() {
             size="small"
             startIcon={<AddRounded />}
             onClick={startWizard}
-            disabled={!categoryId}
+            disabled={!departmentId}
             className="!rounded-xl !normal-case !font-bold shrink-0"
             sx={primaryButtonSx()}
           >
-            Create Group
+            {t("adminGroups.createGroup")}
           </Button>
         </Box>
 
@@ -605,7 +605,7 @@ export default function AdminGroups() {
           </Box>
         ) : (
           <>
-            {/* Desktop table */}
+            {}
             <TableContainer
               className="hidden md:block rounded-2xl overflow-hidden"
               sx={tableContainerSx(isDark)}
@@ -613,19 +613,19 @@ export default function AdminGroups() {
               <Table size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell>Grupi</TableCell>
-                    <TableCell>Drejtimi</TableCell>
-                    <TableCell>Sem.</TableCell>
-                    <TableCell>Kapaciteti</TableCell>
-                    <TableCell>Statusi</TableCell>
-                    <TableCell align="right">Veprime</TableCell>
+                    <TableCell>{t("adminGroups.tableGrupi")}</TableCell>
+                    <TableCell>{t("adminGroups.tableDept")}</TableCell>
+                    <TableCell>{t("adminGroups.tableSem")}</TableCell>
+                    <TableCell>{t("adminGroups.tableCapacity")}</TableCell>
+                    <TableCell>{t("adminGroups.tableStatus")}</TableCell>
+                    <TableCell align="right">{t("adminGroups.tableActions")}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {filteredGroups.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={6} align="center" sx={{ py: 4, color: theme.textMuted }}>
-                        Nuk ka grupe. Përdorni Create Group për wizard-in e plotë.
+                        {t("adminGroups.noGroups")}
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -640,8 +640,8 @@ export default function AdminGroups() {
                           </Box>
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2" noWrap title={group.categoryName || selectedCategory?.emertimi}>
-                            {group.categoryName || selectedCategory?.emertimi || "—"}
+                          <Typography variant="body2" noWrap title={group.departmentName || selectedCategory?.emertimi}>
+                            {group.departmentName || selectedCategory?.emertimi || "—"}
                           </Typography>
                         </TableCell>
                         <TableCell>{group.semester}</TableCell>
@@ -659,14 +659,14 @@ export default function AdminGroups() {
               </Table>
             </TableContainer>
 
-            {/* Mobile cards */}
+            {}
             <Box className="md:hidden flex flex-col gap-2">
               {filteredGroups.length === 0 ? (
                 <Box
                   className="rounded-xl border p-6 text-center"
                   sx={{ borderColor: theme.border, bgcolor: theme.card, color: theme.textMuted }}
                 >
-                  Nuk ka grupe.
+                  {t("adminGroups.noGroupsMobile")}
                 </Box>
               ) : (
                 filteredGroups.map((group) => (
@@ -681,10 +681,10 @@ export default function AdminGroups() {
                           {group.name}
                         </Typography>
                         <Typography variant="caption" sx={{ color: theme.textMuted }} noWrap>
-                          {group.categoryName || selectedCategory?.emertimi} · Sem. {group.semester}
+                          {group.departmentName || selectedCategory?.emertimi} · {t("adminGroups.semLabel")} {group.semester}
                         </Typography>
                         <Typography variant="body2" sx={{ color: theme.textMuted, mt: 0.5 }}>
-                          {group.currentStudents}/{group.maxCapacity} studente
+                          {group.currentStudents}/{group.maxCapacity} {t("adminGroups.students")}
                         </Typography>
                         <Chip
                           size="small"
@@ -710,7 +710,7 @@ export default function AdminGroups() {
           PaperProps={{ sx: cardSx(isDark) }}
         >
           <DialogTitle sx={{ color: theme.text, fontWeight: 800 }}>
-            Detajet — {detailDialog?.group?.name || ""}
+            {t("adminGroups.detailTitle")}{detailDialog?.group?.name || ""}
           </DialogTitle>
           <DialogContent sx={{ color: theme.text }}>
             {detailDialog?.loading ? (
@@ -719,11 +719,11 @@ export default function AdminGroups() {
               <Table size="small" sx={tableContainerSx(isDark)}>
                 <TableHead>
                   <TableRow>
-                    <TableCell>Dita</TableCell>
-                    <TableCell>Ora</TableCell>
-                    <TableCell>Lenda</TableCell>
-                    <TableCell>Profesori</TableCell>
-                    <TableCell>Salla</TableCell>
+                    <TableCell>{t("adminGroups.detailDay")}</TableCell>
+                    <TableCell>{t("adminGroups.detailTime")}</TableCell>
+                    <TableCell>{t("adminGroups.detailSubject")}</TableCell>
+                    <TableCell>{t("adminGroups.detailProfessor")}</TableCell>
+                    <TableCell>{t("adminGroups.detailRoom")}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -733,7 +733,7 @@ export default function AdminGroups() {
                       <TableCell>
                         {String(s.startTime).slice(0, 5)} – {String(s.endTime).slice(0, 5)}
                       </TableCell>
-                      <TableCell>{s.courseTitle}</TableCell>
+                      <TableCell>{s.subjectTitle}</TableCell>
                       <TableCell>{s.teacherName}</TableCell>
                       <TableCell>{s.room || "—"}</TableCell>
                     </TableRow>
@@ -743,7 +743,7 @@ export default function AdminGroups() {
             )}
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setDetailDialog(null)}>Mbyll</Button>
+            <Button onClick={() => setDetailDialog(null)}>{t("adminGroups.close")}</Button>
           </DialogActions>
         </Dialog>
 
@@ -755,13 +755,13 @@ export default function AdminGroups() {
           PaperProps={{ sx: cardSx(isDark) }}
         >
           <DialogTitle sx={{ color: theme.text, fontWeight: 800 }}>
-            Studentet — {membersDialog.group?.name}
+            {t("adminGroups.membersTitle")}{membersDialog.group?.name}
           </DialogTitle>
           <DialogContent sx={{ color: theme.text }}>
             {membersDialog.loading ? (
               <CircularProgress size={28} />
             ) : membersDialog.members.length === 0 ? (
-              <Typography sx={{ color: theme.textMuted }}>Asnje student.</Typography>
+              <Typography sx={{ color: theme.textMuted }}>{t("adminGroups.noStudents")}</Typography>
             ) : (
               membersDialog.members.map((m) => (
                 <Typography key={m.userId} variant="body2" sx={{ py: 0.5 }}>
@@ -774,7 +774,7 @@ export default function AdminGroups() {
             <Button
               onClick={() => setMembersDialog({ open: false, group: null, members: [], loading: false })}
             >
-              Mbyll
+              {t("adminGroups.close")}
             </Button>
           </DialogActions>
         </Dialog>
@@ -782,7 +782,7 @@ export default function AdminGroups() {
         <Snackbar
           open={toast.open}
           autoHideDuration={4000}
-          onClose={() => setToast((t) => ({ ...t, open: false }))}
+          onClose={() => setToast((prev) => ({ ...prev, open: false }))}
           TransitionComponent={Zoom}
         >
           <Alert severity={toast.severity}>{toast.message}</Alert>

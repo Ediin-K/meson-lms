@@ -63,7 +63,7 @@ function GroupCard({ entry, isDark, selectedPendingId, selectingId, onSelect }) 
                 {group.name}
               </Typography>
               <Typography variant="body2" sx={{ color: t.muted }} noWrap>
-                {group.categoryName}
+                {group.departmentName}
               </Typography>
             </Box>
           </Box>
@@ -154,7 +154,7 @@ export default function StudentSchedulePage() {
       setApprovedSchedules(normalized.approvedSchedules);
     } catch (err) {
       setError(extractApiError(err));
-      setStatus({ hasApprovedGroup: false, categoryAssigned: false });
+      setStatus({ hasApprovedGroup: false, isDepartmentAssigned: false });
       setAvailableGroups([]);
       setApprovedSchedules([]);
     } finally {
@@ -166,11 +166,11 @@ export default function StudentSchedulePage() {
     load();
   }, [load]);
 
-  const handleSelect = async (directionGroupId) => {
-    if (!userId || directionGroupId == null) return;
-    setSelectingId(directionGroupId);
+  const handleSelect = async (departmentGroupId) => {
+    if (!userId || departmentGroupId == null) return;
+    setSelectingId(departmentGroupId);
     try {
-      await selectGroup(userId, directionGroupId);
+      await selectGroup(userId, departmentGroupId);
       setToast({ open: true, message: "Grupi u zgjodh dhe orari u personalizua.", severity: "success" });
       await load();
     } catch (err) {
@@ -232,9 +232,9 @@ export default function StudentSchedulePage() {
               </Typography>
             </Box>
             <Box className="flex gap-2 flex-wrap">
-              {status?.categoryName && (
+              {status?.departmentName && (
                 <Chip
-                  label={status.categoryName}
+                  label={status.departmentName}
                   sx={{
                     color: t.text,
                     bgcolor: t.surface,
@@ -273,15 +273,15 @@ export default function StudentSchedulePage() {
 
         {view === "groups" && (
           <>
-            {!status?.categoryAssigned && !error && (
+            {!status?.isDepartmentAssigned && !error && (
               <Alert severity="warning" className="mb-5 rounded-xl!">
-                Drejtimi nuk eshte caktuar per llogarine tende. Kontakto administratorin.
+                Departamenti nuk eshte caktuar per llogarine tende. Kontakto administratorin.
               </Alert>
             )}
 
             {status?.pendingRequest && (
               <Alert severity="info" className="mb-5 rounded-xl!">
-                Ke nje aplikim ne pritje per grupin <strong>{status.pendingRequest.directionGroupName || "-"}</strong>.
+                Ke nje aplikim ne pritje per grupin <strong>{status.pendingRequest.departmentGroupName || "-"}</strong>.
                 Zgjedhja direkte e nje grupi do ta zevendesoje kete pritje.
               </Alert>
             )}
@@ -293,13 +293,13 @@ export default function StudentSchedulePage() {
                   entry={entry}
                   isDark={isDark}
                   selectingId={selectingId}
-                  selectedPendingId={status?.pendingRequest?.directionGroupId}
+                  selectedPendingId={status?.pendingRequest?.departmentGroupId}
                   onSelect={handleSelect}
                 />
               ))}
             </Box>
 
-            {status?.categoryAssigned && availableGroups.length === 0 && !error && (
+            {status?.isDepartmentAssigned && availableGroups.length === 0 && !error && (
               <Box
                 className="rounded-2xl border p-8 text-center"
                 sx={scheduleCardSx()}

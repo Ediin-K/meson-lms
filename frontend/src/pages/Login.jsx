@@ -128,9 +128,12 @@ export default function Login({ portalType }) {
     try {
       const data = await login(email, password)
 
-      localStorage.setItem('email', data.email)
-      localStorage.setItem('token', data.token)
+      if (data.mustChangePassword) {
+        navigate('/change-password', { replace: true })
+        return
+      }
 
+      localStorage.setItem('email', data.email)
       setIsAuthenticated(true)
 
       if (data.role) {
@@ -139,6 +142,12 @@ export default function Login({ portalType }) {
       }
 
       const role = data.role?.toLowerCase()
+      const storedRedirect = sessionStorage.getItem('meson-post-login-redirect')
+      if (storedRedirect) {
+        sessionStorage.removeItem('meson-post-login-redirect')
+        navigate(storedRedirect, { replace: true })
+        return
+      }
       const destination =
         role === 'admin'
           ? '/admin'

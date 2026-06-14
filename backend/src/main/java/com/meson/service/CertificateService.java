@@ -53,7 +53,7 @@ public class CertificateService {
                 .orElseThrow(() -> new RuntimeException("Regjistrimi nuk u gjet"));
 
         if (enrollment.getStatusi() != EnrollmentStatus.PERFUNDUAR) {
-            throw new RuntimeException("Studenti nuk e ka perfunduar kursin");
+            throw new RuntimeException("Studenti nuk e ka perfunduar Lëndan");
         }
 
         Certificate certificate = new Certificate();
@@ -62,7 +62,6 @@ public class CertificateService {
         return toResponse(certificateRepository.save(certificate));
     }
 
-    /** Called internally when a student reaches 100 % progress — idempotent. */
     public String createForEnrollment(Enrollment enrollment) {
         return certificateRepository.findByEnrollmentId(enrollment.getId())
                 .map(Certificate::getKodiUnik)
@@ -80,14 +79,21 @@ public class CertificateService {
         certificateRepository.deleteById(id);
     }
 
+    /** Removes the certificate tied to an enrollment, if one exists (no-op otherwise). */
+    @org.springframework.transaction.annotation.Transactional
+    public void removeForEnrollment(Long enrollmentId) {
+        certificateRepository.findByEnrollmentId(enrollmentId)
+                .ifPresent(certificateRepository::delete);
+    }
+
     private CertificateResponse toResponse(Certificate certificate) {
         return CertificateResponse.builder()
                 .id(certificate.getId())
                 .enrollmentId(certificate.getEnrollment().getId())
                 .userId(certificate.getEnrollment().getUser().getId())
                 .userEmri(certificate.getEnrollment().getUser().getEmri())
-                .courseId(certificate.getEnrollment().getCourse().getId())
-                .courseTitulli(certificate.getEnrollment().getCourse().getTitulli())
+                .subjectId(certificate.getEnrollment().getSubject().getId())
+                .subjectTitulli(certificate.getEnrollment().getSubject().getTitulli())
                 .kodiUnik(certificate.getKodiUnik())
                 .dataLeshimit(certificate.getDataLeshimit())
                 .build();

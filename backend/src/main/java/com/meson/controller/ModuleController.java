@@ -11,19 +11,19 @@ import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/courses/{courseId}/modules")
+@RequestMapping("/api/subjects/{subjectId}/modules")
 @RequiredArgsConstructor
 public class ModuleController{
 
     private final ModuleService moduleService;
 
     @GetMapping
-    public ResponseEntity<List<ModuleResponse>> getAll(@PathVariable Long courseId){
-        return ResponseEntity.ok(moduleService.getByCourseId(courseId));
+    public ResponseEntity<List<ModuleResponse>> getAll(@PathVariable Long subjectId){
+        return ResponseEntity.ok(moduleService.getBySubjectId(subjectId));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ModuleResponse> getById(@PathVariable Long courseId,
+    public ResponseEntity<ModuleResponse> getById(@PathVariable Long subjectId,
                                                   @PathVariable Long id ){
         return ResponseEntity.ok(moduleService.getById(id));
     }
@@ -35,14 +35,14 @@ public class ModuleController{
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ModuleResponse> update(@PathVariable Long courseId,
+    public ResponseEntity<ModuleResponse> update(@PathVariable Long subjectId,
                                                  @PathVariable Long id,
                                                  @Valid @RequestBody ModuleRequest request){
         return ResponseEntity.ok(moduleService.update(id,request));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long courseId,
+    public ResponseEntity<Void> delete(@PathVariable Long subjectId,
                                        @PathVariable Long id){
         moduleService.delete(id);
         return ResponseEntity.noContent().build();

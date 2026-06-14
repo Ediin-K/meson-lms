@@ -14,20 +14,22 @@ public interface StudentProfileRepository extends JpaRepository<StudentProfile, 
 
     @Query("""
             SELECT sp FROM StudentProfile sp
-            LEFT JOIN FETCH sp.courseCategory
-            LEFT JOIN FETCH sp.approvedDirectionGroup dg
-            LEFT JOIN FETCH dg.courseCategory
+            LEFT JOIN FETCH sp.department
+            LEFT JOIN FETCH sp.approvedDepartmentGroup dg
+            LEFT JOIN FETCH dg.department
             WHERE sp.user.id = :userId
             """)
     Optional<StudentProfile> findByUserIdWithDetails(@Param("userId") Long userId);
 
-    long countByApprovedDirectionGroupId(Long directionGroupId);
+    void deleteByUserId(Long userId);
+
+    long countByApprovedDepartmentGroupId(Long departmentGroupId);
 
     @Query("""
             SELECT sp FROM StudentProfile sp
             JOIN FETCH sp.user u
-            WHERE sp.approvedDirectionGroup.id = :groupId
+            WHERE sp.approvedDepartmentGroup.id = :groupId
             ORDER BY u.mbiemri, u.emri
             """)
-    List<StudentProfile> findMembersByDirectionGroupId(@Param("groupId") Long groupId);
+    List<StudentProfile> findMembersByDepartmentGroupId(@Param("groupId") Long groupId);
 }

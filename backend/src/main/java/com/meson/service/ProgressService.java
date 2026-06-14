@@ -1,6 +1,6 @@
 package com.meson.service;
 
-import com.meson.dto.CourseProgressResponse;
+import com.meson.dto.SubjectProgressResponse;
 import com.meson.dto.LessonViewResponse;
 import com.meson.dto.ModuleProgressResponse;
 import com.meson.entity.*;
@@ -24,10 +24,10 @@ public class ProgressService {
     private final LessonProgressRepository progressRepository;
     private final LessonRepository         lessonRepository;
     private final ModuleRepository         moduleRepository;
-    private final CourseRepository         courseRepository;
+    private final SubjectRepository         subjectRepository;
     private final EnrollmentRepository     enrollmentRepository;
     private final UserRepository           userRepository;
-    private final CertificateService       certificateService;
+    private final EnrollmentCompletionService completionService;
 
     @Transactional
     public LessonViewResponse markLessonViewed(Long lessonId) {
@@ -43,65 +43,41 @@ public class ProgressService {
                     .build());
         }
 
-        Long courseId = lesson.getModule().getCourse().getId();
-        String courseTitulli = lesson.getModule().getCourse().getTitulli();
-        String certCode = recalculateAndMaybeComplete(student.getId(), courseId);
+        Long subjectId = lesson.getModule().getSubject().getId();
+        String subjectTitulli = lesson.getModule().getSubject().getTitulli();
+        String certCode = recalculateAndMaybeComplete(student.getId(), subjectId);
 
         boolean completed = certCode != null;
         return LessonViewResponse.builder()
-                .courseCompleted(completed)
+                .subjectCompleted(completed)
                 .certificateCode(certCode)
-                .courseTitulli(completed ? courseTitulli : null)
+                .subjectTitulli(completed ? subjectTitulli : null)
                 .build();
     }
 
-    public CourseProgressResponse getCourseProgress(Long courseId) {
+    public SubjectProgressResponse getSubjectProgress(Long subjectId) {
         User student = getCurrentUser();
-        return buildProgress(courseId, student.getId());
+        return buildProgress(subjectId, student.getId());
     }
 
-    public CourseProgressResponse getStudentCourseProgress(Long courseId, Long studentId) {
+    public SubjectProgressResponse getStudentSubjectProgress(Long subjectId, Long studentId) {
         User teacher = getCurrentUser();
-        courseRepository.findByIdAndTeacherId(courseId, teacher.getId())
+        subjectRepository.findByIdAndTeacherId(subjectId, teacher.getId())
                 .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses në këtë kurs."));
-        return buildProgress(courseId, studentId);
+        return buildProgress(subjectId, studentId);
     }
 
-    // ── helpers ──────────────────────────────────────────────────────────────
-
-    /**
-     * Recalculates enrollment.progresi.
-     * If the student has viewed every lesson and the enrollment is still AKTIV,
-     * marks it PERFUNDUAR and creates the certificate.
-     * Returns the certificate code if just completed, null otherwise.
-     */
-    private String recalculateAndMaybeComplete(Long studentId, Long courseId) {
-        return enrollmentRepository.findByUserIdAndCourseId(studentId, courseId)
-                .map(enrollment -> {
-                    long total  = lessonRepository.countByModuleCourseId(courseId);
-                    long viewed = progressRepository.countViewedLessonsByCourse(studentId, courseId);
-
-                    double pct = total > 0 ? Math.round(viewed * 100.0 / total) : 0;
-                    enrollment.setProgresi(pct);
-
-                    if (total > 0 && viewed >= total
-                            && EnrollmentStatus.AKTIV.equals(enrollment.getStatusi())) {
-                        enrollment.setStatusi(EnrollmentStatus.PERFUNDUAR);
-                        enrollmentRepository.save(enrollment);
-                        return certificateService.createForEnrollment(enrollment);
-                    }
-
-                    enrollmentRepository.save(enrollment);
-                    return null;
-                })
+    private String recalculateAndMaybeComplete(Long studentId, Long subjectId) {
+        return enrollmentRepository.findByUserIdAndSubjectId(studentId, subjectId)
+                .map(completionService::recalculateEnrollment)
                 .orElse(null);
     }
 
-    private CourseProgressResponse buildProgress(Long courseId, Long studentId) {
-        Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new ResourceNotFoundException("Kursi nuk u gjet."));
+    private SubjectProgressResponse buildProgress(Long subjectId, Long studentId) {
+        Subject course = subjectRepository.findById(subjectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Lënda nuk u gjet."));
 
-        List<Module> modules = moduleRepository.findByCourseIdOrderByRradhitjaAsc(courseId);
+        List<Module> modules = moduleRepository.findBySubjectIdOrderByRradhitjaAsc(subjectId);
 
         List<ModuleProgressResponse> moduleProgress = modules.stream().map(module -> {
             int total  = (int) lessonRepository.countByModuleId(module.getId());
@@ -120,9 +96,9 @@ public class ProgressService {
         int viewedLessons = moduleProgress.stream().mapToInt(ModuleProgressResponse::getViewedLessons).sum();
         double overallPct = totalLessons > 0 ? Math.round(viewedLessons * 100.0 / totalLessons) : 0;
 
-        return CourseProgressResponse.builder()
-                .courseId(courseId)
-                .courseTitulli(course.getTitulli())
+        return SubjectProgressResponse.builder()
+                .subjectId(subjectId)
+                .subjectTitulli(course.getTitulli())
                 .totalLessons(totalLessons)
                 .viewedLessons(viewedLessons)
                 .progressPercent(overallPct)

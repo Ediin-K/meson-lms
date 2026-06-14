@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+﻿import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   Box,
@@ -26,18 +26,19 @@ import AddRounded from '@mui/icons-material/AddRounded';
 import teacherContentService from '../../services/teacherContentService';
 import quizService from '../../services/quizService';
 import QuizWizard from '../../components/teacher/quiz/QuizWizard';
+import { useAppPreferences } from '../../context/appPreferencesContext';
 
-const STATUS_CONFIG = {
-  DRAFT:  { label: 'Draft',   bg: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300' },
-  ACTIVE: { label: 'Aktiv',   bg: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' },
-  CLOSED: { label: 'Mbyllur', bg: 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300' },
+const STATUS_BG = {
+  DRAFT:  'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300',
+  ACTIVE: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300',
+  CLOSED: 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300',
 };
 
-const ATTEMPT_STATUS_CONFIG = {
-  IN_PROGRESS: { label: 'Në progres',  bg: 'bg-amber-100 text-amber-700' },
-  SUBMITTED:   { label: 'Dorëzuar',    bg: 'bg-emerald-100 text-emerald-700' },
-  TIMED_OUT:   { label: 'Koha mbaroi', bg: 'bg-red-100 text-red-600' },
-  ABANDONED:   { label: 'Braktisur',   bg: 'bg-slate-100 text-slate-500' },
+const ATTEMPT_BG = {
+  IN_PROGRESS: 'bg-amber-100 text-amber-700',
+  SUBMITTED:   'bg-emerald-100 text-emerald-700',
+  TIMED_OUT:   'bg-red-100 text-red-600',
+  ABANDONED:   'bg-slate-100 text-slate-500',
 };
 
 function formatSeconds(sec) {
@@ -48,11 +49,12 @@ function formatSeconds(sec) {
 }
 
 export default function TeacherQuizzes() {
-  const [courses, setCourses]               = useState([]);
+  const { t } = useAppPreferences();
+  const [subjects, setSubjects]               = useState([]);
   const [modules, setModules]               = useState([]);
   const [lessons, setLessons]               = useState([]);
   const [quizzes, setQuizzes]               = useState([]);
-  const [selectedCourse, setSelectedCourse] = useState('');
+  const [selectedSubject, setSelectedSubject] = useState('');
   const [selectedModule, setSelectedModule] = useState('');
   const [selectedLesson, setSelectedLesson] = useState('');
   const [selectedQuizId, setSelectedQuizId] = useState(null);
@@ -60,7 +62,7 @@ export default function TeacherQuizzes() {
   const [activeTab, setActiveTab]           = useState('list');
   const [results, setResults]               = useState([]);
   const [allAttempts, setAllAttempts]       = useState([]);
-  const [loadingCourses, setLoadingCourses] = useState(true);
+  const [loadingSubjects, setloadingSubjects] = useState(true);
   const [loadingQuizzes, setLoadingQuizzes] = useState(false);
   const [activating, setActivating]         = useState(false);
   const [message, setMessage]               = useState('');
@@ -68,20 +70,20 @@ export default function TeacherQuizzes() {
   const pollRef = useRef(null);
 
   useEffect(() => {
-    teacherContentService.getCourses()
-      .then((res) => setCourses(res.data))
-      .catch(() => setError('Kurset nuk u ngarkuan.'))
-      .finally(() => setLoadingCourses(false));
+    teacherContentService.getSubjects()
+      .then((res) => setSubjects(res.data))
+      .catch(() => setError(t('teacherQuizzes.errorLoad')))
+      .finally(() => setloadingSubjects(false));
   }, []);
 
   useEffect(() => {
-    if (!selectedCourse) return;
+    if (!selectedSubject) return;
     setSelectedModule('');
     setSelectedLesson('');
     setQuizzes([]);
     setSelectedQuizId(null);
-    teacherContentService.getModules(selectedCourse).then((res) => setModules(res.data));
-  }, [selectedCourse]);
+    teacherContentService.getModules(selectedSubject).then((res) => setModules(res.data));
+  }, [selectedSubject]);
 
   useEffect(() => {
     if (!selectedModule) return;
@@ -124,7 +126,7 @@ export default function TeacherQuizzes() {
       ]);
       setResults(resultsRes.data);
       setAllAttempts(attemptsRes.data);
-    } catch { /* poll silently */ }
+    } catch { void 0 }
   }, []);
 
   useEffect(() => {
@@ -146,12 +148,12 @@ export default function TeacherQuizzes() {
     setActivating(true);
     try {
       await quizService.activate(quizId);
-      setMessage('Quiz-i u aktivizua.');
+      setMessage(t('teacherQuizzes.toast.activated'));
       await loadQuizzes(selectedLesson);
       setSelectedQuizId(quizId);
       setActiveTab('live');
     } catch (err) {
-      setError(err.response?.data?.message || 'Aktivizimi dështoi.');
+      setError(err.response?.data?.message || t('teacherQuizzes.toast.activateError'));
     } finally {
       setActivating(false);
     }
@@ -161,24 +163,24 @@ export default function TeacherQuizzes() {
     setError('');
     try {
       await quizService.close(quizId);
-      setMessage('Quiz-i u mbyll.');
+      setMessage(t('teacherQuizzes.toast.closed'));
       await loadQuizzes(selectedLesson);
       clearInterval(pollRef.current);
     } catch (err) {
-      setError(err.response?.data?.message || 'Mbyllja dështoi.');
+      setError(err.response?.data?.message || t('teacherQuizzes.toast.closeError'));
     }
   };
 
   const handleDelete = async (quizId) => {
-    if (!window.confirm('A jeni i sigurt që doni ta fshini këtë quiz?')) return;
+    if (!window.confirm(t('teacherQuizzes.toast.deleteConfirm'))) return;
     try {
       await quizService.deleteQuiz(quizId);
-      setMessage('Quiz-i u fshi.');
+      setMessage(t('teacherQuizzes.toast.deleted'));
       if (selectedQuizId === quizId) setSelectedQuizId(null);
       if (editingQuiz?.id === quizId) setEditingQuiz(null);
       await loadQuizzes(selectedLesson);
     } catch (err) {
-      setError(err.response?.data?.message || 'Fshirja dështoi.');
+      setError(err.response?.data?.message || t('teacherQuizzes.toast.deleteError'));
     }
   };
 
@@ -188,7 +190,7 @@ export default function TeacherQuizzes() {
     return (submitted.reduce((s, r) => s + (r.pikete || 0), 0) / submitted.length).toFixed(1);
   }, [results]);
 
-  if (loadingCourses) {
+  if (loadingSubjects) {
     return (
       <Box className="flex min-h-[60vh] items-center justify-center">
         <CircularProgress />
@@ -197,23 +199,36 @@ export default function TeacherQuizzes() {
   }
 
   const TABS = [
-    { id: 'list',   label: 'Quiz-et' },
-    { id: 'create', label: 'Krijo quiz' },
+    { id: 'list',   label: t('teacherQuizzes.tabList') },
+    { id: 'create', label: t('teacherQuizzes.tabCreate') },
   ];
+
+  const STATUS_CONFIG = {
+    DRAFT:  { label: t('teacherQuizzes.statusDraft'),  bg: STATUS_BG.DRAFT },
+    ACTIVE: { label: t('teacherQuizzes.statusActive'), bg: STATUS_BG.ACTIVE },
+    CLOSED: { label: t('teacherQuizzes.statusClosed'), bg: STATUS_BG.CLOSED },
+  };
+
+  const ATTEMPT_STATUS_CONFIG = {
+    IN_PROGRESS: { label: t('teacherQuizzes.attemptInProgress'), bg: ATTEMPT_BG.IN_PROGRESS },
+    SUBMITTED:   { label: t('teacherQuizzes.attemptSubmitted'),   bg: ATTEMPT_BG.SUBMITTED },
+    TIMED_OUT:   { label: t('teacherQuizzes.attemptTimedOut'),    bg: ATTEMPT_BG.TIMED_OUT },
+    ABANDONED:   { label: t('teacherQuizzes.attemptAbandoned'),   bg: ATTEMPT_BG.ABANDONED },
+  };
 
   return (
     <Container maxWidth="xl" className="py-8">
-      {/* Page header */}
+      {}
       <Box className="mb-6 flex items-center gap-3">
         <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300">
           <QuizRounded />
         </span>
         <div>
           <Typography variant="h4" className="!font-black text-slate-950 dark:!text-white">
-            Quiz-et
+            {t('teacherQuizzes.title')}
           </Typography>
           <Typography className="text-slate-500 dark:!text-slate-400">
-            Menaxho, aktivizo dhe monitoro quiz-et.
+            {t('teacherQuizzes.subtitle')}
           </Typography>
         </div>
       </Box>
@@ -221,7 +236,7 @@ export default function TeacherQuizzes() {
       {message && <Alert severity="success" className="!mb-4" onClose={() => setMessage('')}>{message}</Alert>}
       {error   && <Alert severity="error"   className="!mb-4" onClose={() => setError('')}>{error}</Alert>}
 
-      {/* Tab bar */}
+      {}
       <div className="mb-6 flex gap-1 border-b border-slate-200 dark:border-slate-700">
         {TABS.map((tab) => (
           <button
@@ -239,14 +254,14 @@ export default function TeacherQuizzes() {
         ))}
       </div>
 
-      {/* ── Tab: Quiz list ── */}
+      {}
       {activeTab === 'list' && (
         <div className="space-y-5">
-          {/* Selectors */}
+          {}
           <Card elevation={0} className="rounded-2xl border border-slate-200 bg-white dark:!border-slate-800 dark:!bg-slate-900">
             <CardContent className="!p-5">
               <div className="mb-2 flex items-center justify-between">
-                <Typography variant="subtitle2" className="!font-black dark:!text-white">Zgjidh leksionin</Typography>
+                <Typography variant="subtitle2" className="!font-black dark:!text-white">{t('teacherQuizzes.chooseLessonTitle')}</Typography>
                 <Button
                   size="small"
                   startIcon={<AddRounded />}
@@ -254,25 +269,25 @@ export default function TeacherQuizzes() {
                   onClick={() => setActiveTab('create')}
                   className="!rounded-xl !normal-case"
                 >
-                  Krijo quiz të ri
+                  {t('teacherQuizzes.createNewQuiz')}
                 </Button>
               </div>
               <div className="grid gap-3 sm:grid-cols-3">
                 <FormControl size="small" fullWidth>
-                  <InputLabel>Kursi</InputLabel>
-                  <Select label="Kursi" value={selectedCourse} onChange={(e) => setSelectedCourse(e.target.value)}>
-                    {courses.map((c) => <MenuItem key={c.id} value={c.id}>{c.titulli}</MenuItem>)}
+                  <InputLabel>{t('teacherQuizzes.subjectLabel')}</InputLabel>
+                  <Select label={t('teacherQuizzes.subjectLabel')} value={selectedSubject} onChange={(e) => setSelectedSubject(e.target.value)}>
+                    {subjects.map((c) => <MenuItem key={c.id} value={c.id}>{c.titulli}</MenuItem>)}
                   </Select>
                 </FormControl>
-                <FormControl size="small" fullWidth disabled={!selectedCourse}>
-                  <InputLabel>Moduli</InputLabel>
-                  <Select label="Moduli" value={selectedModule} onChange={(e) => setSelectedModule(e.target.value)}>
+                <FormControl size="small" fullWidth disabled={!selectedSubject}>
+                  <InputLabel>{t('teacherQuizzes.moduleLabel')}</InputLabel>
+                  <Select label={t('teacherQuizzes.moduleLabel')} value={selectedModule} onChange={(e) => setSelectedModule(e.target.value)}>
                     {modules.map((m) => <MenuItem key={m.id} value={m.id}>{m.titulli}</MenuItem>)}
                   </Select>
                 </FormControl>
                 <FormControl size="small" fullWidth disabled={!selectedModule}>
-                  <InputLabel>Leksioni (QUIZ)</InputLabel>
-                  <Select label="Leksioni (QUIZ)" value={selectedLesson} onChange={(e) => setSelectedLesson(e.target.value)}>
+                  <InputLabel>{t('teacherQuizzes.lessonLabel')}</InputLabel>
+                  <Select label={t('teacherQuizzes.lessonLabel')} value={selectedLesson} onChange={(e) => setSelectedLesson(e.target.value)}>
                     {lessons.filter((l) => l.lloji === 'QUIZ').map((l) => (
                       <MenuItem key={l.id} value={l.id}>{l.titulli}</MenuItem>
                     ))}
@@ -282,9 +297,9 @@ export default function TeacherQuizzes() {
             </CardContent>
           </Card>
 
-          {/* Quiz cards */}
+          {}
           {!selectedLesson && (
-            <Alert severity="info">Zgjidh kursin, modulin dhe leksionin QUIZ për të parë quiz-et.</Alert>
+            <Alert severity="info">{t('teacherQuizzes.chooseLesson')}</Alert>
           )}
           {loadingQuizzes && (
             <Box className="flex justify-center py-10"><CircularProgress /></Box>
@@ -292,9 +307,9 @@ export default function TeacherQuizzes() {
           {!loadingQuizzes && selectedLesson && quizzes.length === 0 && (
             <div className="rounded-2xl border-2 border-dashed border-slate-200 p-12 text-center dark:border-slate-800">
               <QuizRounded className="!mb-3 !text-5xl text-slate-200 dark:text-slate-700" />
-              <Typography className="text-slate-400 dark:!text-slate-500">Nuk ka quiz për këtë leksion.</Typography>
+              <Typography className="text-slate-400 dark:!text-slate-500">{t('teacherQuizzes.noQuizzes')}</Typography>
               <Button variant="outlined" size="small" onClick={() => setActiveTab('create')} className="!mt-4 !rounded-xl !normal-case">
-                Krijo quiz-in e parë
+                {t('teacherQuizzes.createFirstQuiz')}
               </Button>
             </div>
           )}
@@ -303,7 +318,7 @@ export default function TeacherQuizzes() {
               const cfg = STATUS_CONFIG[quiz.status] || STATUS_CONFIG.DRAFT;
               return (
                 <div key={quiz.id} className="flex flex-col rounded-2xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
-                  {/* Card top */}
+                  {}
                   <div className="flex flex-1 flex-col p-5">
                     <div className="mb-3 flex items-start justify-between gap-2">
                       <Typography className="!font-black leading-snug dark:!text-white">{quiz.titulli}</Typography>
@@ -316,7 +331,7 @@ export default function TeacherQuizzes() {
                     </Typography>
                   </div>
 
-                  {/* Primary action buttons */}
+                  {}
                   <div className="grid grid-cols-2 gap-2 px-5 pb-3">
                     <Button
                       variant="contained"
@@ -325,7 +340,7 @@ export default function TeacherQuizzes() {
                       onClick={() => { setSelectedQuizId(quiz.id); setActiveTab('live'); }}
                       className="!rounded-xl !normal-case !bg-emerald-600 hover:!bg-emerald-700"
                     >
-                      Live
+                      {t('teacherQuizzes.btnLive')}
                     </Button>
                     <Button
                       variant="contained"
@@ -334,30 +349,30 @@ export default function TeacherQuizzes() {
                       onClick={() => { setSelectedQuizId(quiz.id); setActiveTab('results'); }}
                       className="!rounded-xl !normal-case !bg-sky-600 hover:!bg-sky-700"
                     >
-                      Statistikat
+                      {t('teacherQuizzes.btnStats')}
                     </Button>
                   </div>
 
-                  {/* Secondary actions */}
+                  {}
                   <div className="flex flex-wrap gap-1.5 border-t border-slate-100 px-5 py-3 dark:border-slate-800">
                     {quiz.status === 'DRAFT' && (
                       <>
                         <Button size="small" startIcon={<EditRounded />} onClick={() => { setEditingQuiz(quiz); setActiveTab('create'); }} className="!normal-case">
-                          Ndrysho
+                          {t('teacherQuizzes.btnEdit')}
                         </Button>
                         <Button size="small" color="success" variant="outlined" startIcon={<PlayArrowRounded />} disabled={activating} onClick={() => handleActivate(quiz.id)} className="!normal-case">
-                          Aktivizo
+                          {t('teacherQuizzes.btnActivate')}
                         </Button>
                       </>
                     )}
                     {quiz.status === 'ACTIVE' && (
                       <Button size="small" color="error" variant="outlined" startIcon={<StopRounded />} onClick={() => handleClose(quiz.id)} className="!normal-case">
-                        Mbyll
+                        {t('teacherQuizzes.btnClose')}
                       </Button>
                     )}
                     {quiz.status !== 'ACTIVE' && (
                       <Button size="small" color="error" startIcon={<DeleteRounded />} onClick={() => handleDelete(quiz.id)} className="!normal-case">
-                        Fshi
+                        {t('teacherQuizzes.btnDelete')}
                       </Button>
                     )}
                   </div>
@@ -368,16 +383,16 @@ export default function TeacherQuizzes() {
         </div>
       )}
 
-      {/* ── Tab: Create ── */}
+      {}
       {activeTab === 'create' && (
         <QuizWizard
-          courses={courses}
+          subjects={subjects}
           modules={modules}
           lessons={lessons}
-          selectedCourse={selectedCourse}
+          selectedSubject={selectedSubject}
           selectedModule={selectedModule}
           selectedLesson={selectedLesson}
-          onCourseChange={setSelectedCourse}
+          onSubjectChange={setSelectedSubject}
           onModuleChange={setSelectedModule}
           onLessonChange={setSelectedLesson}
           editingQuiz={editingQuiz}
@@ -392,7 +407,7 @@ export default function TeacherQuizzes() {
         />
       )}
 
-      {/* ── Tab: Live Dashboard ── */}
+      {}
       {activeTab === 'live' && (
         <Card elevation={0} className="rounded-2xl border border-slate-200 bg-white dark:!border-slate-800 dark:!bg-slate-900">
           <CardContent className="!p-5">
@@ -400,21 +415,21 @@ export default function TeacherQuizzes() {
               <Box className="flex items-center gap-2">
                 <PeopleRounded className="text-emerald-600" />
                 <Typography variant="h6" className="!font-black dark:!text-white">
-                  Dashboard live {selectedQuiz ? `— ${selectedQuiz.titulli}` : ''}
+                  {t('teacherQuizzes.liveDashboard')} {selectedQuiz ? `— ${selectedQuiz.titulli}` : ''}
                 </Typography>
               </Box>
               <IconButton onClick={() => loadAttemptData(selectedQuizId)} size="small">
                 <RefreshRounded />
               </IconButton>
             </div>
-            {!selectedQuizId && <Alert severity="info">Zgjidh një quiz nga lista.</Alert>}
+            {!selectedQuizId && <Alert severity="info">{t('teacherQuizzes.liveChooseQuiz')}</Alert>}
             {selectedQuizId && (
               <>
                 <div className="mb-4 grid grid-cols-3 gap-3">
                   {[
-                    { label: 'Në progres', value: allAttempts.filter((a) => a.attemptStatus === 'IN_PROGRESS').length, color: '!text-amber-500' },
-                    { label: 'Dorëzuar',   value: allAttempts.filter((a) => a.attemptStatus === 'SUBMITTED').length,   color: '!text-emerald-500' },
-                    { label: 'Braktisur',  value: allAttempts.filter((a) => a.attemptStatus === 'ABANDONED').length,   color: '!text-red-500' },
+                    { label: t('teacherQuizzes.liveInProgress'), value: allAttempts.filter((a) => a.attemptStatus === 'IN_PROGRESS').length, color: '!text-amber-500' },
+                    { label: t('teacherQuizzes.liveSubmitted'),   value: allAttempts.filter((a) => a.attemptStatus === 'SUBMITTED').length,   color: '!text-emerald-500' },
+                    { label: t('teacherQuizzes.liveAbandoned'),   value: allAttempts.filter((a) => a.attemptStatus === 'ABANDONED').length,   color: '!text-red-500' },
                   ].map((stat) => (
                     <Box key={stat.label} className="rounded-xl bg-slate-50 p-3 text-center dark:bg-slate-800">
                       <Typography variant="h5" className={`!font-black ${stat.color}`}>{stat.value}</Typography>
@@ -426,10 +441,10 @@ export default function TeacherQuizzes() {
                   <table className="w-full text-left text-sm">
                     <thead>
                       <tr className="border-b border-slate-200 dark:border-slate-700">
-                        <th className="py-2 pr-3 text-slate-500 dark:text-slate-400">Studenti</th>
-                        <th className="py-2 pr-3 text-slate-500 dark:text-slate-400">Statusi</th>
-                        <th className="py-2 pr-3 text-slate-500 dark:text-slate-400">Koha</th>
-                        <th className="py-2 text-slate-500 dark:text-slate-400">Pikët</th>
+                        <th className="py-2 pr-3 text-slate-500 dark:text-slate-400">{t('teacherQuizzes.liveColStudent')}</th>
+                        <th className="py-2 pr-3 text-slate-500 dark:text-slate-400">{t('teacherQuizzes.liveColStatus')}</th>
+                        <th className="py-2 pr-3 text-slate-500 dark:text-slate-400">{t('teacherQuizzes.liveColTime')}</th>
+                        <th className="py-2 text-slate-500 dark:text-slate-400">{t('teacherQuizzes.liveColPoints')}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -449,7 +464,7 @@ export default function TeacherQuizzes() {
                     </tbody>
                   </table>
                   {allAttempts.length === 0 && (
-                    <Typography className="!mt-4 text-center text-slate-400">Asnjë student ende.</Typography>
+                    <Typography className="!mt-4 text-center text-slate-400">{t('teacherQuizzes.liveNoStudents')}</Typography>
                   )}
                 </div>
               </>
@@ -458,23 +473,23 @@ export default function TeacherQuizzes() {
         </Card>
       )}
 
-      {/* ── Tab: Statistics / Results ── */}
+      {}
       {activeTab === 'results' && (
         <Card elevation={0} className="rounded-2xl border border-slate-200 bg-white dark:!border-slate-800 dark:!bg-slate-900">
           <CardContent className="!p-5">
             <Box className="mb-4 flex items-center gap-2">
               <AssessmentRounded className="text-sky-600" />
               <Typography variant="h6" className="!font-black dark:!text-white">
-                Statistikat {selectedQuiz ? `— ${selectedQuiz.titulli}` : ''}
+                {t('teacherQuizzes.statsTitle')} {selectedQuiz ? `— ${selectedQuiz.titulli}` : ''}
               </Typography>
             </Box>
-            {!selectedQuizId && <Alert severity="info">Zgjidh një quiz nga lista.</Alert>}
+            {!selectedQuizId && <Alert severity="info">{t('teacherQuizzes.statsChooseQuiz')}</Alert>}
             {selectedQuizId && results.length > 0 && (
               <div className="mb-4 grid grid-cols-3 gap-3">
                 {[
-                  { label: 'Mesatarja', value: avgScore != null ? `${avgScore}%` : '-' },
-                  { label: 'Maksimumi', value: `${Math.max(...results.map((r) => r.pikete ?? 0)).toFixed(0)}%` },
-                  { label: 'Minimumi',  value: `${Math.min(...results.map((r) => r.pikete ?? 0)).toFixed(0)}%` },
+                  { label: t('teacherQuizzes.statsAvg'), value: avgScore != null ? `${avgScore}%` : '-' },
+                  { label: t('teacherQuizzes.statsMax'), value: `${Math.max(...results.map((r) => r.pikete ?? 0)).toFixed(0)}%` },
+                  { label: t('teacherQuizzes.statsMin'), value: `${Math.min(...results.map((r) => r.pikete ?? 0)).toFixed(0)}%` },
                 ].map((s) => (
                   <Box key={s.label} className="rounded-xl bg-sky-50 p-3 text-center dark:bg-sky-950/30">
                     <Typography variant="h6" className="!font-black !text-sky-700 dark:!text-sky-300">{s.value}</Typography>
@@ -488,10 +503,10 @@ export default function TeacherQuizzes() {
                 <table className="w-full text-left text-sm">
                   <thead>
                     <tr className="border-b border-slate-200 dark:border-slate-700">
-                      <th className="py-2 pr-4 text-slate-500 dark:text-slate-400">Studenti</th>
-                      <th className="py-2 pr-4 text-slate-500 dark:text-slate-400">Pikët</th>
-                      <th className="py-2 pr-4 text-slate-500 dark:text-slate-400">Koha</th>
-                      <th className="py-2 text-slate-500 dark:text-slate-400">Dorëzuar</th>
+                      <th className="py-2 pr-4 text-slate-500 dark:text-slate-400">{t('teacherQuizzes.statsColStudent')}</th>
+                      <th className="py-2 pr-4 text-slate-500 dark:text-slate-400">{t('teacherQuizzes.statsColPoints')}</th>
+                      <th className="py-2 pr-4 text-slate-500 dark:text-slate-400">{t('teacherQuizzes.statsColTime')}</th>
+                      <th className="py-2 text-slate-500 dark:text-slate-400">{t('teacherQuizzes.statsColSubmitted')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -506,7 +521,7 @@ export default function TeacherQuizzes() {
                   </tbody>
                 </table>
                 {results.length === 0 && (
-                  <Alert severity="info" className="!mt-3">Nuk ka dorëzime akoma.</Alert>
+                  <Alert severity="info" className="!mt-3">{t('teacherQuizzes.noSubmissions')}</Alert>
                 )}
               </div>
             )}

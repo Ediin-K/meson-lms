@@ -9,7 +9,7 @@ import lombok.*;
 @Builder
 public class GroupStaffAssignmentRequest {
     @NotNull
-    private Long courseId;
+    private Long subjectId;
     @NotNull
     private Long professorId;
     private Long assistantId;

@@ -19,10 +19,10 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "first_name", nullable = false)
     private String emri;
 
-    @Column(nullable = false)
+    @Column(name = "last_name", nullable = false)
     private String mbiemri;
 
     @Column(nullable = false, unique = true)
@@ -47,12 +47,17 @@ public class User {
     private int accessFailedCount = 0;
 
     @Builder.Default
-    @Column(nullable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime dataKrijimit = LocalDateTime.now();
 
     @Builder.Default
-    @Column(nullable = false)
+    @Column(name = "status", nullable = false)
     private String statusi = "active";
+
+    /** True while the user still has the admin-issued temporary password. */
+    @Builder.Default
+    @Column(name = "temporary_password", nullable = false)
+    private boolean temporaryPassword = false;
 
     @Transient
     private String role;

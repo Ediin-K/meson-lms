@@ -18,7 +18,7 @@ public class QuizStartResponse {
     private LocalDateTime startedAt;
     private LocalDateTime expiresAt;
     private Integer remainingSeconds;
-    private Long courseId;
+    private Long subjectId;
     private Integer totalPikete;
     private List<QuizQuestionForAttemptResponse> questions;
 }

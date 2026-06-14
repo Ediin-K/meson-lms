@@ -2,7 +2,7 @@ package com.meson.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Data
 @Builder
@@ -12,12 +12,12 @@ public class AssignmentResponse {
     private Long id;
     private String title;
     private String description;
-    private LocalDateTime deadline;
+    private Instant deadline;
     private boolean hasAttachment;
     private String attachmentName;
     private Long lessonId;
     private String lessonTitle;
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     @JsonProperty("isOpen")
     private boolean isOpen;

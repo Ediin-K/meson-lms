@@ -15,18 +15,22 @@ public interface StudentGroupRequestRepository extends JpaRepository<StudentGrou
     boolean existsByStudentIdAndStatus(Long studentId, GroupRequestStatus status);
     List<StudentGroupRequest> findByStudentIdOrderByAppliedAtDesc(Long studentId);
 
+    void deleteByStudentId(Long studentId);
+
+    void deleteByApprovedById(Long approvedById);
+
     @Query("""
             SELECT r FROM StudentGroupRequest r
             JOIN FETCH r.student s
-            JOIN FETCH r.directionGroup dg
-            JOIN FETCH dg.courseCategory c
+            JOIN FETCH r.departmentGroup dg
+            JOIN FETCH dg.department c
             WHERE (:status IS NULL OR r.status = :status)
-              AND (:categoryId IS NULL OR c.id = :categoryId)
-              AND (:directionGroupId IS NULL OR dg.id = :directionGroupId)
+              AND (:departmentId IS NULL OR c.id = :departmentId)
+              AND (:departmentGroupId IS NULL OR dg.id = :departmentGroupId)
             ORDER BY r.appliedAt DESC
             """)
     List<StudentGroupRequest> findAdminRequests(
             @Param("status") GroupRequestStatus status,
-            @Param("categoryId") Long categoryId,
-            @Param("directionGroupId") Long directionGroupId);
+            @Param("departmentId") Long departmentId,
+            @Param("departmentGroupId") Long departmentGroupId);
 }

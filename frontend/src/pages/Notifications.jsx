@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import Typography from '@mui/material/Typography'
 import Card from '@mui/material/Card'
 import Container from '@mui/material/Container'
@@ -16,7 +16,7 @@ import Footer from '../components/ui/Footer.jsx'
 const MOCK_NOTIFICATIONS = [
   {
     id: 1,
-    title: 'Mbledhje kursi “Struktura diskrete”',
+    title: 'Mbledhje Lënda “Struktura diskrete”',
     message: 'E premte 10:00, salla 404. Pjesëmarrja është e detyrueshme për studentët e vitit të dytë.',
     date: '1 Maj 2026',
     unread: true,
@@ -149,7 +149,7 @@ export default function Notifications() {
         <Footer />
       </div>
 
-      {/* SUCCESS TOAST */}
+      {}
       <Snackbar
         open={openSnackbar}
         autoHideDuration={3000}

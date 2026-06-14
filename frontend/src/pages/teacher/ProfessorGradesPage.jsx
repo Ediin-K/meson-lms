@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+﻿import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Box,
   Button,
@@ -26,17 +26,17 @@ import GradeFormDialog from "../../components/grades/GradeFormDialog";
 import teacherContentService from "../../services/teacherContentService";
 import { useAppPreferences } from "../../context/appPreferencesContext";
 import {
-  getGradesByCourse,
+  getGradesBySubject,
   createGrade,
   updateGrade,
   deleteGrade,
 } from "../../services/gradeService";
 
 export default function ProfessorGradesPage() {
-  const { colorMode } = useAppPreferences();
+  const { colorMode, t } = useAppPreferences();
   const isDark = colorMode === "dark";
-  const [courses, setCourses] = useState([]);
-  const [selectedCourseId, setSelectedCourseId] = useState("");
+  const [subjects, setSubjects] = useState([]);
+  const [selectedSubjectId, setSelectedSubjectId] = useState("");
   const [grades, setGrades] = useState([]);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -54,44 +54,44 @@ export default function ProfessorGradesPage() {
   const getErrorMessage = (error, fallback) =>
     error?.response?.data?.message || error?.response?.data?.error || error?.message || fallback;
 
-  const loadCourses = useCallback(async () => {
+  const loadsubjects = useCallback(async () => {
     try {
-      const res = await teacherContentService.getCourses();
-      setCourses(res.data || []);
+      const res = await teacherContentService.getSubjects();
+      setSubjects(res.data || []);
     } catch (error) {
-      showToast(getErrorMessage(error, "Gabim gjatë marrjes së kurseve"), "error");
+      showToast(getErrorMessage(error, t("professorGrades.toast.fetchSubjectsError")), "error");
     }
   }, []);
 
-  const loadCourseData = useCallback(async (courseId) => {
-    if (!courseId) return;
+  const loadSubjectData = useCallback(async (subjectId) => {
+    if (!subjectId) return;
     setLoading(true);
     try {
       const [gradesData, studentsRes] = await Promise.all([
-        getGradesByCourse(courseId),
-        teacherContentService.getStudentsByCourse(courseId),
+        getGradesBySubject(subjectId),
+        teacherContentService.getStudentsBySubject(subjectId),
       ]);
       setGrades(gradesData || []);
       setStudents(studentsRes.data || []);
     } catch (error) {
-      showToast(getErrorMessage(error, "Gabim gjatë marrjes së të dhënave"), "error");
+      showToast(getErrorMessage(error, t("professorGrades.toast.fetchDataError")), "error");
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    loadCourses();
-  }, [loadCourses]);
+    loadSubjects();
+  }, [loadsubjects]);
 
   useEffect(() => {
-    if (selectedCourseId) {
-      loadCourseData(selectedCourseId);
+    if (selectedSubjectId) {
+      loadSubjectData(selectedSubjectId);
     } else {
       setGrades([]);
       setStudents([]);
     }
-  }, [selectedCourseId, loadCourseData]);
+  }, [selectedSubjectId, loadSubjectData]);
 
   const filteredGrades = useMemo(() => {
     const term = searchTerm.toLowerCase();
@@ -107,22 +107,22 @@ export default function ProfessorGradesPage() {
     return students.filter((s) => !gradedIds.has(s.userId));
   }, [students, grades]);
 
-  const selectedCourse = courses.find((c) => String(c.id) === String(selectedCourseId));
+  const selectedSubject = subjects.find((c) => String(c.id) === String(selectedSubjectId));
 
   const handleFormSubmit = async (data) => {
     setSubmitting(true);
     try {
       if (editGrade?.id) {
         await updateGrade(editGrade.id, data);
-        showToast("Nota u përditësua me sukses");
+        showToast(t("professorGrades.toast.updated"));
       } else {
         await createGrade(data);
-        showToast("Nota u shtua me sukses");
+        showToast(t("professorGrades.toast.created"));
       }
       setOpenForm(false);
-      await loadCourseData(selectedCourseId);
+      await loadSubjectData(selectedSubjectId);
     } catch (error) {
-      showToast(getErrorMessage(error, "Gabim gjatë ruajtjes së notës"), "error");
+      showToast(getErrorMessage(error, t("professorGrades.toast.saveError")), "error");
     } finally {
       setSubmitting(false);
     }
@@ -133,11 +133,11 @@ export default function ProfessorGradesPage() {
     setSubmitting(true);
     try {
       await deleteGrade(deleteTarget.id);
-      showToast("Nota u fshi me sukses");
+      showToast(t("professorGrades.toast.deleted"));
       setDeleteTarget(null);
-      await loadCourseData(selectedCourseId);
+      await loadSubjectData(selectedSubjectId);
     } catch (error) {
-      showToast(getErrorMessage(error, "Gabim gjatë fshirjes së notës"), "error");
+      showToast(getErrorMessage(error, t("professorGrades.toast.deleteError")), "error");
     } finally {
       setSubmitting(false);
     }
@@ -148,39 +148,39 @@ export default function ProfessorGradesPage() {
       variant="contained"
       startIcon={<AddRounded />}
       onClick={() => { setEditGrade(null); setOpenForm(true); }}
-      disabled={!selectedCourseId}
+      disabled={!selectedSubjectId}
       className="!rounded-lg !normal-case !bg-[#2563eb] !shadow-none hover:!bg-[#1d4ed8]"
     >
-      Shto notë
+      {t("professorGrades.addGradeBtn")}
     </Button>
   );
 
   return (
     <GradesPageShell
       backTo="/teacher"
-      backLabel="Kthehu te Paneli"
+      backLabel={t("professorGrades.backToPanel")}
       breadcrumbs={[
-        { label: "Paneli", to: "/teacher" },
-        { label: "Notat" },
+        { label: t("professorGrades.panelTitle"), to: "/teacher" },
+        { label: t("professorGrades.gradesTitle") },
       ]}
-      title="Menaxhimi i Notave"
-      subtitle="Vendosni, ndryshoni dhe fshini notat për studentët e regjistruar."
+      title={t("professorGrades.manageTitle")}
+      subtitle={t("professorGrades.subtitle")}
       icon={GradeRounded}
       actions={toolbarActions}
     >
       <Box className="mb-5 rounded-lg border border-slate-300 bg-white p-4 dark:border-slate-700 dark:bg-slate-900 sm:p-5">
         <Box className="flex flex-col gap-4 lg:flex-row lg:items-end">
           <FormControl size="small" className="w-full lg:max-w-xs" required>
-            <InputLabel>Kursi</InputLabel>
+            <InputLabel>{t("professorGrades.subjectLabel")}</InputLabel>
             <Select
-              value={selectedCourseId}
-              label="Kursi"
-              onChange={(e) => setSelectedCourseId(e.target.value)}
+              value={selectedSubjectId}
+              label={t("professorGrades.subjectLabel")}
+              onChange={(e) => setSelectedSubjectId(e.target.value)}
             >
               <MenuItem value="">
-                <em>Zgjidhni kursin...</em>
+                <em>{t("professorGrades.chooseSubject")}</em>
               </MenuItem>
-              {courses.map((c) => (
+              {subjects.map((c) => (
                 <MenuItem key={c.id} value={c.id}>
                   {c.titulli} ({c.ects ?? 5} ECTS)
                 </MenuItem>
@@ -190,10 +190,10 @@ export default function ProfessorGradesPage() {
 
           <TextField
             size="small"
-            placeholder="Kërko student ose koment..."
+            placeholder={t("professorGrades.searchPlaceholder")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            disabled={!selectedCourseId}
+            disabled={!selectedSubjectId}
             className="w-full lg:flex-1"
             InputProps={{
               startAdornment: (
@@ -212,21 +212,21 @@ export default function ProfessorGradesPage() {
           />
         </Box>
 
-        {selectedCourse && (
+        {selectedSubject && (
           <Box className="mt-4 flex flex-wrap gap-2">
             <Chip
               size="small"
-              label={`${filteredGrades.length} nota`}
+              label={`${filteredGrades.length} ${t("professorGrades.chipGrades")}`}
               className="!bg-sky-100 !font-semibold !text-sky-800 dark:!bg-sky-950/60 dark:!text-sky-300"
             />
             <Chip
               size="small"
-              label={`${studentsWithoutGrade.length} studentë pa notë`}
+              label={`${studentsWithoutGrade.length} ${t("professorGrades.chipWithoutGrade")}`}
               className="!bg-amber-100 !font-semibold !text-amber-800 dark:!bg-amber-950/60 dark:!text-amber-300"
             />
             <Chip
               size="small"
-              label={`${students.length} studentë total`}
+              label={`${students.length} ${t("professorGrades.chipTotal")}`}
               variant="outlined"
               className="!font-semibold dark:!border-slate-600 dark:!text-slate-300"
             />
@@ -234,10 +234,10 @@ export default function ProfessorGradesPage() {
         )}
       </Box>
 
-      {!selectedCourseId ? (
+      {!selectedSubjectId ? (
         <Box className="flex min-h-[280px] items-center justify-center rounded-lg border border-dashed border-slate-400 bg-white px-6 text-center dark:border-slate-600 dark:bg-slate-900">
           <Typography className="!text-slate-600 dark:!text-slate-400">
-            Zgjidhni një kurs nga lista për të parë dhe menaxhuar notat e studentëve.
+            {t("professorGrades.noSubjectPrompt")}
           </Typography>
         </Box>
       ) : (
@@ -256,22 +256,22 @@ export default function ProfessorGradesPage() {
         onSubmit={handleFormSubmit}
         initialData={editGrade}
         students={editGrade ? students : studentsWithoutGrade.length ? studentsWithoutGrade : students}
-        courses={courses}
-        fixedCourseId={selectedCourseId ? Number(selectedCourseId) : null}
-        fixedCourseTitle={selectedCourse?.titulli || ""}
+        subjects={subjects}
+        fixedSubjectId={selectedSubjectId ? Number(selectedSubjectId) : null}
+        fixedSubjectTitle={selectedSubject?.titulli || ""}
         submitting={submitting}
       />
 
       <Dialog open={Boolean(deleteTarget)} onClose={() => setDeleteTarget(null)} PaperProps={{ className: "rounded-xl" }}>
-        <DialogTitle className="!font-bold">Konfirmo fshirjen</DialogTitle>
+        <DialogTitle className="!font-bold">{t("professorGrades.deleteTitle")}</DialogTitle>
         <DialogContent>
           <Typography>
-            Doni të fshini notën e studentit{" "}
+            {t("professorGrades.deleteBody")}{" "}
             <strong>{deleteTarget?.studentEmri} {deleteTarget?.studentMbiemri}</strong>?
           </Typography>
         </DialogContent>
         <DialogActions className="!px-6 !pb-4">
-          <Button onClick={() => setDeleteTarget(null)} className="!rounded-lg !normal-case">Anulo</Button>
+          <Button onClick={() => setDeleteTarget(null)} className="!rounded-lg !normal-case">{t("professorGrades.cancel")}</Button>
           <Button
             color="error"
             variant="contained"
@@ -279,7 +279,7 @@ export default function ProfessorGradesPage() {
             disabled={submitting}
             className="!rounded-lg !normal-case"
           >
-            Fshi notën
+            {t("professorGrades.deleteBtn")}
           </Button>
         </DialogActions>
       </Dialog>

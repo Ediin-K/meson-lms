@@ -118,6 +118,16 @@ public class QuizService {
         return toQuestionResponse(questionRepository.save(question));
     }
 
+    public QuizQuestionResponse updateQuestion(Long id, QuizQuestionRequest request) {
+        QuizQuestion question = questionRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Pyetja nuk u gjet"));
+        question.setPyetja(request.getPyetja());
+        question.setLloji(request.getLloji());
+        question.setRradhitja(request.getRradhitja());
+        question.setPikete(request.getPikete() != null ? request.getPikete() : 1);
+        return toQuestionResponse(questionRepository.save(question));
+    }
+
     public void deleteQuestion(Long id) {
         if (!questionRepository.existsById(id)) {
             throw new ResourceNotFoundException("Pyetja nuk u gjet");
@@ -137,6 +147,14 @@ public class QuizService {
         answer.setPergjigja(request.getPergjigja());
         answer.setEshteSakte(request.getEshteSakte());
         answer.setQuestion(question);
+        return toAnswerResponse(answerRepository.save(answer));
+    }
+
+    public QuizAnswerResponse updateAnswer(Long id, QuizAnswerRequest request) {
+        QuizAnswer answer = answerRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Pergjigja nuk u gjet"));
+        answer.setPergjigja(request.getPergjigja());
+        answer.setEshteSakte(request.getEshteSakte());
         return toAnswerResponse(answerRepository.save(answer));
     }
 
@@ -258,7 +276,7 @@ public class QuizService {
                 .submitted(true)
                 .message("Kuizi u dorezua me sukses.")
                 .pikete(score)
-                .courseId(getCourseIdFromQuiz(attempt.getQuiz()))
+                .subjectId(getSubjectIdFromQuiz(attempt.getQuiz()))
                 .build();
     }
 
@@ -350,7 +368,7 @@ public class QuizService {
                 .startedAt(attempt.getStartedAt())
                 .expiresAt(attempt.getExpiresAt())
                 .remainingSeconds(remaining)
-                .courseId(getCourseIdFromQuiz(attempt.getQuiz()))
+                .subjectId(getSubjectIdFromQuiz(attempt.getQuiz()))
                 .totalPikete(questionHelper.calculateTotalPoints(attempt.getQuiz().getId()))
                 .questions(questionRepository.findByQuizIdOrderByRradhitjaAsc(attempt.getQuiz().getId()).stream()
                         .map(this::toQuestionForAttempt)
@@ -369,11 +387,11 @@ public class QuizService {
                 .build();
     }
 
-    private Long getCourseIdFromQuiz(Quiz quiz) {
-        if (quiz.getLesson() == null || quiz.getLesson().getModule() == null || quiz.getLesson().getModule().getCourse() == null) {
+    private Long getSubjectIdFromQuiz(Quiz quiz) {
+        if (quiz.getLesson() == null || quiz.getLesson().getModule() == null || quiz.getLesson().getModule().getSubject() == null) {
             return null;
         }
-        return quiz.getLesson().getModule().getCourse().getId();
+        return quiz.getLesson().getModule().getSubject().getId();
     }
 
     public Long getCurrentStudentId() {
@@ -400,7 +418,7 @@ public class QuizService {
                 .createdAt(quiz.getCreatedAt())
                 .activatedAt(quiz.getActivatedAt())
                 .closedAt(quiz.getClosedAt())
-                .courseId(getCourseIdFromQuiz(quiz))
+                .subjectId(getSubjectIdFromQuiz(quiz))
                 .questionCount((int) questionCount)
                 .totalPikete(questionHelper.calculateTotalPoints(quiz.getId()))
                 .build();

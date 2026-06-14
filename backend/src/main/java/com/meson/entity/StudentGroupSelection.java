@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(exclude = {"student", "directionGroup"})
+@EqualsAndHashCode(exclude = {"student", "departmentGroup"})
 public class StudentGroupSelection {
 
     @Id
@@ -26,8 +26,8 @@ public class StudentGroupSelection {
     private User student;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "direction_group_id", nullable = false)
-    private DirectionGroup directionGroup;
+    @JoinColumn(name = "department_group_id", nullable = false)
+    private DepartmentGroup departmentGroup;
 
     @Column(name = "selected_at", nullable = false)
     private LocalDateTime selectedAt;

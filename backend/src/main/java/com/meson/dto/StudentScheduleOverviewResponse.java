@@ -9,6 +9,6 @@ import java.util.List;
 @Builder
 public class StudentScheduleOverviewResponse {
     private StudentGroupStatusResponse status;
-    private List<AvailableDirectionGroupResponse> availableGroups;
+    private List<AvailableDepartmentGroupResponse> availableGroups;
     private List<ScheduleSessionResponse> approvedSchedules;
 }

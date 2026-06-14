@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import {
   Typography,
@@ -50,31 +50,28 @@ const EMPTY_MODULE = {
 };
 
 export default function TeacherModules() {
-  const { courseId } = useParams();
+  const { subjectId } = useParams();
   const navigate = useNavigate();
-  const { t, mode } = useAppPreferences();
+  const { mode, t, } = useAppPreferences();
   const isDark = mode === "dark";
 
-  const [courses, setCourses] = useState([]);
-  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [subjects, setSubjects] = useState([]);
+  const [selectedSubject, setSelectedSubject] = useState(null);
   const [modules, setModules] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [, setError] = useState(null);
 
-  // Modal states
   const [openDialog, setOpenDialog] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [editingModule, setEditingModule] = useState(null);
   const [formData, setFormData] = useState(EMPTY_MODULE);
   const [saving, setSaving] = useState(false);
 
-  // Deletion & Toast States
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
 
-  // Quiz results dialog
   const [resultsOpen, setResultsOpen] = useState(false);
   const [resultsModuleName, setResultsModuleName] = useState('');
   const [resultsLoading, setResultsLoading] = useState(false);
@@ -84,36 +81,36 @@ export default function TeacherModules() {
   const [resultsAttemptsLoading, setResultsAttemptsLoading] = useState(false);
 
   useEffect(() => {
-    if (!courseId) {
-      fetchCourses();
+    if (!subjectId) {
+      fetchSubjects();
     } else {
-      fetchCourseAndModules();
+      fetchSubjectAndModules();
     }
-  }, [courseId]);
+  }, [subjectId]);
 
-  const fetchCourses = async () => {
+  const fetchSubjects = async () => {
     setLoading(true);
     try {
-      const res = await teacherContentService.getCourses();
-      setCourses(res.data);
-    } catch (err) {
-      setError("Gabim gjatë marrjes së kurseve.");
+      const res = await teacherContentService.getSubjects();
+      setSubjects(res.data);
+    } catch {
+      setError(t("teacherModules.toast.fetchSubjectsError"));
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchCourseAndModules = async () => {
+  const fetchSubjectAndModules = async () => {
     setLoading(true);
     try {
-      const [courseRes, modulesRes] = await Promise.all([
-        teacherContentService.getCourseById(courseId),
-        teacherContentService.getModules(courseId),
+      const [subjectRes, modulesRes] = await Promise.all([
+        teacherContentService.getSubjectById(subjectId),
+        teacherContentService.getModules(subjectId),
       ]);
-      setSelectedCourse(courseRes.data);
+      setSelectedSubject(subjectRes.data);
       setModules(modulesRes.data);
-    } catch (err) {
-      setError("Gabim gjatë marrjes së të dhënave.");
+    } catch {
+      setError(t("teacherModules.toast.fetchDataError"));
     } finally {
       setLoading(false);
     }
@@ -143,17 +140,17 @@ export default function TeacherModules() {
       if (isEdit) {
         await teacherContentService.updateModule(editingModule.id, {
           ...formData,
-          courseId: Number(courseId),
+          subjectId: Number(subjectId),
         });
       } else {
         await teacherContentService.createModule({
           ...formData,
-          courseId: Number(courseId),
+          subjectId: Number(subjectId),
         });
       }
-      const res = await teacherContentService.getModules(courseId);
+      const res = await teacherContentService.getModules(subjectId);
       setModules(res.data);
-      setSnackbarMessage(isEdit ? "Moduli u përditësua me sukses." : "Moduli u krijua me sukses.");
+      setSnackbarMessage(isEdit ? t('teacherModules.toast.moduleUpdated') : t('teacherModules.toast.moduleCreated'));
       setOpenSnackbar(true);
       setOpenDialog(false);
     } catch (err) {
@@ -173,7 +170,7 @@ export default function TeacherModules() {
     try {
       await teacherContentService.deleteModule(deleteTarget.id);
       setModules((prev) => prev.filter((m) => m.id !== deleteTarget.id));
-      setSnackbarMessage("Moduli u fshi me sukses.");
+      setSnackbarMessage(t('teacherModules.toast.moduleDeleted'));
       setOpenSnackbar(true);
       setDeleteTarget(null);
       setOpenDeleteConfirm(false);
@@ -200,7 +197,7 @@ export default function TeacherModules() {
         )
       );
       setResultsQuizzes(quizArrays.flat());
-    } catch { /* ignore */ } finally {
+    } catch { void 0 } finally {
       setResultsLoading(false);
     }
   };
@@ -212,7 +209,7 @@ export default function TeacherModules() {
     try {
       const res = await quizService.getResults(quiz.id);
       setResultsAttempts(res.data || []);
-    } catch { /* ignore */ } finally {
+    } catch { void 0 } finally {
       setResultsAttemptsLoading(false);
     }
   };
@@ -229,49 +226,49 @@ export default function TeacherModules() {
     <Box className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-950">
       <Container maxWidth="xl" className="py-8 mt-4 sm:mt-8 grow">
         
-        {/* BREADCRUMBS & NAVIGATION */}
+        {}
         <Box className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <Breadcrumbs 
             separator={<Box className="w-1 h-1 rounded-full bg-slate-300 mx-2" />}
             className="text-slate-500! dark:text-slate-400!"
           >
             <Link to="/teacher" className="hover:text-indigo-600 transition-colors font-bold uppercase tracking-wider text-xs">
-              Paneli
+              {t('teacherModules.panelBreadcrumb')}
             </Link>
             <Link to="/teacher/modules" className="hover:text-indigo-600 transition-colors font-bold uppercase tracking-wider text-xs">
-              Modulet
+              {t('teacherModules.modulesBreadcrumb')}
             </Link>
-            {selectedCourse && (
+            {selectedSubject && (
               <Typography className="font-bold! text-indigo-600! uppercase! tracking-wider! text-xs!">
-                {selectedCourse.titulli}
+                {selectedSubject.titulli}
               </Typography>
             )}
           </Breadcrumbs>
 
           <Button
             startIcon={<ArrowBackRounded />}
-            onClick={() => navigate(courseId ? "/teacher/modules" : "/teacher")}
+            onClick={() => navigate(subjectId ? "/teacher/modules" : "/teacher")}
             className="rounded-2xl! px-6! py-2! normal-case! font-bold! text-slate-600! dark:text-slate-400! hover:bg-slate-200/50! dark:hover:bg-slate-800/50!"
           >
-            {courseId ? "Ndërro Kursin" : "Kthehu te Paneli"}
+            {subjectId ? t('teacherModules.changeSubject') : t('teacherModules.backToPanel')}
           </Button>
         </Box>
 
-        {/* CONTENT */}
-        {!courseId ? (
-          /* STEP 1: COURSE SELECTION */
+        {}
+        {!subjectId ? (
+          
           <Box>
             <Box className="mb-12">
               <Typography variant="h3" className="font-black! text-slate-900! dark:text-white! mb-2">
-                Zgjidhni Kursin
+                {t('teacherModules.chooseSubjectTitle')}
               </Typography>
               <Typography variant="body1" className="text-slate-500 dark:text-slate-400 text-lg">
-                Zgjidhni një nga kurset tuaja për të menaxhuar modulet.
+                {t('teacherModules.chooseSubjectSubtitle')}
               </Typography>
             </Box>
 
             <Grid container spacing={4}>
-              {courses.map((course) => (
+              {subjects.map((course) => (
                 <Grid item xs={12} sm={6} lg={4} key={course.id}>
                   <Card 
                     elevation={0}
@@ -339,26 +336,26 @@ export default function TeacherModules() {
                   </Card>
                 </Grid>
               ))}
-              {courses.length === 0 && (
+              {subjects.length === 0 && (
                 <Grid item xs={12}>
                    <Box className="p-20 text-center rounded-[3rem] border-2 border-dashed border-slate-200 dark:border-slate-800">
                       <SchoolRounded className="text-6xl! text-slate-200 mb-4" />
-                      <Typography variant="h6" className="text-slate-400">Nuk keni asnjë kurs të regjistruar akoma.</Typography>
+                      <Typography variant="h6" className="text-slate-400">{t('teacherModules.noSubjects')}</Typography>
                    </Box>
                 </Grid>
               )}
             </Grid>
           </Box>
         ) : (
-          /* STEP 2: MODULE MANAGEMENT */
+          
           <Box>
             <Box className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
               <div>
                 <Typography variant="h3" className="font-black! text-slate-900! dark:text-white! mb-2">
-                  Menaxhimi i Moduleve
+                  {t('teacherModules.manageTitle')}
                 </Typography>
                 <Typography variant="body1" className="text-slate-500 dark:text-slate-400 text-lg flex items-center gap-2">
-                  <SchoolRounded className="text-indigo-600" /> {selectedCourse?.titulli}
+                  <SchoolRounded className="text-indigo-600" /> {selectedSubject?.titulli}
                 </Typography>
               </div>
               <Button
@@ -367,12 +364,12 @@ export default function TeacherModules() {
                 onClick={handleOpenAdd}
                 className="rounded-2xl! bg-indigo-600! px-8! py-3! normal-case! font-bold! shadow-lg shadow-indigo-200 dark:shadow-none"
               >
-                Shto Modul të Ri
+                {t('teacherModules.addModuleBtn')}
               </Button>
             </Box>
 
             <Grid container spacing={3}>
-              {modules.map((mod, index) => (
+              {modules.map((mod) => (
                 <Grid item xs={12} key={mod.id}>
                   <Card 
                     elevation={0}
@@ -387,13 +384,13 @@ export default function TeacherModules() {
                           {mod.titulli}
                         </Typography>
                         <Typography variant="body2" className="text-slate-500 dark:text-slate-400 line-clamp-1">
-                          {mod.pershkrimi || "Nuk ka përshkrim."}
+                          {mod.pershkrimi || t('teacherModules.noDescription')}
                         </Typography>
                       </Box>
                       
                       <Box className="flex items-center gap-6 md:px-6 md:border-x border-slate-100 dark:border-slate-800">
                          <div className="flex flex-col items-center">
-                            <Typography variant="caption" className="font-bold! text-slate-400! uppercase">Leksione</Typography>
+                            <Typography variant="caption" className="font-bold! text-slate-400! uppercase">{t('teacherModules.lessonsLabel')}</Typography>
                             <Typography variant="subtitle1" className="font-black! dark:text-white! flex items-center gap-1">
                                <AutoStoriesRounded fontSize="small" className="text-indigo-500" /> {mod.lessonCount || 0}
                             </Typography>
@@ -401,7 +398,7 @@ export default function TeacherModules() {
                       </Box>
 
                       <Box className="flex gap-2">
-                        <Tooltip title="Rezultate Quiz">
+                        <Tooltip title={t('teacherModules.tooltipResults')}>
                           <IconButton
                             onClick={() => handleOpenResults(mod)}
                             className="bg-sky-50! dark:bg-sky-900/30! text-sky-600! dark:text-sky-300! hover:bg-sky-100! dark:hover:bg-sky-900/50! transition-colors"
@@ -409,7 +406,7 @@ export default function TeacherModules() {
                             <AssessmentRounded />
                           </IconButton>
                         </Tooltip>
-                        <Tooltip title="Ndrysho">
+                        <Tooltip title={t('teacherModules.tooltipEdit')}>
                           <IconButton
                             onClick={() => handleOpenEdit(mod)}
                             className="bg-indigo-50! dark:bg-indigo-900/30! text-indigo-600! dark:text-indigo-200! hover:bg-indigo-100! dark:hover:bg-indigo-900/50! transition-colors"
@@ -417,7 +414,7 @@ export default function TeacherModules() {
                             <EditRounded />
                           </IconButton>
                         </Tooltip>
-                        <Tooltip title="Fshij">
+                        <Tooltip title={t('teacherModules.tooltipDelete')}>
                           <IconButton
                             onClick={() => handleOpenDelete(mod)}
                             className="bg-rose-50! dark:bg-rose-900/30! text-rose-600! dark:text-rose-200! hover:bg-rose-100! dark:hover:bg-rose-900/50! transition-colors"
@@ -434,13 +431,13 @@ export default function TeacherModules() {
                 <Grid item xs={12}>
                    <Box className="p-20 text-center rounded-[3rem] border-2 border-dashed border-slate-200 dark:border-slate-800 bg-white/40 dark:bg-slate-900/20">
                       <LayersRounded className="text-6xl! text-slate-200 mb-4" />
-                      <Typography variant="h6" className="text-slate-400">Nuk ka asnjë modul për këtë kurs akoma.</Typography>
-                      <Button 
-                        variant="outlined" 
-                        className="mt-4! rounded-full! normal-case!" 
+                      <Typography variant="h6" className="text-slate-400">{t('teacherModules.noModules')}</Typography>
+                      <Button
+                        variant="outlined"
+                        className="mt-4! rounded-full! normal-case!"
                         onClick={handleOpenAdd}
                       >
-                        Krijo Modulin e Parë
+                        {t('teacherModules.createFirstModule')}
                       </Button>
                    </Box>
                 </Grid>
@@ -454,7 +451,7 @@ export default function TeacherModules() {
         </div>
       </Container>
 
-      {/* MODULE DIALOG */}
+      {}
       <Dialog 
         open={openDialog} 
         onClose={() => setOpenDialog(false)}
@@ -463,12 +460,12 @@ export default function TeacherModules() {
         PaperProps={{ className: "rounded-[2.5rem]! p-2! shadow-2xl dark:bg-slate-900!" }}
       >
         <DialogTitle className="font-black! text-2xl! pt-8! px-8!">
-          {isEdit ? "Ndrysho Modulin" : "Shto Modul të Ri"}
+          {isEdit ? t('teacherModules.editDialogTitle') : t('teacherModules.addDialogTitle')}
         </DialogTitle>
         <DialogContent className="px-8! pt-4!">
           <Box className="flex flex-col gap-6 py-4">
             <TextField
-              label="Titulli i Modulit"
+              label={t('teacherModules.fieldTitle')}
               fullWidth
               variant="outlined"
               value={formData.titulli}
@@ -476,7 +473,7 @@ export default function TeacherModules() {
               InputProps={{ className: "rounded-2xl!" }}
             />
             <TextField
-              label="Përshkrimi"
+              label={t('teacherModules.fieldDesc')}
               fullWidth
               multiline
               rows={3}
@@ -486,7 +483,7 @@ export default function TeacherModules() {
               InputProps={{ className: "rounded-2xl!" }}
             />
             <TextField
-              label="Rradhitja"
+              label={t('teacherModules.fieldOrder')}
               type="number"
               fullWidth
               variant="outlined"
@@ -498,7 +495,7 @@ export default function TeacherModules() {
         </DialogContent>
         <DialogActions className="px-8! pb-8! pt-2!">
           <Button onClick={() => setOpenDialog(false)} className="normal-case! font-bold! text-slate-500!">
-            Anulo
+            {t('teacherModules.cancel')}
           </Button>
           <Button
             variant="contained"
@@ -506,12 +503,12 @@ export default function TeacherModules() {
             disabled={saving || !formData.titulli}
             className="rounded-2xl! bg-indigo-600! px-10! py-3! normal-case! font-bold! shadow-lg"
           >
-            {saving ? "Duke ruajtur..." : isEdit ? "Përditëso" : "Krijo"}
+            {saving ? t('teacherModules.saving') : isEdit ? t('teacherModules.update') : t('teacherModules.create')}
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* DELETE CONFIRMATION DIALOG */}
+      {}
       <Dialog
         open={openDeleteConfirm}
         onClose={() => {
@@ -541,7 +538,7 @@ export default function TeacherModules() {
             component="p"
             className={isDark ? "font-black! text-white!" : "font-black! text-slate-900!"}
           >
-            A jeni i sigurt?
+            {t('teacherModules.deleteTitle')}
           </Typography>
         </DialogTitle>
         <DialogContent className="px-6! py-4!">
@@ -549,7 +546,7 @@ export default function TeacherModules() {
             variant="body2"
             className={isDark ? "text-slate-300!" : "text-slate-600!"}
           >
-            Do të fshihet përhershëm moduli:
+            {t('teacherModules.deleteBody')}
           </Typography>
           <Typography
             variant="body1"
@@ -561,7 +558,7 @@ export default function TeacherModules() {
             variant="caption"
             className={isDark ? "text-slate-400! block! mt-1!" : "text-slate-500! block! mt-1!"}
           >
-            Kujdes: Ky veprim fshin edhe të gjitha leksionet brenda tij.
+            {t('teacherModules.deleteWarning')}
           </Typography>
         </DialogContent>
         <DialogActions className="px-8! pb-8! pt-4! gap-2">
@@ -572,7 +569,7 @@ export default function TeacherModules() {
             }}
             className="rounded-2xl! px-6! py-3! normal-case! font-bold! text-slate-500! hover:bg-slate-100! dark:hover:bg-slate-800!"
           >
-            Anulo
+            {t('teacherModules.cancel')}
           </Button>
           <Button
             variant="contained"
@@ -580,12 +577,12 @@ export default function TeacherModules() {
             onClick={handleConfirmDelete}
             className="rounded-2xl! px-10! py-3! normal-case! font-black! bg-rose-600! hover:bg-rose-700! shadow-lg shadow-rose-500/20"
           >
-            Fshi
+            {t('teacherModules.delete')}
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* QUIZ RESULTS DIALOG */}
+      {}
       <Dialog
         open={resultsOpen}
         onClose={() => setResultsOpen(false)}
@@ -596,7 +593,7 @@ export default function TeacherModules() {
         <DialogTitle className="flex items-center justify-between font-black! text-xl! pt-6! px-6!">
           <Box className="flex items-center gap-2">
             <AssessmentRounded className="text-sky-500" />
-            <span className="dark:text-white">Rezultatet — {resultsModuleName}</span>
+            <span className="dark:text-white">{t('teacherModules.resultsTitle')} — {resultsModuleName}</span>
           </Box>
           <IconButton onClick={() => setResultsOpen(false)} size="small">
             <CloseRounded fontSize="small" className="dark:text-slate-400" />
@@ -608,11 +605,11 @@ export default function TeacherModules() {
               <CircularProgress />
             </Box>
           ) : resultsQuizzes.length === 0 ? (
-            <Alert severity="info" className="mt-2">Ky modul nuk ka leksione quiz.</Alert>
+            <Alert severity="info" className="mt-2">{t('teacherModules.resultsNoQuizzes')}</Alert>
           ) : !resultsSelectedQuiz ? (
             <Box className="mt-3 flex flex-col gap-3">
               <Typography variant="body2" className="text-slate-500 dark:!text-slate-400">
-                Zgjidhni quiz-in për të parë rezultatet e studentëve:
+                {t('teacherModules.resultsChooseQuiz')}
               </Typography>
               {resultsQuizzes.map((q) => (
                 <Box
@@ -639,24 +636,24 @@ export default function TeacherModules() {
                   onClick={() => { setResultsSelectedQuiz(null); setResultsAttempts([]); }}
                   className="normal-case! text-slate-500!"
                 >
-                  Kthehu
+                  {t('teacherModules.resultsBack')}
                 </Button>
                 <Typography className="font-bold! dark:!text-white">{resultsSelectedQuiz.titulli}</Typography>
               </Box>
               {resultsAttemptsLoading ? (
                 <Box className="flex justify-center py-8"><CircularProgress size={28} /></Box>
               ) : resultsAttempts.length === 0 ? (
-                <Alert severity="info">Asnjë student nuk e ka dorëzuar ende këtë quiz.</Alert>
+                <Alert severity="info">{t('teacherModules.resultsNoAttempts')}</Alert>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-sm">
                     <thead>
                       <tr className="border-b border-slate-200 dark:border-slate-700">
-                        <th className="py-3 pr-4 font-bold text-slate-500 dark:text-slate-400">#</th>
-                        <th className="py-3 pr-4 font-bold text-slate-500 dark:text-slate-400">Emri dhe Mbiemri</th>
-                        <th className="py-3 pr-4 font-bold text-slate-500 dark:text-slate-400">ID</th>
-                        <th className="py-3 pr-4 font-bold text-slate-500 dark:text-slate-400">Koha</th>
-                        <th className="py-3 font-bold text-slate-500 dark:text-slate-400">Pikët</th>
+                        <th className="py-3 pr-4 font-bold text-slate-500 dark:text-slate-400">{t('teacherModules.resultsColNo')}</th>
+                        <th className="py-3 pr-4 font-bold text-slate-500 dark:text-slate-400">{t('teacherModules.resultsColName')}</th>
+                        <th className="py-3 pr-4 font-bold text-slate-500 dark:text-slate-400">{t('teacherModules.resultsColId')}</th>
+                        <th className="py-3 pr-4 font-bold text-slate-500 dark:text-slate-400">{t('teacherModules.resultsColTime')}</th>
+                        <th className="py-3 font-bold text-slate-500 dark:text-slate-400">{t('teacherModules.resultsColPoints')}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -682,7 +679,7 @@ export default function TeacherModules() {
         </DialogContent>
       </Dialog>
 
-      {/* SUCCESS TOAST */}
+      {}
       <Snackbar
         open={openSnackbar}
         autoHideDuration={4000}

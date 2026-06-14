@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react'
+﻿import { useMemo, useRef } from 'react'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Autoplay, Pagination, EffectFade, Navigation } from 'swiper/modules'
 import 'swiper/css'
@@ -59,10 +59,10 @@ const universities = [
 ]
 
 const categories = [
-  { title: 'Histori e artit', meta: '-50% · 3 kurse', icon: PaletteRounded, chipKey: 'offer', chipColor: 'error' },
-  { title: 'UI & UX', meta: 'Së shpejti · 16 kurse', icon: ViewQuiltRounded, chipKey: 'soon', chipColor: 'default' },
-  { title: 'Programim', meta: 'E re · 2 kurse', icon: CodeRounded, chipKey: 'new', chipColor: 'success' },
-  { title: 'Dizajn 3D', meta: '4 kurse', icon: ThreeDRotationRounded, chipKey: null, chipColor: 'default' },
+  { title: 'Histori e artit', meta: '-50% · 3 Lëndë', icon: PaletteRounded, chipKey: 'offer', chipColor: 'error' },
+  { title: 'UI & UX', meta: 'Së shpejti · 16 Lëndë', icon: ViewQuiltRounded, chipKey: 'soon', chipColor: 'default' },
+  { title: 'Programim', meta: 'E re · 2 Lëndë', icon: CodeRounded, chipKey: 'new', chipColor: 'success' },
+  { title: 'Dizajn 3D', meta: '4 Lëndë', icon: ThreeDRotationRounded, chipKey: null, chipColor: 'default' },
 ]
 
 export function SpotlightCard({ title, meta, icon, chip, chipColor, imgLoading }) {
@@ -106,7 +106,7 @@ export function SpotlightCard({ title, meta, icon, chip, chipColor, imgLoading }
 function StatsSection({ t }) {
   const stats = [
     { label: t('home.stats.students'), value: '12k+', icon: GroupsRounded, color: 'text-blue-600' },
-    { label: t('home.stats.courses'), value: '500+', icon: CastForEducationRounded, color: 'text-indigo-600' },
+    { label: t('home.stats.subjects'), value: '500+', icon: CastForEducationRounded, color: 'text-indigo-600' },
     { label: t('home.stats.mentors'), value: '300+', icon: SchoolRounded, color: 'text-sky-600' },
     { label: t('home.stats.satisfaction'), value: '98%', icon: StarRounded, color: 'text-amber-500' },
   ]
@@ -132,7 +132,7 @@ function StatsSection({ t }) {
 
 function PartnersSection({ t }) {
   const partners = ['UBT', 'UP', 'UT', 'UPT', 'UNISHK', 'Kolegji AAB', 'Univ. i Korçës', 'Univ. i Vlorës', 'Univ. i Prizrenit', 'Univ. i Gjakovës']
-  // Double the list for infinite effect
+  
   const marqueeItems = [...partners, ...partners]
 
   return (
@@ -147,7 +147,7 @@ function PartnersSection({ t }) {
               {p}
             </Typography>
           ))}
-          {/* Third copy for ultra-long screens if needed */}
+          {}
           {marqueeItems.map((p, i) => (
             <Typography key={`dup-${i}`} variant="h3" className="!font-black !text-slate-300 dark:!text-slate-700 hover:!text-sky-600 transition-colors cursor-default px-12 inline-block">
               {p}
@@ -158,9 +158,6 @@ function PartnersSection({ t }) {
     </Box>
   )
 }
-
-
-
 
 function TestimonialsSection({ t }) {
   return (
@@ -256,11 +253,11 @@ export default function Home() {
       <div className="flex w-full min-h-0 flex-1 flex-col animate-fadeIn">
         <div className="flex min-h-0 flex-1 flex-col px-2 py-5 sm:px-4 sm:py-7">
 
-          {/* Lobby Greeting / Admin Command Center */}
+          {}
           {isAuthenticated && (
             <Box className="mb-12 animate-fadeIn">
               {role === 'admin' ? (
-                /* ADMIN COMMAND CENTER */
+                
                 <Box className="glass-panel rounded-[3rem] p-8 shadow-2xl shadow-sky-900/10 border-sky-200/50">
                   <div className="flex flex-col lg:flex-row gap-8 items-center justify-between">
                     <div className="flex items-center gap-6">
@@ -276,7 +273,7 @@ export default function Home() {
                     </div>
                     <div className="flex flex-wrap gap-3">
                       <Button onClick={() => navigate('/admin/users')} variant="outlined" startIcon={<GroupsRounded />} className="!rounded-2xl !border-slate-200 !text-slate-700 !font-bold hover:!bg-sky-50 transition-all">{t('home.admin.services.users.title')}</Button>
-                      <Button onClick={() => navigate('/admin/courses')} variant="outlined" startIcon={<CastForEducationRounded />} className="!rounded-2xl !border-slate-200 !text-slate-700 !font-bold hover:!bg-sky-50 transition-all">{t('home.admin.services.courses.title')}</Button>
+                      <Button onClick={() => navigate('/admin/subjects')} variant="outlined" startIcon={<CastForEducationRounded />} className="!rounded-2xl !border-slate-200 !text-slate-700 !font-bold hover:!bg-sky-50 transition-all">{t('home.admin.services.subjects.title')}</Button>
                       <Button onClick={() => navigate('/admin/reports')} variant="contained" startIcon={<ArrowForwardRounded />} className="!rounded-2xl !bg-sky-600 !font-black shadow-lg shadow-sky-200/40">{t('header.navAdminDashboard')}</Button>
                     </div>
                   </div>
@@ -285,7 +282,7 @@ export default function Home() {
                     {[
                       { label: 'Përdorues të rinj', value: '+12', color: 'bg-emerald-50 text-emerald-600' },
                       { label: 'Kërkesa certifikatash', value: '5', color: 'bg-amber-50 text-amber-600' },
-                      { label: 'Kurse në pritje', value: '2', color: 'bg-sky-50 text-sky-600' },
+                      { label: 'Lëndë në pritje', value: '2', color: 'bg-sky-50 text-sky-600' },
                       { label: 'Server Status', value: 'Online', color: 'bg-blue-50 text-blue-600' },
                     ].map((m, i) => (
                       <div key={i} className={`p-4 rounded-3xl ${m.color} flex flex-col items-center justify-center border border-current/10`}>
@@ -296,7 +293,7 @@ export default function Home() {
                   </div>
                 </Box>
               ) : (
-                /* STUDENT LOBBY (Existing) */
+                
                 <Box className="px-6 py-8 glass-panel rounded-[2.5rem] flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl shadow-sky-200/20">
                   <div className="flex items-center gap-6">
                     <Avatar className="!h-20 !w-20 !bg-gradient-to-tr !from-sky-500 !to-indigo-600 !text-3xl !font-black shadow-xl ring-4 ring-white/50">
@@ -325,8 +322,7 @@ export default function Home() {
             </Box>
           )}
 
-
-          {/* Hero Slider */}
+          {}
           <section className="relative overflow-hidden rounded-[3rem] border border-white/20 bg-slate-900 shadow-2xl shadow-sky-900/15">
             <IconButton className="!absolute !left-6 !top-1/2 !z-20 !-translate-y-1/2 !bg-white/10 !text-white !backdrop-blur-md" onClick={() => swiperRef.current?.slidePrev()}>
               <ChevronLeftRounded />
@@ -367,7 +363,7 @@ export default function Home() {
             </Swiper>
           </section>
 
-          {/* Search Section */}
+          {}
           <Container maxWidth="md" className="relative -mt-12 z-30">
             <Paper elevation={0} className="flex w-full items-center rounded-[2.5rem] border border-sky-100 bg-white/95 p-3 shadow-2xl shadow-sky-200/50 backdrop-blur-xl dark:border-slate-700 dark:bg-slate-900/95 dark:shadow-black/50">
               <div className="flex pl-4 items-center justify-center text-sky-600 dark:text-sky-400"><SearchRounded fontSize="large" /></div>
@@ -384,7 +380,7 @@ export default function Home() {
 
           <Container maxWidth="lg" className="mt-20"><StatsSection t={t} /></Container>
 
-          {/* Features Section */}
+          {}
           <Container maxWidth="lg" className="mt-32">
             <Box className="text-center mb-16">
               <Typography variant="overline" className="!font-black !text-sky-600 dark:!text-sky-400 !tracking-widest">{t('home.features.overline')}</Typography>
@@ -405,7 +401,7 @@ export default function Home() {
             </div>
           </Container>
 
-          {/* Universities (Slider) */}
+          {}
           <Container maxWidth="lg" className="mt-32">
             <Box className="mb-12 flex items-end justify-between">
               <div>
@@ -431,11 +427,11 @@ export default function Home() {
 
           <TestimonialsSection t={t} />
 
-          {/* Kategorite */}
+          {}
           <Container maxWidth="lg" className="mt-32">
             <Box className="mb-12">
-              <Typography variant="overline" className="!font-black !tracking-widest !text-sky-600 dark:!text-sky-400">{t('home.catOverline')}</Typography>
-              <Typography variant="h3" className="!font-black !text-slate-800 dark:!text-white">{t('home.catTitle')}</Typography>
+              <Typography variant="overline" className="!font-black !tracking-widest !text-sky-600 dark:!text-sky-400">{t('home.departmentOverline')}</Typography>
+              <Typography variant="h3" className="!font-black !text-slate-800 dark:!text-white">{t('home.departmentTitle')}</Typography>
             </Box>
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
               {categories.map((c, i) => (

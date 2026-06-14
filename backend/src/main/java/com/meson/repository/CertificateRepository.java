@@ -12,4 +12,6 @@ public interface CertificateRepository extends JpaRepository<Certificate, Long> 
     Optional<Certificate> findByKodiUnik(String kodiUnik);
     List<Certificate> findByEnrollmentUserId(Long userId);
     boolean existsByEnrollmentId(Long enrollmentId);
+
+    void deleteByEnrollmentUserId(Long userId);
 }

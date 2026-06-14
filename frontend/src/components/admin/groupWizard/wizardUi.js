@@ -1,4 +1,4 @@
-/** Shared admin groups / wizard theme tokens and MUI sx helpers. */
+﻿
 import { scheduleCardSx, schedulePrimaryButtonSx, scheduleTheme } from "../../schedule/scheduleTheme";
 
 export const WIZARD_STEPS = [
@@ -10,7 +10,6 @@ export const WIZARD_STEPS = [
 export const ROOM_PRESETS = ["101", "132", "205", "301", "A1", "B2"];
 export const DRAFT_STORAGE_KEY = "meson-group-wizard-draft";
 
-/** Theme tokens for admin groups module (light/dark). */
 export function getGroupsTheme(isDark) {
   void isDark;
   return {
@@ -130,20 +129,55 @@ export function primaryButtonSx() {
   return schedulePrimaryButtonSx();
 }
 
-/** Build staff lookup by courseId from wizard staff rows. */
-export function buildStaffByCourse(staffRows, courses, teachers) {
+export function wizardProgressChipSx(isDark) {
+  const t = getGroupsTheme(isDark);
+  return {
+    color: t.text,
+    borderColor: t.border,
+    bgcolor: t.card,
+    "& .MuiChip-icon": { color: t.accent },
+  };
+}
+
+export function wizardStepChipSx(isDark, state) {
+  const t = getGroupsTheme(isDark);
+  if (state === "active") {
+    return {
+      bgcolor: t.accentStrong,
+      color: t.card,
+      borderColor: t.accentStrong,
+      fontWeight: 800,
+    };
+  }
+  if (state === "complete") {
+    return {
+      bgcolor: t.hover,
+      color: t.text,
+      borderColor: t.border,
+      fontWeight: 700,
+    };
+  }
+  return {
+    bgcolor: "transparent",
+    color: t.textMuted,
+    borderColor: t.border,
+    fontWeight: 700,
+  };
+}
+
+export function buildStaffBySubject(staffRows, subjects, teachers) {
   const map = {};
   for (const row of staffRows) {
-    if (!row.courseId || !row.professorId) continue;
-    const course = courses.find((c) => String(c.id) === String(row.courseId));
+    if (!row.subjectId || !row.professorId) continue;
+    const course = subjects.find((c) => String(c.id) === String(row.subjectId));
     const prof = teachers.find((t) => String(t.id) === String(row.professorId));
     const asst = row.assistantId
       ? teachers.find((t) => String(t.id) === String(row.assistantId))
       : null;
-    map[String(row.courseId)] = {
+    map[String(row.subjectId)] = {
       professorId: row.professorId,
       assistantId: row.assistantId || "",
-      courseLabel: course?.titulli || "—",
+      subjectLabel: course?.titulli || "—",
       professorLabel: prof ? `${prof.emri || ""} ${prof.mbiemri || ""}`.trim() : "—",
       assistantLabel: asst ? `${asst.emri || ""} ${asst.mbiemri || ""}`.trim() : "—",
     };
@@ -151,9 +185,9 @@ export function buildStaffByCourse(staffRows, courses, teachers) {
   return map;
 }
 
-export function applyStaffToScheduleRow(row, staffByCourse) {
-  if (!row.courseId) return row;
-  const staff = staffByCourse[String(row.courseId)];
+export function applyStaffToScheduleRow(row, staffBySubject) {
+  if (!row.subjectId) return row;
+  const staff = staffBySubject[String(row.subjectId)];
   if (!staff) return row;
   return {
     ...row,
@@ -163,10 +197,10 @@ export function applyStaffToScheduleRow(row, staffByCourse) {
 }
 
 export function seedScheduleRowsFromStaff(staffRows, emptyScheduleRow) {
-  const valid = staffRows.filter((r) => r.courseId && r.professorId);
+  const valid = staffRows.filter((r) => r.subjectId && r.professorId);
   if (valid.length === 0) return [emptyScheduleRow()];
   return valid.map((r) => ({
-    courseId: r.courseId,
+    subjectId: r.subjectId,
     professorId: r.professorId,
     assistantId: r.assistantId || "",
     sessionType: "LECTURE",
@@ -174,6 +208,5 @@ export function seedScheduleRowsFromStaff(staffRows, emptyScheduleRow) {
     startTime: "10:00",
     endTime: "",
     room: "",
-    color: "sky",
   }));
 }

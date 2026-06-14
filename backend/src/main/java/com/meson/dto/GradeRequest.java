@@ -14,8 +14,8 @@ public class GradeRequest {
     @NotNull(message = "studentId eshte i detyrueshem")
     private Long studentId;
 
-    @NotNull(message = "courseId eshte i detyrueshem")
-    private Long courseId;
+    @NotNull(message = "subjectId eshte i detyrueshem")
+    private Long subjectId;
 
     @NotNull(message = "Nota eshte e detyrueshme")
     @Min(value = 5, message = "Nota duhet te jete nga 5 deri ne 10")

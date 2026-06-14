@@ -28,16 +28,12 @@ public class TeacherLessonService {
     private final UserRepository userRepository;
     private final LessonResourceRepository lessonResourceRepository;
     private final LessonResourceMapper lessonResourceMapper;
+    private final EnrollmentCompletionService completionService;
 
     public List<LessonResponse> getLessonsByModule(Long moduleId) {
         User teacher = getCurrentUser();
-        // Here we rely on findByModuleId and then check ownership if needed, or better, 
-        // use a custom query if we want to be very strict. 
-        // For simplicity and following the rule "findByIdAndModuleCourseTeacherId", 
-        // we can fetch all lessons of a module and then filter or just use a specific query.
         
-        // Let's ensure the module belongs to the teacher first.
-        moduleRepository.findByIdAndCourseTeacherId(moduleId, teacher.getId())
+        moduleRepository.findByIdAndSubjectTeacherId(moduleId, teacher.getId())
                 .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses në këtë modul ose moduli nuk ekziston."));
 
         return lessonRepository.findByModuleIdOrderByRradhitjaAsc(moduleId).stream()
@@ -47,7 +43,7 @@ public class TeacherLessonService {
 
     public LessonResponse createLesson(LessonRequest request) {
         User teacher = getCurrentUser();
-        Module module = moduleRepository.findByIdAndCourseTeacherId(request.getModuleId(), teacher.getId())
+        Module module = moduleRepository.findByIdAndSubjectTeacherId(request.getModuleId(), teacher.getId())
                 .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses në këtë modul ose moduli nuk ekziston."));
 
         Lesson lesson = Lesson.builder()
@@ -60,12 +56,15 @@ public class TeacherLessonService {
                 .module(module)
                 .build();
 
-        return toResponse(lessonRepository.save(lesson));
+        LessonResponse response = toResponse(lessonRepository.save(lesson));
+        // New material may reopen students who had already completed the subject.
+        completionService.recalculateSubject(module.getSubject().getId());
+        return response;
     }
 
     public LessonResponse updateLesson(Long id, LessonRequest request) {
         User teacher = getCurrentUser();
-        Lesson lesson = lessonRepository.findByIdAndModuleCourseTeacherId(id, teacher.getId())
+        Lesson lesson = lessonRepository.findByIdAndModuleSubjectTeacherId(id, teacher.getId())
                 .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses në këtë lëndë ose lënda nuk ekziston."));
 
         lesson.setTitulli(request.getTitulli());
@@ -81,10 +80,13 @@ public class TeacherLessonService {
     @Transactional
     public void deleteLesson(Long id) {
         User teacher = getCurrentUser();
-        Lesson lesson = lessonRepository.findByIdAndModuleCourseTeacherId(id, teacher.getId())
+        Lesson lesson = lessonRepository.findByIdAndModuleSubjectTeacherId(id, teacher.getId())
                 .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses në këtë lëndë ose lënda nuk ekziston."));
 
+        Long subjectId = lesson.getModule().getSubject().getId();
         lessonRepository.delete(lesson);
+        // Removing material may push a student to 100% of what remains.
+        completionService.recalculateSubject(subjectId);
     }
 
     private User getCurrentUser() {

@@ -2,10 +2,10 @@ package com.meson.service;
 
 import com.meson.dto.ModuleRequest;
 import com.meson.dto.ModuleResponse;
-import com.meson.entity.Course;
+import com.meson.entity.Subject;
 import com.meson.entity.Module;
 import com.meson.entity.User;
-import com.meson.repository.CourseRepository;
+import com.meson.repository.SubjectRepository;
 import com.meson.repository.ModuleRepository;
 import com.meson.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,27 +22,28 @@ import java.util.stream.Collectors;
 public class TeacherModuleService {
 
     private final ModuleRepository moduleRepository;
-    private final CourseRepository courseRepository;
+    private final SubjectRepository subjectRepository;
     private final UserRepository userRepository;
     private final com.meson.repository.LessonRepository lessonRepository;
+    private final EnrollmentCompletionService completionService;
 
-    public List<ModuleResponse> getModulesByCourse(Long courseId) {
+    public List<ModuleResponse> getModulesBySubject(Long subjectId) {
         User teacher = getCurrentUser();
-        return moduleRepository.findByCourseIdAndCourseTeacherId(courseId, teacher.getId()).stream()
+        return moduleRepository.findBySubjectIdAndSubjectTeacherId(subjectId, teacher.getId()).stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
 
     public ModuleResponse createModule(ModuleRequest request) {
         User teacher = getCurrentUser();
-        Course course = courseRepository.findByIdAndTeacherId(request.getCourseId(), teacher.getId())
-                .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses në këtë kurs ose kursi nuk ekziston."));
+        Subject course = subjectRepository.findByIdAndTeacherId(request.getSubjectId(), teacher.getId())
+                .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses në këtë kurs ose Lënda nuk ekziston."));
 
         Module module = Module.builder()
                 .titulli(request.getTitulli())
                 .pershkrimi(request.getPershkrimi())
                 .rradhitja(request.getRradhitja())
-                .course(course)
+                .subject(course)
                 .build();
 
         return toResponse(moduleRepository.save(module));
@@ -50,7 +51,7 @@ public class TeacherModuleService {
 
     public ModuleResponse updateModule(Long id, ModuleRequest request) {
         User teacher = getCurrentUser();
-        Module module = moduleRepository.findByIdAndCourseTeacherId(id, teacher.getId())
+        Module module = moduleRepository.findByIdAndSubjectTeacherId(id, teacher.getId())
                 .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses në këtë modul ose moduli nuk ekziston."));
 
         module.setTitulli(request.getTitulli());
@@ -63,10 +64,13 @@ public class TeacherModuleService {
     @Transactional
     public void deleteModule(Long id) {
         User teacher = getCurrentUser();
-        Module module = moduleRepository.findByIdAndCourseTeacherId(id, teacher.getId())
+        Module module = moduleRepository.findByIdAndSubjectTeacherId(id, teacher.getId())
                 .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses në këtë modul ose moduli nuk ekziston."));
 
+        Long subjectId = module.getSubject().getId();
         moduleRepository.delete(module);
+        // Deleting a module drops its lessons, changing what "complete" means.
+        completionService.recalculateSubject(subjectId);
     }
 
     private User getCurrentUser() {
@@ -82,8 +86,8 @@ public class TeacherModuleService {
                 .pershkrimi(module.getPershkrimi())
                 .rradhitja(module.getRradhitja())
                 .createdAt(module.getCreatedAt())
-                .courseId(module.getCourse().getId())
-                .courseTitulli(module.getCourse().getTitulli())
+                .subjectId(module.getSubject().getId())
+                .subjectTitulli(module.getSubject().getTitulli())
                 .lessonCount((int) lessonRepository.countByModuleId(module.getId()))
                 .build();
     }

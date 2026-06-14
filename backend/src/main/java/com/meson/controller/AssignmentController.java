@@ -24,7 +24,6 @@ public class AssignmentController {
     private final AssignmentService assignmentService;
     private final UserRepository userRepository;
 
-    /** Returns the assignment for a lesson, or 204 if none exists. */
     @GetMapping("/lesson/{lessonId}")
     public ResponseEntity<AssignmentResponse> getByLesson(@PathVariable Long lessonId) {
         return assignmentService.getByLesson(lessonId)
@@ -67,6 +66,12 @@ public class AssignmentController {
     @PreAuthorize("hasRole('STUDENT')")
     public List<AssignmentSubmissionResponse> getMySubmissions() {
         return assignmentService.getMySubmissions(currentUserId());
+    }
+
+    @GetMapping("/my-overview")
+    @PreAuthorize("hasRole('STUDENT')")
+    public List<com.meson.dto.StudentAssignmentOverviewResponse> getMyOverview() {
+        return assignmentService.getStudentOverview(currentUserId());
     }
 
     private Long currentUserId() {

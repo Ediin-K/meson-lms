@@ -18,18 +18,18 @@ public class QuizQuestion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(name = "question", nullable = false, columnDefinition = "TEXT")
     private String pyetja;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "type", nullable = false)
     private QuizType lloji;
 
-    @Column(nullable = false)
+    @Column(name = "sequence_order", nullable = false)
     private Integer rradhitja;
 
     @Builder.Default
-    @Column(nullable = false)
+    @Column(name = "points", nullable = false)
     private Integer pikete = 1;
 
     @ManyToOne(fetch = FetchType.LAZY)

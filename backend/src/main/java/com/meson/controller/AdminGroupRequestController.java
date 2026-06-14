@@ -24,9 +24,9 @@ public class AdminGroupRequestController {
     @GetMapping
     public ResponseEntity<List<StudentGroupRequestResponse>> list(
             @RequestParam(required = false) GroupRequestStatus status,
-            @RequestParam(required = false) Long categoryId,
-            @RequestParam(required = false) Long directionGroupId) {
-        return ResponseEntity.ok(studentGroupRequestService.getAdminRequests(status, categoryId, directionGroupId));
+            @RequestParam(required = false) Long departmentId,
+            @RequestParam(required = false) Long departmentGroupId) {
+        return ResponseEntity.ok(studentGroupRequestService.getAdminRequests(status, departmentId, departmentGroupId));
     }
 
     @PostMapping("/{id}/approve")

@@ -1,14 +1,6 @@
-/**
- * Meson LMS — legal document version (keep in sync with backend `termsVersion` / DB).
- * Content is informational and user-friendly; institutions should have counsel review.
- * References: Kosovo Law 06/L-082 on Personal Data Protection; GDPR-aligned practices.
- */
-
+﻿
 export const LEGAL_DOCUMENT_VERSION = '2026.04.05'
 
-/** @typedef {{ id: string, heading: string, paragraphs: string[] }} LegalSection */
-
-/** @type {{ en: { title: string, subtitle: string, sections: LegalSection[] }, sq: { title: string, subtitle: string, sections: LegalSection[] } }} */
 export const PRIVACY_POLICY = {
   en: {
     title: 'Privacy Policy',
@@ -29,7 +21,7 @@ export const PRIVACY_POLICY = {
         paragraphs: [
           'We collect only what is reasonably needed to provide educational services:',
           '• Identity & account: first and last name, email address, role (e.g. student, instructor, parent), institution affiliation where applicable, and account credentials (stored using secure hashing; we do not store plain-text passwords).',
-          '• Learning activity: course enrolments, lesson progress, assignment submissions, grades, feedback, messages within the platform, and timestamps of certain actions (e.g. login, submission).',
+          '• Learning activity: subject enrolments, lesson progress, assignment submissions, grades, feedback, messages within the platform, and timestamps of certain actions (e.g. login, submission).',
           '• Technical data: IP address, browser type, device type, and cookies or similar technologies used for security, preferences, and basic analytics (see “Cookies”).',
           '• Communications: content you send through support channels or in-app messaging, where enabled.',
           'We do not require sensitive categories of data (such as health data) unless your institution explicitly collects them under a separate lawful basis and notice.',
@@ -41,7 +33,7 @@ export const PRIVACY_POLICY = {
         paragraphs: [
           'We use personal data to:',
           '• Create and manage accounts; authenticate users and protect the platform.',
-          '• Deliver courses, assignments, assessments, grades, and notifications related to learning.',
+          '• Deliver subjects, assignments, assessments, grades, and notifications related to learning.',
           '• Allow instructors and authorised staff to manage classes and evaluate work.',
           '• Allow parents/guardians to view permitted information about a learner, where the institution enables this.',
           '• Improve reliability, security, and usability; diagnose errors; and prevent fraud or abuse.',
@@ -144,7 +136,7 @@ export const PRIVACY_POLICY = {
         paragraphs: [
           'Ne mbledhim vetëm atë që është e nevojshme për të ofruar shërbimet tona arsimore:',
           '• Identiteti dhe llogaria: emri dhe mbiemri, adresa e emailit, roli (p.sh. student, pedagog, prind), institucioni dhe kredencialet e llogarisë.',
-          '• Aktiviteti i të nxënit: regjistrimet në kurse, progresi i leksioneve, dorëzimi i detyrave, notat, feedback-u dhe mesazhet brenda platformës.',
+          '• Aktiviteti i të nxënit: regjistrimet në Lëndë, progresi i leksioneve, dorëzimi i detyrave, notat, feedback-u dhe mesazhet brenda platformës.',
           '• Të dhënat teknike: adresa IP, lloji i shfletuesit, pajisja dhe cookies për siguri dhe preferenca.',
         ],
       },
@@ -154,7 +146,7 @@ export const PRIVACY_POLICY = {
         paragraphs: [
           'Ne i përdorim të dhënat personale për:',
           '• Krijimin dhe menaxhimin e llogarive; autentikimin dhe mbrojtjen e platformës.',
-          '• Dorëzimin e kurseve, detyrave, vlerësimeve dhe njoftimeve.',
+          '• Dorëzimin e Lëndëve, detyrave, vlerësimeve dhe njoftimeve.',
           '• Lejimin e instruktorëve për të menaxhuar klasat dhe vlerësuar punën.',
           '• Lejimin e prindërve për të parë progresin e fëmijës.',
           '• Përmirësimin e sigurisë dhe rregullimin e gabimeve.',
@@ -185,7 +177,6 @@ export const PRIVACY_POLICY = {
   },
 }
 
-/** @type {{ en: { title: string, subtitle: string, sections: LegalSection[] }, sq: { title: string, subtitle: string, sections: LegalSection[] } }} */
 export const COOKIE_POLICY = {
   en: {
     title: 'Cookie Policy',
@@ -257,7 +248,6 @@ export const COOKIE_POLICY = {
   },
 }
 
-/** @type {{ en: { title: string, subtitle: string, sections: LegalSection[] }, sq: { title: string, subtitle: string, sections: LegalSection[] } }} */
 export const TERMS_OF_SERVICE = {
   en: {
     title: 'Terms of Service',
@@ -275,7 +265,7 @@ export const TERMS_OF_SERVICE = {
         id: 'description',
         heading: 'The service',
         paragraphs: [
-          'Meson provides tools for online learning: courses, content, assignments, grading, communication features, and related administration. Features may change as we improve the product. We strive for high availability but do not guarantee uninterrupted access.',
+          'Meson provides tools for online learning: subjects, content, assignments, grading, communication features, and related administration. Features may change as we improve the product. We strive for high availability but do not guarantee uninterrupted access.',
         ],
       },
       {
@@ -312,7 +302,7 @@ export const TERMS_OF_SERVICE = {
         id: 'content',
         heading: 'Content and intellectual property',
         paragraphs: [
-          'Your institution or instructors typically own course materials. You retain rights in content you create, subject to licences you or your institution grant to use the platform. You must not upload content you do not have the right to use.',
+          'Your institution or instructors typically own subject materials. You retain rights in content you create, subject to licences you or your institution grant to use the platform. You must not upload content you do not have the right to use.',
           'Meson may display aggregated, non-personal statistics to improve the service.',
         ],
       },
@@ -365,7 +355,7 @@ export const TERMS_OF_SERVICE = {
         id: 'description',
         heading: 'Shërbimi',
         paragraphs: [
-          'Meson ofron mjete për mësimin online: kurse, përmbajtje, detyra, vlerësime dhe komunikim.',
+          'Meson ofron mjete për mësimin online: Lëndë, përmbajtje, detyra, vlerësime dhe komunikim.',
         ],
       },
       {

@@ -11,8 +11,8 @@ import jakarta.validation.constraints.NotNull;
 @NoArgsConstructor
 @Builder
 public class AssignTeacherRequest {
-    @NotNull(message = "courseId nuk mund të jetë null")
-    private Long courseId;
+    @NotNull(message = "subjectId nuk mund të jetë null")
+    private Long subjectId;
 
     @NotNull(message = "teacherId nuk mund të jetë null")
     private Long teacherId;

@@ -1,19 +1,20 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { 
-  Typography, Box, Card, CardContent, CircularProgress, 
-  Container, Grid, IconButton 
+import { useAppPreferences } from "../../context/appPreferencesContext";
+import {
+  Typography, Box, Card, CardContent, CircularProgress,
+  Container, Grid, IconButton
 } from "@mui/material";
+import Alert from "@mui/material/Alert";
 import SchoolRounded from "@mui/icons-material/SchoolRounded";
 import PeopleRounded from "@mui/icons-material/PeopleRounded";
 import QuizRounded from "@mui/icons-material/QuizRounded";
 import AssignmentRounded from "@mui/icons-material/AssignmentRounded";
 import AnalyticsRounded from "@mui/icons-material/AnalyticsRounded";
 import LayersRounded from "@mui/icons-material/LayersRounded";
-import AutoStoriesRounded from "@mui/icons-material/AutoStoriesRounded";
 import ArrowForwardRounded from "@mui/icons-material/ArrowForwardRounded";
 import teacherContentService from "../../services/teacherContentService";
-import { useAppPreferences } from "../../context/appPreferencesContext";
+
 import Footer from "../../components/ui/Footer";
 
 export default function TeacherDashboard() {
@@ -21,34 +22,38 @@ export default function TeacherDashboard() {
   const { t } = useAppPreferences();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     teacherContentService.getStats()
       .then(res => setStats(res.data))
-      .catch(err => console.error(err))
+      .catch(err => {
+        console.error(err);
+        setError(t("teacherDashboard.errorLoading"));
+      })
       .finally(() => setLoading(false));
   }, []);
 
   const teacherServices = [
     {
-      title: "Kurset e Mia",
-      desc: "Menaxhoni të gjitha lëndët tuaja, materialet dhe studentët në një vend.",
+      title: t("teacherDashboard.services.subjects.title"),
+      desc: t("teacherDashboard.services.subjects.desc"),
       icon: SchoolRounded,
-      path: "/teacher/courses",
+      path: "/teacher/subjects",
       color: "text-indigo-600",
       bg: "bg-indigo-100 dark:bg-indigo-900/40",
     },
     {
-      title: "Studentët",
-      desc: "Shikoni listën e studentëve të regjistruar dhe progresin e tyre.",
+      title: t("teacherDashboard.services.students.title"),
+      desc: t("teacherDashboard.services.students.desc"),
       icon: PeopleRounded,
       path: "/teacher/students",
       color: "text-violet-600",
       bg: "bg-violet-100 dark:bg-violet-900/40",
     },
     {
-      title: "Statistikat",
-      desc: "Analizoni performancën e studentëve dhe angazhimin në kurse.",
+      title: t("teacherDashboard.services.stats.title"),
+      desc: t("teacherDashboard.services.stats.desc"),
       icon: AnalyticsRounded,
       path: "/teacher/reports",
       color: "text-sky-600",
@@ -59,17 +64,17 @@ export default function TeacherDashboard() {
   return (
     <Container maxWidth="xl" className="py-8 mt-4 sm:mt-8">
       <Box className="mb-10 rounded-[3rem] border border-slate-200/60 bg-white/80 p-6 shadow-2xl shadow-slate-200/20 sm:p-12 dark:!border-slate-700/60 dark:!bg-slate-900/50 dark:shadow-none">
-        {/* HEADER */}
+        {}
         <Box className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <Typography variant="overline" className="!font-bold !tracking-widest !text-indigo-600 dark:!text-indigo-400">
-              PANELI I MËSUESIT
+              {t("teacherDashboard.overline")}
             </Typography>
             <Typography variant="h3" component="h1" className="!mt-1 !font-black !text-slate-900 dark:!text-white">
-              Mirësevini, Profesor!
+              {t("teacherDashboard.welcome")}
             </Typography>
             <Typography variant="body1" className="!mt-3 !max-w-2xl !text-slate-600 dark:!text-slate-400 text-lg !font-medium">
-              Menaxhoni kurset tuaja, studentët dhe aktivitetet mësimore në një vend.
+              {t("teacherDashboard.subtitle")}
             </Typography>
           </div>
           <Box className="h-16 w-16 rounded-3xl bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shadow-inner">
@@ -77,14 +82,20 @@ export default function TeacherDashboard() {
           </Box>
         </Box>
 
-        {/* STATS STRIP */}
+        {}
+        {error && (
+          <Alert severity="error" className="!mt-8 !rounded-2xl">
+            {error}
+          </Alert>
+        )}
+
         {!loading && stats ? (
           <Box className="mt-10 grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { label: "Kurse", value: stats.totalCourses, icon: SchoolRounded, color: "text-indigo-600", bg: "bg-indigo-50 dark:bg-indigo-900/20" },
-              { label: "Studentë", value: stats.totalStudents, icon: PeopleRounded, color: "text-sky-600", bg: "bg-sky-50 dark:bg-sky-900/20" },
-              { label: "Kuize", value: stats.totalQuizzes, icon: QuizRounded, color: "text-amber-600", bg: "bg-amber-50 dark:bg-amber-900/20" },
-              { label: "Detyra", value: stats.totalAssignments, icon: AssignmentRounded, color: "text-emerald-600", bg: "bg-emerald-50 dark:bg-emerald-900/20" },
+              { label: t("teacherDashboard.statsSubjects"), value: stats.totalSubjects, icon: SchoolRounded, color: "text-indigo-600", bg: "bg-indigo-50 dark:bg-indigo-900/20" },
+              { label: t("teacherDashboard.statsStudents"), value: stats.totalStudents, icon: PeopleRounded, color: "text-sky-600", bg: "bg-sky-50 dark:bg-sky-900/20" },
+              { label: t("teacherDashboard.statsQuizzes"), value: stats.totalQuizzes, icon: QuizRounded, color: "text-amber-600", bg: "bg-amber-50 dark:bg-amber-900/20" },
+              { label: t("teacherDashboard.statsAssignments"), value: stats.totalAssignments, icon: AssignmentRounded, color: "text-emerald-600", bg: "bg-emerald-50 dark:bg-emerald-900/20" },
             ].map((s, i) => (
               <Box key={i} className="p-6 rounded-3xl bg-white dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 shadow-sm transition-transform hover:scale-[1.02]">
                 <div className={`h-10 w-10 rounded-xl ${s.bg} ${s.color} flex items-center justify-center mb-4`}>
@@ -105,10 +116,10 @@ export default function TeacherDashboard() {
           </Box>
         )}
 
-        {/* SERVICES GRID */}
+        {}
         <Typography variant="h5" className="!mt-20 !mb-8 !font-black !text-slate-800 dark:!text-white flex items-center justify-center gap-3">
           <LayersRounded className="text-indigo-600" />
-          Shërbimet e Mësimdhënies
+          {t("teacherDashboard.servicesTitle")}
         </Typography>
 
         <Box
@@ -140,7 +151,7 @@ export default function TeacherDashboard() {
                   {service.desc}
                 </Typography>
                 <Box className="flex items-center text-indigo-600 dark:text-indigo-400 font-black text-xs uppercase tracking-[0.2em] mt-auto">
-                  Hyr në Shërbim
+                  {t("teacherDashboard.enterService")}
                   <ArrowForwardRounded
                     className="ml-2 !text-lg transition-transform group-hover:translate-x-3"
                     sx={{ color: "var(--teacher-action-icon)" }}

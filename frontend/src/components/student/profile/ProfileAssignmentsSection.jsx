@@ -1,10 +1,13 @@
 import { useNavigate } from 'react-router-dom'
+import { useAppPreferences } from '../../../context/appPreferencesContext.js'
+import { formatDate } from '../../../lib/dateFormat.js'
 import { Box, Chip, Typography } from '@mui/material'
 import AssignmentRounded from '@mui/icons-material/AssignmentRounded'
 import CheckCircleRounded from '@mui/icons-material/CheckCircleRounded'
 
 export default function ProfileAssignmentsSection({ submissions, t }) {
     const navigate = useNavigate()
+    const { locale } = useAppPreferences()
 
     return (
         <Box>
@@ -36,7 +39,7 @@ export default function ProfileAssignmentsSection({ submissions, t }) {
                                             {sub.lessonTitle}
                                         </Typography>
                                         <Typography variant="caption" className="!text-slate-400 !block !mt-0.5">
-                                            Dorëzuar: {new Date(sub.submittedAt).toLocaleDateString('sq-AL')}
+                                            Dorëzuar: {formatDate(sub.submittedAt, locale)}
                                         </Typography>
                                     </div>
                                     <div className="flex flex-col items-end gap-1 shrink-0">

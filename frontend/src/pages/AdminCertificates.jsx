@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppPreferences } from "../context/appPreferencesContext";
 import {
@@ -76,37 +76,37 @@ export default function AdminCertificates() {
     );
   };
 
-  const loadCertificates = async () => {
+  const loadCertificates = useCallback(async () => {
     setLoading(true);
     try {
       const response = await getAllCertificates();
       setCertificates(response);
     } catch (error) {
       showToast(
-        getErrorMessage(error, "Gabim gjatë marrjes së certifikatave"),
+        getErrorMessage(error, t("adminCertificates.toast.fetchError")),
         "error",
       );
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const loadEnrollments = async () => {
+  const loadEnrollments = useCallback(async () => {
     try {
       const response = await axiosInstance.get("/enrollments");
       setEnrollments(response.data);
     } catch (error) {
       showToast(
-        getErrorMessage(error, "Gabim gjatë marrjes së regjistrimeve"),
+        getErrorMessage(error, t("adminCertificates.toast.enrollmentsError")),
         "error",
       );
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadCertificates();
     loadEnrollments();
-  }, []);
+  }, [loadCertificates, loadEnrollments]);
 
   const availableEnrollments = enrollments.filter(
     (enr) =>
@@ -117,11 +117,9 @@ export default function AdminCertificates() {
   const filtered = certificates.filter((cert) => {
     const term = searchTerm.toLowerCase();
     const matchStudent = (cert.userEmri?.toLowerCase() || "").includes(term);
-    const matchCourse = (cert.courseTitulli?.toLowerCase() || "").includes(
-      term,
-    );
+    const matchSubject = (cert.subjectTitulli?.toLowerCase() || "").includes(term);
     const matchCode = (cert.kodiUnik?.toLowerCase() || "").includes(term);
-    return matchStudent || matchCourse || matchCode;
+    return matchStudent || matchSubject || matchCode;
   });
 
   const openAddDialog = () => {
@@ -135,7 +133,7 @@ export default function AdminCertificates() {
 
   const handleSubmit = async () => {
     if (!formData.enrollmentId) {
-      showToast("Zgjidh një regjistrim për të krijuar certifikatën", "error");
+      showToast(t("adminCertificates.toast.selectRequired"), "error");
       return;
     }
 
@@ -143,14 +141,14 @@ export default function AdminCertificates() {
 
     try {
       await createCertificate({ enrollmentId: Number(formData.enrollmentId) });
-      showToast("Certifikata u krijua me sukses", "success");
+      showToast(t("adminCertificates.toast.created"), "success");
       setOpenDialog(false);
       setFormData({ enrollmentId: "" });
       await loadCertificates();
       await loadEnrollments();
     } catch (error) {
       showToast(
-        getErrorMessage(error, "Gabim gjatë krijimit të certifikatës"),
+        getErrorMessage(error, t("adminCertificates.toast.createError")),
         "error",
       );
     } finally {
@@ -164,14 +162,14 @@ export default function AdminCertificates() {
     setSubmitting(true);
     try {
       await deleteCertificate(deleteTarget.id);
-      showToast("Certifikata u fshi me sukses", "success");
+      showToast(t("adminCertificates.toast.deleted"), "success");
       setOpenDeleteConfirm(false);
       setDeleteTarget(null);
       await loadCertificates();
       await loadEnrollments();
     } catch (error) {
       showToast(
-        getErrorMessage(error, "Gabim gjatë fshirjes së certifikatës"),
+        getErrorMessage(error, t("adminCertificates.toast.deleteError")),
         "error",
       );
     } finally {
@@ -187,7 +185,7 @@ export default function AdminCertificates() {
           onClick={() => navigate("/admin")}
           className="!mb-6 !normal-case !text-slate-600 dark:!text-slate-400"
         >
-          {t("home.admin.services.backToPanel", "Kthehu te Paneli")}
+          {t("home.admin.services.backToPanel")}
         </Button>
 
         <Box className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -201,22 +199,19 @@ export default function AdminCertificates() {
                 component="h1"
                 className="!font-extrabold !text-slate-900 dark:!text-white"
               >
-                {t("home.admin.services.certificates.title", "Certifikatat")}
+                {t("home.admin.services.certificates.title")}
               </Typography>
             </Box>
             <Typography
               variant="body1"
               className="!text-slate-600 dark:!text-slate-400"
             >
-              {t(
-                "home.admin.services.certificates.desc",
-                "Menaxho lëshimin e certifikatave dhe arritjet e studentëve.",
-              )}
+              {t("home.admin.services.certificates.desc")}
             </Typography>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 items-center">
             <TextField
-              placeholder="Kërko student, kurs ose kod..."
+              placeholder={t("adminCertificates.searchPlaceholder")}
               variant="outlined"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -238,7 +233,7 @@ export default function AdminCertificates() {
               onClick={openAddDialog}
               className="!rounded-xl !py-2.5 !px-6 !normal-case !font-bold !bg-emerald-600 hover:!bg-emerald-700 shadow-lg shadow-emerald-500/20"
             >
-              Shto Certifikatë
+              {t("adminCertificates.addBtn")}
             </Button>
           </div>
         </Box>
@@ -257,22 +252,22 @@ export default function AdminCertificates() {
                 <TableHead className="bg-slate-50 dark:!bg-slate-800/80">
                   <TableRow>
                     <TableCell className="!font-bold !text-slate-700 dark:!text-slate-200">
-                      Studenti
+                      {t("adminCertificates.tableStudent")}
                     </TableCell>
                     <TableCell className="!font-bold !text-slate-700 dark:!text-slate-200">
-                      Kursi
+                      {t("adminCertificates.tableLenda")}
                     </TableCell>
                     <TableCell className="!font-bold !text-slate-700 dark:!text-slate-200">
-                      Data lëshimit
+                      {t("adminCertificates.tableDate")}
                     </TableCell>
                     <TableCell className="!font-bold !text-slate-700 dark:!text-slate-200">
-                      Kodi
+                      {t("adminCertificates.tableCode")}
                     </TableCell>
                     <TableCell
                       align="right"
                       className="!font-bold !text-slate-700 dark:!text-slate-200"
                     >
-                      Veprime
+                      {t("adminCertificates.tableActions")}
                     </TableCell>
                   </TableRow>
                 </TableHead>
@@ -285,7 +280,7 @@ export default function AdminCertificates() {
                             <WorkspacePremiumOutlinedIcon className="!text-4xl text-emerald-400" />
                           </div>
                           <Typography className="!font-semibold !text-slate-500">
-                            Nuk ka certifikata të disponueshme.
+                            {t("adminCertificates.noData")}
                           </Typography>
                         </Box>
                       </TableCell>
@@ -309,7 +304,7 @@ export default function AdminCertificates() {
                           </Box>
                         </TableCell>
                         <TableCell className="!text-slate-700 dark:!text-slate-300 !font-medium max-w-[220px]">
-                          <p className="truncate">{cert.courseTitulli}</p>
+                          <p className="truncate">{cert.subjectTitulli}</p>
                         </TableCell>
                         <TableCell className="!text-slate-500 !text-sm">
                           {cert.dataLeshimit
@@ -362,30 +357,30 @@ export default function AdminCertificates() {
             variant="h5"
             className="!font-black !text-slate-900 dark:!text-white"
           >
-            Shto Certifikatë
+            {t("adminCertificates.addDialogTitle")}
           </Typography>
         </DialogTitle>
         <DialogContent className="!px-6 !py-4">
           <Box className="flex flex-col gap-4 mt-2">
             <FormControl fullWidth>
-              <InputLabel id="select-enrollment-label">Regjistrimi</InputLabel>
+              <InputLabel id="select-enrollment-label">{t("adminCertificates.fieldEnrollment")}</InputLabel>
               <Select
                 labelId="select-enrollment-label"
                 value={formData.enrollmentId}
-                label="Regjistrimi"
+                label={t("adminCertificates.fieldEnrollment")}
                 onChange={handleFieldChange("enrollmentId")}
               >
-                <MenuItem value="">Zgjidh</MenuItem>
+                <MenuItem value="">{t("adminCertificates.chooseOption")}</MenuItem>
                 {availableEnrollments.map((enr) => (
                   <MenuItem key={enr.id} value={enr.id}>
-                    {enr.userEmri} — {enr.courseTitulli}
+                    {enr.userEmri} — {enr.subjectTitulli}
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
             {availableEnrollments.length === 0 && (
               <Typography className="!text-slate-500 dark:!text-slate-400 text-sm">
-                Nuk ka regjistrime të përfunduara pa certifikatë.
+                {t("adminCertificates.noCompletedEnrollments")}
               </Typography>
             )}
           </Box>
@@ -395,7 +390,7 @@ export default function AdminCertificates() {
             onClick={() => setOpenDialog(false)}
             className="!rounded-xl !normal-case !text-slate-600"
           >
-            Anulo
+            {t("adminCertificates.cancel")}
           </Button>
           <Button
             variant="contained"
@@ -403,7 +398,7 @@ export default function AdminCertificates() {
             onClick={handleSubmit}
             className="!rounded-xl !normal-case !font-bold !bg-emerald-600 hover:!bg-emerald-700"
           >
-            {submitting ? "Duke ruajtur..." : "Krijo Certifikatë"}
+            {submitting ? t("adminCertificates.saving") : t("adminCertificates.createBtn")}
           </Button>
         </DialogActions>
       </Dialog>
@@ -420,13 +415,12 @@ export default function AdminCertificates() {
             variant="h5"
             className="!font-black !text-slate-900 dark:!text-white"
           >
-            Fshi Certifikatë
+            {t("adminCertificates.deleteTitle")}
           </Typography>
         </DialogTitle>
         <DialogContent className="!px-6 !py-4">
           <Typography className="!text-slate-600 dark:!text-slate-300">
-            Je i sigurt që dëshiron të fshish certifikatën e "
-            {deleteTarget?.userEmri}"?
+            {t("adminCertificates.deleteBodyPrefix")} "{deleteTarget?.userEmri}"?
           </Typography>
         </DialogContent>
         <DialogActions className="!p-4 gap-2">
@@ -434,7 +428,7 @@ export default function AdminCertificates() {
             onClick={() => setOpenDeleteConfirm(false)}
             className="!rounded-xl !normal-case !text-slate-600"
           >
-            Anulo
+            {t("adminCertificates.cancel")}
           </Button>
           <Button
             variant="contained"
@@ -443,7 +437,7 @@ export default function AdminCertificates() {
             disabled={submitting}
             className="!rounded-xl !normal-case !font-bold"
           >
-            {submitting ? "Po fshihet..." : "Fshi Certifikatë"}
+            {submitting ? t("adminCertificates.deleting") : t("adminCertificates.deleteBtn")}
           </Button>
         </DialogActions>
       </Dialog>
@@ -459,8 +453,8 @@ export default function AdminCertificates() {
           onClose={() => setOpenSnackbar(false)}
           severity={snackbarSeverity}
           variant="filled"
-          sx={{ 
-            width: "100%", 
+          sx={{
+            width: "100%",
             borderRadius: "1.25rem",
             fontWeight: "bold",
             boxShadow: "0 10px 30px rgba(0,0,0,0.1)"

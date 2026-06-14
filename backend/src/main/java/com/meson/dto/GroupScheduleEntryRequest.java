@@ -12,7 +12,7 @@ import java.time.LocalTime;
 @Builder
 public class GroupScheduleEntryRequest {
     @NotNull
-    private Long courseId;
+    private Long subjectId;
     @NotNull
     private Long professorId;
     private Long assistantId;
