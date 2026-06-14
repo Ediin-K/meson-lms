@@ -89,11 +89,14 @@ public class QuizService {
         return toQuizResponse(quizRepository.save(quiz));
     }
 
+    @Transactional
     public void deleteQuiz(Long id) {
-        if (!quizRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Kuizi nuk u gjet");
-        }
-        quizRepository.deleteById(id);
+        Quiz quiz = quizRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Kuizi nuk u gjet"));
+        // Remove student attempts (and their answer submissions, via cascade) so that
+        // deleting a quiz leaves no orphaned attempt history behind on the profile.
+        attemptRepository.deleteAll(attemptRepository.findByQuizId(id));
+        quizRepository.delete(quiz);
     }
 
     public List<QuizQuestionResponse> getQuestionsByQuizId(Long quizId) {

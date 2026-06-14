@@ -40,8 +40,10 @@ import java.time.LocalDateTime;
 public class UserService {
 
     private static final Set<String> ALLOWED_ASSIGNABLE_ROLES = Set.of(
-            "student", "teacher", "admin", "prind", "parent", "instructor"
+            "student", "teacher", "admin", "prind", "parent", "instructor", "assistant"
     );
+
+    private static final Set<String> PROFILE_ROLES = Set.of("student", "teacher", "assistant");
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -79,7 +81,7 @@ public class UserService {
 
     private String normalizeRoleForFrontend(String role) {
         if ("prind".equals(role)) return "parent";
-        return role;
+        return role; // "assistant" passes through as-is
     }
 
     public void activate(Long id) {
@@ -249,7 +251,8 @@ public class UserService {
     }
 
     private void syncStudentProfile(User user, String role, Long departmentId, Integer currentSemester) {
-        if (!"student".equals(normalizeRoleForFrontend(normalizeRoleForDB(role)))) {
+        String normalized = normalizeRoleForFrontend(normalizeRoleForDB(role));
+        if (!PROFILE_ROLES.contains(normalized)) {
             return;
         }
 

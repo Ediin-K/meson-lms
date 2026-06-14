@@ -41,6 +41,8 @@ const AdminGroups = lazy(() => import("./pages/AdminGroups.jsx"));
 const AdminRoles = lazy(() => import("./pages/AdminRoles.jsx"));
 const AdminUserClaims = lazy(() => import("./pages/AdminUserClaims.jsx"));
 const AdminUserTokens = lazy(() => import("./pages/AdminUserTokens.jsx"));
+const AdminProfilePage = lazy(() => import("./pages/admin/AdminProfilePage.jsx"));
+const TeacherProfilePage = lazy(() => import("./pages/teacher/TeacherProfilePage.jsx"));
 const TeacherLayout = lazy(() => import("./layouts/TeacherLayout.jsx"));
 const TeacherSubjects = lazy(() => import("./pages/teacher/TeacherSubjects.jsx"));
 const TeacherModules = lazy(() => import("./pages/teacher/TeacherModules.jsx"));
@@ -248,6 +250,14 @@ function AppLayout() {
                 }
               />
               <Route
+                path="/admin/profile"
+                element={
+                  <ProtectedRoute requiredRole="admin">
+                    <AdminProfilePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/student"
                 element={
                   <ProtectedRoute requiredRole="student">
@@ -311,6 +321,7 @@ function AppLayout() {
                 <Route path="quizzes" element={<TeacherQuizzes />} />
                 <Route path="students" element={<TeacherStudents />} />
                 <Route path="grades" element={<ProfessorGradesPage />} />
+                <Route path="profile" element={<TeacherProfilePage />} />
               </Route>
               <Route
                 path="/notifications"

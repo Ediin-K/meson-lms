@@ -34,6 +34,10 @@ public class User {
 
     private String phoneNumber;
 
+    /** Relative storage path of the user's avatar, or null if none uploaded. */
+    @Column(name = "photo_path")
+    private String photoPath;
+
     @Builder.Default
     @Column(nullable = false)
     private boolean emailConfirmed = false;

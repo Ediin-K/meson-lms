@@ -1,6 +1,7 @@
 ﻿import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAppPreferences } from '../../context/appPreferencesContext.js'
+import { getMyAccount, accountPhotoSrc } from '../../services/accountService.js'
 import { GB, AL } from 'country-flag-icons/react/3x2'
 
 function ThemeToggleIcon({ dark }) {
@@ -41,7 +42,22 @@ export default function Header() {
 
   const langMenuId = useId()
   const profileMenuId = useId()
-  const profileHref = role === 'student' ? '/student/profile' : '/profile'
+  const profileHref =
+    role === 'student' ? '/student/profile' :
+    role === 'admin' ? '/admin/profile' :
+    role === 'teacher' ? '/teacher/profile' :
+    '/profile'
+
+  // Avatar shown in the header button — loaded once when authenticated.
+  const [avatar, setAvatar] = useState(null)
+  useEffect(() => {
+    if (!isAuthenticated) return
+    let active = true
+    getMyAccount()
+      .then((a) => { if (active) setAvatar(a) })
+      .catch(() => {})
+    return () => { active = false }
+  }, [isAuthenticated])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -86,7 +102,7 @@ export default function Header() {
       default:
         return [
           { label: t('header.navDashboard'), href: '/student' },
-          { label: t('header.navsubjects'), href: '/subjects' },
+          { label: t('header.navSubjects'), href: '/subjects' },
           { label: t('header.navAssignments'), href: '/assignments' },
           contactLink,
           libraryLink,
@@ -286,7 +302,7 @@ export default function Header() {
               <button
                 ref={profileBtnRef}
                 type="button"
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-sky-400/40 bg-gradient-to-br from-sky-500 to-indigo-700 text-sm font-bold text-white shadow-md shadow-slate-900/15 outline-none ring-sky-500/0 transition hover:border-sky-300 hover:shadow-lg focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
+                className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-sky-400/40 bg-gradient-to-br from-sky-500 to-indigo-700 text-sm font-bold text-white shadow-md shadow-slate-900/15 outline-none ring-sky-500/0 transition hover:border-sky-300 hover:shadow-lg focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
                 aria-haspopup="menu"
                 aria-expanded={profileOpen}
                 aria-controls={profileMenuId}
@@ -296,8 +312,10 @@ export default function Header() {
                   setLangOpen(false)
                 }}
               >
-                {role?.toLowerCase() === 'admin' ? 'A' : 
-                 role?.toLowerCase() === 'teacher' ? 'T' : 
+                {isAuthenticated && avatar?.hasPhoto && avatar?.id ? (
+                  <img src={accountPhotoSrc(avatar.id)} alt="" className="h-full w-full object-cover" />
+                ) : role?.toLowerCase() === 'admin' ? 'A' :
+                 role?.toLowerCase() === 'teacher' ? 'T' :
                  role?.toLowerCase() === 'student' ? 'S' : 'G'}
               </button>
               {profileOpen ? (

@@ -1,15 +1,17 @@
 ﻿import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Alert, Box, CircularProgress, Container, Snackbar, Typography } from '@mui/material'
+import { useNavigate } from 'react-router-dom'
+import { Alert, Box, Button, CircularProgress, Container, Snackbar, Typography } from '@mui/material'
+import ArrowBackRounded from '@mui/icons-material/ArrowBackRounded'
 import { useAppPreferences } from '../../context/appPreferencesContext'
 import Footer from '../../components/ui/Footer'
 import ProfileHeaderCard from '../../components/student/profile/ProfileHeaderCard'
 import ProfileStatsRow from '../../components/student/profile/ProfileStatsRow'
-import ProfileSubjectsSection from '../../components/student/profile/ProfileSubjectsSection'
 import ProfileCertificatesSection from '../../components/student/profile/ProfileCertificatesSection'
 import ProfileGroupSection from '../../components/student/profile/ProfileGroupSection'
 import ProfileAssignmentsSection from '../../components/student/profile/ProfileAssignmentsSection'
 import ProfileQuizActivitySection from '../../components/student/profile/ProfileQuizActivitySection'
 import ProfileSchedulePreview from '../../components/student/profile/ProfileSchedulePreview'
+import ProfileGradesSection from '../../components/student/profile/ProfileGradesSection'
 import {
   getStudentProfile,
   updateStudentProfile,
@@ -19,9 +21,12 @@ import {
   getMyQuizAttempts,
 } from '../../services/studentProfileService'
 import { getStudentGroupStatus, getStudentScheduleOverview } from '../../services/studentGroupService'
+import { getMyAccount } from '../../services/accountService'
+import { getGradesByStudent } from '../../services/gradeService'
 
 export default function StudentProfilePage() {
   const { t } = useAppPreferences()
+  const navigate = useNavigate()
   const userId = localStorage.getItem('userId')
 
   const [loading, setLoading] = useState(true)
@@ -32,6 +37,8 @@ export default function StudentProfilePage() {
   const [groupStatus, setGroupStatus] = useState(null)
   const [schedules, setSchedules] = useState([])
   const [quizAttempts, setQuizAttempts] = useState([])
+  const [account, setAccount] = useState(null)
+  const [gradesSummary, setGradesSummary] = useState(null)
   const [savingProfile, setSavingProfile] = useState(false)
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' })
 
@@ -50,6 +57,8 @@ export default function StudentProfilePage() {
       getStudentGroupStatus(userId),
       getStudentScheduleOverview(userId),
       getMyQuizAttempts(),
+      getMyAccount(),
+      getGradesByStudent(userId),
     ])
 
     if (results[0].status === 'fulfilled') setProfile(results[0].value)
@@ -61,6 +70,8 @@ export default function StudentProfilePage() {
       setSchedules(results[5].value?.approvedSchedules || [])
     }
     if (results[6].status === 'fulfilled') setQuizAttempts(results[6].value)
+    if (results[7].status === 'fulfilled') setAccount(results[7].value)
+    if (results[8].status === 'fulfilled') setGradesSummary(results[8].value)
 
     setLoading(false)
   }, [userId])
@@ -109,6 +120,15 @@ export default function StudentProfilePage() {
   return (
     <section className="flex min-h-screen flex-col">
       <Container maxWidth="lg" className="mt-4 flex-grow px-4 py-8 sm:mt-8 sm:px-6 lg:px-8">
+        <Button
+          startIcon={<ArrowBackRounded />}
+          onClick={() => navigate('/student')}
+          className="!mb-6 !normal-case !text-slate-500 hover:!text-slate-700 dark:!text-slate-400 dark:hover:!text-slate-200"
+          size="small"
+        >
+          {t('studentProfile.backToDashboard')}
+        </Button>
+
         <Box className="mb-10">
           <Typography variant="overline" className="!font-bold !tracking-widest !text-sky-600 dark:!text-sky-400">
             {t('studentProfile.overline')}
@@ -126,15 +146,18 @@ export default function StudentProfilePage() {
           <div className="flex flex-col gap-6 lg:col-span-1">
             <ProfileHeaderCard
               profile={profile}
+              account={account}
               t={t}
               onSave={handleSaveProfile}
               saving={savingProfile}
+              onPhotoChanged={setAccount}
+              notify={notify}
             />
             <ProfileGroupSection groupStatus={groupStatus} t={t} />
           </div>
 
           <div className="flex flex-col gap-6 lg:col-span-2">
-            <ProfileSubjectsSection enrollments={enrollments} t={t} />
+            <ProfileGradesSection summary={gradesSummary} t={t} />
             <ProfileCertificatesSection certificates={certificates} t={t} />
             <ProfileAssignmentsSection submissions={submissions} t={t} />
             <ProfileQuizActivitySection attempts={quizAttempts} t={t} />
