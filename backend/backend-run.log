@@ -1,0 +1,1560 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] --------------------< com.meson:meson-lms-backend >---------------------
+[INFO] Building meson-lms-backend 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.4.2:run (default-cli) > test-compile @ meson-lms-backend >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ meson-lms-backend ---
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] Copying 44 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ meson-lms-backend ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 254 source files with javac [debug parameters release 21] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ meson-lms-backend ---
+[INFO] Copying 1 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ meson-lms-backend ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 7 source files with javac [debug parameters release 21] to target\test-classes
+[INFO] 
+[INFO] <<< spring-boot:3.4.2:run (default-cli) < test-compile @ meson-lms-backend <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.4.2:run (default-cli) @ meson-lms-backend ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.4.2)
+
+2026-06-15T01:06:05.080+02:00  INFO 6468 --- [meson-lms-backend] [           main] com.meson.MesonLmsApplication            : Starting MesonLmsApplication using Java 21.0.10 with PID 6468 (C:\Users\1\Desktop\meson-lms\backend\target\classes started by 1 in C:\Users\1\Desktop\meson-lms\backend)
+2026-06-15T01:06:05.086+02:00  INFO 6468 --- [meson-lms-backend] [           main] com.meson.MesonLmsApplication            : No active profile set, falling back to 1 default profile: "default"
+2026-06-15T01:06:05.755+02:00  INFO 6468 --- [meson-lms-backend] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-06-15T01:06:05.854+02:00  INFO 6468 --- [meson-lms-backend] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 93 ms. Found 32 JPA repository interfaces.
+2026-06-15T01:06:06.246+02:00  INFO 6468 --- [meson-lms-backend] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-06-15T01:06:06.258+02:00  INFO 6468 --- [meson-lms-backend] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-06-15T01:06:06.259+02:00  INFO 6468 --- [meson-lms-backend] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.34]
+2026-06-15T01:06:06.295+02:00  INFO 6468 --- [meson-lms-backend] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-06-15T01:06:06.296+02:00  INFO 6468 --- [meson-lms-backend] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1183 ms
+2026-06-15T01:06:06.457+02:00  INFO 6468 --- [meson-lms-backend] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-06-15T01:06:06.565+02:00  INFO 6468 --- [meson-lms-backend] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@4c56644f
+2026-06-15T01:06:06.567+02:00  INFO 6468 --- [meson-lms-backend] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-06-15T01:06:06.597+02:00  INFO 6468 --- [meson-lms-backend] [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:mysql://localhost:3306/meson_lms?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true (MySQL 9.7)
+2026-06-15T01:06:06.606+02:00  WARN 6468 --- [meson-lms-backend] [           main] o.f.c.internal.database.base.Database    : Flyway upgrade recommended: MySQL 9.7 is newer than this version of Flyway and support has not been tested. The latest supported version of MySQL is 8.1.
+2026-06-15T01:06:06.657+02:00  INFO 6468 --- [meson-lms-backend] [           main] o.f.core.internal.command.DbMigrate      : Current version of schema `meson_lms`: 43
+2026-06-15T01:06:06.657+02:00  INFO 6468 --- [meson-lms-backend] [           main] o.f.core.internal.command.DbMigrate      : Schema `meson_lms` is up to date. No migration necessary.
+2026-06-15T01:06:06.717+02:00  INFO 6468 --- [meson-lms-backend] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-06-15T01:06:06.746+02:00  INFO 6468 --- [meson-lms-backend] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.5.Final
+2026-06-15T01:06:06.780+02:00  INFO 6468 --- [meson-lms-backend] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-06-15T01:06:07.009+02:00  INFO 6468 --- [meson-lms-backend] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-06-15T01:06:07.056+02:00  WARN 6468 --- [meson-lms-backend] [           main] org.hibernate.orm.deprecation            : HHH90000025: MySQL8Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-06-15T01:06:07.057+02:00  WARN 6468 --- [meson-lms-backend] [           main] org.hibernate.orm.deprecation            : HHH90000026: MySQL8Dialect has been deprecated; use org.hibernate.dialect.MySQLDialect instead
+2026-06-15T01:06:07.068+02:00  INFO 6468 --- [meson-lms-backend] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 8.0
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-06-15T01:06:08.046+02:00  INFO 6468 --- [meson-lms-backend] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-06-15T01:06:08.051+02:00  INFO 6468 --- [meson-lms-backend] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-06-15T01:06:08.218+02:00  INFO 6468 --- [meson-lms-backend] [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-06-15T01:06:10.851+02:00  WARN 6468 --- [meson-lms-backend] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-06-15T01:06:10.868+02:00  WARN 6468 --- [meson-lms-backend] [           main] .s.s.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 0926e581-2dda-4016-9f41-037028bc1a53
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-06-15T01:06:10.873+02:00  INFO 6468 --- [meson-lms-backend] [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-06-15T01:06:11.423+02:00  INFO 6468 --- [meson-lms-backend] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-06-15T01:06:11.437+02:00  INFO 6468 --- [meson-lms-backend] [           main] com.meson.MesonLmsApplication            : Started MesonLmsApplication in 6.594 seconds (process running for 6.819)
+2026-06-15T01:06:29.869+02:00  INFO 6468 --- [meson-lms-backend] [nio-8080-exec-4] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-06-15T01:06:29.869+02:00  INFO 6468 --- [meson-lms-backend] [nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-06-15T01:06:29.870+02:00  INFO 6468 --- [meson-lms-backend] [nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.access_failed_count,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.email_confirmed,
+        u1_0.first_name,
+        u1_0.lockout_enabled,
+        u1_0.last_name,
+        u1_0.password_hash,
+        u1_0.phone_number,
+        u1_0.status,
+        u1_0.temporary_password 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        ur1_0.id,
+        ur1_0.role_id,
+        ur1_0.user_id 
+    from
+        user_roles ur1_0 
+    where
+        ur1_0.user_id=?
+Hibernate: 
+    select
+        r1_0.id,
+        r1_0.name,
+        r1_0.normalized_name,
+        r1_0.description 
+    from
+        roles r1_0 
+    where
+        r1_0.id=?
+Hibernate: 
+    select
+        rt1_0.id,
+        rt1_0.created,
+        rt1_0.expires,
+        rt1_0.revoked,
+        rt1_0.token,
+        rt1_0.user_id 
+    from
+        refresh_tokens rt1_0 
+    where
+        rt1_0.user_id=?
+Hibernate: 
+    select
+        ut1_0.id,
+        ut1_0.login_provider,
+        ut1_0.token_name,
+        ut1_0.token_value,
+        ut1_0.user_id 
+    from
+        user_tokens ut1_0 
+    join
+        users u1_0 
+            on u1_0.id=ut1_0.user_id 
+    where
+        u1_0.id=? 
+        and ut1_0.login_provider=?
+Hibernate: 
+    insert 
+    into
+        user_tokens
+        (login_provider, token_name, token_value, user_id) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        refresh_tokens
+        (created, expires, revoked, token, user_id) 
+    values
+        (?, ?, ?, ?, ?)
+Hibernate: 
+    update
+        refresh_tokens 
+    set
+        created=?,
+        expires=?,
+        revoked=?,
+        token=?,
+        user_id=? 
+    where
+        id=?
+Hibernate: 
+    delete 
+    from
+        user_tokens 
+    where
+        id=?
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.access_failed_count,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.email_confirmed,
+        u1_0.first_name,
+        u1_0.lockout_enabled,
+        u1_0.last_name,
+        u1_0.password_hash,
+        u1_0.phone_number,
+        u1_0.status,
+        u1_0.temporary_password 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        uc1_0.id,
+        uc1_0.claim_type,
+        uc1_0.claim_value,
+        uc1_0.user_id 
+    from
+        user_claims uc1_0 
+    left join
+        users u1_0 
+            on u1_0.id=uc1_0.user_id 
+    where
+        u1_0.id=?
+Hibernate: 
+    select
+        distinct u1_0.id,
+        u1_0.access_failed_count,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.email_confirmed,
+        u1_0.first_name,
+        u1_0.lockout_enabled,
+        u1_0.last_name,
+        u1_0.password_hash,
+        u1_0.phone_number,
+        u1_0.status,
+        u1_0.temporary_password 
+    from
+        users u1_0 
+    join
+        user_roles ur1_0 
+            on u1_0.id=ur1_0.user_id 
+    join
+        roles r1_0 
+            on r1_0.id=ur1_0.role_id 
+    where
+        lower(r1_0.normalized_name)=lower(?)
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.access_failed_count,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.email_confirmed,
+        u1_0.first_name,
+        u1_0.lockout_enabled,
+        u1_0.last_name,
+        u1_0.password_hash,
+        u1_0.phone_number,
+        u1_0.status,
+        u1_0.temporary_password 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        ea1_0.id,
+        ea1_0.applied_at,
+        ea1_0.cancelled_at,
+        ea1_0.subject_id,
+        c1_0.id,
+        c1_0.created_at,
+        d1_0.id,
+        d1_0.name,
+        d1_0.num_semesters,
+        d1_0.description,
+        c1_0.ects,
+        c1_0.enrollment_key,
+        c1_0.level,
+        c1_0.description,
+        c1_0.semester,
+        c1_0.status,
+        c1_0.teacher_id,
+        c1_0.title,
+        g1_0.id,
+        g1_0.assigned_at,
+        g1_0.comment,
+        g1_0.grade,
+        g1_0.professor_id,
+        g1_0.student_id,
+        g1_0.subject_id,
+        ea1_0.grade_assigned_at,
+        ea1_0.professor_id,
+        p2_0.id,
+        p2_0.access_failed_count,
+        p2_0.created_at,
+        p2_0.email,
+        p2_0.email_confirmed,
+        p2_0.first_name,
+        p2_0.lockout_enabled,
+        p2_0.last_name,
+        p2_0.password_hash,
+        p2_0.phone_number,
+        p2_0.status,
+        p2_0.temporary_password,
+        ea1_0.rejected_at,
+        ea1_0.status,
+        ea1_0.student_id,
+        s4_0.id,
+        s4_0.access_failed_count,
+        s4_0.created_at,
+        s4_0.email,
+        s4_0.email_confirmed,
+        s4_0.first_name,
+        s4_0.lockout_enabled,
+        s4_0.last_name,
+        s4_0.password_hash,
+        s4_0.phone_number,
+        s4_0.status,
+        s4_0.temporary_password 
+    from
+        exam_applications ea1_0 
+    join
+        users s1_0 
+            on s1_0.id=ea1_0.student_id 
+    join
+        subjects c1_0 
+            on c1_0.id=ea1_0.subject_id 
+    left join
+        departments d1_0 
+            on d1_0.id=c1_0.department_id 
+    left join
+        grades g1_0 
+            on g1_0.id=ea1_0.grade_id 
+    join
+        users p2_0 
+            on p2_0.id=ea1_0.professor_id 
+    join
+        users s4_0 
+            on s4_0.id=ea1_0.student_id 
+    where
+        s1_0.id=? 
+    order by
+        ea1_0.applied_at desc
+Hibernate: 
+    select
+        s1_0.id,
+        s1_0.created_at,
+        s1_0.department_id,
+        s1_0.ects,
+        s1_0.enrollment_key,
+        s1_0.level,
+        s1_0.description,
+        s1_0.semester,
+        s1_0.status,
+        s1_0.teacher_id,
+        s1_0.title 
+    from
+        subjects s1_0 
+    where
+        s1_0.status=?
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.access_failed_count,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.email_confirmed,
+        u1_0.first_name,
+        u1_0.lockout_enabled,
+        u1_0.last_name,
+        u1_0.password_hash,
+        u1_0.phone_number,
+        u1_0.status,
+        u1_0.temporary_password 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        uc1_0.id,
+        uc1_0.claim_type,
+        uc1_0.claim_value,
+        uc1_0.user_id 
+    from
+        user_claims uc1_0 
+    left join
+        users u1_0 
+            on u1_0.id=uc1_0.user_id 
+    where
+        u1_0.id=?
+Hibernate: 
+    select
+        distinct u1_0.id,
+        u1_0.access_failed_count,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.email_confirmed,
+        u1_0.first_name,
+        u1_0.lockout_enabled,
+        u1_0.last_name,
+        u1_0.password_hash,
+        u1_0.phone_number,
+        u1_0.status,
+        u1_0.temporary_password 
+    from
+        users u1_0 
+    join
+        user_roles ur1_0 
+            on u1_0.id=ur1_0.user_id 
+    join
+        roles r1_0 
+            on r1_0.id=ur1_0.role_id 
+    where
+        lower(r1_0.normalized_name)=lower(?)
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.access_failed_count,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.email_confirmed,
+        u1_0.first_name,
+        u1_0.lockout_enabled,
+        u1_0.last_name,
+        u1_0.password_hash,
+        u1_0.phone_number,
+        u1_0.status,
+        u1_0.temporary_password 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        ea1_0.id,
+        ea1_0.applied_at,
+        ea1_0.cancelled_at,
+        ea1_0.subject_id,
+        c1_0.id,
+        c1_0.created_at,
+        d1_0.id,
+        d1_0.name,
+        d1_0.num_semesters,
+        d1_0.description,
+        c1_0.ects,
+        c1_0.enrollment_key,
+        c1_0.level,
+        c1_0.description,
+        c1_0.semester,
+        c1_0.status,
+        c1_0.teacher_id,
+        c1_0.title,
+        g1_0.id,
+        g1_0.assigned_at,
+        g1_0.comment,
+        g1_0.grade,
+        g1_0.professor_id,
+        g1_0.student_id,
+        g1_0.subject_id,
+        ea1_0.grade_assigned_at,
+        ea1_0.professor_id,
+        p2_0.id,
+        p2_0.access_failed_count,
+        p2_0.created_at,
+        p2_0.email,
+        p2_0.email_confirmed,
+        p2_0.first_name,
+        p2_0.lockout_enabled,
+        p2_0.last_name,
+        p2_0.password_hash,
+        p2_0.phone_number,
+        p2_0.status,
+        p2_0.temporary_password,
+        ea1_0.rejected_at,
+        ea1_0.status,
+        ea1_0.student_id,
+        s4_0.id,
+        s4_0.access_failed_count,
+        s4_0.created_at,
+        s4_0.email,
+        s4_0.email_confirmed,
+        s4_0.first_name,
+        s4_0.lockout_enabled,
+        s4_0.last_name,
+        s4_0.password_hash,
+        s4_0.phone_number,
+        s4_0.status,
+        s4_0.temporary_password 
+    from
+        exam_applications ea1_0 
+    join
+        users s1_0 
+            on s1_0.id=ea1_0.student_id 
+    join
+        subjects c1_0 
+            on c1_0.id=ea1_0.subject_id 
+    left join
+        departments d1_0 
+            on d1_0.id=c1_0.department_id 
+    left join
+        grades g1_0 
+            on g1_0.id=ea1_0.grade_id 
+    join
+        users p2_0 
+            on p2_0.id=ea1_0.professor_id 
+    join
+        users s4_0 
+            on s4_0.id=ea1_0.student_id 
+    where
+        s1_0.id=? 
+    order by
+        ea1_0.applied_at desc
+Hibernate: 
+    select
+        s1_0.id,
+        s1_0.created_at,
+        s1_0.department_id,
+        s1_0.ects,
+        s1_0.enrollment_key,
+        s1_0.level,
+        s1_0.description,
+        s1_0.semester,
+        s1_0.status,
+        s1_0.teacher_id,
+        s1_0.title 
+    from
+        subjects s1_0 
+    where
+        s1_0.status=?
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.access_failed_count,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.email_confirmed,
+        u1_0.first_name,
+        u1_0.lockout_enabled,
+        u1_0.last_name,
+        u1_0.password_hash,
+        u1_0.phone_number,
+        u1_0.status,
+        u1_0.temporary_password 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        uc1_0.id,
+        uc1_0.claim_type,
+        uc1_0.claim_value,
+        uc1_0.user_id 
+    from
+        user_claims uc1_0 
+    left join
+        users u1_0 
+            on u1_0.id=uc1_0.user_id 
+    where
+        u1_0.id=?
+Hibernate: 
+    select
+        distinct u1_0.id,
+        u1_0.access_failed_count,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.email_confirmed,
+        u1_0.first_name,
+        u1_0.lockout_enabled,
+        u1_0.last_name,
+        u1_0.password_hash,
+        u1_0.phone_number,
+        u1_0.status,
+        u1_0.temporary_password 
+    from
+        users u1_0 
+    join
+        user_roles ur1_0 
+            on u1_0.id=ur1_0.user_id 
+    join
+        roles r1_0 
+            on r1_0.id=ur1_0.role_id 
+    where
+        lower(r1_0.normalized_name)=lower(?)
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.access_failed_count,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.email_confirmed,
+        u1_0.first_name,
+        u1_0.lockout_enabled,
+        u1_0.last_name,
+        u1_0.password_hash,
+        u1_0.phone_number,
+        u1_0.status,
+        u1_0.temporary_password 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        ea1_0.id,
+        ea1_0.applied_at,
+        ea1_0.cancelled_at,
+        ea1_0.subject_id,
+        c1_0.id,
+        c1_0.created_at,
+        d1_0.id,
+        d1_0.name,
+        d1_0.num_semesters,
+        d1_0.description,
+        c1_0.ects,
+        c1_0.enrollment_key,
+        c1_0.level,
+        c1_0.description,
+        c1_0.semester,
+        c1_0.status,
+        c1_0.teacher_id,
+        c1_0.title,
+        g1_0.id,
+        g1_0.assigned_at,
+        g1_0.comment,
+        g1_0.grade,
+        g1_0.professor_id,
+        g1_0.student_id,
+        g1_0.subject_id,
+        ea1_0.grade_assigned_at,
+        ea1_0.professor_id,
+        p2_0.id,
+        p2_0.access_failed_count,
+        p2_0.created_at,
+        p2_0.email,
+        p2_0.email_confirmed,
+        p2_0.first_name,
+        p2_0.lockout_enabled,
+        p2_0.last_name,
+        p2_0.password_hash,
+        p2_0.phone_number,
+        p2_0.status,
+        p2_0.temporary_password,
+        ea1_0.rejected_at,
+        ea1_0.status,
+        ea1_0.student_id,
+        s4_0.id,
+        s4_0.access_failed_count,
+        s4_0.created_at,
+        s4_0.email,
+        s4_0.email_confirmed,
+        s4_0.first_name,
+        s4_0.lockout_enabled,
+        s4_0.last_name,
+        s4_0.password_hash,
+        s4_0.phone_number,
+        s4_0.status,
+        s4_0.temporary_password 
+    from
+        exam_applications ea1_0 
+    join
+        users s1_0 
+            on s1_0.id=ea1_0.student_id 
+    join
+        subjects c1_0 
+            on c1_0.id=ea1_0.subject_id 
+    left join
+        departments d1_0 
+            on d1_0.id=c1_0.department_id 
+    left join
+        grades g1_0 
+            on g1_0.id=ea1_0.grade_id 
+    join
+        users p2_0 
+            on p2_0.id=ea1_0.professor_id 
+    join
+        users s4_0 
+            on s4_0.id=ea1_0.student_id 
+    where
+        s1_0.id=? 
+    order by
+        ea1_0.applied_at desc
+Hibernate: 
+    select
+        s1_0.id,
+        s1_0.created_at,
+        s1_0.department_id,
+        s1_0.ects,
+        s1_0.enrollment_key,
+        s1_0.level,
+        s1_0.description,
+        s1_0.semester,
+        s1_0.status,
+        s1_0.teacher_id,
+        s1_0.title 
+    from
+        subjects s1_0 
+    where
+        s1_0.status=?
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.access_failed_count,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.email_confirmed,
+        u1_0.first_name,
+        u1_0.lockout_enabled,
+        u1_0.last_name,
+        u1_0.password_hash,
+        u1_0.phone_number,
+        u1_0.status,
+        u1_0.temporary_password 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        ur1_0.id,
+        ur1_0.role_id,
+        ur1_0.user_id 
+    from
+        user_roles ur1_0 
+    where
+        ur1_0.user_id=?
+Hibernate: 
+    select
+        r1_0.id,
+        r1_0.name,
+        r1_0.normalized_name,
+        r1_0.description 
+    from
+        roles r1_0 
+    where
+        r1_0.id=?
+Hibernate: 
+    select
+        rt1_0.id,
+        rt1_0.created,
+        rt1_0.expires,
+        rt1_0.revoked,
+        rt1_0.token,
+        rt1_0.user_id 
+    from
+        refresh_tokens rt1_0 
+    where
+        rt1_0.user_id=?
+Hibernate: 
+    select
+        ut1_0.id,
+        ut1_0.login_provider,
+        ut1_0.token_name,
+        ut1_0.token_value,
+        ut1_0.user_id 
+    from
+        user_tokens ut1_0 
+    join
+        users u1_0 
+            on u1_0.id=ut1_0.user_id 
+    where
+        u1_0.id=? 
+        and ut1_0.login_provider=?
+Hibernate: 
+    insert 
+    into
+        user_tokens
+        (login_provider, token_name, token_value, user_id) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        refresh_tokens
+        (created, expires, revoked, token, user_id) 
+    values
+        (?, ?, ?, ?, ?)
+Hibernate: 
+    update
+        refresh_tokens 
+    set
+        created=?,
+        expires=?,
+        revoked=?,
+        token=?,
+        user_id=? 
+    where
+        id=?
+Hibernate: 
+    delete 
+    from
+        user_tokens 
+    where
+        id=?
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.access_failed_count,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.email_confirmed,
+        u1_0.first_name,
+        u1_0.lockout_enabled,
+        u1_0.last_name,
+        u1_0.password_hash,
+        u1_0.phone_number,
+        u1_0.status,
+        u1_0.temporary_password 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        uc1_0.id,
+        uc1_0.claim_type,
+        uc1_0.claim_value,
+        uc1_0.user_id 
+    from
+        user_claims uc1_0 
+    left join
+        users u1_0 
+            on u1_0.id=uc1_0.user_id 
+    where
+        u1_0.id=?
+Hibernate: 
+    select
+        distinct u1_0.id,
+        u1_0.access_failed_count,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.email_confirmed,
+        u1_0.first_name,
+        u1_0.lockout_enabled,
+        u1_0.last_name,
+        u1_0.password_hash,
+        u1_0.phone_number,
+        u1_0.status,
+        u1_0.temporary_password 
+    from
+        users u1_0 
+    join
+        user_roles ur1_0 
+            on u1_0.id=ur1_0.user_id 
+    join
+        roles r1_0 
+            on r1_0.id=ur1_0.role_id 
+    where
+        lower(r1_0.normalized_name)=lower(?)
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.access_failed_count,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.email_confirmed,
+        u1_0.first_name,
+        u1_0.lockout_enabled,
+        u1_0.last_name,
+        u1_0.password_hash,
+        u1_0.phone_number,
+        u1_0.status,
+        u1_0.temporary_password 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        ea1_0.id,
+        ea1_0.applied_at,
+        ea1_0.cancelled_at,
+        ea1_0.subject_id,
+        c1_0.id,
+        c1_0.created_at,
+        d1_0.id,
+        d1_0.name,
+        d1_0.num_semesters,
+        d1_0.description,
+        c1_0.ects,
+        c1_0.enrollment_key,
+        c1_0.level,
+        c1_0.description,
+        c1_0.semester,
+        c1_0.status,
+        c1_0.teacher_id,
+        c1_0.title,
+        g1_0.id,
+        g1_0.assigned_at,
+        g1_0.comment,
+        g1_0.grade,
+        g1_0.professor_id,
+        g1_0.student_id,
+        g1_0.subject_id,
+        ea1_0.grade_assigned_at,
+        ea1_0.professor_id,
+        p2_0.id,
+        p2_0.access_failed_count,
+        p2_0.created_at,
+        p2_0.email,
+        p2_0.email_confirmed,
+        p2_0.first_name,
+        p2_0.lockout_enabled,
+        p2_0.last_name,
+        p2_0.password_hash,
+        p2_0.phone_number,
+        p2_0.status,
+        p2_0.temporary_password,
+        ea1_0.rejected_at,
+        ea1_0.status,
+        ea1_0.student_id,
+        s4_0.id,
+        s4_0.access_failed_count,
+        s4_0.created_at,
+        s4_0.email,
+        s4_0.email_confirmed,
+        s4_0.first_name,
+        s4_0.lockout_enabled,
+        s4_0.last_name,
+        s4_0.password_hash,
+        s4_0.phone_number,
+        s4_0.status,
+        s4_0.temporary_password 
+    from
+        exam_applications ea1_0 
+    join
+        users s1_0 
+            on s1_0.id=ea1_0.student_id 
+    join
+        subjects c1_0 
+            on c1_0.id=ea1_0.subject_id 
+    left join
+        departments d1_0 
+            on d1_0.id=c1_0.department_id 
+    left join
+        grades g1_0 
+            on g1_0.id=ea1_0.grade_id 
+    join
+        users p2_0 
+            on p2_0.id=ea1_0.professor_id 
+    join
+        users s4_0 
+            on s4_0.id=ea1_0.student_id 
+    where
+        s1_0.id=? 
+    order by
+        ea1_0.applied_at desc
+Hibernate: 
+    select
+        s1_0.id,
+        s1_0.created_at,
+        s1_0.department_id,
+        s1_0.ects,
+        s1_0.enrollment_key,
+        s1_0.level,
+        s1_0.description,
+        s1_0.semester,
+        s1_0.status,
+        s1_0.teacher_id,
+        s1_0.title 
+    from
+        subjects s1_0 
+    where
+        s1_0.status=?
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.access_failed_count,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.email_confirmed,
+        u1_0.first_name,
+        u1_0.lockout_enabled,
+        u1_0.last_name,
+        u1_0.password_hash,
+        u1_0.phone_number,
+        u1_0.status,
+        u1_0.temporary_password 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        ur1_0.id,
+        ur1_0.role_id,
+        ur1_0.user_id 
+    from
+        user_roles ur1_0 
+    where
+        ur1_0.user_id=?
+Hibernate: 
+    select
+        r1_0.id,
+        r1_0.name,
+        r1_0.normalized_name,
+        r1_0.description 
+    from
+        roles r1_0 
+    where
+        r1_0.id=?
+Hibernate: 
+    select
+        rt1_0.id,
+        rt1_0.created,
+        rt1_0.expires,
+        rt1_0.revoked,
+        rt1_0.token,
+        rt1_0.user_id 
+    from
+        refresh_tokens rt1_0 
+    where
+        rt1_0.user_id=?
+Hibernate: 
+    select
+        ut1_0.id,
+        ut1_0.login_provider,
+        ut1_0.token_name,
+        ut1_0.token_value,
+        ut1_0.user_id 
+    from
+        user_tokens ut1_0 
+    join
+        users u1_0 
+            on u1_0.id=ut1_0.user_id 
+    where
+        u1_0.id=? 
+        and ut1_0.login_provider=?
+Hibernate: 
+    insert 
+    into
+        user_tokens
+        (login_provider, token_name, token_value, user_id) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        refresh_tokens
+        (created, expires, revoked, token, user_id) 
+    values
+        (?, ?, ?, ?, ?)
+Hibernate: 
+    update
+        refresh_tokens 
+    set
+        created=?,
+        expires=?,
+        revoked=?,
+        token=?,
+        user_id=? 
+    where
+        id=?
+Hibernate: 
+    delete 
+    from
+        user_tokens 
+    where
+        id=?
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.access_failed_count,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.email_confirmed,
+        u1_0.first_name,
+        u1_0.lockout_enabled,
+        u1_0.last_name,
+        u1_0.password_hash,
+        u1_0.phone_number,
+        u1_0.status,
+        u1_0.temporary_password 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        uc1_0.id,
+        uc1_0.claim_type,
+        uc1_0.claim_value,
+        uc1_0.user_id 
+    from
+        user_claims uc1_0 
+    left join
+        users u1_0 
+            on u1_0.id=uc1_0.user_id 
+    where
+        u1_0.id=?
+Hibernate: 
+    select
+        distinct u1_0.id,
+        u1_0.access_failed_count,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.email_confirmed,
+        u1_0.first_name,
+        u1_0.lockout_enabled,
+        u1_0.last_name,
+        u1_0.password_hash,
+        u1_0.phone_number,
+        u1_0.status,
+        u1_0.temporary_password 
+    from
+        users u1_0 
+    join
+        user_roles ur1_0 
+            on u1_0.id=ur1_0.user_id 
+    join
+        roles r1_0 
+            on r1_0.id=ur1_0.role_id 
+    where
+        lower(r1_0.normalized_name)=lower(?)
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.access_failed_count,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.email_confirmed,
+        u1_0.first_name,
+        u1_0.lockout_enabled,
+        u1_0.last_name,
+        u1_0.password_hash,
+        u1_0.phone_number,
+        u1_0.status,
+        u1_0.temporary_password 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        ea1_0.id,
+        ea1_0.applied_at,
+        ea1_0.cancelled_at,
+        ea1_0.subject_id,
+        c1_0.id,
+        c1_0.created_at,
+        d1_0.id,
+        d1_0.name,
+        d1_0.num_semesters,
+        d1_0.description,
+        c1_0.ects,
+        c1_0.enrollment_key,
+        c1_0.level,
+        c1_0.description,
+        c1_0.semester,
+        c1_0.status,
+        c1_0.teacher_id,
+        c1_0.title,
+        g1_0.id,
+        g1_0.assigned_at,
+        g1_0.comment,
+        g1_0.grade,
+        g1_0.professor_id,
+        g1_0.student_id,
+        g1_0.subject_id,
+        ea1_0.grade_assigned_at,
+        ea1_0.professor_id,
+        p2_0.id,
+        p2_0.access_failed_count,
+        p2_0.created_at,
+        p2_0.email,
+        p2_0.email_confirmed,
+        p2_0.first_name,
+        p2_0.lockout_enabled,
+        p2_0.last_name,
+        p2_0.password_hash,
+        p2_0.phone_number,
+        p2_0.status,
+        p2_0.temporary_password,
+        ea1_0.rejected_at,
+        ea1_0.status,
+        ea1_0.student_id,
+        s4_0.id,
+        s4_0.access_failed_count,
+        s4_0.created_at,
+        s4_0.email,
+        s4_0.email_confirmed,
+        s4_0.first_name,
+        s4_0.lockout_enabled,
+        s4_0.last_name,
+        s4_0.password_hash,
+        s4_0.phone_number,
+        s4_0.status,
+        s4_0.temporary_password 
+    from
+        exam_applications ea1_0 
+    join
+        users s1_0 
+            on s1_0.id=ea1_0.student_id 
+    join
+        subjects c1_0 
+            on c1_0.id=ea1_0.subject_id 
+    left join
+        departments d1_0 
+            on d1_0.id=c1_0.department_id 
+    left join
+        grades g1_0 
+            on g1_0.id=ea1_0.grade_id 
+    join
+        users p2_0 
+            on p2_0.id=ea1_0.professor_id 
+    join
+        users s4_0 
+            on s4_0.id=ea1_0.student_id 
+    where
+        s1_0.id=? 
+    order by
+        ea1_0.applied_at desc
+Hibernate: 
+    select
+        s1_0.id,
+        s1_0.created_at,
+        s1_0.department_id,
+        s1_0.ects,
+        s1_0.enrollment_key,
+        s1_0.level,
+        s1_0.description,
+        s1_0.semester,
+        s1_0.status,
+        s1_0.teacher_id,
+        s1_0.title 
+    from
+        subjects s1_0 
+    where
+        s1_0.status=?
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.access_failed_count,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.email_confirmed,
+        u1_0.first_name,
+        u1_0.lockout_enabled,
+        u1_0.last_name,
+        u1_0.password_hash,
+        u1_0.phone_number,
+        u1_0.status,
+        u1_0.temporary_password 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        uc1_0.id,
+        uc1_0.claim_type,
+        uc1_0.claim_value,
+        uc1_0.user_id 
+    from
+        user_claims uc1_0 
+    left join
+        users u1_0 
+            on u1_0.id=uc1_0.user_id 
+    where
+        u1_0.id=?
+Hibernate: 
+    select
+        distinct u1_0.id,
+        u1_0.access_failed_count,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.email_confirmed,
+        u1_0.first_name,
+        u1_0.lockout_enabled,
+        u1_0.last_name,
+        u1_0.password_hash,
+        u1_0.phone_number,
+        u1_0.status,
+        u1_0.temporary_password 
+    from
+        users u1_0 
+    join
+        user_roles ur1_0 
+            on u1_0.id=ur1_0.user_id 
+    join
+        roles r1_0 
+            on r1_0.id=ur1_0.role_id 
+    where
+        lower(r1_0.normalized_name)=lower(?)
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.access_failed_count,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.email_confirmed,
+        u1_0.first_name,
+        u1_0.lockout_enabled,
+        u1_0.last_name,
+        u1_0.password_hash,
+        u1_0.phone_number,
+        u1_0.status,
+        u1_0.temporary_password 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        ea1_0.id,
+        ea1_0.applied_at,
+        ea1_0.cancelled_at,
+        ea1_0.subject_id,
+        c1_0.id,
+        c1_0.created_at,
+        d1_0.id,
+        d1_0.name,
+        d1_0.num_semesters,
+        d1_0.description,
+        c1_0.ects,
+        c1_0.enrollment_key,
+        c1_0.level,
+        c1_0.description,
+        c1_0.semester,
+        c1_0.status,
+        c1_0.teacher_id,
+        c1_0.title,
+        g1_0.id,
+        g1_0.assigned_at,
+        g1_0.comment,
+        g1_0.grade,
+        g1_0.professor_id,
+        g1_0.student_id,
+        g1_0.subject_id,
+        ea1_0.grade_assigned_at,
+        ea1_0.professor_id,
+        p2_0.id,
+        p2_0.access_failed_count,
+        p2_0.created_at,
+        p2_0.email,
+        p2_0.email_confirmed,
+        p2_0.first_name,
+        p2_0.lockout_enabled,
+        p2_0.last_name,
+        p2_0.password_hash,
+        p2_0.phone_number,
+        p2_0.status,
+        p2_0.temporary_password,
+        ea1_0.rejected_at,
+        ea1_0.status,
+        ea1_0.student_id,
+        s4_0.id,
+        s4_0.access_failed_count,
+        s4_0.created_at,
+        s4_0.email,
+        s4_0.email_confirmed,
+        s4_0.first_name,
+        s4_0.lockout_enabled,
+        s4_0.last_name,
+        s4_0.password_hash,
+        s4_0.phone_number,
+        s4_0.status,
+        s4_0.temporary_password 
+    from
+        exam_applications ea1_0 
+    join
+        users s1_0 
+            on s1_0.id=ea1_0.student_id 
+    join
+        subjects c1_0 
+            on c1_0.id=ea1_0.subject_id 
+    left join
+        departments d1_0 
+            on d1_0.id=c1_0.department_id 
+    left join
+        grades g1_0 
+            on g1_0.id=ea1_0.grade_id 
+    join
+        users p2_0 
+            on p2_0.id=ea1_0.professor_id 
+    join
+        users s4_0 
+            on s4_0.id=ea1_0.student_id 
+    where
+        s1_0.id=? 
+    order by
+        ea1_0.applied_at desc
+Hibernate: 
+    select
+        s1_0.id,
+        s1_0.created_at,
+        s1_0.department_id,
+        s1_0.ects,
+        s1_0.enrollment_key,
+        s1_0.level,
+        s1_0.description,
+        s1_0.semester,
+        s1_0.status,
+        s1_0.teacher_id,
+        s1_0.title 
+    from
+        subjects s1_0 
+    where
+        s1_0.status=?
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.access_failed_count,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.email_confirmed,
+        u1_0.first_name,
+        u1_0.lockout_enabled,
+        u1_0.last_name,
+        u1_0.password_hash,
+        u1_0.phone_number,
+        u1_0.status,
+        u1_0.temporary_password 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        uc1_0.id,
+        uc1_0.claim_type,
+        uc1_0.claim_value,
+        uc1_0.user_id 
+    from
+        user_claims uc1_0 
+    left join
+        users u1_0 
+            on u1_0.id=uc1_0.user_id 
+    where
+        u1_0.id=?
+Hibernate: 
+    select
+        distinct u1_0.id,
+        u1_0.access_failed_count,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.email_confirmed,
+        u1_0.first_name,
+        u1_0.lockout_enabled,
+        u1_0.last_name,
+        u1_0.password_hash,
+        u1_0.phone_number,
+        u1_0.status,
+        u1_0.temporary_password 
+    from
+        users u1_0 
+    join
+        user_roles ur1_0 
+            on u1_0.id=ur1_0.user_id 
+    join
+        roles r1_0 
+            on r1_0.id=ur1_0.role_id 
+    where
+        lower(r1_0.normalized_name)=lower(?)
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.access_failed_count,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.email_confirmed,
+        u1_0.first_name,
+        u1_0.lockout_enabled,
+        u1_0.last_name,
+        u1_0.password_hash,
+        u1_0.phone_number,
+        u1_0.status,
+        u1_0.temporary_password 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        ea1_0.id,
+        ea1_0.applied_at,
+        ea1_0.cancelled_at,
+        ea1_0.subject_id,
+        c1_0.id,
+        c1_0.created_at,
+        d1_0.id,
+        d1_0.name,
+        d1_0.num_semesters,
+        d1_0.description,
+        c1_0.ects,
+        c1_0.enrollment_key,
+        c1_0.level,
+        c1_0.description,
+        c1_0.semester,
+        c1_0.status,
+        c1_0.teacher_id,
+        c1_0.title,
+        g1_0.id,
+        g1_0.assigned_at,
+        g1_0.comment,
+        g1_0.grade,
+        g1_0.professor_id,
+        g1_0.student_id,
+        g1_0.subject_id,
+        ea1_0.grade_assigned_at,
+        ea1_0.professor_id,
+        p2_0.id,
+        p2_0.access_failed_count,
+        p2_0.created_at,
+        p2_0.email,
+        p2_0.email_confirmed,
+        p2_0.first_name,
+        p2_0.lockout_enabled,
+        p2_0.last_name,
+        p2_0.password_hash,
+        p2_0.phone_number,
+        p2_0.status,
+        p2_0.temporary_password,
+        ea1_0.rejected_at,
+        ea1_0.status,
+        ea1_0.student_id,
+        s4_0.id,
+        s4_0.access_failed_count,
+        s4_0.created_at,
+        s4_0.email,
+        s4_0.email_confirmed,
+        s4_0.first_name,
+        s4_0.lockout_enabled,
+        s4_0.last_name,
+        s4_0.password_hash,
+        s4_0.phone_number,
+        s4_0.status,
+        s4_0.temporary_password 
+    from
+        exam_applications ea1_0 
+    join
+        users s1_0 
+            on s1_0.id=ea1_0.student_id 
+    join
+        subjects c1_0 
+            on c1_0.id=ea1_0.subject_id 
+    left join
+        departments d1_0 
+            on d1_0.id=c1_0.department_id 
+    left join
+        grades g1_0 
+            on g1_0.id=ea1_0.grade_id 
+    join
+        users p2_0 
+            on p2_0.id=ea1_0.professor_id 
+    join
+        users s4_0 
+            on s4_0.id=ea1_0.student_id 
+    where
+        s1_0.id=? 
+    order by
+        ea1_0.applied_at desc
+Hibernate: 
+    select
+        s1_0.id,
+        s1_0.created_at,
+        s1_0.department_id,
+        s1_0.ects,
+        s1_0.enrollment_key,
+        s1_0.level,
+        s1_0.description,
+        s1_0.semester,
+        s1_0.status,
+        s1_0.teacher_id,
+        s1_0.title 
+    from
+        subjects s1_0 
+    where
+        s1_0.status=?

@@ -231,6 +231,26 @@ button:disabled,
   color: #cbd5e1 !important;
 }
 
+.dark .MuiTablePagination-root,
+.dark .MuiTablePagination-selectLabel,
+.dark .MuiTablePagination-displayedRows,
+.dark .MuiTablePagination-input,
+.dark .MuiTablePagination-select,
+.dark .MuiTablePagination-selectIcon,
+.dark .MuiTablePagination-actions,
+.dark .MuiTablePagination-actions .MuiIconButton-root {
+  color: #e2e8f0 !important;
+}
+
+.dark .MuiTablePagination-actions .Mui-disabled,
+.dark .MuiTablePagination-actions .MuiIconButton-root.Mui-disabled {
+  color: #94a3b8 !important;
+}
+
+.dark .MuiTablePagination-toolbar {
+  color: #e2e8f0 !important;
+}
+
 .dark .fixed.inset-0 [class*="text-slate-900"],
 .dark .fixed.inset-0 [class*="text-slate-800"],
 .dark .fixed.inset-0 [class*="text-gray-900"],

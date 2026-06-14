@@ -88,6 +88,23 @@ export default function ExamRegistrationPage() {
                           disabled={!hasProfessors}
                           size="small"
                           fullWidth
+                          sx={{
+                            color: hasProfessors ? 'inherit' : '#94a3b8',
+                            backgroundColor: 'transparent',
+                            '.MuiSelect-select': {
+                              color: hasProfessors ? 'inherit' : '#94a3b8',
+                            },
+                            '.MuiSelect-icon': {
+                              color: hasProfessors ? 'currentColor' : '#94a3b8',
+                            },
+                            '&.Mui-disabled .MuiSelect-select': {
+                              WebkitTextFillColor: '#94a3b8',
+                              color: '#94a3b8',
+                            },
+                            '&.Mui-disabled .MuiSelect-icon': {
+                              color: '#94a3b8',
+                            },
+                          }}
                         >
                           <MenuItem value="">Zgjidhe ligjeruesin</MenuItem>
                           {(course.professors || []).map((p) => (

@@ -72,7 +72,7 @@ function useTableStyles(isDark) {
       rowOdd: isDark ? "#1e293b" : "#f4f7fa",
       rowHover: isDark ? "#334155" : "#e8f0f8",
       paginationBorder: isDark ? "1px solid #334155" : "1px solid #e2e8f0",
-      paginationColor: isDark ? "#94a3b8" : "#64748b",
+      paginationColor: isDark ? "#e2e8f0" : "#475569",
       paperBg: isDark ? "#0f172a" : "#ffffff",
       paperBorder: isDark ? "#334155" : "#cbd5e1",
     }),
@@ -252,11 +252,14 @@ export default function GradeTable({
             fontSize: "0.8125rem",
             color: styles.paginationColor,
           },
+          ".MuiTablePagination-selectIcon": {
+            color: isDark ? "#e2e8f0" : "#475569",
+          },
           ".MuiTablePagination-actions .MuiIconButton-root": {
-            color: isDark ? "#94a3b8" : "#64748b",
+            color: isDark ? "#e2e8f0" : "#475569",
           },
           ".Mui-disabled": {
-            color: isDark ? "#475569" : "#cbd5e1",
+            color: isDark ? "#94a3b8" : "#cbd5e1",
           },
         }}
       />

@@ -372,10 +372,16 @@ public class SmisService {
                     "vehbi.sofiu@meson.com"
             );
             case "sistemet e nderlidhura" -> List.of("astrit.hulaj@meson.com");
+            case "interneti i gjerave iot" -> List.of("astrit.hulaj@meson.com");
             case "bazat e inteligjences artificiale" -> List.of(
                     "komision.transfer@meson.com",
                     "zhilbert.tafa@meson.com"
             );
+            case "devops" -> List.of(
+                    "komision.transfer@meson.com",
+                    "besnik.qehaja@meson.com"
+            );
+            case "perpunimi dixhital i sinjalit" -> List.of("getoar.lubeniqi@meson.com");
             case "teknologjite e perzgjedhura javascript frameworks r eti" -> List.of(
                     "bertan.karahoda@meson.com",
                     "lavdim.beqiri@meson.com"
@@ -449,6 +455,7 @@ public class SmisService {
                 .replace("(", " ")
                 .replace(")", " ")
                 .replace("-", " ")
+                .replace(",", " ")
                 .replaceAll("\\s+", " ")
                 .trim();
         return normalized;
