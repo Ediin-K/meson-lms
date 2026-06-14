@@ -13,27 +13,27 @@ import java.util.Optional;
 @Repository
 public interface ExamApplicationRepository extends JpaRepository<ExamApplication, Long> {
 
-    @EntityGraph(attributePaths = {"student", "course", "course.courseCategory", "professor", "grade"})
+    @EntityGraph(attributePaths = {"student", "course", "course.department", "professor", "grade"})
     List<ExamApplication> findByStudentIdOrderByAppliedAtDesc(Long studentId);
 
-    @EntityGraph(attributePaths = {"student", "course", "course.courseCategory", "professor", "grade"})
+    @EntityGraph(attributePaths = {"student", "course", "course.department", "professor", "grade"})
     List<ExamApplication> findByStudentIdAndStatusInOrderByAppliedAtDesc(
             Long studentId,
             Collection<ExamApplicationStatus> statuses);
 
-    @EntityGraph(attributePaths = {"student", "course", "course.courseCategory", "professor", "grade"})
+    @EntityGraph(attributePaths = {"student", "course", "course.department", "professor", "grade"})
     List<ExamApplication> findByProfessorIdOrderByAppliedAtDesc(Long professorId);
 
-    @EntityGraph(attributePaths = {"student", "course", "course.courseCategory", "professor", "grade"})
+    @EntityGraph(attributePaths = {"student", "course", "course.department", "professor", "grade"})
     List<ExamApplication> findByStatusOrderByAppliedAtDesc(ExamApplicationStatus status);
 
-    @EntityGraph(attributePaths = {"student", "course", "course.courseCategory", "professor", "grade"})
+    @EntityGraph(attributePaths = {"student", "course", "course.department", "professor", "grade"})
     List<ExamApplication> findAllByOrderByAppliedAtDesc();
 
-    @EntityGraph(attributePaths = {"student", "course", "course.courseCategory", "professor", "grade"})
+    @EntityGraph(attributePaths = {"student", "course", "course.department", "professor", "grade"})
     Optional<ExamApplication> findByIdAndStudentId(Long id, Long studentId);
 
-    @EntityGraph(attributePaths = {"student", "course", "course.courseCategory", "professor", "grade"})
+    @EntityGraph(attributePaths = {"student", "course", "course.department", "professor", "grade"})
     Optional<ExamApplication> findByIdAndProfessorId(Long id, Long professorId);
 
     boolean existsByStudentIdAndCourseIdAndStatusIn(Long studentId, Long courseId, Collection<ExamApplicationStatus> statuses);

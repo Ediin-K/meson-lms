@@ -94,7 +94,7 @@ export default function Header() {
       default:
         return [
           { label: t('header.navDashboard'), href: '/student' },
-          { label: t('header.navsubjects'), href: '/subjects' },
+          { label: t('header.navSubjects'), href: '/subjects' },
           { label: t('header.navAssignments'), href: '/assignments' },
           contactLink,
           libraryLink,
@@ -316,13 +316,13 @@ export default function Header() {
                 >
                   {[
                     { label: t('header.profile'), href: profileHref },
-                    { label: t('header.accountSettings'), href: null },
+                    { label: t('header.accountSettings'), href: profileHref },
                     {
                       label: t('header.grades'),
                       href: gradesHref,
                     },
-                    { label: t('header.messages'), href: null },
-                    { label: t('header.help'), href: null },
+                    { label: t('header.messages'), href: '/notifications' },
+                    { label: t('header.help'), href: '/contact' },
                   ].map(({ label, href }) => (
                     <button
                       key={label}

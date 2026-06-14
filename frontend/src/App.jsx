@@ -91,22 +91,24 @@ function AppLayout() {
   const location = useLocation();
   const isLoginPage = location.pathname === "/login" || location.pathname.startsWith("/login/");
   const isQuizPage = /\/quiz\/\d+/.test(location.pathname);
-  const isSmisPage = location.pathname.includes("/smis");
+  const isSmisLoginPage = location.pathname.startsWith("/smis-login");
+  const isFullScreenPage = isLoginPage || isQuizPage || isSmisLoginPage;
 
   return (
       <div className="flex min-h-dvh flex-col bg-gradient-to-b from-sky-50 via-[#f0f7fb] to-[#d8e8f2] transition-colors dark:from-slate-950 dark:via-slate-900 dark:to-slate-900">
-        {!isLoginPage && !isQuizPage && <Header />}
+        {!isFullScreenPage && <Header />}
         <SessionExpiredDialog />
         <main className="flex flex-col flex-grow">
           <div
             id="main-content"
-            className={`flex flex-col flex-grow ${isLoginPage || isQuizPage || isSmisPage ? "" : "pt-[73px] sm:pt-[81px]"}`}
+            className={`flex flex-col flex-grow ${isFullScreenPage ? "" : "pt-[73px] sm:pt-[81px]"}`}
             tabIndex={-1}
           >
             <Suspense fallback={<PageFallback />}>
             <Routes>
               <Route path="/" element={<RootRedirect />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/smis-login/:portal" element={<SmisPortalLogin />} />
               <Route path="/change-password" element={<ChangeTemporaryPassword />} />
               <Route path="/register" element={<Navigate to="/login" replace />} />
               <Route path="/signup" element={<Navigate to="/login" replace />} />
@@ -259,6 +261,14 @@ function AppLayout() {
                 }
               />
               <Route
+                path="/admin/smis"
+                element={
+                  <ProtectedRoute requiredRole="admin">
+                    <AdminSmisDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/student"
                 element={
                   <ProtectedRoute requiredRole="student">
@@ -355,7 +365,7 @@ function AppLayout() {
             </Suspense>
           </div>
         </main>
-        {!isLoginPage && <ConsentBanner />}
+        {!isFullScreenPage && <ConsentBanner />}
       </div>
   );
 }

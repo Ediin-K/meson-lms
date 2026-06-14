@@ -74,7 +74,7 @@ public class SmisService {
             new SmisCatalogCourse("40OCC353", "Orientimi ne Karriere - Komunikim dhe Zhvillim", "Zgjedhore")
     );
 
-    private final CourseRepository courseRepository;
+    private final SubjectRepository subjectRepository;
     private final UserRepository userRepository;
     private final ExamApplicationRepository examApplicationRepository;
     private final GradeRepository gradeRepository;
@@ -87,11 +87,11 @@ public class SmisService {
                 .toList();
         Set<Long> alreadyAppliedCourseIds = activeApplicationCourseIdsForCurrentStudent();
 
-        return courseRepository.findByStatusi(CourseStatus.PUBLIKUAR)
+        return subjectRepository.findByStatusi(SubjectStatus.PUBLIKUAR)
                 .stream()
                 .filter(this::isComputerScienceCourse)
                 .filter(course -> !alreadyAppliedCourseIds.contains(course.getId()))
-                .sorted(Comparator.comparing(Course::getSemester).thenComparing(course -> courseCode(course)))
+                .sorted(Comparator.comparing(Subject::getSemester).thenComparing(course -> courseCode(course)))
                 .map(course -> toCourseResponse(course, professorsForCourse(course, professors)))
                 .toList();
     }
@@ -111,7 +111,7 @@ public class SmisService {
 
         User student = userRepository.findById(studentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Studenti nuk u gjet"));
-        Course course = courseRepository.findById(request.getCourseId())
+        Subject course = subjectRepository.findById(request.getCourseId())
                 .orElseThrow(() -> new ResourceNotFoundException("Kursi nuk u gjet"));
         User professor = userRepository.findById(request.getProfessorId())
                 .orElseThrow(() -> new ResourceNotFoundException("Profesori nuk u gjet"));
@@ -192,14 +192,14 @@ public class SmisService {
 
         Grade grade = application.getGrade();
         if (grade == null) {
-            grade = gradeRepository.findByStudentIdAndCourseId(
+            grade = gradeRepository.findByStudentIdAndSubjectId(
                     application.getStudent().getId(),
                     application.getCourse().getId()).orElse(null);
         }
         if (grade == null) {
             grade = Grade.builder()
                     .student(application.getStudent())
-                    .course(application.getCourse())
+                    .subject(application.getCourse())
                     .professor(application.getProfessor())
                     .grade(request.getGrade())
                     .comment(request.getComment())
@@ -231,7 +231,7 @@ public class SmisService {
 
         Grade grade = application.getGrade();
         if (grade == null) {
-            grade = gradeRepository.findByStudentIdAndCourseId(
+            grade = gradeRepository.findByStudentIdAndSubjectId(
                     application.getStudent().getId(),
                     application.getCourse().getId()).orElse(null);
         }
@@ -273,7 +273,7 @@ public class SmisService {
                 .build();
     }
 
-    private SmisCourseResponse toCourseResponse(Course course, List<SmisProfessorOptionResponse> professors) {
+    private SmisCourseResponse toCourseResponse(Subject course, List<SmisProfessorOptionResponse> professors) {
         return SmisCourseResponse.builder()
                 .id(course.getId())
                 .code(courseCode(course))
@@ -294,7 +294,7 @@ public class SmisService {
     }
 
     private List<SmisProfessorOptionResponse> professorsForCourse(
-            Course course,
+            Subject course,
             List<SmisProfessorOptionResponse> allProfessors) {
         List<String> allowedEmails = professorEmailsForCourse(course);
         if (allowedEmails.isEmpty()) {
@@ -305,7 +305,7 @@ public class SmisService {
                 .toList();
     }
 
-    private List<String> professorEmailsForCourse(Course course) {
+    private List<String> professorEmailsForCourse(Subject course) {
         return switch (normalizedCourseTitle(course)) {
             case "algoritmet dhe strukturat e te dhenave" -> List.of("shkelqim.berisha@meson.com");
             case "bazat e teknologjive big data" -> List.of("bertan.karahoda@meson.com");
@@ -371,6 +371,45 @@ public class SmisService {
                     "armend.ymeri@meson.com",
                     "vehbi.sofiu@meson.com"
             );
+            case "sistemet e nderlidhura" -> List.of("astrit.hulaj@meson.com");
+            case "bazat e inteligjences artificiale" -> List.of(
+                    "komision.transfer@meson.com",
+                    "zhilbert.tafa@meson.com"
+            );
+            case "teknologjite e perzgjedhura javascript frameworks r eti" -> List.of(
+                    "bertan.karahoda@meson.com",
+                    "lavdim.beqiri@meson.com"
+            );
+            case "blockchain ne aplikacionet multidisiplinare" -> List.of(
+                    "komision.transfer@meson.com",
+                    "osman.osmani@meson.com",
+                    "lavdim.beqiri@meson.com"
+            );
+            case "psikologjia ne projektet inxhinierike" -> List.of(
+                    "besnik.qehaja@meson.com",
+                    "vehbi.sofiu@meson.com",
+                    "alma.novoberdaliu@meson.com",
+                    "liridon.hoti@meson.com",
+                    "hizer.leka@meson.com",
+                    "zijadin.krasniqi@meson.com",
+                    "lavdim.beqiri@meson.com",
+                    "lamir.shkurti@meson.com"
+            );
+            case "metodat e analizes ekonomike" -> List.of(
+                    "elton.boshnjaku@meson.com",
+                    "liridon.hoti@meson.com",
+                    "besnik.qehaja@meson.com",
+                    "ramadan.dervishi@meson.com"
+            );
+            case "orientimi ne karriere komunikim dhe zhvillim" -> List.of(
+                    "osman.osmani@meson.com",
+                    "lavdim.beqiri@meson.com",
+                    "elissa.mollakuqe@meson.com",
+                    "shejnaze.gagica@meson.com",
+                    "anita.sadikaj@meson.com",
+                    "anton.gojani@meson.com",
+                    "zejnije.bytyqi@meson.com"
+            );
             case "rrjeta kompjuterike", "rrjeta kompjuterike dhe komunikimi" -> List.of(
                     "zhilbert.tafa@meson.com",
                     "lavdim.beqiri@meson.com"
@@ -399,7 +438,7 @@ public class SmisService {
         };
     }
 
-    private String normalizedCourseTitle(Course course) {
+    private String normalizedCourseTitle(Subject course) {
         if (course == null || course.getTitulli() == null) {
             return "";
         }
@@ -417,7 +456,7 @@ public class SmisService {
 
     private ExamApplicationResponse toResponse(ExamApplication application) {
         Grade grade = application.getGrade();
-        Course course = application.getCourse();
+        Subject course = application.getCourse();
         return ExamApplicationResponse.builder()
                 .id(application.getId())
                 .studentId(application.getStudent().getId())
@@ -442,7 +481,7 @@ public class SmisService {
                 .build();
     }
 
-    private String courseCode(Course course) {
+    private String courseCode(Subject course) {
         SmisCatalogCourse catalogCourse = catalogCourse(course);
         if (catalogCourse != null) {
             return catalogCourse.code();
@@ -450,15 +489,15 @@ public class SmisService {
         return "MESON" + String.format("%03d", course.getId());
     }
 
-    private String courseCategory(Course course) {
+    private String courseCategory(Subject course) {
         SmisCatalogCourse catalogCourse = catalogCourse(course);
         if (catalogCourse != null) {
             return catalogCourse.category();
         }
-        return course.getCourseCategory() != null ? course.getCourseCategory().getEmertimi() : "Pa kategori";
+        return course.getDepartment() != null ? course.getDepartment().getEmertimi() : "Pa kategori";
     }
 
-    private SmisCatalogCourse catalogCourse(Course course) {
+    private SmisCatalogCourse catalogCourse(Subject course) {
         if (course == null || course.getTitulli() == null) {
             return null;
         }
@@ -469,12 +508,12 @@ public class SmisService {
                 .orElse(null);
     }
 
-    private boolean isComputerScienceCourse(Course course) {
+    private boolean isComputerScienceCourse(Subject course) {
         if (catalogCourse(course) != null) {
             return true;
         }
-        return course.getCourseCategory() != null
-                && "Shkenca kompjuterike dhe inxhinieri".equalsIgnoreCase(course.getCourseCategory().getEmertimi());
+        return course.getDepartment() != null
+                && "Shkenca kompjuterike dhe inxhinieri".equalsIgnoreCase(course.getDepartment().getEmertimi());
     }
 
     private Set<Long> activeApplicationCourseIdsForCurrentStudent() {

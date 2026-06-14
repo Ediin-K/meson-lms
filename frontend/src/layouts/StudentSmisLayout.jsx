@@ -62,7 +62,7 @@ export default function StudentSmisLayout() {
       </header>
 
       <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[286px_1fr] lg:px-8">
-        <aside className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-900 lg:sticky lg:top-6 lg:h-fit">
+        <aside className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-900 lg:sticky lg:top-28 lg:h-fit">
           <div className="mb-3 rounded-xl bg-slate-950 px-4 py-4 text-white dark:bg-slate-800">
             <p className="text-[11px] font-bold uppercase tracking-widest text-sky-200">Sherbimet akademike</p>
             <h2 className="mt-1 text-lg font-black">Menu SMIS</h2>

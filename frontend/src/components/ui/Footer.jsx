@@ -37,7 +37,7 @@ export default function Footer() {
 
   const quick = [
     [t('header.navHome'), '#'],
-    [t('header.navsubjects'), '#'],
+    [t('header.navSubjects'), '#'],
     [t('header.navAssignments'), '#'],
     [t('header.navLibrary'), 'https://www.ubt-uni.net/sq/ubt/jeta-ne-kampus/ubt-biblioteka/'],
   ]

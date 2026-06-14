@@ -48,7 +48,7 @@ export default function SubjectsPage() {
         {}
         <Box className="mb-10">
           <Typography variant="h4" className="!font-black !text-slate-900 dark:!text-white tracking-tight">
-            {t("header.navsubjects", "Lëndët")}
+            {t("header.navSubjects", "Lëndët")}
           </Typography>
         </Box>
 

@@ -23,8 +23,8 @@ public class ExamApplication {
     private User student;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "course_id", nullable = false)
-    private Course course;
+    @JoinColumn(name = "subject_id", nullable = false)
+    private Subject course;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "professor_id", nullable = false)
