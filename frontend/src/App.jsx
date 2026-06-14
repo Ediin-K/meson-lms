@@ -36,6 +36,12 @@ const AdminSchedules = lazy(() => import("./pages/AdminSchedules.jsx"));
 const StudentSchedules = lazy(() => import("./pages/StudentSchedules.jsx"));
 const StudentGroups = lazy(() => import("./pages/StudentGroups.jsx"));
 const StudentProfilePage = lazy(() => import("./pages/student/StudentProfilePage.jsx"));
+const StudentSmisLayout = lazy(() => import("./layouts/StudentSmisLayout.jsx"));
+const StudentSmisHome = lazy(() => import("./pages/student/StudentSmisHome.jsx"));
+const StudentSmisProfilePage = lazy(() => import("./pages/student/StudentSmisProfilePage.jsx"));
+const ExamRegistrationPage = lazy(() => import("./pages/student/ExamRegistrationPage.jsx"));
+const RegisteredExamsPage = lazy(() => import("./pages/student/RegisteredExamsPage.jsx"));
+const StudentPaymentsPage = lazy(() => import("./pages/student/StudentPaymentsPage.jsx"));
 const AdminGroupApplications = lazy(() => import("./pages/AdminGroupApplications.jsx"));
 const AdminGroups = lazy(() => import("./pages/AdminGroups.jsx"));
 const AdminRoles = lazy(() => import("./pages/AdminRoles.jsx"));
@@ -50,7 +56,11 @@ const TeacherLessons = lazy(() => import("./pages/teacher/TeacherLessons.jsx"));
 const TeacherQuizzes = lazy(() => import("./pages/teacher/TeacherQuizzes.jsx"));
 const TeacherStudents = lazy(() => import("./pages/teacher/TeacherStudents.jsx"));
 const ProfessorGradesPage = lazy(() => import("./pages/teacher/ProfessorGradesPage.jsx"));
+const ProfessorExamPage = lazy(() => import("./pages/teacher/ProfessorExamPage.jsx"));
 const StudentGradesPage = lazy(() => import("./pages/student/StudentGradesPage.jsx"));
+const StudentTranscriptPage = lazy(() => import("./pages/student/StudentTranscriptPage.jsx"));
+const AdminSmisDashboard = lazy(() => import("./pages/AdminSmisDashboard.jsx"));
+const SmisPortalLogin = lazy(() => import("./pages/SmisPortalLogin.jsx"));
 
 function RootRedirect() {
   const { isAuthenticated, role } = useAppPreferences();
@@ -81,8 +91,9 @@ function PageFallback() {
 
 function AppLayout() {
   const location = useLocation();
-  const isLoginPage = location.pathname === "/login";
+  const isLoginPage = location.pathname === "/login" || location.pathname.startsWith("/login/");
   const isQuizPage = /\/quiz\/\d+/.test(location.pathname);
+  const isSmisPage = location.pathname.includes("/smis");
 
   return (
       <div className="flex min-h-dvh flex-col bg-gradient-to-b from-sky-50 via-[#f0f7fb] to-[#d8e8f2] transition-colors dark:from-slate-950 dark:via-slate-900 dark:to-slate-900">
@@ -91,7 +102,7 @@ function AppLayout() {
         <main className="flex flex-col flex-grow">
           <div
             id="main-content"
-            className={`flex flex-col flex-grow ${isLoginPage || isQuizPage ? "" : "pt-[73px] sm:pt-[81px]"}`}
+            className={`flex flex-col flex-grow ${isLoginPage || isQuizPage || isSmisPage ? "" : "pt-[73px] sm:pt-[81px]"}`}
             tabIndex={-1}
           >
             <Suspense fallback={<PageFallback />}>
@@ -305,6 +316,21 @@ function AppLayout() {
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/student/smis"
+                element={
+                  <ProtectedRoute requiredRole="student">
+                    <StudentSmisLayout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route index element={<StudentSmisHome />} />
+                <Route path="profile" element={<StudentSmisProfilePage />} />
+                <Route path="grades" element={<StudentTranscriptPage />} />
+                <Route path="exams/register" element={<ExamRegistrationPage />} />
+                <Route path="exams/registered" element={<RegisteredExamsPage />} />
+                <Route path="payments" element={<StudentPaymentsPage />} />
+              </Route>
               <Route
                 path="/teacher"
                 element={

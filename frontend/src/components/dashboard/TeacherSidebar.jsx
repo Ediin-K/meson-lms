@@ -32,13 +32,14 @@ export default function TeacherSidebar() {
     { to: "/teacher/quizzes", icon: QuizRounded, label: "Quizzes" },
     { to: "/teacher/students", icon: PeopleRounded, label: "Students" },
     { to: "/teacher/grades", icon: GradeRounded, label: "Notat" },
+    { to: "/teacher/smis/exams", icon: FactCheckRounded, label: "Provimet SMIS" },
   ];
 
   return (
     <aside className="w-64 flex-shrink-0 border-r border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md h-[calc(100vh-80px)] sticky top-20 hidden md:block">
       <div className="p-6 flex flex-col gap-2">
         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4 px-2">
-          Menu e Mësuesit
+          Menu e Profesorit
         </p>
         {links.map((link) => (
           <SidebarLink key={link.to} {...link} />
