@@ -13,12 +13,12 @@ export default function ProfileAssignmentsSection({ submissions, t }) {
         <Box>
             <Typography variant="h6" className="!font-extrabold !text-slate-900 dark:!text-white !mb-4 flex items-center gap-2">
                 <AssignmentRounded className="text-sky-600" fontSize="small" />
-                {t?.('profile.assignments') ?? 'Detyrat'}
+                {t?.('studentProfile.assignments') ?? 'Detyrat'}
             </Typography>
 
             {!submissions || submissions.length === 0 ? (
                 <Typography variant="body2" className="!text-slate-500">
-                    {t?.('profile.noAssignments') ?? 'Nuk keni dorëzime ende.'}
+                    {t?.('studentProfile.noAssignments') ?? 'Nuk keni dorëzime ende.'}
                 </Typography>
             ) : (
                 <div className="flex flex-col gap-3">

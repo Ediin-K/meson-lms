@@ -1,7 +1,24 @@
+import { useMemo } from 'react'
 import { Box, Card, CardContent, Chip, Typography } from '@mui/material'
 import QuizRounded from '@mui/icons-material/QuizRounded'
 
 export default function ProfileQuizActivitySection({ attempts, t }) {
+  // Show one row per quiz — the most recent attempt — so retried/re-created quizzes
+  // don't list the same quiz multiple times.
+  const latestPerQuiz = useMemo(() => {
+    const byQuiz = new Map()
+    for (const a of attempts || []) {
+      const key = a.quizId ?? a.quizTitulli
+      const existing = byQuiz.get(key)
+      if (!existing || new Date(a.startedAt || 0) > new Date(existing.startedAt || 0)) {
+        byQuiz.set(key, a)
+      }
+    }
+    return [...byQuiz.values()].sort(
+      (x, y) => new Date(y.startedAt || 0) - new Date(x.startedAt || 0),
+    )
+  }, [attempts])
+
   return (
     <Card elevation={0} className="rounded-2xl border border-slate-200/80 bg-white dark:!border-slate-700/80 dark:!bg-slate-900">
       <CardContent className="!p-6">
@@ -9,13 +26,13 @@ export default function ProfileQuizActivitySection({ attempts, t }) {
           <QuizRounded className="text-violet-600" fontSize="small" />
           {t('studentProfile.quizzes')}
         </Typography>
-        {!attempts?.length ? (
+        {!latestPerQuiz.length ? (
           <Typography variant="body2" className="!text-slate-500">
             {t('studentProfile.noQuizzes')}
           </Typography>
         ) : (
           <div className="flex flex-col gap-2">
-            {attempts.map((attempt) => (
+            {latestPerQuiz.map((attempt) => (
               <Box
                 key={attempt.id}
                 className="rounded-xl border border-slate-100 bg-slate-50/30 p-3 dark:border-slate-700 dark:bg-slate-800/40"
