@@ -47,6 +47,11 @@ export default function Header() {
     role === 'admin' ? '/admin/profile' :
     role === 'teacher' ? '/teacher/profile' :
     '/profile'
+  const smisHref =
+    role === 'student' ? '/smis-login/student' :
+    role === 'admin' ? '/smis-login/admin' :
+    role === 'teacher' ? '/smis-login/staff' :
+    '/smis-login/student'
 
   // Avatar shown in the header button — loaded once when authenticated.
   const [avatar, setAvatar] = useState(null)
@@ -88,6 +93,7 @@ export default function Header() {
           { label: t('header.navAdminDashboard'), href: '/admin' },
           { label: t('home.admin.services.users.title'), href: '/admin/users' },
           { label: t('home.admin.services.subjects.title'), href: '/admin/subjects' },
+          { label: 'SMIS', href: '/admin/smis' },
           contactLink,
         ]
       case 'teacher':
@@ -95,6 +101,7 @@ export default function Header() {
           { label: t('header.navDashboard'), href: '/teacher' },
           { label: t('home.teacher.manageClasses'), href: '/classes' },
           { label: t('header.navAssignments'), href: '/assignments' },
+          { label: 'SMIS', href: '/teacher/smis/exams' },
           contactLink,
           libraryLink,
         ]
@@ -104,6 +111,7 @@ export default function Header() {
           { label: t('header.navDashboard'), href: '/student' },
           { label: t('header.navSubjects'), href: '/subjects' },
           { label: t('header.navAssignments'), href: '/assignments' },
+          { label: 'SMIS', href: '/student/smis' },
           contactLink,
           libraryLink,
         ]
@@ -329,7 +337,7 @@ export default function Header() {
                     { label: t('header.accountSettings'), href: profileHref },
                     {
                       label: t('header.grades'),
-                      href: role === 'student' ? '/student/grades' : role === 'teacher' ? '/teacher/grades' : null,
+                      href: smisHref,
                     },
                     { label: t('header.messages'), href: '/notifications' },
                     { label: t('header.help'), href: '/contact' },

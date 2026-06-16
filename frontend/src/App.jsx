@@ -357,6 +357,7 @@ function AppLayout() {
                 <Route path="quizzes" element={<TeacherQuizzes />} />
                 <Route path="students" element={<TeacherStudents />} />
                 <Route path="grades" element={<ProfessorGradesPage />} />
+                <Route path="smis/exams" element={<ProfessorExamPage />} />
                 <Route path="profile" element={<TeacherProfilePage />} />
               </Route>
               <Route
