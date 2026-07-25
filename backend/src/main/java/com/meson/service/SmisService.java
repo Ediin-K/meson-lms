@@ -22,7 +22,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SmisService {
 
-    private static final List<SmisCatalogCourse> COMPUTER_SCIENCE_COURSES = List.of(
+    // TODO: hardcoded course catalog — belongs in the database, not in code
+     static final List<SmisCatalogCourse> COMPUTER_SCIENCE_COURSES = List.of(
             new SmisCatalogCourse("40ICP101", "Hyrje në Shkenca Kompjuterike dhe Programim", "Obligative"),
             new SmisCatalogCourse("40MAT102", "Matematikë 1", "Obligative"),
             new SmisCatalogCourse("40FEE103", "Bazat e Inxhinierise Elektronike / Elektrike", "Obligative"),
@@ -63,7 +64,7 @@ public class SmisService {
             new SmisCatalogCourse("40OCC353", "Orientimi ne Karriere - Komunikim dhe Zhvillim", "Zgjedhore")
     );
 
-    private final CourseRepository courseRepository;
+    private final SubjectRepository subjectRepository;
     private final UserRepository userRepository;
     private final ExamApplicationRepository examApplicationRepository;
     private final GradeRepository gradeRepository;
@@ -74,14 +75,14 @@ public class SmisService {
                 .stream()
                 .map(this::toProfessorOption)
                 .toList();
-        Set<Long> alreadyAppliedCourseIds = activeApplicationCourseIdsForCurrentStudent();
+        Set<Long> alreadyAppliedSubjectIds = activeApplicationSubjectIdsForCurrentStudent();
 
-        return courseRepository.findByStatusi(CourseStatus.PUBLIKUAR)
+        return subjectRepository.findByStatusi(SubjectStatus.PUBLIKUAR)
                 .stream()
                 .filter(this::isComputerScienceCourse)
-                .filter(course -> !alreadyAppliedCourseIds.contains(course.getId()))
-                .sorted(Comparator.comparing(Course::getSemester).thenComparing(course -> courseCode(course)))
-                .map(course -> toCourseResponse(course, professorsForCourse(course, professors)))
+                .filter(subject -> !alreadyAppliedSubjectIds.contains(subject.getId()))
+                .sorted(Comparator.comparing(Subject::getSemester).thenComparing(this::courseCode))
+                .map(subject -> toCourseResponse(subject, professorsForCourse(subject, professors)))
                 .toList();
     }
 
@@ -91,7 +92,7 @@ public class SmisService {
             throw new AccessDeniedException("Nuk keni qasje per kete student");
         }
 
-        if (examApplicationRepository.existsByStudentIdAndCourseIdAndStatusIn(
+        if (examApplicationRepository.existsByStudentIdAndSubjectIdAndStatusIn(
                 studentId,
                 request.getCourseId(),
                 List.of(ExamApplicationStatus.REGISTERED, ExamApplicationStatus.GRADED))) {
@@ -100,14 +101,14 @@ public class SmisService {
 
         User student = userRepository.findById(studentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Studenti nuk u gjet"));
-        Course course = courseRepository.findById(request.getCourseId())
+        Subject subject = subjectRepository.findById(request.getCourseId())
                 .orElseThrow(() -> new ResourceNotFoundException("Kursi nuk u gjet"));
         User professor = userRepository.findById(request.getProfessorId())
                 .orElseThrow(() -> new ResourceNotFoundException("Profesori nuk u gjet"));
 
         ExamApplication application = ExamApplication.builder()
                 .student(student)
-                .course(course)
+                .subject(subject)
                 .professor(professor)
                 .status(ExamApplicationStatus.REGISTERED)
                 .appliedAt(LocalDateTime.now())
@@ -165,9 +166,9 @@ public class SmisService {
         User professor = getCurrentUser();
         ExamApplication application = hasRole("ADMIN")
                 ? examApplicationRepository.findById(applicationId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Paraqitja e provimit nuk u gjet"))
+                .orElseThrow(() -> new ResourceNotFoundException("Paraqitja e provimit nuk u gjet"))
                 : examApplicationRepository.findByIdAndProfessorId(applicationId, professor.getId())
-                    .orElseThrow(() -> new AccessDeniedException("Ju nuk keni qasje ne kete paraqitje"));
+                .orElseThrow(() -> new AccessDeniedException("Ju nuk keni qasje ne kete paraqitje"));
 
         if (application.getStatus() == ExamApplicationStatus.CANCELLED) {
             throw new BadRequestException("Nuk mund te vendoset nota per provim te anuluar");
@@ -175,14 +176,14 @@ public class SmisService {
 
         Grade grade = application.getGrade();
         if (grade == null) {
-            grade = gradeRepository.findByStudentIdAndCourseId(
+            grade = gradeRepository.findByStudentIdAndSubjectId(
                     application.getStudent().getId(),
-                    application.getCourse().getId()).orElse(null);
+                    application.getSubject().getId()).orElse(null);
         }
         if (grade == null) {
             grade = Grade.builder()
                     .student(application.getStudent())
-                    .course(application.getCourse())
+                    .subject(application.getSubject())
                     .professor(application.getProfessor())
                     .grade(request.getGrade())
                     .comment(request.getComment())
@@ -208,15 +209,15 @@ public class SmisService {
         User professor = getCurrentUser();
         ExamApplication application = hasRole("ADMIN")
                 ? examApplicationRepository.findById(applicationId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Paraqitja e provimit nuk u gjet"))
+                .orElseThrow(() -> new ResourceNotFoundException("Paraqitja e provimit nuk u gjet"))
                 : examApplicationRepository.findByIdAndProfessorId(applicationId, professor.getId())
-                    .orElseThrow(() -> new AccessDeniedException("Ju nuk keni qasje ne kete paraqitje"));
+                .orElseThrow(() -> new AccessDeniedException("Ju nuk keni qasje ne kete paraqitje"));
 
         Grade grade = application.getGrade();
         if (grade == null) {
-            grade = gradeRepository.findByStudentIdAndCourseId(
+            grade = gradeRepository.findByStudentIdAndSubjectId(
                     application.getStudent().getId(),
-                    application.getCourse().getId()).orElse(null);
+                    application.getSubject().getId()).orElse(null);
         }
 
         if (grade == null) {
@@ -256,14 +257,14 @@ public class SmisService {
                 .build();
     }
 
-    private SmisCourseResponse toCourseResponse(Course course, List<SmisProfessorOptionResponse> professors) {
+    private SmisCourseResponse toCourseResponse(Subject subject, List<SmisProfessorOptionResponse> professors) {
         return SmisCourseResponse.builder()
-                .id(course.getId())
-                .code(courseCode(course))
-                .name(course.getTitulli())
-                .ects(course.getEcts())
-                .semester(course.getSemester())
-                .category(courseCategory(course))
+                .id(subject.getId())
+                .code(courseCode(subject))
+                .name(subject.getTitulli())
+                .ects(subject.getEcts())
+                .semester(subject.getSemester())
+                .category(courseCategory(subject))
                 .professors(professors)
                 .build();
     }
@@ -277,9 +278,9 @@ public class SmisService {
     }
 
     private List<SmisProfessorOptionResponse> professorsForCourse(
-            Course course,
+            Subject subject,
             List<SmisProfessorOptionResponse> allProfessors) {
-        List<String> allowedEmails = professorEmailsForCourse(course);
+        List<String> allowedEmails = professorEmailsForCourse(subject);
         if (allowedEmails.isEmpty()) {
             return allProfessors;
         }
@@ -288,8 +289,10 @@ public class SmisService {
                 .toList();
     }
 
-    private List<String> professorEmailsForCourse(Course course) {
-        String title = course != null && course.getTitulli() != null ? course.getTitulli().trim().toLowerCase() : "";
+
+    // TODO: hardcoded professor-email-to-course-title mapping — belongs in the database, not in code
+    private List<String> professorEmailsForCourse(Subject subject) {
+        String title = subject != null && subject.getTitulli() != null ? subject.getTitulli().trim().toLowerCase() : "";
         if (title.equals("hyrje ne algoritme")
                 || title.equals("algoritmet dhe strukturat e të dhënave")
                 || title.equals("algoritmet dhe strukturat e te dhenave")) {
@@ -300,18 +303,18 @@ public class SmisService {
 
     private ExamApplicationResponse toResponse(ExamApplication application) {
         Grade grade = application.getGrade();
-        Course course = application.getCourse();
+        Subject subject = application.getSubject();
         return ExamApplicationResponse.builder()
                 .id(application.getId())
                 .studentId(application.getStudent().getId())
                 .studentName(application.getStudent().getEmri() + " " + application.getStudent().getMbiemri())
                 .studentEmail(application.getStudent().getEmail())
-                .courseId(course.getId())
-                .courseCode(courseCode(course))
-                .courseName(course.getTitulli())
-                .courseEcts(course.getEcts())
-                .semester(course.getSemester())
-                .category(courseCategory(course))
+                .courseId(subject.getId())
+                .courseCode(courseCode(subject))
+                .courseName(subject.getTitulli())
+                .courseEcts(subject.getEcts())
+                .semester(subject.getSemester())
+                .category(courseCategory(subject))
                 .professorId(application.getProfessor().getId())
                 .professorName(application.getProfessor().getEmri() + " " + application.getProfessor().getMbiemri())
                 .status(application.getStatus())
@@ -325,42 +328,42 @@ public class SmisService {
                 .build();
     }
 
-    private String courseCode(Course course) {
-        SmisCatalogCourse catalogCourse = catalogCourse(course);
+    private String courseCode(Subject subject) {
+        SmisCatalogCourse catalogCourse = catalogCourse(subject);
         if (catalogCourse != null) {
             return catalogCourse.code();
         }
-        return "MESON" + String.format("%03d", course.getId());
+        return "MESON" + String.format("%03d", subject.getId());
     }
 
-    private String courseCategory(Course course) {
-        SmisCatalogCourse catalogCourse = catalogCourse(course);
+    private String courseCategory(Subject subject) {
+        SmisCatalogCourse catalogCourse = catalogCourse(subject);
         if (catalogCourse != null) {
             return catalogCourse.category();
         }
-        return course.getCourseCategory() != null ? course.getCourseCategory().getEmertimi() : "Pa kategori";
+        return subject.getDepartment() != null ? subject.getDepartment().getEmertimi() : "Pa kategori";
     }
 
-    private SmisCatalogCourse catalogCourse(Course course) {
-        if (course == null || course.getTitulli() == null) {
+    private SmisCatalogCourse catalogCourse(Subject subject) {
+        if (subject == null || subject.getTitulli() == null) {
             return null;
         }
-        String title = course.getTitulli().trim();
+        String title = subject.getTitulli().trim();
         return COMPUTER_SCIENCE_COURSES.stream()
                 .filter(catalogCourse -> catalogCourse.title().equalsIgnoreCase(title))
                 .findFirst()
                 .orElse(null);
     }
 
-    private boolean isComputerScienceCourse(Course course) {
-        if (catalogCourse(course) != null) {
+    private boolean isComputerScienceCourse(Subject subject) {
+        if (catalogCourse(subject) != null) {
             return true;
         }
-        return course.getCourseCategory() != null
-                && "Shkenca kompjuterike dhe inxhinieri".equalsIgnoreCase(course.getCourseCategory().getEmertimi());
+        return subject.getDepartment() != null
+                && "Shkenca kompjuterike dhe inxhinieri".equalsIgnoreCase(subject.getDepartment().getEmertimi());
     }
 
-    private Set<Long> activeApplicationCourseIdsForCurrentStudent() {
+    private Set<Long> activeApplicationSubjectIdsForCurrentStudent() {
         if (!hasRole("STUDENT")) {
             return Set.of();
         }
@@ -369,7 +372,7 @@ public class SmisService {
                 .stream()
                 .filter(application -> application.getStatus() == ExamApplicationStatus.REGISTERED
                         || application.getStatus() == ExamApplicationStatus.GRADED)
-                .map(application -> application.getCourse().getId())
+                .map(application -> application.getSubject().getId())
                 .collect(Collectors.toSet());
     }
 

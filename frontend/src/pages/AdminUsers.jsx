@@ -13,9 +13,6 @@ import ArrowBackRounded from "@mui/icons-material/ArrowBackRounded";
 import EditRounded from "@mui/icons-material/EditRounded";
 import DeleteRounded from "@mui/icons-material/DeleteRounded";
 import PeopleRounded from "@mui/icons-material/PeopleRounded";
-import SchoolRounded from "@mui/icons-material/SchoolRounded";
-import AdminPanelSettingsRounded from "@mui/icons-material/AdminPanelSettingsRounded";
-import ScienceRounded from "@mui/icons-material/ScienceRounded";
 import PersonAddRounded from "@mui/icons-material/PersonAddRounded";
 import VerifiedUserRounded from "@mui/icons-material/VerifiedUserRounded";
 import FilterListRounded from "@mui/icons-material/FilterListRounded";
@@ -53,45 +50,8 @@ const EMPTY_FORM = {
   departmentId: "", currentSemester: 1,
 };
 
-/* ─── Role-create cards config ───────────────────────────────────── */
-const ROLE_CARDS = [
-  {
-    role: "student",
-    icon: SchoolRounded,
-    color: "text-emerald-700 dark:text-emerald-400",
-    bg: "bg-emerald-50 dark:bg-emerald-900/20",
-    border: "border-emerald-200 dark:border-emerald-800/60 hover:border-emerald-400",
-    labelKey: "adminUsers.cards.student",
-    descKey:  "adminUsers.cards.studentDesc",
-  },
-  {
-    role: "teacher",
-    icon: PeopleRounded,
-    color: "text-sky-700 dark:text-sky-400",
-    bg: "bg-sky-50 dark:bg-sky-900/20",
-    border: "border-sky-200 dark:border-sky-800/60 hover:border-sky-400",
-    labelKey: "adminUsers.cards.teacher",
-    descKey:  "adminUsers.cards.teacherDesc",
-  },
-  {
-    role: "assistant",
-    icon: ScienceRounded,
-    color: "text-amber-700 dark:text-amber-400",
-    bg: "bg-amber-50 dark:bg-amber-900/20",
-    border: "border-amber-200 dark:border-amber-800/60 hover:border-amber-400",
-    labelKey: "adminUsers.cards.assistant",
-    descKey:  "adminUsers.cards.assistantDesc",
-  },
-  {
-    role: "admin",
-    icon: AdminPanelSettingsRounded,
-    color: "text-violet-700 dark:text-violet-400",
-    bg: "bg-violet-50 dark:bg-violet-900/20",
-    border: "border-violet-200 dark:border-violet-800/60 hover:border-violet-400",
-    labelKey: "adminUsers.cards.admin",
-    descKey:  "adminUsers.cards.adminDesc",
-  },
-];
+/* ─── Roles selectable when creating/editing a user ─────────────── */
+const USER_ROLES = ["student", "teacher", "assistant", "parent", "admin"];
 
 export default function AdminUsers() {
   const navigate = useNavigate();
@@ -213,10 +173,10 @@ export default function AdminUsers() {
   };
 
   /* ─── Open dialogs ─── */
-  const handleOpenAddRole = (role) => {
+  const handleOpenAdd = () => {
     setIsEdit(false);
     setSelectedUser(null);
-    setFormData({ ...EMPTY_FORM, role, currentSemester: 1 });
+    setFormData({ ...EMPTY_FORM, currentSemester: 1 });
     setStudentGroups([]); setApprovedGroupLabel(""); setGroupAssignId("");
     setOpenDialog(true);
   };
@@ -294,9 +254,9 @@ export default function AdminUsers() {
 
   const showsDept = PROFILE_ROLES.includes(formData.role);
 
-  /* ─── Role card dialog title / subtitle ─── */
-  const dialogTitle = isEdit ? t("adminUsers.form.editTitle") : t(`adminUsers.cards.${formData.role}`);
-  const dialogSub   = isEdit ? t("adminUsers.form.editSubtitle") : t(`adminUsers.cards.${formData.role}Desc`);
+  /* ─── Dialog title / subtitle ─── */
+  const dialogTitle = isEdit ? t("adminUsers.form.editTitle") : t("adminUsers.form.addTitle");
+  const dialogSub   = isEdit ? t("adminUsers.form.editSubtitle") : t("adminUsers.form.addSubtitle");
 
   /* ═══════════════════════════════════════════════════════════════ */
   return (
@@ -317,45 +277,41 @@ export default function AdminUsers() {
         </Box>
 
         {/* Title */}
-        <Box className="mb-10">
-          <Typography variant="overline" className="font-bold! tracking-[0.3em]! text-indigo-600! dark:text-indigo-400!">
-            {t("adminUsers.overline")}
-          </Typography>
-          <Typography variant="h3" component="h1" className="mt-2! font-black! text-slate-900! dark:text-white!">
-            {t("adminUsers.title")}
-          </Typography>
-          <Typography variant="body1" className="mt-3! text-slate-500! dark:text-slate-400!">
-            {t("adminUsers.subtitle")}
-          </Typography>
-        </Box>
-
-        {/* ── Role create cards ── */}
-        <div className="mb-10 grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {ROLE_CARDS.map(({ role, icon: Icon, color, bg, border, labelKey, descKey }) => (
-            <button
-              key={role}
-              type="button"
-              onClick={() => handleOpenAddRole(role)}
-              className={`group flex flex-col items-start gap-3 rounded-2xl border-2 bg-white p-5 text-left transition-all hover:shadow-md dark:bg-slate-900 ${border}`}
+        <Box className="mb-10 flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+          <div>
+            <Typography variant="overline" className="font-bold! tracking-[0.3em]! text-indigo-600! dark:text-indigo-400!">
+              {t("adminUsers.overline")}
+            </Typography>
+            <Typography variant="h3" component="h1" className="mt-2! font-black! text-slate-900! dark:text-white!">
+              {t("adminUsers.title")}
+            </Typography>
+            <Typography variant="body1" className="mt-3! text-slate-500! dark:text-slate-400!">
+              {t("adminUsers.subtitle")}
+            </Typography>
+          </div>
+          <Box className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
+            <TextField
+              placeholder={t("adminUsers.searchPlaceholder")}
+              variant="outlined"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full lg:w-80"
+              InputProps={{
+                startAdornment: <InputAdornment position="start"><SearchRounded className="text-slate-400" /></InputAdornment>,
+                className: "rounded-3xl! bg-white! dark:bg-slate-900! border-none! shadow-sm shadow-slate-200/50 dark:shadow-none",
+              }}
+              sx={{ "& .MuiOutlinedInput-notchedOutline": { border: "none" } }}
+            />
+            <Button
+              variant="contained"
+              startIcon={<PersonAddRounded />}
+              onClick={handleOpenAdd}
+              className="rounded-3xl! py-4! px-8! normal-case! font-black! bg-indigo-600! hover:bg-indigo-700! shadow-xl shadow-indigo-500/30 transition-all hover:scale-105 active:scale-95"
             >
-              <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${bg} ${color}`}>
-                <Icon fontSize="small" />
-              </div>
-              <div>
-                <Typography variant="body2" className={`!font-black ${color}`}>
-                  {t(labelKey)}
-                </Typography>
-                <Typography variant="caption" className="!text-slate-500 dark:!text-slate-400">
-                  {t(descKey)}
-                </Typography>
-              </div>
-              <div className={`flex items-center gap-1 text-xs font-bold ${color}`}>
-                <PersonAddRounded style={{ fontSize: 14 }} />
-                {t("adminUsers.cards.create")}
-              </div>
-            </button>
-          ))}
-        </div>
+              {t("adminUsers.form.addTitle")}
+            </Button>
+          </Box>
+        </Box>
 
         {/* ── Stats row ── */}
         <Grid container spacing={3} className="mb-8">
@@ -385,17 +341,6 @@ export default function AdminUsers() {
               {t("adminUsers.listTitle")}
             </Typography>
             <Box className="flex flex-wrap items-center gap-2">
-              <TextField
-                placeholder={t("adminUsers.searchPlaceholder")}
-                size="small"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                InputProps={{
-                  startAdornment: <InputAdornment position="start"><SearchRounded className="text-slate-400" fontSize="small" /></InputAdornment>,
-                  className: "rounded-2xl! bg-slate-50! dark:bg-slate-800! border-none!",
-                }}
-                sx={{ "& .MuiOutlinedInput-notchedOutline": { border: "none" }, width: 200 }}
-              />
               {["all", "student", "teacher", "assistant", "admin", "parent"].map((r) => (
                 <Button key={r} size="small"
                   onClick={() => { setRoleFilter(r); setPage(0); }}
@@ -529,6 +474,18 @@ export default function AdminUsers() {
                 type="password" fullWidth value={formData.password || ""} onChange={field("password")}
                 InputProps={{ className: "rounded-2xl!" }} sx={inputSx}
                 helperText={isEdit ? t("adminUsers.form.passwordHint") : undefined} />
+
+              {/* Role */}
+              <FormControl fullWidth>
+                <InputLabel sx={{ color: isDark ? "#cbd5e1" : "#64748b" }}>{t("adminUsers.form.role")}</InputLabel>
+                <Select value={formData.role} label={t("adminUsers.form.role")} onChange={field("role")} sx={selectSx}>
+                  {USER_ROLES.map((r) => (
+                    <MenuItem key={r} value={r}>
+                      {t(`adminUsers.form.role${r.charAt(0).toUpperCase()}${r.slice(1)}`)}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
 
               {/* Status (edit only) */}
               {isEdit && (
