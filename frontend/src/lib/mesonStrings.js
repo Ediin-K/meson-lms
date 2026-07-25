@@ -495,6 +495,7 @@ export const STRINGS = {
       },
       form: {
         titleLabel: "Titulli i Lëndës *",
+        codeLabel: "Kodi i Lëndës",
         description: "Përshkrimi",
         departmentId: "Departamenti *",
         semester: "Semestri *",
@@ -2294,6 +2295,7 @@ export const STRINGS = {
       },
       form: {
         titleLabel: "Subject Title *",
+        codeLabel: "Subject Code",
         description: "Description",
         departmentId: "Department *",
         semester: "Semester *",

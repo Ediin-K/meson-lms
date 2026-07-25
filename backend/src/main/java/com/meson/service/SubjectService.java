@@ -47,6 +47,7 @@ public class SubjectService {
 
         Subject subject = new Subject();
         subject.setTitulli(request.getTitulli());
+        subject.setCode(normalizeCode(request.getCode()));
         subject.setPershkrimi(request.getPershkrimi());
         subject.setEcts(request.getEcts() != null ? request.getEcts() : 5);
         subject.setNiveli(request.getNiveli());
@@ -70,6 +71,7 @@ public class SubjectService {
                 .orElseThrow(() -> new RuntimeException("Departamenti nuk u gjet"));
 
         subject.setTitulli(request.getTitulli());
+        subject.setCode(normalizeCode(request.getCode()));
         subject.setPershkrimi(request.getPershkrimi());
         subject.setEcts(request.getEcts() != null ? request.getEcts() : 5);
         subject.setNiveli(request.getNiveli());
@@ -94,6 +96,7 @@ public class SubjectService {
         return SubjectResponse.builder()
                 .id(subject.getId())
                 .titulli(subject.getTitulli())
+                .code(subject.getCode())
                 .pershkrimi(subject.getPershkrimi())
                 .teacherId(subject.getTeacher().getId())
                 .teacherName(subject.getTeacher().getEmri())
@@ -128,6 +131,13 @@ public class SubjectService {
             return null;
         }
         return enrollmentKey.trim();
+    }
+
+    private String normalizeCode(String code) {
+        if (!StringUtils.hasText(code)) {
+            return null;
+        }
+        return code.trim();
     }
 
 }

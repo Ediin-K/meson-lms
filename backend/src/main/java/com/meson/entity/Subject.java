@@ -20,6 +20,9 @@ public class Subject {
     @Column(name = "title", nullable = false, unique = true)
     private String titulli;
 
+    @Column(name = "code")
+    private String code;
+
     @Column(name = "description", nullable = false)
     private String pershkrimi;
 
