@@ -341,31 +341,33 @@ export default function AdminDepartments() {
                           {department.numSemesters ?? "—"}
                         </TableCell>
                         <TableCell align="right">
-                          <IconButton
-                            size="small"
-                            onClick={() => openGroupsDialog(department)}
-                            className="text-slate-400! hover:text-indigo-600!"
-                            title={t("adminDepartments.tooltipGroups")}
-                          >
-                            <GroupsRounded fontSize="small" />
-                          </IconButton>
-                          <IconButton
-                            size="small"
-                            onClick={() => openEditDialog(department)}
-                            className="text-slate-400! hover:text-amber-600!"
-                          >
-                            <EditRounded fontSize="small" />
-                          </IconButton>
-                          <IconButton
-                            size="small"
-                            onClick={() => {
-                              setDeleteTarget(department);
-                              setOpenDeleteConfirm(true);
-                            }}
-                            className="text-slate-400! hover:text-rose-600!"
-                          >
-                            <DeleteRounded fontSize="small" />
-                          </IconButton>
+                          <Box className="flex justify-end items-center gap-1">
+                            <IconButton
+                              size="small"
+                              onClick={() => openGroupsDialog(department)}
+                              className="text-slate-400! hover:text-indigo-600!"
+                              title={t("adminDepartments.tooltipGroups")}
+                            >
+                              <GroupsRounded fontSize="small" />
+                            </IconButton>
+                            <IconButton
+                              size="small"
+                              onClick={() => openEditDialog(department)}
+                              className="text-slate-400! hover:text-amber-600!"
+                            >
+                              <EditRounded fontSize="small" />
+                            </IconButton>
+                            <IconButton
+                              size="small"
+                              onClick={() => {
+                                setDeleteTarget(department);
+                                setOpenDeleteConfirm(true);
+                              }}
+                              className="text-slate-400! hover:text-rose-600!"
+                            >
+                              <DeleteRounded fontSize="small" />
+                            </IconButton>
+                          </Box>
                         </TableCell>
                       </TableRow>
                     ))
