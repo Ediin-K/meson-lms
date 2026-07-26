@@ -17,6 +17,9 @@ public class SubjectRequest {
     @NotBlank(message="Titulli nuk mund te jet bosh")
     private String titulli;
 
+    @Size(max = 20, message = "Kodi nuk mund te kaloj 20 karaktere")
+    private String code;
+
     @Size(max = 500, message = "Pershkrimi nuk mund te kaloj 500 karaktere")
     private String pershkrimi;
 

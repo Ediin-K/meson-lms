@@ -22,52 +22,14 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SmisService {
 
-    // TODO: hardcoded course catalog — belongs in the database, not in code
-     static final List<SmisCatalogCourse> COMPUTER_SCIENCE_COURSES = List.of(
-            new SmisCatalogCourse("40ICP101", "Hyrje në Shkenca Kompjuterike dhe Programim", "Obligative"),
-            new SmisCatalogCourse("40MAT102", "Matematikë 1", "Obligative"),
-            new SmisCatalogCourse("40FEE103", "Bazat e Inxhinierise Elektronike / Elektrike", "Obligative"),
-            new SmisCatalogCourse("40CAO104", "Arkitektura dhe Organizimi i Kompjuterëve", "Obligative"),
-            new SmisCatalogCourse("40AWS105", "Shkrim Akademik dhe Seminar", "Obligative"),
-            new SmisCatalogCourse("40ENG106", "Gjuhë Angleze për Inxhinieri", "Obligative"),
-            new SmisCatalogCourse("40ITA107", "Gjuhe Italiane", "Zgjedhore"),
-            new SmisCatalogCourse("40MAT151", "Matematikë 2", "Obligative"),
-            new SmisCatalogCourse("40OSY152", "Sistemet Operative", "Obligative"),
-            new SmisCatalogCourse("40CS1150", "Shkenca Kompjuterike 1", "Obligative"),
-            new SmisCatalogCourse("40IIS154", "Hyrje në Sigurinë e Informacionit", "Obligative"),
-            new SmisCatalogCourse("40HCI155", "Ndërveprimi Kompjuter-Njeri", "Obligative"),
-            new SmisCatalogCourse("40CNC202", "Rrjeta Kompjuterike dhe Komunikimi", "Obligative"),
-            new SmisCatalogCourse("40ITA203", "Hyrje ne Algoritme", "Obligative"),
-            new SmisCatalogCourse("40ADS251", "Algoritmet dhe Strukturat e të dhënave", "Obligative"),
-            new SmisCatalogCourse("40SS253", "Sisteme dhe Sinjale", "Obligative"),
-            new SmisCatalogCourse("40GP304", "Programimi i Lojerave", "Zgjedhore"),
-            new SmisCatalogCourse("40DEV305", "DevOps", "Zgjedhore"),
-            new SmisCatalogCourse("40SQL307", "Bazat e te dhenave NoSQL", "Zgjedhore"),
-            new SmisCatalogCourse("40SA310", "Sensoret dhe Aktivizuesit", "Zgjedhore"),
-            new SmisCatalogCourse("40PP303", "Programimi ne Python", "Zgjedhore"),
-            new SmisCatalogCourse("40MPE302", "Menaxhimi i Projekteve dhe Ndermarresia", "Obligative"),
-            new SmisCatalogCourse("40DSP311", "Perpunimi Dixhital i Sinjalit", "Zgjedhore"),
-            new SmisCatalogCourse("40ES301", "Sistemet e Nderlidhura", "Obligative"),
-            new SmisCatalogCourse("40IOT309", "Interneti i Gjerave (IoT)", "Zgjedhore"),
-            new SmisCatalogCourse("40LC1300", "Bazat e Inteligjences Artificiale", "Obligative"),
-            new SmisCatalogCourse("40STJ306", "Teknologjite e perzgjedhura (JavaScript Frameworks, R eti)", "Zgjedhore"),
-            new SmisCatalogCourse("40SI308", "Infrastruktura e Servereve", "Zgjedhore"),
-            new SmisCatalogCourse("40BMA312", "Blockchain ne Aplikacionet Multidisiplinare", "Zgjedhore"),
-            new SmisCatalogCourse("40CE358", "Etika Kompjuterike", "Zgjedhore"),
-            new SmisCatalogCourse("40FB356", "Financimi dhe Buxhetimi", "Zgjedhore"),
-            new SmisCatalogCourse("40BTH352", "Punimi i Temes se Bachelor-it", "Obligative"),
-            new SmisCatalogCourse("40PEP354", "Psikologjia ne Projektet Inxhinierike", "Zgjedhore"),
-            new SmisCatalogCourse("40IEE357", "Hyrje ne Ekonomine Inxhinierike", "Zgjedhore"),
-            new SmisCatalogCourse("40LC2351", "Lenda Laboratorike 2 (Projekt Grupor)", "Obligative"),
-            new SmisCatalogCourse("40EAM355", "Metodat e Analizes Ekonomike", "Zgjedhore"),
-            new SmisCatalogCourse("40CC350", "Cloud Computing", "Obligative"),
-            new SmisCatalogCourse("40OCC353", "Orientimi ne Karriere - Komunikim dhe Zhvillim", "Zgjedhore")
-    );
-
     private final SubjectRepository subjectRepository;
     private final UserRepository userRepository;
     private final ExamApplicationRepository examApplicationRepository;
     private final GradeRepository gradeRepository;
+    private final SubjectGroupRepository subjectGroupRepository;
+    private final SubjectGroupTeacherRepository subjectGroupTeacherRepository;
+    private final SubjectSubgroupRepository subjectSubgroupRepository;
+    private final SubjectSubgroupTeacherRepository subjectSubgroupTeacherRepository;
 
     @Transactional(readOnly = true)
     public List<SmisCourseResponse> getAvailableCourses() {
@@ -280,25 +242,27 @@ public class SmisService {
     private List<SmisProfessorOptionResponse> professorsForCourse(
             Subject subject,
             List<SmisProfessorOptionResponse> allProfessors) {
-        List<String> allowedEmails = professorEmailsForCourse(subject);
-        if (allowedEmails.isEmpty()) {
-            return allProfessors;
-        }
+        Set<Long> teacherIds = teacherIdsForSubject(subject);
         return allProfessors.stream()
-                .filter(professor -> allowedEmails.contains(professor.getEmail().toLowerCase()))
+                .filter(professor -> teacherIds.contains(professor.getId()))
                 .toList();
     }
 
-
-    // TODO: hardcoded professor-email-to-course-title mapping — belongs in the database, not in code
-    private List<String> professorEmailsForCourse(Subject subject) {
-        String title = subject != null && subject.getTitulli() != null ? subject.getTitulli().trim().toLowerCase() : "";
-        if (title.equals("hyrje ne algoritme")
-                || title.equals("algoritmet dhe strukturat e të dhënave")
-                || title.equals("algoritmet dhe strukturat e te dhenave")) {
-            return List.of("shkelqim.berisha@meson.com");
+    /** Every teacher actually assigned to this subject: its primary teacher plus any group/subgroup teachers. */
+    private Set<Long> teacherIdsForSubject(Subject subject) {
+        Set<Long> teacherIds = new java.util.HashSet<>();
+        if (subject.getTeacher() != null) {
+            teacherIds.add(subject.getTeacher().getId());
         }
-        return List.of();
+        for (SubjectGroup group : subjectGroupRepository.findBySubjectId(subject.getId())) {
+            subjectGroupTeacherRepository.findBySubjectGroupId(group.getId())
+                    .forEach(gt -> teacherIds.add(gt.getTeacher().getId()));
+            for (SubjectSubgroup subgroup : subjectSubgroupRepository.findBySubjectGroupId(group.getId())) {
+                subjectSubgroupTeacherRepository.findBySubjectSubgroupId(subgroup.getId())
+                        .forEach(sgt -> teacherIds.add(sgt.getTeacher().getId()));
+            }
+        }
+        return teacherIds;
     }
 
     private ExamApplicationResponse toResponse(ExamApplication application) {
@@ -329,36 +293,17 @@ public class SmisService {
     }
 
     private String courseCode(Subject subject) {
-        SmisCatalogCourse catalogCourse = catalogCourse(subject);
-        if (catalogCourse != null) {
-            return catalogCourse.code();
+        if (subject.getCode() != null && !subject.getCode().isBlank()) {
+            return subject.getCode();
         }
         return "MESON" + String.format("%03d", subject.getId());
     }
 
     private String courseCategory(Subject subject) {
-        SmisCatalogCourse catalogCourse = catalogCourse(subject);
-        if (catalogCourse != null) {
-            return catalogCourse.category();
-        }
         return subject.getDepartment() != null ? subject.getDepartment().getEmertimi() : "Pa kategori";
     }
 
-    private SmisCatalogCourse catalogCourse(Subject subject) {
-        if (subject == null || subject.getTitulli() == null) {
-            return null;
-        }
-        String title = subject.getTitulli().trim();
-        return COMPUTER_SCIENCE_COURSES.stream()
-                .filter(catalogCourse -> catalogCourse.title().equalsIgnoreCase(title))
-                .findFirst()
-                .orElse(null);
-    }
-
     private boolean isComputerScienceCourse(Subject subject) {
-        if (catalogCourse(subject) != null) {
-            return true;
-        }
         return subject.getDepartment() != null
                 && "Shkenca kompjuterike dhe inxhinieri".equalsIgnoreCase(subject.getDepartment().getEmertimi());
     }
@@ -375,8 +320,6 @@ public class SmisService {
                 .map(application -> application.getSubject().getId())
                 .collect(Collectors.toSet());
     }
-
-    private record SmisCatalogCourse(String code, String title, String category) {}
 
     private User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();

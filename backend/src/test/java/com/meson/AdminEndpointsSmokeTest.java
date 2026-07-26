@@ -32,6 +32,8 @@ class AdminEndpointsSmokeTest {
     @Autowired UserRoleRepository userRoleRepository;
     @Autowired DepartmentRepository departmentRepository;
     @Autowired SubjectRepository subjectRepository;
+    @Autowired ModuleRepository moduleRepository;
+    @Autowired EnrollmentRepository enrollmentRepository;
 
     private Long departmentId;
     private Long studentUserId;
@@ -39,6 +41,8 @@ class AdminEndpointsSmokeTest {
     @BeforeEach
     void setUp() {
         userRoleRepository.deleteAll();
+        enrollmentRepository.deleteAll();
+        moduleRepository.deleteAll();
         subjectRepository.deleteAll();
         userRepository.deleteAll();
         departmentRepository.deleteAll();

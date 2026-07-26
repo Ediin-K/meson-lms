@@ -4,6 +4,7 @@ package com.meson.service;
 import com.meson.dto.EnrollmentRequest;
 import com.meson.dto.EnrollmentResponse;
 import com.meson.entity.*;
+import com.meson.exception.ResourceNotFoundException;
 import com.meson.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -55,7 +56,7 @@ public class EnrollmentService {
 
     public EnrollmentResponse getById(Long id) {
         Enrollment enrollment = enrollmentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Regjistrimi nuk u gjet"));
+                .orElseThrow(() -> new ResourceNotFoundException("Regjistrimi nuk u gjet"));
         return toResponse(enrollment);
     }
 
@@ -65,7 +66,7 @@ public class EnrollmentService {
         }
 
         Subject course = subjectRepository.findById(request.getSubjectId())
-                .orElseThrow(() -> new RuntimeException("Lënda nuk u gjet"));
+                .orElseThrow(() -> new ResourceNotFoundException("Lënda nuk u gjet"));
 
         if (course.getEnrollmentKey() != null && !course.getEnrollmentKey().isEmpty()) {
             if (!course.getEnrollmentKey().equals(request.getEnrollmentKey())) {
@@ -74,14 +75,14 @@ public class EnrollmentService {
         }
 
         User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("Perdoruesi nuk u gjet"));
+                .orElseThrow(() -> new ResourceNotFoundException("Perdoruesi nuk u gjet"));
 
         SubjectGroup subjectGroup = null;
         SubjectSubgroup subjectSubgroup = null;
 
         if (request.getSubjectGroupId() != null) {
             subjectGroup = subjectGroupRepository.findById(request.getSubjectGroupId())
-                    .orElseThrow(() -> new RuntimeException("Grupi nuk u gjet"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Grupi nuk u gjet"));
 
             if (!subjectGroup.getSubject().getId().equals(course.getId())) {
                 throw new RuntimeException("Grupi nuk i perket ketij Lënda");
@@ -90,7 +91,7 @@ public class EnrollmentService {
 
         if (request.getSubjectSubgroupId() != null) {
             subjectSubgroup = subjectSubgroupRepository.findById(request.getSubjectSubgroupId())
-                    .orElseThrow(() -> new RuntimeException("Nengrupi nuk u gjet"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Nengrupi nuk u gjet"));
 
             if (subjectGroup == null) {
                 subjectGroup = subjectSubgroup.getSubjectGroup();
@@ -116,14 +117,14 @@ public class EnrollmentService {
 
     public EnrollmentResponse updateProgresi(Long id, Double progresi) {
         Enrollment enrollment = enrollmentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Regjistrimi nuk u gjet"));
+                .orElseThrow(() -> new ResourceNotFoundException("Regjistrimi nuk u gjet"));
         enrollment.setProgresi(progresi);
         return toResponse(enrollmentRepository.save(enrollment));
     }
 
     public EnrollmentResponse updateStatusi(Long id, EnrollmentStatus statusi) {
         Enrollment enrollment = enrollmentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Regjistrimi nuk u gjet"));
+                .orElseThrow(() -> new ResourceNotFoundException("Regjistrimi nuk u gjet"));
 
         // "Përfunduar" is derived from actually finishing all course material — it
         // cannot be set by hand. Admins may set only AKTIV or ANULUAR.
@@ -145,7 +146,7 @@ public class EnrollmentService {
 
     public void delete(Long id) {
         if (!enrollmentRepository.existsById(id)) {
-            throw new RuntimeException("Regjistrimi nuk u gjet");
+            throw new ResourceNotFoundException("Regjistrimi nuk u gjet");
         }
         enrollmentRepository.deleteById(id);
     }

@@ -7,6 +7,7 @@ import com.meson.entity.Subject;
 import com.meson.entity.EnrollmentStatus;
 import com.meson.entity.Grade;
 import com.meson.entity.User;
+import com.meson.exception.ResourceNotFoundException;
 import com.meson.repository.SubjectRepository;
 import com.meson.repository.EnrollmentRepository;
 import com.meson.repository.GradeRepository;
@@ -67,10 +68,10 @@ public class GradeService {
         }
 
         User student = userRepository.findById(request.getStudentId())
-                .orElseThrow(() -> new RuntimeException("Studenti nuk u gjet"));
+                .orElseThrow(() -> new ResourceNotFoundException("Studenti nuk u gjet"));
 
         Subject course = subjectRepository.findById(request.getSubjectId())
-                .orElseThrow(() -> new RuntimeException("Lënda nuk u gjet"));
+                .orElseThrow(() -> new ResourceNotFoundException("Lënda nuk u gjet"));
 
         User professor = getCurrentUser();
 
@@ -89,7 +90,7 @@ public class GradeService {
     @Transactional
     public GradeResponse update(Long id, GradeRequest request) {
         Grade grade = gradeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Nota nuk u gjet"));
+                .orElseThrow(() -> new ResourceNotFoundException("Nota nuk u gjet"));
 
         assertCanManageSubject(grade.getSubject().getId());
 
@@ -108,7 +109,7 @@ public class GradeService {
     @Transactional
     public void delete(Long id) {
         Grade grade = gradeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Nota nuk u gjet"));
+                .orElseThrow(() -> new ResourceNotFoundException("Nota nuk u gjet"));
         assertCanManageSubject(grade.getSubject().getId());
         gradeRepository.delete(grade);
     }
@@ -168,7 +169,7 @@ public class GradeService {
     private User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Perdoruesi nuk u gjet"));
+                .orElseThrow(() -> new ResourceNotFoundException("Perdoruesi nuk u gjet"));
     }
 
     private boolean hasRole(String role) {

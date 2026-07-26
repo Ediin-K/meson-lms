@@ -26,6 +26,8 @@ class QuizDeleteCascadeTest {
     @Autowired SubjectRepository subjectRepository;
     @Autowired ModuleRepository moduleRepository;
     @Autowired LessonRepository lessonRepository;
+    @Autowired AssignmentSubmissionRepository submissionRepository;
+    @Autowired AssignmentRepository assignmentRepository;
 
     private Long quizId;
     private Long studentId;
@@ -34,6 +36,8 @@ class QuizDeleteCascadeTest {
     void setUp() {
         attemptRepository.deleteAll();
         quizRepository.deleteAll();
+        submissionRepository.deleteAll();
+        assignmentRepository.deleteAll();
         lessonRepository.deleteAll();
         moduleRepository.deleteAll();
         subjectRepository.deleteAll();

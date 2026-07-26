@@ -59,6 +59,7 @@ const SEMESTER_COLORS = {
 
 const EMPTY_FORM = {
   titulli: "",
+  code: "",
   pershkrimi: "",
   teacherId: "",
   departmentId: "",
@@ -179,6 +180,7 @@ export default function AdminSubjects() {
     setSelectedSubject(subject);
     setFormData({
       titulli: subject.titulli,
+      code: subject.code || "",
       pershkrimi: subject.pershkrimi,
       teacherId: subject.teacherId,
       departmentId: subject.departmentId,
@@ -621,12 +623,22 @@ export default function AdminSubjects() {
                                       <AutoStoriesRounded fontSize="small" />
                                     </div>
                                     <div>
-                                      <Typography
-                                          variant="body1"
-                                          className="font-black! text-slate-900! dark:text-white!"
-                                      >
-                                        {subject.titulli}
-                                      </Typography>
+                                      <Box className="flex items-center gap-2">
+                                        <Typography
+                                            variant="body1"
+                                            className="font-black! text-slate-900! dark:text-white!"
+                                        >
+                                          {subject.titulli}
+                                        </Typography>
+                                        {subject.code && (
+                                          <Typography
+                                              variant="caption"
+                                              className="font-mono! font-bold! text-slate-400! dark:text-slate-500!"
+                                          >
+                                            {subject.code}
+                                          </Typography>
+                                        )}
+                                      </Box>
                                       <Typography
                                           variant="caption"
                                           className="text-slate-500! font-medium! line-clamp-1 max-w-[250px]"
@@ -770,6 +782,29 @@ export default function AdminSubjects() {
                     fullWidth
                     value={formData.titulli}
                     onChange={field("titulli")}
+                    InputProps={{ className: "rounded-2xl!" }}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        color: isDark ? "#f1f5f9" : "#1e293b",
+                        "& fieldset": {
+                          borderColor: isDark ? "#334155" : "#cbd5e1",
+                        },
+                        "&:hover fieldset": {
+                          borderColor: isDark ? "#475569" : "#94a3b8",
+                        },
+                      },
+                      "& .MuiInputLabel-root": {
+                        color: isDark ? "#cbd5e1" : "#64748b",
+                      },
+                    }}
+                />
+
+                {}
+                <TextField
+                    label={t("adminSubjects.form.codeLabel")}
+                    fullWidth
+                    value={formData.code}
+                    onChange={field("code")}
                     InputProps={{ className: "rounded-2xl!" }}
                     sx={{
                       "& .MuiOutlinedInput-root": {

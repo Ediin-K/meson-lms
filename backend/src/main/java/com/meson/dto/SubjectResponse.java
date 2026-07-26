@@ -15,6 +15,7 @@ import lombok.Builder;
 public class SubjectResponse {
     private Long id;
     private String titulli;
+    private String code;
     private String pershkrimi;
     private Long teacherId;
     private String teacherName;
