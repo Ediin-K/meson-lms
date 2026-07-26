@@ -48,6 +48,7 @@ public interface ScheduleSessionRepository extends JpaRepository<ScheduleSession
 
     List<ScheduleSession> findByTeacherId(Long teacherId);
     List<ScheduleSession> findByDayOfWeek(DayOfWeek dayOfWeek);
+    long countBySubjectId(Long subjectId);
 
     void deleteByTeacherId(Long teacherId);
 

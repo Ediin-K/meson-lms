@@ -11,6 +11,7 @@ import java.util.List;
 @Repository
 public interface SubjectGroupRepository extends JpaRepository<SubjectGroup, Long> {
     List<SubjectGroup> findBySubjectId(Long subjectId);
+    long countBySubjectId(Long subjectId);
     List<SubjectGroup> findByDepartmentGroupId(Long departmentGroupId);
     boolean existsBySubjectIdAndNameIgnoreCase(Long subjectId, String name);
 

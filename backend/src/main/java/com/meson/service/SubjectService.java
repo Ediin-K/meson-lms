@@ -5,9 +5,14 @@ import com.meson.dto.SubjectRequest;
 import com.meson.entity.Subject;
 import com.meson.entity.User;
 import com.meson.entity.Department;
+import com.meson.exception.ResourceNotFoundException;
 import com.meson.repository.SubjectRepository;
 import com.meson.repository.UserRepository;
 import com.meson.repository.DepartmentRepository;
+import com.meson.repository.ModuleRepository;
+import com.meson.repository.EnrollmentRepository;
+import com.meson.repository.SubjectGroupRepository;
+import com.meson.repository.ScheduleSessionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +25,10 @@ public class SubjectService {
     private final SubjectRepository subjectRepository;
     private final UserRepository userRepository;
     private final DepartmentRepository departmentRepository;
+    private final ModuleRepository moduleRepository;
+    private final EnrollmentRepository enrollmentRepository;
+    private final SubjectGroupRepository subjectGroupRepository;
+    private final ScheduleSessionRepository scheduleSessionRepository;
 
     public List<SubjectResponse> getAll() {
         return subjectRepository.findAll()
@@ -30,7 +39,7 @@ public class SubjectService {
 
     public SubjectResponse getById(Long id) {
         Subject subject = subjectRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Lënda nuk u gjet"));
+                .orElseThrow(() -> new ResourceNotFoundException("Lënda nuk u gjet"));
         return toResponse(subject);
     }
 
@@ -40,10 +49,10 @@ public class SubjectService {
         }
 
         User teacher = userRepository.findById(request.getTeacherId())
-                .orElseThrow(() -> new RuntimeException("Mesuesi nuk u gjet"));
+                .orElseThrow(() -> new ResourceNotFoundException("Mesuesi nuk u gjet"));
 
         Department department = departmentRepository.findById(request.getDepartmentId())
-                .orElseThrow(() -> new RuntimeException("Departamenti nuk u gjet"));
+                .orElseThrow(() -> new ResourceNotFoundException("Departamenti nuk u gjet"));
 
         Subject subject = new Subject();
         subject.setTitulli(request.getTitulli());
@@ -62,13 +71,13 @@ public class SubjectService {
 
     public SubjectResponse update(Long id, SubjectRequest request) {
         Subject subject = subjectRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Lënda nuk u gjet"));
+                .orElseThrow(() -> new ResourceNotFoundException("Lënda nuk u gjet"));
 
         User teacher = userRepository.findById(request.getTeacherId())
-                .orElseThrow(() -> new RuntimeException("Mesuesi nuk u gjet"));
+                .orElseThrow(() -> new ResourceNotFoundException("Mesuesi nuk u gjet"));
 
         Department department = departmentRepository.findById(request.getDepartmentId())
-                .orElseThrow(() -> new RuntimeException("Departamenti nuk u gjet"));
+                .orElseThrow(() -> new ResourceNotFoundException("Departamenti nuk u gjet"));
 
         subject.setTitulli(request.getTitulli());
         subject.setCode(normalizeCode(request.getCode()));
@@ -87,7 +96,23 @@ public class SubjectService {
     @org.springframework.transaction.annotation.Transactional
     public void delete(Long id) {
         if (!subjectRepository.existsById(id)) {
-            throw new RuntimeException("Lënda nuk u gjet");
+            throw new ResourceNotFoundException("Lënda nuk u gjet");
+        }
+        if (moduleRepository.countBySubjectId(id) > 0) {
+            throw new RuntimeException(
+                "Kjo lëndë ka module. Fshijini modulet para se të fshini lëndën.");
+        }
+        if (enrollmentRepository.countBySubjectId(id) > 0) {
+            throw new RuntimeException(
+                "Kjo lëndë ka studentë të regjistruar. Hiqni regjistrimet para se të fshini lëndën.");
+        }
+        if (subjectGroupRepository.countBySubjectId(id) > 0) {
+            throw new RuntimeException(
+                "Kjo lëndë ka grupe. Fshini grupet para se të fshini lëndën.");
+        }
+        if (scheduleSessionRepository.countBySubjectId(id) > 0) {
+            throw new RuntimeException(
+                "Kjo lëndë ka orë të planifikuara. Fshini oraret para se të fshini lëndën.");
         }
         subjectRepository.deleteById(id);
     }

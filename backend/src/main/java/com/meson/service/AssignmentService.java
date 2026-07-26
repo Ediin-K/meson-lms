@@ -9,6 +9,7 @@ import com.meson.entity.Enrollment;
 import com.meson.entity.EnrollmentStatus;
 import com.meson.entity.Lesson;
 import com.meson.entity.User;
+import com.meson.exception.ResourceNotFoundException;
 import com.meson.repository.AssignmentRepository;
 import com.meson.repository.AssignmentSubmissionRepository;
 import com.meson.repository.EnrollmentRepository;
@@ -103,7 +104,7 @@ public class AssignmentService {
 
     public AssignmentResponse upsertForLesson(Long lessonId, Instant deadline, Long teacherId) {
         Lesson lesson = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new RuntimeException("Leksioni nuk u gjet"));
+                .orElseThrow(() -> new ResourceNotFoundException("Leksioni nuk u gjet"));
         verifyTeacherOwnsLesson(lesson, teacherId);
 
         Assignment assignment = assignmentRepository.findByLessonId(lessonId)
@@ -273,7 +274,7 @@ public class AssignmentService {
 
     private AssignmentSubmission findSubmissionForTeacher(Long submissionId, Long teacherId) {
         AssignmentSubmission sub = submissionRepository.findById(submissionId)
-                .orElseThrow(() -> new RuntimeException("Dorëzimi nuk u gjet"));
+                .orElseThrow(() -> new ResourceNotFoundException("Dorëzimi nuk u gjet"));
         findTeacherAssignment(sub.getAssignment().getId(), teacherId);
         return sub;
     }
@@ -301,6 +302,7 @@ public class AssignmentService {
     @Transactional
     public AssignmentSubmissionResponse submit(Long assignmentId, MultipartFile file, Long studentId) {
         Assignment assignment = findAssignment(assignmentId);
+        verifyStudentEnrolled(assignment, studentId);
         validateFile(file);
 
         Instant now = Instant.now();
@@ -324,7 +326,7 @@ public class AssignmentService {
         }
 
         User student = userRepository.findById(studentId)
-                .orElseThrow(() -> new RuntimeException("Studenti nuk u gjet"));
+                .orElseThrow(() -> new ResourceNotFoundException("Studenti nuk u gjet"));
 
         return toSubmissionResponse(submissionRepository.save(
                 AssignmentSubmission.builder()
@@ -413,9 +415,17 @@ public class AssignmentService {
             throw new RuntimeException("Lloji i skedarit nuk lejohet: ." + ext);
     }
 
+    private void verifyStudentEnrolled(Assignment assignment, Long studentId) {
+        Long subjectId = assignment.getLesson().getModule().getSubject().getId();
+        Enrollment enrollment = enrollmentRepository.findByUserIdAndSubjectId(studentId, subjectId)
+                .orElseThrow(() -> new RuntimeException("Nuk jeni i regjistruar në këtë lëndë"));
+        if (enrollment.getStatusi() != EnrollmentStatus.AKTIV)
+            throw new RuntimeException("Regjistrimi juaj në këtë lëndë nuk është aktiv");
+    }
+
     private Assignment findAssignment(Long id) {
         return assignmentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Detyra nuk u gjet"));
+                .orElseThrow(() -> new ResourceNotFoundException("Detyra nuk u gjet"));
     }
 
     private Assignment findTeacherAssignment(Long id, Long teacherId) {
