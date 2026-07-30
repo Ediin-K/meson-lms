@@ -16,6 +16,6 @@ frontend/dist/
 .env.local
 .env.*.local
 
-# Claude Code tooling (skewed GitHub language stats with its bundled Python)
-.agents/skills/graphify/
-.claude/skills/graphify/
+# Claude Code tooling — not part of the app, shouldn't live in this repo
+.agents/
+.claude/skills/
