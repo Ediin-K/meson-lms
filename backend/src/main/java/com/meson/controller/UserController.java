@@ -1,15 +1,20 @@
 package com.meson.controller;
 
+import com.meson.dto.BulkImportResponse;
+import com.meson.dto.BulkImportRowDTO;
+import com.meson.dto.BulkImportRowResult;
 import com.meson.dto.UserDTO;
 import com.meson.dto.CreateUserDTO;
 import com.meson.dto.UpdateUserDTO;
 import com.meson.entity.User;
+import com.meson.service.BulkImportService;
 import com.meson.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
@@ -19,6 +24,7 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final BulkImportService bulkImportService;
 
     @GetMapping
     public ResponseEntity<List<UserDTO>> getAll() {
@@ -70,5 +76,23 @@ public class UserController {
     public ResponseEntity<Void> deactivate(@PathVariable Long id) {
         userService.deactivate(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/bulk-import")
+    public ResponseEntity<BulkImportResponse> bulkImport(@RequestParam("file") MultipartFile file) {
+        List<BulkImportRowDTO> rows = bulkImportService.parseCsv(file);
+
+        List<BulkImportRowResult> results = rows.stream()
+                .map(bulkImportService::importRow)
+                .toList();
+
+        List<BulkImportRowResult> failures = results.stream()
+                .filter(result -> !result.isSuccess())
+                .toList();
+
+        BulkImportResponse response = new BulkImportResponse(
+                results.size(), results.size() - failures.size(), failures.size(), failures);
+
+        return ResponseEntity.ok(response);
     }
 }

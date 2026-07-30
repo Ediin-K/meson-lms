@@ -412,6 +412,10 @@ export const STRINGS = {
             title: "Certifikatat",
             desc: "Menaxho lëshimin e certifikatave dhe vërteto arritjet e studentëve.",
           },
+          bulkImport: {
+            title: "Regjistrim Studentësh në Masë",
+            desc: "Ngarko një skedar CSV për të krijuar shumë llogari studentësh njëherësh.",
+          },
           reports: {
             title: "Raportet",
             desc: "Shikoni statistika të detajuara dhe raporte mbi performancën.",
@@ -1052,6 +1056,42 @@ export const STRINGS = {
         removeSuccess: "Studenti u hoq nga grupi",
         removeConfirm: "Hiq studentin nga grupi aktual?",
         removeError: "Gabim",
+      },
+    },
+    adminBulkImport: {
+      overline: "IMPORT NË MASË",
+      title: "Regjistrim Studentësh në Masë",
+      subtitle: "Ngarko një skedar CSV për të krijuar shumë llogari studentësh njëherësh.",
+      uploadCard: {
+        heading: "Ngarko skedarin CSV",
+        hint: "Skedari duhet të ketë kolonat: emri, mbiemri, email, role, department, semester.",
+        chooseFile: "Zgjidh skedar",
+        noFileChosen: "Asnjë skedar i zgjedhur",
+        submit: "Importo",
+        submitting: "Duke importuar...",
+      },
+      summary: {
+        total: "Gjithsej rreshta",
+        success: "Me sukses",
+        failed: "Dështuan",
+      },
+      table: {
+        heading: "Rreshtat e dështuar",
+        name: "Emri & Mbiemri",
+        email: "Email",
+        role: "Roli",
+        department: "Departamenti",
+        semester: "Semestri",
+        error: "Arsyeja e dështimit",
+      },
+      empty: {
+        title: "Të gjitha rreshtat u importuan me sukses",
+        description: "Nuk ka rreshta të dështuar për të shfaqur.",
+      },
+      toast: {
+        fileRequired: "Zgjidh një skedar CSV për të vazhduar.",
+        processed: "Skedari u përpunua me sukses.",
+        uploadError: "Gabim gjatë përpunimit të skedarit.",
       },
     },
     about: {
@@ -2212,6 +2252,10 @@ export const STRINGS = {
             title: "Certificates",
             desc: "Manage certificate issuance and verify student achievements.",
           },
+          bulkImport: {
+            title: "Bulk Student Registration",
+            desc: "Upload a CSV file to create many student accounts at once.",
+          },
           reports: {
             title: "Reports",
             desc: "View detailed statistics and reports on platform performance.",
@@ -2851,6 +2895,42 @@ export const STRINGS = {
         removeSuccess: "Student removed from group",
         removeConfirm: "Remove student from current group?",
         removeError: "Error",
+      },
+    },
+    adminBulkImport: {
+      overline: "BULK IMPORT",
+      title: "Bulk Student Registration",
+      subtitle: "Upload a CSV file to create many student accounts at once.",
+      uploadCard: {
+        heading: "Upload CSV file",
+        hint: "The file must include these columns: emri, mbiemri, email, role, department, semester.",
+        chooseFile: "Choose file",
+        noFileChosen: "No file chosen",
+        submit: "Import",
+        submitting: "Importing...",
+      },
+      summary: {
+        total: "Total rows",
+        success: "Succeeded",
+        failed: "Failed",
+      },
+      table: {
+        heading: "Failed rows",
+        name: "Name",
+        email: "Email",
+        role: "Role",
+        department: "Department",
+        semester: "Semester",
+        error: "Failure reason",
+      },
+      empty: {
+        title: "All rows imported successfully",
+        description: "There are no failed rows to show.",
+      },
+      toast: {
+        fileRequired: "Choose a CSV file to continue.",
+        processed: "File processed successfully.",
+        uploadError: "Error processing the file.",
       },
     },
     about: {

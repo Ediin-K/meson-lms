@@ -38,6 +38,7 @@ import ArrowForwardRounded from "@mui/icons-material/ArrowForwardRounded";
 import AdminPanelSettingsRounded from "@mui/icons-material/AdminPanelSettingsRounded";
 import LabelRounded from "@mui/icons-material/LabelRounded";
 import TokenRounded from "@mui/icons-material/TokenRounded";
+import UploadFileRounded from "@mui/icons-material/UploadFileRounded";
 import Footer from "../ui/Footer";
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -142,6 +143,14 @@ export default function AdminDashboard() {
       path: "/admin/certificates",
       color: "text-emerald-600",
       bg: "bg-emerald-100 dark:bg-emerald-900/40",
+    },
+    {
+      title: t("home.admin.services.bulkImport.title"),
+      desc: t("home.admin.services.bulkImport.desc"),
+      icon: UploadFileRounded,
+      path: "/admin/bulk-import",
+      color: "text-fuchsia-600",
+      bg: "bg-fuchsia-100 dark:bg-fuchsia-900/40",
     },
     {
       title: "Oraret",
