@@ -26,6 +26,7 @@ const ProfilePage = lazy(() => import("./pages/ProfilePage.jsx"));
 const CertificateVerify = lazy(() => import("./pages/CertificateVerify.jsx"));
 const AdminDashboard = lazy(() => import("./components/dashboard/AdminDashboard.jsx"));
 const AdminUsers = lazy(() => import("./pages/AdminUsers.jsx"));
+const AdminBulkImport = lazy(() => import("./pages/AdminBulkImport.jsx"));
 const AdminSubjects = lazy(() => import("./pages/AdminSubjects.jsx"));
 const AdminDepartments = lazy(() => import("./pages/AdminDepartments.jsx"));
 const AdminTeachers = lazy(() => import("./pages/AdminTeachers.jsx"));
@@ -161,6 +162,14 @@ function AppLayout() {
                 element={
                   <ProtectedRoute requiredRole="admin">
                     <AdminUsers />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/bulk-import"
+                element={
+                  <ProtectedRoute requiredRole="admin">
+                    <AdminBulkImport />
                   </ProtectedRoute>
                 }
               />
