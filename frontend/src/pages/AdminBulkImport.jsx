@@ -9,8 +9,24 @@ import {
 import ArrowBackRounded from "@mui/icons-material/ArrowBackRounded";
 import UploadFileRounded from "@mui/icons-material/UploadFileRounded";
 import CheckCircleRounded from "@mui/icons-material/CheckCircleRounded";
+import WarningAmberRounded from "@mui/icons-material/WarningAmberRounded";
+import DownloadRounded from "@mui/icons-material/DownloadRounded";
 import Footer from "../components/ui/Footer";
 import axiosInstance from "../services/axiosInstance";
+
+function downloadCredentialsCsv(credentials) {
+  const header = "emri,mbiemri,email,tempPassword";
+  const lines = credentials.map((c) => [c.emri, c.mbiemri, c.email, c.tempPassword].join(","));
+  const csv = [header, ...lines].join("\n");
+
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "temp-passwords.csv";
+  link.click();
+  URL.revokeObjectURL(url);
+}
 
 export default function AdminBulkImport() {
   const navigate = useNavigate();
@@ -148,6 +164,61 @@ export default function AdminBulkImport() {
                 </Grid>
               ))}
             </Grid>
+
+            {result.credentials.length > 0 && (
+              <Card elevation={0} className="rounded-[2.5rem]! border border-amber-200/60 bg-white/80 dark:bg-slate-900/50! dark:border-amber-900/40! overflow-hidden shadow-2xl shadow-slate-200/20 dark:shadow-none mb-8">
+                <Box className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 p-6 dark:border-slate-800">
+                  <Box className="flex items-center gap-3">
+                    <WarningAmberRounded className="text-amber-500!" />
+                    <Box>
+                      <Typography variant="h6" className="font-black! text-slate-800! dark:text-white!">
+                        {t("adminBulkImport.credentials.heading")}
+                      </Typography>
+                      <Typography variant="caption" className="text-amber-600! dark:text-amber-400! font-semibold!">
+                        {t("adminBulkImport.credentials.warning")}
+                      </Typography>
+                    </Box>
+                  </Box>
+                  <Button
+                    variant="outlined"
+                    startIcon={<DownloadRounded />}
+                    onClick={() => downloadCredentialsCsv(result.credentials)}
+                    className="rounded-2xl! px-6! py-2! normal-case! font-bold! shrink-0"
+                  >
+                    {t("adminBulkImport.credentials.download")}
+                  </Button>
+                </Box>
+
+                <TableContainer>
+                  <Table sx={{ minWidth: 600 }}>
+                    <TableHead className="bg-slate-50/50 dark:bg-slate-800/30!">
+                      <TableRow>
+                        {[
+                          t("adminBulkImport.credentials.name"),
+                          t("adminBulkImport.credentials.email"),
+                          t("adminBulkImport.credentials.password"),
+                        ].map((h, i) => (
+                          <TableCell key={i} className="font-black! text-slate-400! uppercase! text-[10px]! tracking-widest! py-5!" sx={{ paddingLeft: i === 0 ? "2rem" : undefined }}>
+                            {h}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {result.credentials.map((cred, i) => (
+                        <TableRow key={i} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+                          <TableCell className="pl-8! py-5! font-bold! text-slate-900! dark:text-white!">
+                            {cred.emri} {cred.mbiemri}
+                          </TableCell>
+                          <TableCell className="text-slate-600! dark:text-slate-300!">{cred.email}</TableCell>
+                          <TableCell className="font-mono! text-slate-900! dark:text-white! font-semibold!">{cred.tempPassword}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Card>
+            )}
 
             <Card elevation={0} className="rounded-[2.5rem]! border border-slate-200/60 bg-white/80 dark:bg-slate-900/50! overflow-hidden shadow-2xl shadow-slate-200/20 dark:shadow-none">
               <Box className="border-b border-slate-100 p-6 dark:border-slate-800">

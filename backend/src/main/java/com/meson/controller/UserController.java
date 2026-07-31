@@ -1,5 +1,6 @@
 package com.meson.controller;
 
+import com.meson.dto.BulkImportCredential;
 import com.meson.dto.BulkImportResponse;
 import com.meson.dto.BulkImportRowDTO;
 import com.meson.dto.BulkImportRowResult;
@@ -90,8 +91,15 @@ public class UserController {
                 .filter(result -> !result.isSuccess())
                 .toList();
 
+        List<BulkImportCredential> credentials = results.stream()
+                .filter(result -> result.getTempPassword() != null)
+                .map(result -> new BulkImportCredential(
+                        result.getRow().getEmri(), result.getRow().getMbiemri(),
+                        result.getRow().getEmail(), result.getTempPassword()))
+                .toList();
+
         BulkImportResponse response = new BulkImportResponse(
-                results.size(), results.size() - failures.size(), failures.size(), failures);
+                results.size(), results.size() - failures.size(), failures.size(), failures, credentials);
 
         return ResponseEntity.ok(response);
     }

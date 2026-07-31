@@ -109,6 +109,7 @@ class BulkImportServiceTest {
         assertThat(result.isSuccess()).isTrue();
         assertThat(result.getErrorMessage()).isNull();
         assertThat(result.getUserId()).isNotNull();
+        assertThat(result.getTempPassword()).hasSize(12);
         createdUserIds.add(result.getUserId());
 
         var savedUser = userRepository.findById(result.getUserId()).orElseThrow();

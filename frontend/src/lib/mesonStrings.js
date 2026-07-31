@@ -1075,6 +1075,14 @@ export const STRINGS = {
         success: "Me sukses",
         failed: "Dështuan",
       },
+      credentials: {
+        heading: "Fjalëkalimet e përkohshme",
+        warning: "Shfaqen vetëm një herë - ruajini ose printojini tani.",
+        download: "Shkarko si CSV",
+        name: "Emri & Mbiemri",
+        email: "Email",
+        password: "Fjalëkalimi i përkohshëm",
+      },
       table: {
         heading: "Rreshtat e dështuar",
         name: "Emri & Mbiemri",
@@ -2913,6 +2921,14 @@ export const STRINGS = {
         total: "Total rows",
         success: "Succeeded",
         failed: "Failed",
+      },
+      credentials: {
+        heading: "Temporary passwords",
+        warning: "Shown only once - save or print them now.",
+        download: "Download as CSV",
+        name: "Name",
+        email: "Email",
+        password: "Temporary password",
       },
       table: {
         heading: "Failed rows",
