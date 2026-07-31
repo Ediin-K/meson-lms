@@ -63,14 +63,15 @@ public class BulkImportService {
             }
 
             User createdUser = userService.create(createUserDTO);
+            String tempPassword = createUserDTO.getPassword();
 
             try {
-                emailService.sendTempPasswordEmail(createdUser, createUserDTO.getPassword());
+                emailService.sendTempPasswordEmail(createdUser, tempPassword);
             } catch (RuntimeException emailException) {
-                return BulkImportRowResult.accountCreatedEmailFailed(row, createdUser.getId(), emailException.getMessage());
+                return BulkImportRowResult.accountCreatedEmailFailed(row, createdUser.getId(), tempPassword, emailException.getMessage());
             }
 
-            return BulkImportRowResult.success(row, createdUser.getId());
+            return BulkImportRowResult.success(row, createdUser.getId(), tempPassword);
         } catch (RuntimeException e) {
             return BulkImportRowResult.failure(row, e.getMessage());
         }

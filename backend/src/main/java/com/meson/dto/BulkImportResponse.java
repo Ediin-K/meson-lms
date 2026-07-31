@@ -10,12 +10,14 @@ public class BulkImportResponse {
     private final int successCount;
     private final int failureCount;
     private final List<BulkImportRowResult> failures;
+    private final List<BulkImportCredential> credentials;
 
     public BulkImportResponse(int totalRows, int successCount, int failureCount,
-                               List<BulkImportRowResult> failures) {
+                               List<BulkImportRowResult> failures, List<BulkImportCredential> credentials) {
         this.totalRows = totalRows;
         this.successCount = successCount;
         this.failureCount = failureCount;
         this.failures = failures;
+        this.credentials = credentials;
     }
 }

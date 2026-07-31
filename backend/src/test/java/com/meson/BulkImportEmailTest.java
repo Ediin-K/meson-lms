@@ -93,5 +93,8 @@ class BulkImportEmailTest {
         assertThat(result.isSuccess()).isFalse();
         assertThat(result.getErrorMessage()).contains("smtp refused");
         assertThat(result.getErrorMessage()).contains("Llogaria u krijua");
+        // The whole point of keeping this populated here: email failed, so this is
+        // the only place the admin can still recover the student's password from.
+        assertThat(result.getTempPassword()).hasSize(12);
     }
 }

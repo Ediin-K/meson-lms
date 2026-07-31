@@ -89,7 +89,11 @@ class BulkImportControllerTest {
                 .andExpect(jsonPath("$.successCount").value(2))
                 .andExpect(jsonPath("$.failureCount").value(1))
                 .andExpect(jsonPath("$.failures[0].row.email").value(badEmail))
-                .andExpect(jsonPath("$.failures[0].errorMessage").value(containsString("NonexistentDept")));
+                .andExpect(jsonPath("$.failures[0].errorMessage").value(containsString("NonexistentDept")))
+                .andExpect(jsonPath("$.credentials.length()").value(2))
+                .andExpect(jsonPath("$.credentials[0].email").value(goodEmail1))
+                .andExpect(jsonPath("$.credentials[0].tempPassword").isNotEmpty())
+                .andExpect(jsonPath("$.credentials[1].email").value(goodEmail2));
     }
 
     @Test
