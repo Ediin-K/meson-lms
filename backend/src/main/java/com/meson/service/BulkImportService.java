@@ -36,6 +36,7 @@ public class BulkImportService {
 
     private final UserService userService;
     private final DepartmentRepository departmentRepository;
+    private final EmailService emailService;
 
     public String generateTempPassword() {
         StringBuilder password = new StringBuilder(PASSWORD_LENGTH);
@@ -62,6 +63,13 @@ public class BulkImportService {
             }
 
             User createdUser = userService.create(createUserDTO);
+
+            try {
+                emailService.sendTempPasswordEmail(createdUser, createUserDTO.getPassword());
+            } catch (RuntimeException emailException) {
+                return BulkImportRowResult.accountCreatedEmailFailed(row, createdUser.getId(), emailException.getMessage());
+            }
+
             return BulkImportRowResult.success(row, createdUser.getId());
         } catch (RuntimeException e) {
             return BulkImportRowResult.failure(row, e.getMessage());
