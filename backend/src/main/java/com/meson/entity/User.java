@@ -50,6 +50,9 @@ public class User {
     @Column(nullable = false)
     private int accessFailedCount = 0;
 
+    @Column(name = "locked_until")
+    private LocalDateTime lockedUntil;
+
     @Builder.Default
     @Column(name = "created_at", nullable = false)
     private LocalDateTime dataKrijimit = LocalDateTime.now();
