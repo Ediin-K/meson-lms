@@ -15,10 +15,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class AuthService {
+
+    private static final int MAX_FAILED_ATTEMPTS = 7;
+    private static final long LOCKOUT_DURATION_MINUTES = 15;
 
     private final UserRepository userRepository;
     private final UserRoleRepository userRoleRepository;
@@ -27,6 +33,10 @@ public class AuthService {
     private final RefreshTokenService refreshTokenService;
     private final UserTokenRepository userTokenRepository;
 
+    // noRollbackFor: failed-attempt bookkeeping below must survive even though this
+    // method throws on every failure path — default rollback-on-RuntimeException
+    // would otherwise undo the counter/lockout before it reaches the database.
+    @Transactional(noRollbackFor = RuntimeException.class)
     public AuthResponse login(LoginRequest request) {
 
         String email = request.getEmail().trim().toLowerCase();
@@ -34,14 +44,38 @@ public class AuthService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Email ose password gabim"));
 
+        LocalDateTime now = LocalDateTime.now();
+
+        if (user.getLockedUntil() != null) {
+            if (user.getLockedUntil().isAfter(now)) {
+                long minutesLeft = Duration.between(now, user.getLockedUntil()).toMinutes() + 1;
+                throw new RuntimeException(
+                        "Llogaria eshte e bllokuar per shkak te shume tentativave te gabuara. Provoni perseri pas "
+                                + minutesLeft + " minutash.");
+            }
+            // Lockout window elapsed - auto-clear, give the account a clean slate
+            user.setLockedUntil(null);
+            user.setAccessFailedCount(0);
+        }
+
         boolean isPasswordValid = passwordEncoder.matches(
                 request.getPassword(),
                 user.getPasswordHash()
         );
 
         if (!isPasswordValid) {
+            int failedCount = user.getAccessFailedCount() + 1;
+            user.setAccessFailedCount(failedCount);
+            if (failedCount >= MAX_FAILED_ATTEMPTS) {
+                user.setLockedUntil(now.plusMinutes(LOCKOUT_DURATION_MINUTES));
+            }
+            userRepository.save(user);
             throw new RuntimeException("Email ose password gabim");
         }
+
+        user.setAccessFailedCount(0);
+        user.setLockedUntil(null);
+        userRepository.save(user);
 
         Role role = userRoleRepository.findByUser(user)
                 .stream()
