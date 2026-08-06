@@ -30,6 +30,7 @@ public class SmisService {
     private final SubjectGroupTeacherRepository subjectGroupTeacherRepository;
     private final SubjectSubgroupRepository subjectSubgroupRepository;
     private final SubjectSubgroupTeacherRepository subjectSubgroupTeacherRepository;
+    private final AcademicTermService academicTermService;
 
     @Transactional(readOnly = true)
     public List<SmisCourseResponse> getAvailableCourses() {
@@ -52,6 +53,10 @@ public class SmisService {
     public ExamApplicationResponse registerExam(Long studentId, ExamApplicationRequest request) {
         if (!getCurrentUser().getId().equals(studentId) && !hasRole("ADMIN")) {
             throw new AccessDeniedException("Nuk keni qasje per kete student");
+        }
+
+        if (!hasRole("ADMIN")) {
+            academicTermService.assertExamApplicationWindowOpen();
         }
 
         if (examApplicationRepository.existsByStudentIdAndSubjectIdAndStatusIn(

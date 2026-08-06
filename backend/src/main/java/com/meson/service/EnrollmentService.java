@@ -7,6 +7,7 @@ import com.meson.entity.*;
 import com.meson.exception.ResourceNotFoundException;
 import com.meson.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -22,6 +23,7 @@ public class EnrollmentService {
     private final EnrollmentCompletionService completionService;
     private final SubjectGroupTeacherRepository subjectGroupTeacherRepository;
     private final SubjectSubgroupTeacherRepository subjectSubgroupTeacherRepository;
+    private final AcademicTermService academicTermService;
 
     public org.springframework.data.domain.Page<EnrollmentResponse> getPage(String search, String status,
             org.springframework.data.domain.Pageable pageable) {
@@ -61,6 +63,10 @@ public class EnrollmentService {
     }
 
     public EnrollmentResponse create(EnrollmentRequest request) {
+        if (!hasRole("ADMIN")) {
+            academicTermService.assertEnrollmentWindowOpen();
+        }
+
         if (enrollmentRepository.existsByUserIdAndSubjectId(request.getUserId(), request.getSubjectId())) {
             throw new RuntimeException("Studenti eshte tashme i regjistruar ne kete kurs");
         }
@@ -201,5 +207,14 @@ public class EnrollmentService {
             return 5;
         }
         return course.getEcts();
+    }
+
+    private boolean hasRole(String role) {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null) {
+            return false;
+        }
+        String target = "ROLE_" + role;
+        return auth.getAuthorities().stream().anyMatch(a -> target.equals(a.getAuthority()));
     }
 }
