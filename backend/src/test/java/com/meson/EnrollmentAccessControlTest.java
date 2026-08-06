@@ -39,6 +39,7 @@ class EnrollmentAccessControlTest {
     @Autowired LessonRepository lessonRepository;
     @Autowired AssignmentRepository assignmentRepository;
     @Autowired AssignmentSubmissionRepository submissionRepository;
+    @Autowired AcademicTermRepository academicTermRepository;
 
     private User student1;
     private User student2;
@@ -54,6 +55,17 @@ class EnrollmentAccessControlTest {
         enrollmentRepository.deleteAll();
         subjectRepository.deleteAll();
         userRepository.deleteAll();
+        academicTermRepository.deleteAll();
+
+        LocalDateTime now = LocalDateTime.now();
+        academicTermRepository.save(AcademicTerm.builder()
+                .name("Test Term")
+                .active(true)
+                .enrollmentStart(now.minusDays(1))
+                .enrollmentEnd(now.plusDays(1))
+                .examApplicationStart(now.minusDays(1))
+                .examApplicationEnd(now.plusDays(1))
+                .build());
 
         User teacher = newUser("Teacher", "teacher@test.com", "TEACHER");
         newUser("Admin", ADMIN_EMAIL, "ADMIN");

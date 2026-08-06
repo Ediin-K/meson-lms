@@ -39,6 +39,7 @@ import AdminPanelSettingsRounded from "@mui/icons-material/AdminPanelSettingsRou
 import LabelRounded from "@mui/icons-material/LabelRounded";
 import TokenRounded from "@mui/icons-material/TokenRounded";
 import UploadFileRounded from "@mui/icons-material/UploadFileRounded";
+import EventAvailableRounded from "@mui/icons-material/EventAvailableRounded";
 import Footer from "../ui/Footer";
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -135,6 +136,14 @@ export default function AdminDashboard() {
       path: "/admin/enrollments",
       color: "text-rose-600",
       bg: "bg-rose-100 dark:bg-rose-900/40",
+    },
+    {
+      title: t("home.admin.services.academicTerms.title"),
+      desc: t("home.admin.services.academicTerms.desc"),
+      icon: EventAvailableRounded,
+      path: "/admin/academic-terms",
+      color: "text-violet-600",
+      bg: "bg-violet-100 dark:bg-violet-900/40",
     },
     {
       title: t("home.admin.services.certificates.title"),
