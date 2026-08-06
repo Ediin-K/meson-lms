@@ -62,6 +62,7 @@ export default function Login({ portalType }) {
   const [attemptedSubmit, setAttemptedSubmit] = useState(false)
   const [loading, setLoading] = useState(false)
   const [globalError, setGlobalError] = useState('')
+  const [locked, setLocked] = useState(false)
   const navigate = useNavigate()
 
   const theme = useMemo(
@@ -107,7 +108,10 @@ export default function Login({ portalType }) {
     return errors[field] || ''
   }
 
-  const clearGlobalError = () => setGlobalError('')
+  const clearGlobalError = () => {
+    if (locked) return
+    setGlobalError('')
+  }
   const copy = portalCopy[portalType]
 
   const handleSubmit = async (e) => {
@@ -121,6 +125,7 @@ export default function Login({ portalType }) {
 
     setAttemptedSubmit(true)
     if (errs.email || errs.password) return
+    if (locked) return
 
     setLoading(true)
     setGlobalError('')
@@ -159,6 +164,12 @@ export default function Login({ portalType }) {
       navigate(destination, { replace: true })
     } catch (error) {
       setGlobalError(error?.message || 'Gabim në login')
+      if (error?.locked) {
+        setLocked(true)
+        if (error.retryAfterMinutes) {
+          setTimeout(() => setLocked(false), error.retryAfterMinutes * 60 * 1000)
+        }
+      }
     } finally {
       setLoading(false)
     }
@@ -205,7 +216,7 @@ export default function Login({ portalType }) {
                   <Alert
                     severity="error"
                     role="alert"
-                    onClose={clearGlobalError}
+                    onClose={locked ? undefined : clearGlobalError}
                     className="rounded-[12px]"
                     sx={{ alignItems: 'center' }}
                   >
@@ -274,7 +285,7 @@ export default function Login({ portalType }) {
                   }
                 />
 
-                <LoginSubmitButton loading={loading}>{t('auth.loginSubmit')}</LoginSubmitButton>
+                <LoginSubmitButton loading={loading} disabled={locked}>{t('auth.loginSubmit')}</LoginSubmitButton>
 
                 <div className="flex items-center gap-3 py-1">
                   <span
