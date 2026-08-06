@@ -66,9 +66,16 @@ class LoginLockoutTest {
 
     @Test
     void sevenWrongAttemptsLocksAccountEvenWithCorrectPasswordAfterward() throws Exception {
-        for (int i = 0; i < 7; i++) {
-            attemptLogin(WRONG_PASSWORD).andExpect(status().isBadRequest());
+        for (int i = 0; i < 6; i++) {
+            attemptLogin(WRONG_PASSWORD)
+                    .andExpect(status().isBadRequest())
+                    .andExpect(result -> assertThat(result.getResponse().getContentAsString()).contains("tentativa"));
         }
+
+        // The 7th wrong attempt is the one that trips the lock itself.
+        attemptLogin(WRONG_PASSWORD)
+                .andExpect(status().isLocked())
+                .andExpect(result -> assertThat(result.getResponse().getContentAsString()).contains("bllokua"));
 
         User locked = userRepository.findByEmail(EMAIL).orElseThrow();
         assertThat(locked.getAccessFailedCount()).isEqualTo(7);
@@ -78,8 +85,8 @@ class LoginLockoutTest {
         // runs before the password check, not just an extra failed attempt.
         mockMvc.perform(post("/api/auth/login").contentType("application/json")
                         .content("{\"email\":\"" + EMAIL + "\",\"password\":\"" + PASSWORD + "\"}"))
-                .andExpect(status().isBadRequest())
-                .andExpect(result -> assertThat(result.getResponse().getContentAsString()).contains("bllokuar"));
+                .andExpect(status().isLocked())
+                .andExpect(result -> assertThat(result.getResponse().getContentAsString()).contains("bllokua"));
     }
 
     @Test

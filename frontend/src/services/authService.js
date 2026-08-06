@@ -13,7 +13,19 @@ export const login = async (email, password) => {
     });
 
     if (!response.ok) {
-        throw new Error('Email ose password i gabuar!');
+        let message = 'Email ose password i gabuar!'
+        let body = null
+        try {
+            body = await response.json()
+            message = body.message || message
+        } catch { void 0 }
+
+        const error = new Error(message)
+        error.locked = response.status === 423
+        if (body?.retryAfterMinutes != null) {
+            error.retryAfterMinutes = body.retryAfterMinutes
+        }
+        throw error
     }
 
     const data = await response.json();

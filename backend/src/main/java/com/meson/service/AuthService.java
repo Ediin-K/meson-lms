@@ -7,6 +7,7 @@ import com.meson.entity.User;
 import com.meson.entity.UserRole;
 import com.meson.entity.UserToken;
 import com.meson.entity.RefreshToken;
+import com.meson.exception.AccountLockedException;
 import com.meson.repository.UserRepository;
 import com.meson.repository.UserRoleRepository;
 import com.meson.repository.UserTokenRepository;
@@ -49,9 +50,10 @@ public class AuthService {
         if (user.getLockedUntil() != null) {
             if (user.getLockedUntil().isAfter(now)) {
                 long minutesLeft = Duration.between(now, user.getLockedUntil()).toMinutes() + 1;
-                throw new RuntimeException(
+                throw new AccountLockedException(
                         "Llogaria eshte e bllokuar per shkak te shume tentativave te gabuara. Provoni perseri pas "
-                                + minutesLeft + " minutash.");
+                                + minutesLeft + " minutash.",
+                        minutesLeft);
             }
             // Lockout window elapsed - auto-clear, give the account a clean slate
             user.setLockedUntil(null);
@@ -66,11 +68,20 @@ public class AuthService {
         if (!isPasswordValid) {
             int failedCount = user.getAccessFailedCount() + 1;
             user.setAccessFailedCount(failedCount);
+
             if (failedCount >= MAX_FAILED_ATTEMPTS) {
                 user.setLockedUntil(now.plusMinutes(LOCKOUT_DURATION_MINUTES));
+                userRepository.save(user);
+                throw new AccountLockedException(
+                        "Llogaria u bllokua per shkak te shume tentativave te gabuara. Provoni perseri pas "
+                                + LOCKOUT_DURATION_MINUTES + " minutash.",
+                        LOCKOUT_DURATION_MINUTES);
             }
+
             userRepository.save(user);
-            throw new RuntimeException("Email ose password gabim");
+            int remaining = MAX_FAILED_ATTEMPTS - failedCount;
+            throw new RuntimeException(
+                    "Email ose password gabim. Ju kane mbetur edhe " + remaining + " tentativa para bllokimit te llogarise.");
         }
 
         user.setAccessFailedCount(0);

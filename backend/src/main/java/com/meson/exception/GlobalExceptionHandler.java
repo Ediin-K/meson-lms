@@ -26,6 +26,16 @@ public class GlobalExceptionHandler {
         return error(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
+    @ExceptionHandler(AccountLockedException.class)
+    public ResponseEntity<Map<String, Object>> handleAccountLocked(AccountLockedException ex) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("status", HttpStatus.LOCKED.value());
+        body.put("error", HttpStatus.LOCKED.getReasonPhrase());
+        body.put("message", ex.getMessage());
+        body.put("retryAfterMinutes", ex.getRetryAfterMinutes());
+        return ResponseEntity.status(HttpStatus.LOCKED).body(body);
+    }
+
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<Map<String, Object>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
         return error(HttpStatus.BAD_REQUEST, "Parametri '" + ex.getName() + "' eshte i pavlefshem.");
