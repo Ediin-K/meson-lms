@@ -16,6 +16,7 @@ public class GradeResponse {
     private Long subjectId;
     private String subjectTitulli;
     private Integer subjectEcts;
+    private Integer subjectSemester;
     private Long professorId;
     private String professorEmri;
     private Integer grade;

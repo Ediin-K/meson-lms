@@ -14,4 +14,5 @@ public class StudentGradesSummaryResponse {
     private int totalGrades;
     private int totalEcts;
     private int totalEnrolledEcts;
+    private List<SemesterSummaryResponse> bySemester;
 }

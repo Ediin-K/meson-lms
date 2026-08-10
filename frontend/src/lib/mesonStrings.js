@@ -669,6 +669,11 @@ export const STRINGS = {
         fetchError: "Gabim gjate marrjes se afateve",
       },
     },
+    adminStudentTranscript: {
+      title: "Transkripta e Studentit",
+      back: "Kthehu te Perdoruesit",
+      loadError: "Transkripta nuk mund te ngarkohet",
+    },
     adminGroups: {
       title: "Groups",
       searchPlaceholder: "Kerko grupe...",
@@ -2561,6 +2566,11 @@ export const STRINGS = {
         activateError: "Error activating term",
         fetchError: "Error fetching terms",
       },
+    },
+    adminStudentTranscript: {
+      title: "Student Transcript",
+      back: "Back to Users",
+      loadError: "Transcript could not be loaded",
     },
     adminGroups: {
       title: "Groups",
