@@ -3,6 +3,7 @@ package com.meson;
 import com.meson.entity.*;
 import com.meson.entity.Module;
 import com.meson.repository.*;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,6 +77,21 @@ class EnrollmentAccessControlTest {
         subject2 = newSubject(teacher, "Subject B " + System.nanoTime());
 
         enroll(student1, subject);
+    }
+
+    // A test method below creates a Module (tied to a Subject) but this class doesn't
+    // otherwise touch it again - without cleaning it up, it silently outlives this class
+    // and breaks whichever test class runs next and tries to delete subjects.
+    @AfterEach
+    void tearDown() {
+        submissionRepository.deleteAll();
+        assignmentRepository.deleteAll();
+        lessonRepository.deleteAll();
+        moduleRepository.deleteAll();
+        enrollmentRepository.deleteAll();
+        subjectRepository.deleteAll();
+        userRepository.deleteAll();
+        academicTermRepository.deleteAll();
     }
 
     private User newUser(String name, String email, String role) {

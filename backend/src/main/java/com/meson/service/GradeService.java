@@ -2,6 +2,7 @@ package com.meson.service;
 
 import com.meson.dto.GradeRequest;
 import com.meson.dto.GradeResponse;
+import com.meson.dto.SemesterSummaryResponse;
 import com.meson.dto.StudentGradesSummaryResponse;
 import com.meson.entity.Subject;
 import com.meson.entity.EnrollmentStatus;
@@ -19,7 +20,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -127,19 +130,46 @@ public class GradeService {
     }
 
     private StudentGradesSummaryResponse buildSummary(List<GradeResponse> grades, int totalEnrolledEcts) {
-        double average = grades.isEmpty()
-                ? 0.0
-                : grades.stream().mapToInt(GradeResponse::getGrade).average().orElse(0.0);
         int totalEcts = grades.stream()
                 .mapToInt(g -> g.getSubjectEcts() != null ? g.getSubjectEcts() : 5)
                 .sum();
+
+        List<SemesterSummaryResponse> bySemester = grades.stream()
+                .collect(Collectors.groupingBy(GradeResponse::getSubjectSemester))
+                .entrySet().stream()
+                .map(entry -> SemesterSummaryResponse.builder()
+                        .semester(entry.getKey())
+                        .grades(entry.getValue())
+                        .gpa(weightedGpa(entry.getValue()))
+                        .ects(entry.getValue().stream()
+                                .mapToInt(g -> g.getSubjectEcts() != null ? g.getSubjectEcts() : 5)
+                                .sum())
+                        .build())
+                .sorted(Comparator.comparingInt(SemesterSummaryResponse::getSemester))
+                .toList();
+
         return StudentGradesSummaryResponse.builder()
                 .grades(grades)
-                .averageGrade(Math.round(average * 100.0) / 100.0)
+                .averageGrade(weightedGpa(grades))
                 .totalGrades(grades.size())
                 .totalEcts(totalEcts)
                 .totalEnrolledEcts(totalEnrolledEcts)
+                .bySemester(bySemester)
                 .build();
+    }
+
+    /** ECTS-weighted GPA: each grade counts in proportion to its subject's credits, not flatly. */
+    private double weightedGpa(List<GradeResponse> grades) {
+        int ects = grades.stream()
+                .mapToInt(g -> g.getSubjectEcts() != null ? g.getSubjectEcts() : 5)
+                .sum();
+        if (ects == 0) {
+            return 0.0;
+        }
+        double weightedSum = grades.stream()
+                .mapToDouble(g -> g.getGrade() * (g.getSubjectEcts() != null ? g.getSubjectEcts() : 5))
+                .sum();
+        return Math.round((weightedSum / ects) * 100.0) / 100.0;
     }
 
     private int resolveSubjectEcts(Subject course) {
@@ -158,6 +188,7 @@ public class GradeService {
                 .subjectId(grade.getSubject().getId())
                 .subjectTitulli(grade.getSubject().getTitulli())
                 .subjectEcts(resolveSubjectEcts(grade.getSubject()))
+                .subjectSemester(grade.getSubject().getSemester())
                 .professorId(grade.getProfessor().getId())
                 .professorEmri(grade.getProfessor().getEmri() + " " + grade.getProfessor().getMbiemri())
                 .grade(grade.getGrade())

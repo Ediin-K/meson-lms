@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Alert, Box, Button, Chip, CircularProgress, Typography } from '@mui/material'
+import { useCallback, useEffect, useState } from 'react'
+import { Alert, Box, Button, Chip, CircularProgress } from '@mui/material'
 import DescriptionRounded from '@mui/icons-material/DescriptionRounded'
 import SmisPageHeader from '../../components/smis/SmisPageHeader'
+import TranscriptView from '../../components/transcript/TranscriptView'
 import { getStudentProfile } from '../../services/studentProfileService'
 import { getGradesByStudent } from '../../services/gradeService'
 
-const formatDate = (value) => (value ? new Date(value).toLocaleDateString() : '-')
 const DEFAULT_STUDENT_PROGRAM = 'Shkenca kompjuterike dhe inxhinieri'
 
 export default function StudentTranscriptPage() {
@@ -48,17 +48,9 @@ export default function StudentTranscriptPage() {
     }
   }
 
-  const rows = summary?.grades || []
   const program = profile?.categoryName || DEFAULT_STUDENT_PROGRAM
   const semester = profile?.currentSemester ? `Semestri ${profile.currentSemester}` : 'Semestri 6'
   const status = profile?.statusi || 'Aktiv'
-
-  const stats = useMemo(() => [
-    ['Mesatarja', summary?.averageGrade ? summary.averageGrade.toFixed(2) : '-'],
-    ['Nota gjithsej', summary?.totalGrades ?? 0],
-    ['ECTS me note', summary?.totalEcts ?? 0],
-    ['ECTS regjistruar', summary?.totalEnrolledEcts ?? 0],
-  ], [summary])
 
   if (loading) {
     return <Box className="flex min-h-[320px] items-center justify-center"><CircularProgress /></Box>
@@ -74,7 +66,7 @@ export default function StudentTranscriptPage() {
 
       {error ? <Alert severity="error" className="!mb-4">{error}</Alert> : null}
 
-      <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="print-hide rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="overflow-x-auto p-5 sm:p-6">
           <table className="min-w-full border-separate border-spacing-0 text-left text-sm">
             <thead className="bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200">
@@ -109,55 +101,8 @@ export default function StudentTranscriptPage() {
       </div>
 
       {showTranscript ? (
-        <div className="mt-5 rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="border-b border-slate-200 px-5 py-4 dark:border-slate-800 sm:px-6">
-            <Typography variant="h6" className="!font-black !text-slate-950 dark:!text-white">
-              Transkripta akademike
-            </Typography>
-            <Typography variant="body2" className="!mt-1 !text-slate-500 dark:!text-slate-400">
-              Studenti: {profile?.emri} {profile?.mbiemri} · ID: {profile?.id}
-            </Typography>
-          </div>
-
-          <div className="grid gap-3 p-5 sm:grid-cols-2 lg:grid-cols-4 lg:p-6">
-            {stats.map(([label, value]) => (
-              <div key={label} className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-950">
-                <p className="text-xs font-black uppercase tracking-widest text-slate-500">{label}</p>
-                <p className="mt-1 text-2xl font-black text-slate-950 dark:text-white">{value}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="overflow-x-auto px-5 pb-5 sm:px-6 sm:pb-6">
-            {rows.length === 0 ? (
-              <Alert severity="info">Nuk ka nota te vendosura ende per transkripte.</Alert>
-            ) : (
-              <table className="min-w-full border-separate border-spacing-0 text-left text-sm">
-                <thead className="bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200">
-                  <tr>
-                    {['Kodi', 'Lenda', 'Profesori', 'Nota', 'ECTS', 'Data', 'Koment'].map((h) => (
-                      <th key={h} className="border-b border-slate-200 px-3 py-3 font-bold dark:border-slate-700">{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.map((row) => (
-                    <tr key={row.id} className="bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800/70">
-                      <td className="border-b border-slate-100 px-3 py-3 font-bold text-sky-800 dark:border-slate-800 dark:text-sky-300">
-                        MESON{String(row.courseId).padStart(3, '0')}
-                      </td>
-                      <td className="border-b border-slate-100 px-3 py-3 font-semibold dark:border-slate-800">{row.courseTitulli}</td>
-                      <td className="border-b border-slate-100 px-3 py-3 dark:border-slate-800">{row.professorEmri}</td>
-                      <td className="border-b border-slate-100 px-3 py-3 font-black dark:border-slate-800">{row.grade}</td>
-                      <td className="border-b border-slate-100 px-3 py-3 dark:border-slate-800">{row.courseEcts ?? 5}</td>
-                      <td className="border-b border-slate-100 px-3 py-3 dark:border-slate-800">{formatDate(row.assignedAt)}</td>
-                      <td className="border-b border-slate-100 px-3 py-3 dark:border-slate-800">{row.comment || '-'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
+        <div className="mt-5">
+          <TranscriptView profile={profile} summary={summary} />
         </div>
       ) : null}
     </>

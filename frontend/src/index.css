@@ -348,4 +348,19 @@ html.dark svg:not([class*="text-"]):not([class*="MuiSvgIcon-color"]) {
   color: var(--lms-schedule-accent);
 }
 
+@media print {
+  .print-hide {
+    display: none !important;
+  }
+
+  .print-area {
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  body {
+    background: white !important;
+  }
+}
+
 

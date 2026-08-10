@@ -16,6 +16,7 @@ import PeopleRounded from "@mui/icons-material/PeopleRounded";
 import PersonAddRounded from "@mui/icons-material/PersonAddRounded";
 import VerifiedUserRounded from "@mui/icons-material/VerifiedUserRounded";
 import FilterListRounded from "@mui/icons-material/FilterListRounded";
+import DescriptionRounded from "@mui/icons-material/DescriptionRounded";
 import Footer from "../components/ui/Footer";
 import axiosInstance from "../services/axiosInstance";
 import { getDepartmentGroups } from "../services/departmentGroupService";
@@ -413,6 +414,12 @@ export default function AdminUsers() {
                       </TableCell>
                       <TableCell align="right" className="pr-8!">
                         <Box className="flex justify-end gap-1">
+                          {user.role === "student" && (
+                            <IconButton size="small" onClick={() => navigate(`/admin/students/${user.id}/transcript`)}
+                              className="bg-slate-100! dark:bg-slate-800! text-slate-400! hover:text-sky-600! rounded-xl! transition-all">
+                              <DescriptionRounded fontSize="small" />
+                            </IconButton>
+                          )}
                           <IconButton size="small" onClick={() => handleOpenEdit(user)}
                             className="bg-slate-100! dark:bg-slate-800! text-slate-400! hover:text-indigo-600! rounded-xl! transition-all">
                             <EditRounded fontSize="small" />
