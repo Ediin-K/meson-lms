@@ -23,6 +23,7 @@ import SearchRounded from "@mui/icons-material/SearchRounded";
 import GradesPageShell from "../../components/grades/GradesPageShell";
 import GradeTable from "../../components/grades/GradeTable";
 import GradeFormDialog from "../../components/grades/GradeFormDialog";
+import GradeHistoryDialog from "../../components/grades/GradeHistoryDialog";
 import teacherContentService from "../../services/teacherContentService";
 import { useAppPreferences } from "../../context/appPreferencesContext";
 import {
@@ -44,6 +45,7 @@ export default function ProfessorGradesPage() {
   const [openForm, setOpenForm] = useState(false);
   const [editGrade, setEditGrade] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [historyTarget, setHistoryTarget] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
 
@@ -247,6 +249,7 @@ export default function ProfessorGradesPage() {
           loading={loading}
           onEdit={(row) => { setEditGrade(row); setOpenForm(true); }}
           onDelete={(row) => setDeleteTarget(row)}
+          onHistory={(row) => setHistoryTarget(row)}
         />
       )}
 
@@ -260,6 +263,12 @@ export default function ProfessorGradesPage() {
         fixedSubjectId={selectedSubjectId ? Number(selectedSubjectId) : null}
         fixedSubjectTitle={selectedSubject?.titulli || ""}
         submitting={submitting}
+      />
+
+      <GradeHistoryDialog
+        open={Boolean(historyTarget)}
+        onClose={() => setHistoryTarget(null)}
+        gradeId={historyTarget?.id}
       />
 
       <Dialog open={Boolean(deleteTarget)} onClose={() => setDeleteTarget(null)} PaperProps={{ className: "rounded-xl" }}>

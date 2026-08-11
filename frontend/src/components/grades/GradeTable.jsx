@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import EditOutlined from "@mui/icons-material/EditOutlined";
 import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import HistoryOutlined from "@mui/icons-material/HistoryOutlined";
 import MenuBookOutlined from "@mui/icons-material/MenuBookOutlined";
 import { useAppPreferences } from "../../context/appPreferencesContext";
 
@@ -86,6 +87,7 @@ export default function GradeTable({
   mode = "student",
   onEdit,
   onDelete,
+  onHistory,
   pageSize: defaultPageSize = 10,
 }) {
   const { colorMode } = useAppPreferences();
@@ -153,7 +155,7 @@ export default function GradeTable({
               <TableCell sx={styles.headerCell} align="center">Nota</TableCell>
               <TableCell sx={styles.headerCell}>Komenti</TableCell>
               <TableCell sx={styles.headerCell}>Data vendosjes</TableCell>
-              {mode === "professor" && (onEdit || onDelete) && (
+              {mode === "professor" && (onEdit || onDelete || onHistory) && (
                 <TableCell sx={styles.headerCell} align="center">Veprime</TableCell>
               )}
             </TableRow>
@@ -200,9 +202,20 @@ export default function GradeTable({
                 <TableCell sx={{ ...styles.bodyCell, whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
                   {formatDate(row.assignedAt)}
                 </TableCell>
-                {mode === "professor" && (onEdit || onDelete) && (
+                {mode === "professor" && (onEdit || onDelete || onHistory) && (
                   <TableCell sx={styles.bodyCell} align="center">
                     <Box className="flex items-center justify-center gap-2">
+                      {onHistory && (
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          startIcon={<HistoryOutlined sx={{ fontSize: 16 }} />}
+                          onClick={() => onHistory(row)}
+                          className="!min-w-0 !rounded !border-slate-400 !px-3 !py-1 !text-xs !normal-case !text-slate-500 hover:!border-slate-500 dark:!border-slate-600 dark:!text-slate-400"
+                        >
+                          Historiku
+                        </Button>
+                      )}
                       {onEdit && (
                         <Button
                           size="small"
