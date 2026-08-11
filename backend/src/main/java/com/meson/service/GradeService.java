@@ -1,9 +1,12 @@
 package com.meson.service;
 
+import com.meson.dto.GradeAuditLogResponse;
 import com.meson.dto.GradeRequest;
 import com.meson.dto.GradeResponse;
 import com.meson.dto.SemesterSummaryResponse;
 import com.meson.dto.StudentGradesSummaryResponse;
+import com.meson.entity.GradeAuditAction;
+import com.meson.entity.GradeAuditLog;
 import com.meson.entity.Subject;
 import com.meson.entity.EnrollmentStatus;
 import com.meson.entity.Grade;
@@ -11,9 +14,12 @@ import com.meson.entity.User;
 import com.meson.exception.ResourceNotFoundException;
 import com.meson.repository.SubjectRepository;
 import com.meson.repository.EnrollmentRepository;
+import com.meson.repository.GradeAuditLogRepository;
 import com.meson.repository.GradeRepository;
 import com.meson.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -32,6 +38,7 @@ public class GradeService {
     private final UserRepository userRepository;
     private final SubjectRepository subjectRepository;
     private final EnrollmentRepository enrollmentRepository;
+    private final GradeAuditLogRepository gradeAuditLogRepository;
 
     @Transactional(readOnly = true)
     public StudentGradesSummaryResponse getByStudentId(Long studentId) {
@@ -87,7 +94,9 @@ public class GradeService {
                 .assignedAt(LocalDateTime.now())
                 .build();
 
-        return toResponse(gradeRepository.save(grade));
+        grade = gradeRepository.save(grade);
+        logAudit(grade, GradeAuditAction.CREATED, null, grade.getGrade());
+        return toResponse(grade);
     }
 
     @Transactional
@@ -102,11 +111,14 @@ public class GradeService {
             throw new RuntimeException("Nuk lejohet ndryshimi i studentit ose Lëndat per nje note ekzistuese");
         }
 
+        int previousGrade = grade.getGrade();
         grade.setGrade(request.getGrade());
         grade.setComment(request.getComment());
         grade.setAssignedAt(LocalDateTime.now());
 
-        return toResponse(gradeRepository.save(grade));
+        grade = gradeRepository.save(grade);
+        logAudit(grade, GradeAuditAction.UPDATED, previousGrade, grade.getGrade());
+        return toResponse(grade);
     }
 
     @Transactional
@@ -114,7 +126,70 @@ public class GradeService {
         Grade grade = gradeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Nota nuk u gjet"));
         assertCanManageSubject(grade.getSubject().getId());
+        logAudit(grade, GradeAuditAction.DELETED, grade.getGrade(), null);
         gradeRepository.delete(grade);
+    }
+
+    @Transactional(readOnly = true)
+    public List<GradeAuditLogResponse> getHistoryForGrade(Long gradeId) {
+        List<GradeAuditLog> logs = gradeAuditLogRepository.findByGradeIdOrderByPerformedAtAsc(gradeId);
+        if (!logs.isEmpty()) {
+            assertCanManageSubject(logs.get(0).getSubjectId());
+        } else {
+            gradeRepository.findById(gradeId)
+                    .ifPresent(g -> assertCanManageSubject(g.getSubject().getId()));
+        }
+        return logs.stream().map(this::toAuditResponse).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<GradeAuditLogResponse> getAuditLog(Pageable pageable) {
+        if (hasRole("ADMIN")) {
+            return gradeAuditLogRepository.findAll(pageable).map(this::toAuditResponse);
+        }
+        if (hasRole("TEACHER")) {
+            List<Long> subjectIds = subjectRepository.findByTeacherId(getCurrentUser().getId())
+                    .stream().map(Subject::getId).toList();
+            return gradeAuditLogRepository.findBySubjectIdIn(subjectIds, pageable)
+                    .map(this::toAuditResponse);
+        }
+        throw new AccessDeniedException("Nuk keni qasje ne historikun e notave");
+    }
+
+    private void logAudit(Grade grade, GradeAuditAction action, Integer previousGrade, Integer newGrade) {
+        User performer = getCurrentUser();
+        gradeAuditLogRepository.save(GradeAuditLog.builder()
+                .gradeId(grade.getId())
+                .studentId(grade.getStudent().getId())
+                .studentName(grade.getStudent().getEmri() + " " + grade.getStudent().getMbiemri())
+                .subjectId(grade.getSubject().getId())
+                .subjectTitulli(grade.getSubject().getTitulli())
+                .performedById(performer.getId())
+                .performedByName(performer.getEmri() + " " + performer.getMbiemri())
+                .action(action)
+                .previousGrade(previousGrade)
+                .newGrade(newGrade)
+                .comment(grade.getComment())
+                .performedAt(LocalDateTime.now())
+                .build());
+    }
+
+    private GradeAuditLogResponse toAuditResponse(GradeAuditLog log) {
+        return GradeAuditLogResponse.builder()
+                .id(log.getId())
+                .gradeId(log.getGradeId())
+                .studentId(log.getStudentId())
+                .studentName(log.getStudentName())
+                .subjectId(log.getSubjectId())
+                .subjectTitulli(log.getSubjectTitulli())
+                .performedById(log.getPerformedById())
+                .performedByName(log.getPerformedByName())
+                .action(log.getAction())
+                .previousGrade(log.getPreviousGrade())
+                .newGrade(log.getNewGrade())
+                .comment(log.getComment())
+                .performedAt(log.getPerformedAt())
+                .build();
     }
 
     private void assertCanManageSubject(Long subjectId) {
