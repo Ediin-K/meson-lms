@@ -2,6 +2,7 @@ package com.meson.repository;
 
 import com.meson.entity.Enrollment;
 import com.meson.entity.EnrollmentStatus;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.List;
@@ -9,12 +10,23 @@ import java.util.Optional;
 
 @Repository
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
+
+    @Override
+    @EntityGraph(attributePaths = {"user", "subject", "subject.teacher", "subjectGroup", "subjectSubgroup"})
+    List<Enrollment> findAll();
+
+    @EntityGraph(attributePaths = {"user", "subject", "subject.teacher", "subjectGroup", "subjectSubgroup"})
     List<Enrollment> findByUserId(Long userId);
+
+    @EntityGraph(attributePaths = {"user", "subject", "subject.teacher", "subjectGroup", "subjectSubgroup"})
     List<Enrollment> findBySubjectId(Long subjectId);
+
+    @EntityGraph(attributePaths = {"subject"})
     List<Enrollment> findByUserIdAndStatusi(Long userId, EnrollmentStatus statusi);
     Optional<Enrollment> findByUserIdAndSubjectId(Long userId, Long subjectId);
     boolean existsByUserIdAndSubjectId(Long userId, Long subjectId);
 
+    @EntityGraph(attributePaths = {"user", "subject", "subject.teacher", "subjectGroup", "subjectSubgroup"})
     @org.springframework.data.jpa.repository.Query("SELECT e FROM Enrollment e WHERE "
             + "(LOWER(e.user.emri) LIKE CONCAT('%', LOWER(:search), '%') "
             + "OR LOWER(e.user.mbiemri) LIKE CONCAT('%', LOWER(:search), '%') "
@@ -24,6 +36,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     org.springframework.data.domain.Page<Enrollment> searchPage(String search, EnrollmentStatus status,
             org.springframework.data.domain.Pageable pageable);
 
+    @EntityGraph(attributePaths = {"user", "subject"})
     List<Enrollment> findBySubjectTeacherId(Long teacherId);
     long countBySubjectTeacherId(Long teacherId);
 

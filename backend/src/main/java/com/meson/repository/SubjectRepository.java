@@ -10,16 +10,29 @@ import java.util.Optional;
 
 @Repository
 public interface SubjectRepository extends JpaRepository<Subject, Long> {
+
+    @Override
+    @EntityGraph(attributePaths = {"teacher", "department"})
+    List<Subject> findAll();
+
     Optional<Subject> findByTitulli(String titulli);
+
+    @EntityGraph(attributePaths = {"teacher", "department"})
     List<Subject> findByStatusi(SubjectStatus statusi);
+
     List<Subject> findByDepartmentIdAndStatusi(Long departmentId, SubjectStatus statusi);
 
     @EntityGraph(attributePaths = {"teacher", "department"})
     List<Subject> findByTeacherId(Long teacherId);
 
     List<Subject> findByTitulliContainingIgnoreCase(String titulli);
+
+    @EntityGraph(attributePaths = {"teacher", "department"})
     List<Subject> findBySemester(Integer semester);
+
+    @EntityGraph(attributePaths = {"teacher", "department"})
     List<Subject> findByDepartmentIdAndSemester(Long departmentId, Integer semester);
+
     boolean existsByTitulli(String titulli);
 
     long countByTeacherId(Long teacherId);

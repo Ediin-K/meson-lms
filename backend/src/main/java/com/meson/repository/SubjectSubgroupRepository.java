@@ -8,5 +8,6 @@ import java.util.List;
 @Repository
 public interface SubjectSubgroupRepository extends JpaRepository<SubjectSubgroup, Long> {
     List<SubjectSubgroup> findBySubjectGroupId(Long subjectGroupId);
+    List<SubjectSubgroup> findBySubjectGroupIdIn(List<Long> subjectGroupIds);
     boolean existsBySubjectGroupIdAndNameIgnoreCase(Long subjectGroupId, String name);
 }

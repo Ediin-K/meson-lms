@@ -11,6 +11,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -34,29 +37,66 @@ public class EnrollmentService {
         if (status != null && !status.isBlank() && !"all".equalsIgnoreCase(status)) {
             statusFilter = com.meson.entity.EnrollmentStatus.valueOf(status.toUpperCase());
         }
-        return enrollmentRepository.searchPage(search == null ? "" : search.trim(), statusFilter, pageable)
-                .map(this::toResponse);
+        org.springframework.data.domain.Page<Enrollment> page = enrollmentRepository.searchPage(
+                search == null ? "" : search.trim(), statusFilter, pageable);
+        Map<Long, String> professorNames = batchProfessorNames(page.getContent());
+        Map<Long, String> assistantNames = batchAssistantNames(page.getContent());
+        return page.map(e -> toResponse(e, professorNames, assistantNames));
     }
 
     public List<EnrollmentResponse> getAll() {
-        return enrollmentRepository.findAll()
-                .stream()
-                .map(this::toResponse)
-                .toList();
+        return toResponseList(enrollmentRepository.findAll());
     }
 
     public List<EnrollmentResponse> getByUserId(Long userId) {
-        return enrollmentRepository.findByUserId(userId)
-                .stream()
-                .map(this::toResponse)
-                .toList();
+        return toResponseList(enrollmentRepository.findByUserId(userId));
     }
 
     public List<EnrollmentResponse> getBySubjectId(Long subjectId) {
-        return enrollmentRepository.findBySubjectId(subjectId)
-                .stream()
-                .map(this::toResponse)
+        return toResponseList(enrollmentRepository.findBySubjectId(subjectId));
+    }
+
+    private List<EnrollmentResponse> toResponseList(List<Enrollment> enrollments) {
+        Map<Long, String> professorNames = batchProfessorNames(enrollments);
+        Map<Long, String> assistantNames = batchAssistantNames(enrollments);
+        return enrollments.stream()
+                .map(e -> toResponse(e, professorNames, assistantNames))
                 .toList();
+    }
+
+    /** One query for every group's teacher, instead of one query per enrollment. */
+    private Map<Long, String> batchProfessorNames(List<Enrollment> enrollments) {
+        List<Long> groupIds = enrollments.stream()
+                .map(Enrollment::getSubjectGroup)
+                .filter(Objects::nonNull)
+                .map(SubjectGroup::getId)
+                .distinct()
+                .toList();
+        if (groupIds.isEmpty()) {
+            return Map.of();
+        }
+        return subjectGroupTeacherRepository.findBySubjectGroupIdIn(groupIds).stream()
+                .collect(Collectors.toMap(
+                        a -> a.getSubjectGroup().getId(),
+                        a -> a.getTeacher().getEmri() + " " + a.getTeacher().getMbiemri(),
+                        (first, second) -> first));
+    }
+
+    private Map<Long, String> batchAssistantNames(List<Enrollment> enrollments) {
+        List<Long> subgroupIds = enrollments.stream()
+                .map(Enrollment::getSubjectSubgroup)
+                .filter(Objects::nonNull)
+                .map(SubjectSubgroup::getId)
+                .distinct()
+                .toList();
+        if (subgroupIds.isEmpty()) {
+            return Map.of();
+        }
+        return subjectSubgroupTeacherRepository.findBySubjectSubgroupIdIn(subgroupIds).stream()
+                .collect(Collectors.toMap(
+                        a -> a.getSubjectSubgroup().getId(),
+                        a -> a.getTeacher().getEmri() + " " + a.getTeacher().getMbiemri(),
+                        (first, second) -> first));
     }
 
     public EnrollmentResponse getById(Long id) {
@@ -171,7 +211,13 @@ public class EnrollmentService {
         enrollmentRepository.deleteById(id);
     }
 
+    /** Single-entity path (getById/create/update) — no batching needed for one row. */
     private EnrollmentResponse toResponse(Enrollment enrollment) {
+        return toResponse(enrollment, null, null);
+    }
+
+    private EnrollmentResponse toResponse(Enrollment enrollment, Map<Long, String> professorNames,
+            Map<Long, String> assistantNames) {
         return EnrollmentResponse.builder()
                 .id(enrollment.getId())
                 .userId(enrollment.getUser().getId())
@@ -183,18 +229,22 @@ public class EnrollmentService {
                 .subjectGroupName(enrollment.getSubjectGroup() != null ? enrollment.getSubjectGroup().getName() : null)
                 .subjectSubgroupId(enrollment.getSubjectSubgroup() != null ? enrollment.getSubjectSubgroup().getId() : null)
                 .subjectSubgroupName(enrollment.getSubjectSubgroup() != null ? enrollment.getSubjectSubgroup().getName() : null)
-                .professorName(resolveProfessorName(enrollment))
-                .assistantName(resolveAssistantName(enrollment))
+                .professorName(resolveProfessorName(enrollment, professorNames))
+                .assistantName(resolveAssistantName(enrollment, assistantNames))
                 .progresi(enrollment.getProgresi())
                 .statusi(enrollment.getStatusi())
                 .dataRegjistrimit(enrollment.getDataRegjistrimit())
                 .build();
     }
 
-    private String resolveProfessorName(Enrollment enrollment) {
+    private String resolveProfessorName(Enrollment enrollment, Map<Long, String> professorNames) {
         if (enrollment.getSubjectGroup() == null) {
             User teacher = enrollment.getSubject().getTeacher();
             return teacher != null ? teacher.getEmri() + " " + teacher.getMbiemri() : null;
+        }
+
+        if (professorNames != null) {
+            return professorNames.get(enrollment.getSubjectGroup().getId());
         }
 
         return subjectGroupTeacherRepository.findBySubjectGroupId(enrollment.getSubjectGroup().getId())
@@ -204,9 +254,13 @@ public class EnrollmentService {
                 .orElse(null);
     }
 
-    private String resolveAssistantName(Enrollment enrollment) {
+    private String resolveAssistantName(Enrollment enrollment, Map<Long, String> assistantNames) {
         if (enrollment.getSubjectSubgroup() == null) {
             return null;
+        }
+
+        if (assistantNames != null) {
+            return assistantNames.get(enrollment.getSubjectSubgroup().getId());
         }
 
         return subjectSubgroupTeacherRepository.findBySubjectSubgroupId(enrollment.getSubjectSubgroup().getId())

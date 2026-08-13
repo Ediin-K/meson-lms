@@ -13,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -40,12 +42,18 @@ public class SmisService {
                 .toList();
         Set<Long> alreadyAppliedSubjectIds = activeApplicationSubjectIdsForCurrentStudent();
 
-        return subjectRepository.findByStatusi(SubjectStatus.PUBLIKUAR)
+        List<Subject> candidates = subjectRepository.findByStatusi(SubjectStatus.PUBLIKUAR)
                 .stream()
                 .filter(this::isComputerScienceCourse)
                 .filter(subject -> !alreadyAppliedSubjectIds.contains(subject.getId()))
                 .sorted(Comparator.comparing(Subject::getSemester).thenComparing(this::courseCode))
-                .map(subject -> toCourseResponse(subject, professorsForCourse(subject, professors)))
+                .toList();
+
+        Map<Long, Set<Long>> teacherIdsBySubject = batchTeacherIdsBySubject(candidates);
+
+        return candidates.stream()
+                .map(subject -> toCourseResponse(subject,
+                        professorsForTeacherIds(teacherIdsBySubject.get(subject.getId()), professors)))
                 .toList();
     }
 
@@ -244,30 +252,73 @@ public class SmisService {
                 .build();
     }
 
-    private List<SmisProfessorOptionResponse> professorsForCourse(
-            Subject subject,
+    private List<SmisProfessorOptionResponse> professorsForTeacherIds(
+            Set<Long> teacherIds,
             List<SmisProfessorOptionResponse> allProfessors) {
-        Set<Long> teacherIds = teacherIdsForSubject(subject);
+        if (teacherIds == null || teacherIds.isEmpty()) {
+            return List.of();
+        }
         return allProfessors.stream()
                 .filter(professor -> teacherIds.contains(professor.getId()))
                 .toList();
     }
 
-    /** Every teacher actually assigned to this subject: its primary teacher plus any group/subgroup teachers. */
-    private Set<Long> teacherIdsForSubject(Subject subject) {
-        Set<Long> teacherIds = new java.util.HashSet<>();
-        if (subject.getTeacher() != null) {
-            teacherIds.add(subject.getTeacher().getId());
+    /**
+     * Every teacher actually assigned to each subject in the list: its primary teacher plus any
+     * group/subgroup teachers. Batched into 3 queries total (groups, group-teachers, subgroups +
+     * subgroup-teachers) instead of a per-subject/per-group/per-subgroup fan-out.
+     */
+    private Map<Long, Set<Long>> batchTeacherIdsBySubject(List<Subject> subjects) {
+        Map<Long, Set<Long>> teacherIdsBySubject = new HashMap<>();
+        for (Subject subject : subjects) {
+            Set<Long> ids = new HashSet<>();
+            if (subject.getTeacher() != null) {
+                ids.add(subject.getTeacher().getId());
+            }
+            teacherIdsBySubject.put(subject.getId(), ids);
         }
-        for (SubjectGroup group : subjectGroupRepository.findBySubjectId(subject.getId())) {
-            subjectGroupTeacherRepository.findBySubjectGroupId(group.getId())
-                    .forEach(gt -> teacherIds.add(gt.getTeacher().getId()));
-            for (SubjectSubgroup subgroup : subjectSubgroupRepository.findBySubjectGroupId(group.getId())) {
-                subjectSubgroupTeacherRepository.findBySubjectSubgroupId(subgroup.getId())
-                        .forEach(sgt -> teacherIds.add(sgt.getTeacher().getId()));
+        if (subjects.isEmpty()) {
+            return teacherIdsBySubject;
+        }
+
+        List<Long> subjectIds = subjects.stream().map(Subject::getId).toList();
+        List<SubjectGroup> groups = subjectGroupRepository.findBySubjectIdIn(subjectIds);
+        if (groups.isEmpty()) {
+            return teacherIdsBySubject;
+        }
+        List<Long> groupIds = groups.stream().map(SubjectGroup::getId).toList();
+
+        Map<Long, List<Long>> groupIdsBySubject = groups.stream()
+                .collect(Collectors.groupingBy(g -> g.getSubject().getId(),
+                        Collectors.mapping(SubjectGroup::getId, Collectors.toList())));
+
+        Map<Long, List<Long>> teacherIdsByGroup = subjectGroupTeacherRepository.findBySubjectGroupIdIn(groupIds)
+                .stream()
+                .collect(Collectors.groupingBy(gt -> gt.getSubjectGroup().getId(),
+                        Collectors.mapping(gt -> gt.getTeacher().getId(), Collectors.toList())));
+
+        List<SubjectSubgroup> subgroups = subjectSubgroupRepository.findBySubjectGroupIdIn(groupIds);
+        Map<Long, List<Long>> subgroupIdsByGroup = subgroups.stream()
+                .collect(Collectors.groupingBy(sg -> sg.getSubjectGroup().getId(),
+                        Collectors.mapping(SubjectSubgroup::getId, Collectors.toList())));
+
+        List<Long> subgroupIds = subgroups.stream().map(SubjectSubgroup::getId).toList();
+        Map<Long, List<Long>> teacherIdsBySubgroup = subgroupIds.isEmpty()
+                ? Map.of()
+                : subjectSubgroupTeacherRepository.findBySubjectSubgroupIdIn(subgroupIds).stream()
+                        .collect(Collectors.groupingBy(sgt -> sgt.getSubjectSubgroup().getId(),
+                                Collectors.mapping(sgt -> sgt.getTeacher().getId(), Collectors.toList())));
+
+        for (Map.Entry<Long, List<Long>> entry : groupIdsBySubject.entrySet()) {
+            Set<Long> ids = teacherIdsBySubject.computeIfAbsent(entry.getKey(), k -> new HashSet<>());
+            for (Long groupId : entry.getValue()) {
+                ids.addAll(teacherIdsByGroup.getOrDefault(groupId, List.of()));
+                for (Long subgroupId : subgroupIdsByGroup.getOrDefault(groupId, List.of())) {
+                    ids.addAll(teacherIdsBySubgroup.getOrDefault(subgroupId, List.of()));
+                }
             }
         }
-        return teacherIds;
+        return teacherIdsBySubject;
     }
 
     private ExamApplicationResponse toResponse(ExamApplication application) {
