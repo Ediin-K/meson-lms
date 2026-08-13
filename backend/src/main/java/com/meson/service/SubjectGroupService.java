@@ -6,7 +6,10 @@ import com.meson.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,9 +24,68 @@ public class SubjectGroupService {
     private final DepartmentGroupRepository departmentGroupRepository;
 
     public List<SubjectGroupResponse> getBySubject(Long subjectId) {
-        return subjectGroupRepository.findBySubjectId(subjectId)
+        return toGroupResponses(subjectGroupRepository.findBySubjectId(subjectId));
+    }
+
+    /** Same groups as getBySubject, but for an arbitrary set of group ids, in that order. */
+    public List<SubjectGroupResponse> getByIds(List<Long> groupIds) {
+        if (groupIds.isEmpty()) {
+            return List.of();
+        }
+        Map<Long, SubjectGroupResponse> byId = toGroupResponses(subjectGroupRepository.findAllById(groupIds))
                 .stream()
-                .map(this::toGroupResponse)
+                .collect(Collectors.toMap(SubjectGroupResponse::getId, r -> r));
+        return groupIds.stream().map(byId::get).filter(java.util.Objects::nonNull).toList();
+    }
+
+    /**
+     * Batched mapping for a list of groups: one query for all their teachers, one for all their
+     * subgroups, one for all those subgroups' teachers — instead of firing that per group/subgroup.
+     */
+    private List<SubjectGroupResponse> toGroupResponses(List<SubjectGroup> groups) {
+        if (groups.isEmpty()) {
+            return List.of();
+        }
+        List<Long> groupIds = groups.stream().map(SubjectGroup::getId).toList();
+
+        Map<Long, List<AssignedTeacherResponse>> teachersByGroup = subjectGroupTeacherRepository
+                .findBySubjectGroupIdIn(groupIds).stream()
+                .collect(Collectors.groupingBy(a -> a.getSubjectGroup().getId(), LinkedHashMap::new,
+                        Collectors.mapping(this::toTeacherResponse, Collectors.toList())));
+
+        List<SubjectSubgroup> subgroups = subjectSubgroupRepository.findBySubjectGroupIdIn(groupIds);
+        Map<Long, List<SubjectSubgroup>> subgroupsByGroup = subgroups.stream()
+                .collect(Collectors.groupingBy(sg -> sg.getSubjectGroup().getId(), LinkedHashMap::new,
+                        Collectors.toList()));
+
+        List<Long> subgroupIds = subgroups.stream().map(SubjectSubgroup::getId).toList();
+        Map<Long, List<AssignedTeacherResponse>> assistantsBySubgroup = subgroupIds.isEmpty()
+                ? Map.of()
+                : subjectSubgroupTeacherRepository.findBySubjectSubgroupIdIn(subgroupIds).stream()
+                        .collect(Collectors.groupingBy(a -> a.getSubjectSubgroup().getId(), LinkedHashMap::new,
+                                Collectors.mapping(this::toTeacherResponse, Collectors.toList())));
+
+        return groups.stream()
+                .map(group -> SubjectGroupResponse.builder()
+                        .id(group.getId())
+                        .subjectId(group.getSubject().getId())
+                        .name(group.getName())
+                        .capacity(group.getCapacity())
+                        .schedule(group.getSchedule())
+                        .departmentGroupId(group.getDepartmentGroup() != null ? group.getDepartmentGroup().getId() : null)
+                        .departmentGroupName(group.getDepartmentGroup() != null ? group.getDepartmentGroup().getName() : null)
+                        .teachers(teachersByGroup.getOrDefault(group.getId(), List.of()))
+                        .subgroups(subgroupsByGroup.getOrDefault(group.getId(), List.of()).stream()
+                                .map(sg -> SubjectSubgroupResponse.builder()
+                                        .id(sg.getId())
+                                        .subjectGroupId(sg.getSubjectGroup().getId())
+                                        .name(sg.getName())
+                                        .capacity(sg.getCapacity())
+                                        .schedule(sg.getSchedule())
+                                        .assistants(assistantsBySubgroup.getOrDefault(sg.getId(), List.of()))
+                                        .build())
+                                .toList())
+                        .build())
                 .toList();
     }
 

@@ -30,8 +30,7 @@ public class QuizService {
     private final QuizQuestionHelper questionHelper;
 
     public List<QuizResponse> getAll() {
-        return quizRepository.findByStatus(QuizStatus.ACTIVE).stream()
-                .map(this::toQuizResponse).toList();
+        return toQuizResponses(quizRepository.findByStatus(QuizStatus.ACTIVE));
     }
 
     public QuizResponse getById(Long id) {
@@ -44,8 +43,26 @@ public class QuizService {
     }
 
     public List<QuizResponse> getByLessonId(Long lessonId) {
-        return quizRepository.findByLessonIdAndStatus(lessonId, QuizStatus.ACTIVE).stream()
-                .map(this::toQuizResponse).toList();
+        return toQuizResponses(quizRepository.findByLessonIdAndStatus(lessonId, QuizStatus.ACTIVE));
+    }
+
+    /** Batches question-count + total-points across the whole list: one grouped query instead of two per quiz. */
+    private List<QuizResponse> toQuizResponses(List<Quiz> quizzes) {
+        if (quizzes.isEmpty()) {
+            return List.of();
+        }
+        List<Long> quizIds = quizzes.stream().map(Quiz::getId).toList();
+        Map<Long, QuizQuestionRepository.QuizQuestionStats> statsByQuiz = questionRepository
+                .countAndSumPointsByQuizIdIn(quizIds).stream()
+                .collect(Collectors.toMap(QuizQuestionRepository.QuizQuestionStats::getQuizId, s -> s));
+        return quizzes.stream()
+                .map(quiz -> {
+                    QuizQuestionRepository.QuizQuestionStats stats = statsByQuiz.get(quiz.getId());
+                    long questionCount = stats != null ? stats.getQuestionCount() : 0;
+                    int totalPikete = stats != null ? (int) stats.getTotalPoints() : 0;
+                    return buildQuizResponse(quiz, questionCount, totalPikete);
+                })
+                .toList();
     }
 
     public QuizAttemptStudentResponse getMyAttemptForQuiz(Long quizId) {
@@ -407,8 +424,14 @@ public class QuizService {
                 .orElseThrow(() -> new ResourceNotFoundException("Perdoruesi nuk u gjet."));
     }
 
+    /** Single-quiz path (create/update/getById) — one row, so a couple of per-row queries are fine here. */
     public QuizResponse toQuizResponse(Quiz quiz) {
         long questionCount = questionRepository.countByQuizId(quiz.getId());
+        int totalPikete = questionHelper.calculateTotalPoints(quiz.getId());
+        return buildQuizResponse(quiz, questionCount, totalPikete);
+    }
+
+    private QuizResponse buildQuizResponse(Quiz quiz, long questionCount, int totalPikete) {
         return QuizResponse.builder()
                 .id(quiz.getId())
                 .titulli(quiz.getTitulli())
@@ -423,7 +446,7 @@ public class QuizService {
                 .closedAt(quiz.getClosedAt())
                 .subjectId(getSubjectIdFromQuiz(quiz))
                 .questionCount((int) questionCount)
-                .totalPikete(questionHelper.calculateTotalPoints(quiz.getId()))
+                .totalPikete(totalPikete)
                 .build();
     }
 

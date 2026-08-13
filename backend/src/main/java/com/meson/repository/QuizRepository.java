@@ -2,6 +2,7 @@ package com.meson.repository;
 
 import com.meson.entity.Quiz;
 import com.meson.entity.QuizStatus;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.List;
@@ -11,7 +12,10 @@ import java.util.Optional;
 public interface QuizRepository extends JpaRepository<Quiz, Long> {
     List<Quiz> findByLessonId(Long lessonId);
 
+    @EntityGraph(attributePaths = {"lesson", "lesson.module", "lesson.module.subject"})
     List<Quiz> findByStatus(QuizStatus status);
+
+    @EntityGraph(attributePaths = {"lesson", "lesson.module", "lesson.module.subject"})
     List<Quiz> findByLessonIdAndStatus(Long lessonId, QuizStatus status);
 
     boolean existsByTitulliAndLessonId(String titulli, Long lessonId);
