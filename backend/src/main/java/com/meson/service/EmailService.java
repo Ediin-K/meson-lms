@@ -1,5 +1,6 @@
 package com.meson.service;
 
+import com.meson.entity.Subject;
 import com.meson.entity.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
@@ -37,6 +38,44 @@ public class EmailService {
                         + "Email: " + user.getEmail() + "\n"
                         + "Fjalëkalimi i përkohshëm: " + tempPassword + "\n\n"
                         + "Ju lutem kyçuni dhe ndryshoni fjalëkalimin sa më shpejt."
+        );
+
+        mailSender.send(message);
+    }
+
+    /** No-ops when mail.enabled=false. Fired when a grade is first posted for a student. */
+    public void sendGradePostedEmail(User student, Subject subject, int grade) {
+        if (!mailEnabled) {
+            return;
+        }
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromAddress);
+        message.setTo(student.getEmail());
+        message.setSubject("Nota juaj u vendos: " + subject.getTitulli());
+        message.setText(
+                "Përshëndetje " + student.getEmri() + " " + student.getMbiemri() + ",\n\n"
+                        + "Nota juaj për lëndën \"" + subject.getTitulli() + "\" u vendos: " + grade + ".\n\n"
+                        + "Kyçuni në Meson LMS për të parë detajet e plota."
+        );
+
+        mailSender.send(message);
+    }
+
+    /** No-ops when mail.enabled=false. Fired when a student's enrollment in a subject is created. */
+    public void sendEnrollmentConfirmedEmail(User student, Subject subject) {
+        if (!mailEnabled) {
+            return;
+        }
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromAddress);
+        message.setTo(student.getEmail());
+        message.setSubject("Regjistrimi u konfirmua: " + subject.getTitulli());
+        message.setText(
+                "Përshëndetje " + student.getEmri() + " " + student.getMbiemri() + ",\n\n"
+                        + "Regjistrimi juaj në lëndën \"" + subject.getTitulli() + "\" u konfirmua.\n\n"
+                        + "Kyçuni në Meson LMS për të parë detajet e plota."
         );
 
         mailSender.send(message);

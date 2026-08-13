@@ -18,6 +18,7 @@ import com.meson.repository.GradeAuditLogRepository;
 import com.meson.repository.GradeRepository;
 import com.meson.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
@@ -30,6 +31,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class GradeService {
@@ -38,6 +40,7 @@ public class GradeService {
     private final UserRepository userRepository;
     private final SubjectRepository subjectRepository;
     private final EnrollmentRepository enrollmentRepository;
+    private final EmailService emailService;
     private final GradeAuditLogRepository gradeAuditLogRepository;
 
     @Transactional(readOnly = true)
@@ -96,6 +99,7 @@ public class GradeService {
 
         grade = gradeRepository.save(grade);
         logAudit(grade, GradeAuditAction.CREATED, null, grade.getGrade());
+        notifyGradePosted(grade);
         return toResponse(grade);
     }
 
@@ -154,6 +158,15 @@ public class GradeService {
                     .map(this::toAuditResponse);
         }
         throw new AccessDeniedException("Nuk keni qasje ne historikun e notave");
+    }
+
+    /** Best-effort: a notification failure must never undo a grade that was already posted. */
+    private void notifyGradePosted(Grade grade) {
+        try {
+            emailService.sendGradePostedEmail(grade.getStudent(), grade.getSubject(), grade.getGrade());
+        } catch (RuntimeException e) {
+            log.warn("Failed to send grade-posted email for grade {}: {}", grade.getId(), e.getMessage());
+        }
     }
 
     private void logAudit(Grade grade, GradeAuditAction action, Integer previousGrade, Integer newGrade) {
