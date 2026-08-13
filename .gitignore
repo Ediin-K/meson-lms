@@ -19,3 +19,7 @@ frontend/dist/
 # Claude Code tooling — not part of the app, shouldn't live in this repo
 .agents/
 .claude/skills/
+
+# AI planning/roadmap/checklist docs — not part of the app, shouldn't live in this repo
+*.md
+!README.md
