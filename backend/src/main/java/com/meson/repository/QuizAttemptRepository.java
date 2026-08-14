@@ -19,7 +19,11 @@ public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, Long> 
 
     List<QuizAttempt> findByQuizIdAndUserId(Long quizId, Long userId);
     Optional<QuizAttempt> findFirstByQuizIdAndUserId(Long quizId, Long userId);
+
+    @EntityGraph(attributePaths = {"quiz", "user"})
     List<QuizAttempt> findByQuizIdOrderBySubmittedAtDesc(Long quizId);
+
+    @EntityGraph(attributePaths = {"quiz", "user"})
     List<QuizAttempt> findByQuizIdOrderByStartedAtDesc(Long quizId);
 
     @Query("SELECT COUNT(a) FROM QuizAttempt a WHERE a.quiz.id = :quizId AND a.submitted = true")

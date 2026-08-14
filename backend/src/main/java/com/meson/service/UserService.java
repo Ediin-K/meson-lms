@@ -30,8 +30,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.time.LocalDateTime;
 
 @Service
@@ -98,16 +101,52 @@ public class UserService {
 
     public org.springframework.data.domain.Page<UserDTO> getPage(String search, String role, String status,
             org.springframework.data.domain.Pageable pageable) {
-        return userRepository.searchPage(search == null ? "" : search.trim(),
-                        role == null || role.isBlank() ? "" : normalizeRoleForDB(role.trim().toLowerCase()),
-                        status == null ? "" : status.trim(), pageable)
-                .map(this::toDto);
+        org.springframework.data.domain.Page<User> page = userRepository.searchPage(
+                search == null ? "" : search.trim(),
+                role == null || role.isBlank() ? "" : normalizeRoleForDB(role.trim().toLowerCase()),
+                status == null ? "" : status.trim(), pageable);
+
+        List<User> users = page.getContent();
+        Map<Long, String> roleByUserId = batchPrimaryRoles(users);
+        Map<Long, StudentProfile> profileByUserId = batchStudentProfiles(users);
+        return page.map(user -> toDto(user, roleByUserId.get(user.getId()), profileByUserId.get(user.getId())));
     }
 
     public List<UserDTO> getAll() {
-        return userRepository.findAllWithRoles().stream()
-                .map(this::toDto)
+        List<User> users = userRepository.findAllWithRoles();
+        Map<Long, StudentProfile> profileByUserId = batchStudentProfiles(users);
+        return users.stream()
+                .map(user -> toDto(user, resolvePrimaryRoleFromLoadedRoles(user), profileByUserId.get(user.getId())))
                 .toList();
+    }
+
+    /** One query for every listed user's role, instead of a lazy per-row load. */
+    private Map<Long, String> batchPrimaryRoles(List<User> users) {
+        if (users.isEmpty()) {
+            return Map.of();
+        }
+        List<Long> userIds = users.stream().map(User::getId).toList();
+        Map<Long, String> roleByUserId = new HashMap<>();
+        userRoleRepository.findByUserIdIn(userIds).forEach(ur ->
+                roleByUserId.putIfAbsent(ur.getUserId(), normalizeRoleForFrontend(ur.getRoleName())));
+        return roleByUserId;
+    }
+
+    /** One query for every listed user's student profile, instead of one per user. */
+    private Map<Long, StudentProfile> batchStudentProfiles(List<User> users) {
+        if (users.isEmpty()) {
+            return Map.of();
+        }
+        List<Long> userIds = users.stream().map(User::getId).toList();
+        return studentProfileRepository.findByUserIdIn(userIds).stream()
+                .collect(Collectors.toMap(sp -> sp.getUser().getId(), sp -> sp));
+    }
+
+    private String resolvePrimaryRoleFromLoadedRoles(User user) {
+        return user.getUserRoles().stream()
+                .findFirst()
+                .map(userRole -> normalizeRoleForFrontend(userRole.getRole().getEmertimi()))
+                .orElse("unknown");
     }
 
     public User getById(Long id) {
@@ -228,21 +267,14 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
-    private UserDTO toDto(User user) {
-        String role = user.getUserRoles().stream()
-                .findFirst()
-                .map(userRole -> normalizeRoleForFrontend(userRole.getRole().getEmertimi()))
-                .orElse("unknown");
-
-        var profile = studentProfileRepository.findByUserId(user.getId()).orElse(null);
-
+    private UserDTO toDto(User user, String role, StudentProfile profile) {
         return new UserDTO(
                 user.getId(),
                 user.getEmri(),
                 user.getMbiemri(),
                 user.getEmail(),
                 user.getStatusi(),
-                role,
+                role != null ? role : "unknown",
                 profile != null && profile.getDepartment() != null ? profile.getDepartment().getId() : null,
                 profile != null && profile.getDepartment() != null ? profile.getDepartment().getEmertimi() : null,
                 profile != null ? profile.getCurrentSemester() : null,

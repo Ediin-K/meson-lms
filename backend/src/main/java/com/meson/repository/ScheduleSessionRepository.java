@@ -30,6 +30,21 @@ public interface ScheduleSessionRepository extends JpaRepository<ScheduleSession
             @Param("departmentGroupId") Long departmentGroupId,
             @Param("semester") Integer semester);
 
+    /** Same as findByDepartmentGroupIdAndSemester, batched across many department groups at once. */
+    @Query("""
+            SELECT DISTINCT s FROM ScheduleSession s
+            JOIN FETCH s.subject c
+            JOIN FETCH s.teacher
+            LEFT JOIN FETCH s.subjectGroup cg
+            LEFT JOIN FETCH s.subjectSubgroup
+            WHERE cg.departmentGroup.id IN :departmentGroupIds
+              AND c.semester = :semester
+              AND s.status = 'ACTIVE'
+            """)
+    List<ScheduleSession> findByDepartmentGroupIdInAndSemester(
+            @Param("departmentGroupIds") List<Long> departmentGroupIds,
+            @Param("semester") Integer semester);
+
     @Query("""
             SELECT DISTINCT s FROM ScheduleSession s
             JOIN FETCH s.subject c

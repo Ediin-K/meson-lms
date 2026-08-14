@@ -10,6 +10,7 @@ import java.util.Optional;
 
 @Repository
 public interface QuizRepository extends JpaRepository<Quiz, Long> {
+    @EntityGraph(attributePaths = {"lesson", "lesson.module", "lesson.module.subject"})
     List<Quiz> findByLessonId(Long lessonId);
 
     @EntityGraph(attributePaths = {"lesson", "lesson.module", "lesson.module.subject"})

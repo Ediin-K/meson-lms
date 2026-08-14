@@ -10,7 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -282,10 +284,30 @@ public class StudentGroupRequestService {
 
         boolean hasPending = status.getPendingRequest() != null;
         List<DepartmentGroup> departmentGroups = resolveDepartmentGroupsForDepartment(departmentId, semester);
+        if (departmentGroups.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> groupIds = departmentGroups.stream().map(DepartmentGroup::getId).toList();
+        Map<Long, DepartmentGroupResponse> groupInfoById = departmentGroupService.toResponses(departmentGroups)
+                .stream()
+                .collect(Collectors.toMap(DepartmentGroupResponse::getId, r -> r));
+        Map<Long, List<ScheduleSession>> sessionsByGroup = scheduleSessionRepository
+                .findByDepartmentGroupIdInAndSemester(groupIds, semester)
+                .stream()
+                .collect(Collectors.groupingBy(s -> s.getSubjectGroup().getDepartmentGroup().getId()));
+        Map<Long, List<ScheduleSessionResponse>> schedulesByGroup = new java.util.HashMap<>();
+        sessionsByGroup.forEach((groupId, sessions) -> schedulesByGroup.put(groupId, sessions.stream()
+                .map(scheduleSessionService::toResponse)
+                .filter(java.util.Objects::nonNull)
+                .toList()));
 
         List<AvailableDepartmentGroupResponse> result = new ArrayList<>();
         for (DepartmentGroup group : departmentGroups) {
-            result.add(buildAvailableGroupEntry(group, semester, false, hasPending));
+            result.add(buildAvailableGroupEntry(
+                    groupInfoById.get(group.getId()),
+                    schedulesByGroup.getOrDefault(group.getId(), List.of()),
+                    false, hasPending));
         }
         return result;
     }
@@ -305,15 +327,8 @@ public class StudentGroupRequestService {
     }
 
     private AvailableDepartmentGroupResponse buildAvailableGroupEntry(
-            DepartmentGroup group, Integer semester, boolean hasApproved, boolean hasPending) {
-        DepartmentGroupResponse groupInfo = departmentGroupService.toResponse(group);
-        List<ScheduleSessionResponse> schedules = scheduleSessionRepository
-                .findByDepartmentGroupIdAndSemester(group.getId(), semester)
-                .stream()
-                .map(scheduleSessionService::toResponse)
-                .filter(java.util.Objects::nonNull)
-                .toList();
-
+            DepartmentGroupResponse groupInfo, List<ScheduleSessionResponse> schedules,
+            boolean hasApproved, boolean hasPending) {
         String blockedReason = null;
         boolean canApply = true;
 

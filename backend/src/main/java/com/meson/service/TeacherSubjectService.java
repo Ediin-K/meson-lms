@@ -12,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,8 +28,23 @@ public class TeacherSubjectService {
 
     public List<SubjectResponse> getOwnSubjects() {
         User teacher = getCurrentUser();
-        return subjectRepository.findByTeacherId(teacher.getId()).stream()
-                .map(this::toResponse)
+        List<Subject> subjects = subjectRepository.findByTeacherId(teacher.getId());
+        if (subjects.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> subjectIds = subjects.stream().map(Subject::getId).toList();
+        Map<Long, Long> moduleCounts = moduleRepository.countBySubjectIdIn(subjectIds).stream()
+                .collect(Collectors.toMap(ModuleRepository.SubjectModuleCount::getSubjectId,
+                        ModuleRepository.SubjectModuleCount::getModuleCount));
+        Map<Long, Long> enrollmentCounts = enrollmentRepository.countBySubjectIdIn(subjectIds).stream()
+                .collect(Collectors.toMap(EnrollmentRepository.SubjectEnrollmentCount::getSubjectId,
+                        EnrollmentRepository.SubjectEnrollmentCount::getEnrollmentCount));
+
+        return subjects.stream()
+                .map(subject -> toResponse(subject,
+                        moduleCounts.getOrDefault(subject.getId(), 0L),
+                        enrollmentCounts.getOrDefault(subject.getId(), 0L)))
                 .collect(Collectors.toList());
     }
 
@@ -70,7 +86,14 @@ public class TeacherSubjectService {
                 .orElseThrow(() -> new RuntimeException("Përdoruesi nuk u gjet."));
     }
 
+    /** Single-subject path (getOwnSubjectById/update) — one row, so per-row counts are fine here. */
     private SubjectResponse toResponse(Subject subject) {
+        return toResponse(subject,
+                moduleRepository.countBySubjectId(subject.getId()),
+                enrollmentRepository.countBySubjectId(subject.getId()));
+    }
+
+    private SubjectResponse toResponse(Subject subject, long moduleCount, long studentCount) {
         return SubjectResponse.builder()
                 .id(subject.getId())
                 .titulli(subject.getTitulli())
@@ -83,8 +106,8 @@ public class TeacherSubjectService {
                 .ects(subject.getEcts())
                 .niveli(subject.getNiveli())
                 .statusi(subject.getStatusi())
-                .moduleCount((int) moduleRepository.countBySubjectId(subject.getId()))
-                .studentCount((int) enrollmentRepository.countBySubjectId(subject.getId()))
+                .moduleCount((int) moduleCount)
+                .studentCount((int) studentCount)
                 .createdAt(subject.getCreatedAt())
                 .build();
     }

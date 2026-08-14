@@ -47,7 +47,7 @@ public class QuizService {
     }
 
     /** Batches question-count + total-points across the whole list: one grouped query instead of two per quiz. */
-    private List<QuizResponse> toQuizResponses(List<Quiz> quizzes) {
+    public List<QuizResponse> toQuizResponses(List<Quiz> quizzes) {
         if (quizzes.isEmpty()) {
             return List.of();
         }
