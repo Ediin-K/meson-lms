@@ -155,13 +155,8 @@ public class DepartmentGroupWizardService {
             savedSessions.add(scheduleSessionRepository.save(session));
         }
 
-        List<SubjectGroupResponse> subjectGroupResponses = new ArrayList<>();
-        for (SubjectGroup cg : subjectGroupBySubjectId.values()) {
-            subjectGroupResponses.add(subjectGroupService.getBySubject(cg.getSubject().getId()).stream()
-                    .filter(g -> Objects.equals(g.getId(), cg.getId()))
-                    .findFirst()
-                    .orElseThrow(() -> new ResourceNotFoundException("Grupi i Lëndat nuk u gjet")));
-        }
+        List<SubjectGroupResponse> subjectGroupResponses = subjectGroupService.getByIds(
+                subjectGroupBySubjectId.values().stream().map(SubjectGroup::getId).toList());
 
         return DepartmentGroupWizardResponse.builder()
                 .group(departmentGroupService.toResponse(departmentGroup))
@@ -183,15 +178,10 @@ public class DepartmentGroupWizardService {
                 .filter(Objects::nonNull)
                 .toList();
 
-        List<SubjectGroupResponse> subjectGroups = subjectGroupRepository
-                .findByDepartmentGroupId(group.getId())
-                .stream()
-                .map(cg -> subjectGroupService.getBySubject(cg.getSubject().getId()).stream()
-                        .filter(g -> Objects.equals(g.getId(), cg.getId()))
-                        .findFirst()
-                        .orElse(null))
-                .filter(Objects::nonNull)
-                .toList();
+        List<SubjectGroupResponse> subjectGroups = subjectGroupService.getByIds(
+                subjectGroupRepository.findByDepartmentGroupId(group.getId()).stream()
+                        .map(SubjectGroup::getId)
+                        .toList());
 
         return DepartmentGroupWizardResponse.builder()
                 .group(departmentGroupService.toResponse(group))

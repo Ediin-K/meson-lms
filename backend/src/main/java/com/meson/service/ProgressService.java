@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -78,10 +79,20 @@ public class ProgressService {
                 .orElseThrow(() -> new ResourceNotFoundException("Lënda nuk u gjet."));
 
         List<Module> modules = moduleRepository.findBySubjectIdOrderByRradhitjaAsc(subjectId);
+        List<Long> moduleIds = modules.stream().map(Module::getId).toList();
+
+        Map<Long, Long> totalByModule = moduleIds.isEmpty() ? Map.of()
+                : lessonRepository.countByModuleIdIn(moduleIds).stream()
+                        .collect(Collectors.toMap(LessonRepository.ModuleLessonCount::getModuleId,
+                                LessonRepository.ModuleLessonCount::getLessonCount));
+        Map<Long, Long> viewedByModule = moduleIds.isEmpty() ? Map.of()
+                : progressRepository.countViewedLessonsByModuleIn(studentId, moduleIds).stream()
+                        .collect(Collectors.toMap(LessonProgressRepository.ModuleViewedCount::getModuleId,
+                                LessonProgressRepository.ModuleViewedCount::getViewedCount));
 
         List<ModuleProgressResponse> moduleProgress = modules.stream().map(module -> {
-            int total  = (int) lessonRepository.countByModuleId(module.getId());
-            int viewed = (int) progressRepository.countViewedLessonsByModule(studentId, module.getId());
+            int total  = totalByModule.getOrDefault(module.getId(), 0L).intValue();
+            int viewed = viewedByModule.getOrDefault(module.getId(), 0L).intValue();
             double pct = total > 0 ? Math.round(viewed * 100.0 / total) : 0;
             return ModuleProgressResponse.builder()
                     .moduleId(module.getId())

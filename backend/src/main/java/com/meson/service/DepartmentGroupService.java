@@ -14,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +30,22 @@ public class DepartmentGroupService {
         List<DepartmentGroup> groups = semester != null
                 ? departmentGroupRepository.findByDepartmentIdAndSemesterWithDepartment(departmentId, semester)
                 : departmentGroupRepository.findByDepartmentIdWithDepartment(departmentId);
-        return groups.stream().map(this::toResponse).toList();
+        return toResponses(groups);
+    }
+
+    /** Same as toResponse, batched: one query for every group's approved-student count. */
+    public List<DepartmentGroupResponse> toResponses(List<DepartmentGroup> groups) {
+        if (groups.isEmpty()) {
+            return List.of();
+        }
+        List<Long> groupIds = groups.stream().map(DepartmentGroup::getId).toList();
+        Map<Long, Long> currentStudentsByGroup = studentProfileRepository
+                .countByApprovedDepartmentGroupIdIn(groupIds).stream()
+                .collect(Collectors.toMap(StudentProfileRepository.DepartmentGroupStudentCount::getGroupId,
+                        StudentProfileRepository.DepartmentGroupStudentCount::getStudentCount));
+        return groups.stream()
+                .map(group -> toResponse(group, currentStudentsByGroup.getOrDefault(group.getId(), 0L).intValue()))
+                .toList();
     }
 
     @Transactional
@@ -125,7 +142,10 @@ public class DepartmentGroupService {
         if (group == null) {
             return null;
         }
-        int current = getCurrentStudents(group.getId());
+        return toResponse(group, getCurrentStudents(group.getId()));
+    }
+
+    private DepartmentGroupResponse toResponse(DepartmentGroup group, int current) {
         int max = group.getMaxCapacity() != null ? group.getMaxCapacity() : 0;
         int remaining = Math.max(0, max - current);
         boolean isFull = max > 0 && current >= max;

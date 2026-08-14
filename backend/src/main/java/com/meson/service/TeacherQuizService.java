@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,9 +33,7 @@ public class TeacherQuizService {
         User teacher = getCurrentUser();
         lessonRepository.findByIdAndModuleSubjectTeacherId(lessonId, teacher.getId())
                 .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses ne kete leksion."));
-        return quizRepository.findByLessonId(lessonId).stream()
-                .map(quizService::toQuizResponse)
-                .collect(Collectors.toList());
+        return quizService.toQuizResponses(quizRepository.findByLessonId(lessonId));
     }
 
     @Transactional
@@ -159,9 +158,21 @@ public class TeacherQuizService {
         quizRepository.findByIdAndLessonModuleSubjectTeacherId(quizId, teacher.getId())
                 .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses ne kete kuiz."));
 
-        return questionRepository.findByQuizIdOrderByRradhitjaAsc(quizId).stream()
-                .map(this::toQuestionResponseWithOptions)
+        List<QuizQuestion> questions = questionRepository.findByQuizIdOrderByRradhitjaAsc(quizId);
+        Map<Long, List<QuizAnswer>> answersByQuestion = batchAnswersByQuestion(questions);
+        return questions.stream()
+                .map(q -> toQuestionResponseWithOptions(q, answersByQuestion.getOrDefault(q.getId(), List.of())))
                 .collect(Collectors.toList());
+    }
+
+    /** One query for every question's answer options, instead of one per question. */
+    private Map<Long, List<QuizAnswer>> batchAnswersByQuestion(List<QuizQuestion> questions) {
+        if (questions.isEmpty()) {
+            return Map.of();
+        }
+        List<Long> questionIds = questions.stream().map(QuizQuestion::getId).toList();
+        return answerRepository.findByQuestionIdIn(questionIds).stream()
+                .collect(Collectors.groupingBy(a -> a.getQuestion().getId()));
     }
 
     public QuizQuestionResponse createQuestion(QuizQuestionRequest request) {
@@ -208,7 +219,7 @@ public class TeacherQuizService {
                 .orElseThrow(() -> new ResourceNotFoundException("Perdoruesi nuk u gjet."));
     }
 
-    private QuizQuestionResponse toQuestionResponseWithOptions(QuizQuestion question) {
+    private QuizQuestionResponse toQuestionResponseWithOptions(QuizQuestion question, List<QuizAnswer> answers) {
         return QuizQuestionResponse.builder()
                 .id(question.getId())
                 .pyetja(question.getPyetja())
@@ -216,7 +227,7 @@ public class TeacherQuizService {
                 .rradhitja(question.getRradhitja())
                 .pikete(question.getPikete())
                 .quizId(question.getQuiz().getId())
-                .options(answerRepository.findByQuestionId(question.getId()).stream()
+                .options(answers.stream()
                         .map(this::toAnswerResponse)
                         .collect(Collectors.toList()))
                 .build();

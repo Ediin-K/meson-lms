@@ -4,6 +4,7 @@ import com.meson.dto.LessonRequest;
 import com.meson.dto.LessonResponse;
 import com.meson.dto.LessonResourceResponse;
 import com.meson.entity.Lesson;
+import com.meson.entity.LessonResource;
 import com.meson.entity.Module;
 import com.meson.entity.User;
 import com.meson.repository.LessonRepository;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,9 +38,21 @@ public class TeacherLessonService {
         moduleRepository.findByIdAndSubjectTeacherId(moduleId, teacher.getId())
                 .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses në këtë modul ose moduli nuk ekziston."));
 
-        return lessonRepository.findByModuleIdOrderByRradhitjaAsc(moduleId).stream()
-                .map(this::toResponse)
+        List<Lesson> lessons = lessonRepository.findByModuleIdOrderByRradhitjaAsc(moduleId);
+        Map<Long, List<LessonResource>> resourcesByLesson = batchResourcesByLesson(lessons);
+        return lessons.stream()
+                .map(lesson -> toResponse(lesson, resourcesByLesson.getOrDefault(lesson.getId(), List.of())))
                 .collect(Collectors.toList());
+    }
+
+    /** One query for every lesson's resources, instead of one per lesson. */
+    private Map<Long, List<LessonResource>> batchResourcesByLesson(List<Lesson> lessons) {
+        if (lessons.isEmpty()) {
+            return Map.of();
+        }
+        List<Long> lessonIds = lessons.stream().map(Lesson::getId).toList();
+        return lessonResourceRepository.findByLessonIdIn(lessonIds).stream()
+                .collect(Collectors.groupingBy(r -> r.getLesson().getId()));
     }
 
     public LessonResponse createLesson(LessonRequest request) {
@@ -96,6 +110,10 @@ public class TeacherLessonService {
     }
 
     private LessonResponse toResponse(Lesson lesson) {
+        return toResponse(lesson, lessonResourceRepository.findByLessonId(lesson.getId()));
+    }
+
+    private LessonResponse toResponse(Lesson lesson, List<LessonResource> resources) {
         return LessonResponse.builder()
                 .id(lesson.getId())
                 .titulli(lesson.getTitulli())
@@ -107,7 +125,7 @@ public class TeacherLessonService {
                 .moduleId(lesson.getModule().getId())
                 .moduleTitulli(lesson.getModule().getTitulli())
                 .createdAt(lesson.getCreatedAt())
-                .resources(lessonResourceRepository.findByLessonId(lesson.getId()).stream()
+                .resources(resources.stream()
                         .map(lessonResourceMapper::toResponse)
                         .collect(Collectors.toList()))
                 .build();

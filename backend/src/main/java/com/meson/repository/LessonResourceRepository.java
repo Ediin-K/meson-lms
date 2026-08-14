@@ -11,6 +11,7 @@ import java.util.Optional;
 @Repository
 public interface LessonResourceRepository extends JpaRepository<LessonResource, Long> {
     List<LessonResource> findByLessonId(Long lessonId);
+    List<LessonResource> findByLessonIdIn(List<Long> lessonIds);
 
     @Query("""
             SELECT r FROM LessonResource r
