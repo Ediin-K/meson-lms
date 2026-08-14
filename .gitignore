@@ -23,3 +23,9 @@ frontend/dist/
 # AI planning/roadmap/checklist docs — not part of the app, shouldn't live in this repo
 *.md
 !README.md
+!docs/**/*.md
+
+# DB dumps — contain real data (password hashes, real student/teacher records),
+# must never end up in git history. Scoped to backups/ only — NOT a blanket *.sql,
+# since backend/src/main/resources/db/migration/*.sql is real tracked source code.
+backups/
