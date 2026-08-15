@@ -78,3 +78,39 @@ accident — Ctrl+C during that pause aborts safely, nothing has been touched ye
   real MySQL outside of tests (which run against H2, so this was invisible). Not
   fixed as part of this drill — confirm the correct value and update `.env`
   separately before relying on it.
+
+## Drill performed 2026-08-15 — restore into the real database, verified end to end
+
+The 2026-08-14 drill above only exercised the safe scratch-DB path. This one covers
+the scenario that matters for actual disaster recovery: restoring a dump directly
+into the real, live `meson_lms` database (`./scripts/restore-db.sh <dump>
+meson_lms`), which is the code path that triggers `restore-db.sh`'s
+target-matches-`DB_NAME` warning-and-pause.
+
+Steps:
+
+1. `./scripts/backup-db.sh` against the real `meson_lms` database — produced a fresh
+   dump capturing the exact current state (`backups/meson_lms_20260815_085714.sql`).
+2. Simulated live data loss/corruption: inserted one throwaway row into
+   `refresh_tokens` (valid `user_id` FK, obviously-fake token string, no application
+   code reads by token content) and confirmed it landed (`refresh_tokens` count
+   239 -> 240).
+3. `./scripts/restore-db.sh backups/meson_lms_20260815_085714.sql meson_lms` — hit the
+   warning-and-pause path for the first time (previous drill's target was always the
+   scratch DB), then proceeded automatically after the 3-second pause and restored
+   successfully.
+4. Verified the restore actually overwrote live data rather than being a no-op: the
+   marker row was gone and `refresh_tokens` count was back to 239. Cross-checked all
+   35 tables' row counts post-restore — none zeroed out or looked corrupted.
+
+Because the dump was taken immediately before the marker insert, restoring it left
+the database in exactly its pre-drill state — this exercises the real restore-into-
+live-DB mechanics (including the warning/pause path) with no net data loss risk.
+
+**Table count is 35 here vs. 34 in the 2026-08-14 entry** — expected drift from
+schema changes made between the two drills (e.g. `grade_audit_logs`), not a
+discrepancy to chase.
+
+The full disaster-recovery scenario (backup real data, real data changes/is lost,
+restore from backup, verify recovery) is now proven end to end against the actual
+configured database, not just a scratch copy.
