@@ -1,6 +1,11 @@
 # Meson LMS
 
-Meson LMS is a full-stack Learning Management System built with Spring Boot, React, and MySQL. The system supports role-based access for administrators, teachers, and students, including course management, modules, lessons, file resources, assignments, schedules, student groups, certificates, and a complete quiz workflow.
+Meson LMS is a full-stack Learning Management System and SMIS (Student Management
+Information System) built with Spring Boot, React, and MySQL. It supports
+role-based access for administrators, teachers, and students, covering everything
+from course content (subjects, modules, lessons, file resources, assignments,
+quizzes) to real university operations (bulk enrollment, academic terms, transcripts
+and GPA, grade audit trails, and exam registration).
 
 ## Technologies
 
@@ -12,6 +17,7 @@ Meson LMS is a full-stack Learning Management System built with Spring Boot, Rea
 - JWT authentication
 - Spring Data JPA
 - Flyway database migrations
+- Spring Mail (transactional email)
 - MySQL
 - Swagger/OpenAPI with Springdoc
 
@@ -31,21 +37,29 @@ Meson LMS is a full-stack Learning Management System built with Spring Boot, Rea
 
 ## Main Features
 
-- Authentication with JWT and refresh tokens
-- Role-based authorization for `ADMIN`, `TEACHER`, and `STUDENT`
-- Admin dashboard
-- Teacher dashboard
-- Student dashboard
-- Course CRUD
-- Category CRUD
-- Module CRUD
-- Lesson CRUD
-- File upload, preview, and download for lesson resources
+- JWT authentication via httpOnly cookies, with refresh tokens
+- Role-based authorization (Admin, Teacher, Student, Assistant)
+- Per-account login lockout (7 failed attempts locks for 15 minutes, auto-expires)
+  and IP-based login rate limiting
+- Admin, teacher, and student dashboards
+- Subject and Department management (CRUD)
+- Module and lesson management, with file upload/preview/download for lesson
+  resources
 - Assignment creation, submission, and grading
-- Quiz creation, publishing, timed attempts, automatic backend scoring, and teacher results dashboard
-- Schedule and student group management
+- Quiz creation, publishing, timed attempts, automatic backend scoring, and a
+  teacher results dashboard
+- Subject groups/subgroups and schedule management
+- Bulk user import via CSV, with per-row partial success, temp passwords, and
+  optional email delivery
+- Academic terms that gate enrollment and exam-registration windows
+- SMIS exam registration
+- Transcripts with ECTS-weighted GPA, grouped by semester, printable/exportable;
+  admins can view any student's transcript
+- Grade audit trail (who changed a grade, when, and the before/after value),
+  viewable per-grade by teachers and globally by admins
+- Email notifications for grade posting and enrollment confirmation (best-effort,
+  opt-in via `MAIL_ENABLED`)
 - Certificate management
-- Notifications and profile pages
 - Cookie/privacy consent UI
 
 ## Project Structure
@@ -94,8 +108,24 @@ DB_NAME=meson_lms
 DB_USER=root
 DB_PASSWORD=
 JWT_SECRET=base64-secret
-JWT_EXPIRATION=86400000
+JWT_EXPIRATION=900000
+
+CORS_ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+
+RATE_LIMIT_LOGIN_MAX_ATTEMPTS=20
+RATE_LIMIT_LOGIN_WINDOW_MINUTES=15
+
+MAIL_ENABLED=false
+MAIL_FROM=no-reply@meson-lms.com
+MAIL_HOST=smtp.sendgrid.net
+MAIL_PORT=587
+MAIL_USERNAME=apikey
+MAIL_PASSWORD=
 ```
+
+All of the above have working defaults except `JWT_SECRET`, which has no fallback
+outside the dev profile — the app fails fast if it's unset. `MAIL_ENABLED` defaults
+to `false`, so email sending is off until a real provider key is configured.
 
 Frontend reads:
 
@@ -142,6 +172,13 @@ The frontend runs at:
 http://localhost:5173
 ```
 
+## Docker & CI
+
+- `backend/Dockerfile` is a multi-stage build (Maven build stage, then a slim JRE
+  runtime image) producing a deployable backend image.
+- GitHub Actions (`.github/workflows/backend-ci.yml`) runs the backend test suite on
+  every push and pull request to `main`.
+
 ## Swagger / OpenAPI
 
 Swagger UI is enabled for API documentation and testing:
@@ -172,13 +209,13 @@ For protected endpoints:
 | POST | `/api/auth/login` | Login and receive JWT + refresh token |
 | POST | `/api/auth/refresh` | Refresh expired JWT |
 
-### Courses And Lessons
+### Subjects And Lessons
 
 | Method | Endpoint | Description |
 |---|---|---|
-| GET | `/api/courses` | Public course list |
-| GET | `/api/courses/{id}` | Course details |
-| GET | `/api/courses/{courseId}/modules` | Course modules |
+| GET | `/api/subjects` | Public subject list |
+| GET | `/api/subjects/{id}` | Subject details |
+| GET | `/api/subjects/{subjectId}/modules` | Subject modules |
 | GET | `/api/modules/{moduleId}/lessons` | Module lessons |
 | GET | `/api/resources/{id}/download` | Download lesson resource |
 | GET | `/api/resources/{id}/view` | Preview lesson resource |
@@ -187,7 +224,7 @@ For protected endpoints:
 
 | Method | Endpoint | Description |
 |---|---|---|
-| GET | `/api/teacher/courses` | Teacher courses |
+| GET | `/api/teacher/subjects` | Teacher's subjects |
 | POST | `/api/teacher/modules` | Create module |
 | POST | `/api/teacher/lessons` | Create lesson |
 | POST | `/api/teacher/files/upload/lesson/{lessonId}` | Upload lesson file |
@@ -204,49 +241,74 @@ For protected endpoints:
 | POST | `/api/quizzes/{id}/submit` | Student | Submit answers |
 | GET | `/api/teacher/quizzes/{id}/results` | Teacher | View student scores |
 
-Quiz scoring is calculated in the backend. Students do not receive the answer key and do not see their individual score after submission.
+Quiz scoring is calculated in the backend. Students do not receive the answer key and
+do not see their individual score after submission.
+
+### University Operations
+
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/users/bulk-import` | Bulk-create accounts from a CSV upload |
+| GET/POST | `/api/academic-terms` | Manage academic terms (enrollment/exam windows) |
+| GET | `/api/grades/student/{id}` | Student transcript (grades + GPA) |
+| GET | `/api/grades/audit-log` | Global grade audit log (admin) |
+| GET | `/api/grades/{id}/history` | Per-grade audit history |
+| POST | `/api/smis/exam-applications` | Register for an exam |
 
 ## Security
 
-- JWT is used for API authentication.
-- Refresh tokens are supported.
-- Protected frontend routes use role checks.
-- Backend endpoints use Spring Security and `@PreAuthorize` where needed.
+- JWT authentication via httpOnly cookies, with refresh tokens.
+- Protected frontend routes use role checks; backend endpoints use Spring Security
+  and `@PreAuthorize`.
 - Passwords are hashed with BCrypt.
-- CORS is restricted to local frontend development origins.
-- Production deployments should provide `JWT_SECRET` through environment variables and use HTTPS.
+- Per-account login lockout: 7 failed attempts locks the account for 15 minutes,
+  auto-expires, no admin action needed.
+- IP-based login rate limiting, independent of per-account lockout — catches one IP
+  spraying passwords across many accounts, which per-account lockout alone can't.
+- CORS is restricted via `CORS_ALLOWED_ORIGINS` (env-configurable; defaults to local
+  dev origins).
+- `JWT_SECRET` has no insecure fallback outside the dev profile — the app fails fast
+  if it's unset in other profiles.
+- Lesson resource download/view endpoints are intentionally public, to support
+  access to course material from public pages.
+- Production deployments should set a real `JWT_SECRET` via environment variable and
+  serve over HTTPS.
 
 ## Database Design
 
-The main entities include:
+The main entities, grouped by area:
 
-- `users`
-- `roles`
-- `user_roles`
-- `courses`
-- `course_categories`
-- `modules`
-- `lessons`
-- `lesson_resources`
-- `quizzes`
-- `quiz_questions`
-- `quiz_answers`
-- `quiz_attempts`
-- `answer_submissions`
-- `assignments`
-- `assignment_submissions`
-- `enrollments`
-- `certificates`
-- `schedule_sessions`
-- `course_groups`
-- `course_subgroups`
-- `student_group_requests`
+**Identity & access**: `users`, `roles`, `user_roles`, `user_claims`, `user_tokens`,
+`refresh_tokens`
 
-Migrations include indexes and foreign key constraints to preserve relational integrity.
+**Academic structure**: `universities`, `departments`, `subjects`, `modules`,
+`lessons`, `lesson_resources`, `academic_terms`
+
+**Enrollment & groups**: `enrollments`, `department_groups`, `subject_groups`,
+`subject_group_teachers`, `subject_subgroups`, `subject_subgroup_teachers`,
+`student_group_requests`, `student_group_selections`, `student_profiles`,
+`schedule_sessions`
+
+**Coursework**: `assignments`, `assignment_submissions`, `quizzes`,
+`quiz_questions`, `quiz_answers`, `quiz_attempts`, `answer_submissions`,
+`lesson_progress`
+
+**Grades & records**: `grades`, `grade_audit_logs`, `certificates`
+
+Migrations include indexes and foreign key constraints to preserve relational
+integrity.
 
 ## Frontend Optimization
 
-The frontend uses route-level lazy loading with `React.lazy` and `Suspense` in `App.jsx` to reduce the initial JavaScript bundle loaded by the browser.
+The frontend uses route-level lazy loading with `React.lazy` and `Suspense` in
+`App.jsx` to reduce the initial JavaScript bundle loaded by the browser.
+
+## Operations
+
+- `scripts/backup-db.sh` / `scripts/restore-db.sh` — MySQL backup and restore,
+  `.env`-aware. See [`docs/BACKUP_RESTORE.md`](docs/BACKUP_RESTORE.md) for the full
+  runbook, including a walkthrough of a real restore drill against the live
+  database.
 
 ## Testing And Verification
 
@@ -254,7 +316,7 @@ Backend build and tests:
 
 ```bash
 cd backend
-mvn test
+mvn clean test
 ```
 
 Frontend production build:
@@ -263,39 +325,3 @@ Frontend production build:
 cd frontend
 npm run build
 ```
-
-## Git Contribution Evidence
-
-The repository contains commits from multiple contributors. During presentation, each group member should be ready to explain their own commits and code changes.
-
-Useful command:
-
-```bash
-git log --all --pretty=format:"%an <%ae>" | sort -u
-```
-
-## Trello Evidence
-
-Trello is required for task management. The team should prepare:
-
-- Board link or screenshots
-- Lists such as `To Do`, `In Progress`, `Review`, `Done`
-- Cards assigned to group members
-- Labels for backend, frontend, database, testing, and documentation
-
-## Presentation Checklist
-
-- Start MySQL.
-- Start backend with `mvn spring-boot:run`.
-- Start frontend with `npm run dev`.
-- Open Swagger UI.
-- Demonstrate login for each role.
-- Demonstrate dashboards.
-- Demonstrate CRUD flow.
-- Demonstrate teacher quiz creation and publishing.
-- Demonstrate student quiz attempt and auto-submit.
-- Demonstrate teacher results dashboard.
-- Show database migrations and relationships.
-- Show Git commits per group member.
-- Show Trello board.
-- Be ready for live coding changes.
