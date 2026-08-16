@@ -93,8 +93,8 @@ export default function Header() {
       case 'teacher':
         return [
           { label: t('header.navDashboard'), href: '/teacher' },
-          { label: t('home.teacher.manageClasses'), href: '/classes' },
-          { label: t('header.navAssignments'), href: '/assignments' },
+          { label: t('home.teacher.manageClasses'), href: '/teacher/subjects' },
+          { label: t('header.navAssignments'), href: '/teacher/assignments' },
           contactLink,
           libraryLink,
         ]
@@ -326,14 +326,12 @@ export default function Header() {
                 >
                   {[
                     { label: t('header.profile'), href: profileHref },
-                    { label: t('header.accountSettings'), href: null },
                     {
                       label: t('header.grades'),
                       href: role === 'student' ? '/student/grades' : role === 'teacher' ? '/teacher/grades' : null,
                     },
-                    { label: t('header.messages'), href: null },
-                    { label: t('header.help'), href: null },
-                  ].map(({ label, href }) => (
+                    { label: t('header.help'), href: '/contact' },
+                  ].filter(({ href }) => href).map(({ label, href }) => (
                     <button
                       key={label}
                       type="button"

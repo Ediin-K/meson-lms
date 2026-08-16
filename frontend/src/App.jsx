@@ -8,6 +8,9 @@ import ConsentBanner from "./components/cookies/ConsentBanner.jsx";
 
 const Home = lazy(() => import("./pages/Home.jsx"));
 const Login = lazy(() => import("./pages/Login.jsx"));
+const StudentLogin = lazy(() => import("./pages/StudentLogin.jsx"));
+const StaffLogin = lazy(() => import("./pages/StaffLogin.jsx"));
+const AdminLogin = lazy(() => import("./pages/AdminLogin.jsx"));
 const ChangeTemporaryPassword = lazy(() => import("./pages/ChangeTemporaryPassword.jsx"));
 import SessionExpiredDialog from "./components/ui/SessionExpiredDialog.jsx";
 const About = lazy(() => import("./pages/About.jsx"));
@@ -46,7 +49,6 @@ const StudentSmisProfilePage = lazy(() => import("./pages/student/StudentSmisPro
 const ExamRegistrationPage = lazy(() => import("./pages/student/ExamRegistrationPage.jsx"));
 const RegisteredExamsPage = lazy(() => import("./pages/student/RegisteredExamsPage.jsx"));
 const StudentPaymentsPage = lazy(() => import("./pages/student/StudentPaymentsPage.jsx"));
-const AdminGroupApplications = lazy(() => import("./pages/AdminGroupApplications.jsx"));
 const AdminGroups = lazy(() => import("./pages/AdminGroups.jsx"));
 const AdminRoles = lazy(() => import("./pages/AdminRoles.jsx"));
 const AdminUserClaims = lazy(() => import("./pages/AdminUserClaims.jsx"));
@@ -59,12 +61,12 @@ const TeacherModules = lazy(() => import("./pages/teacher/TeacherModules.jsx"));
 const TeacherLessons = lazy(() => import("./pages/teacher/TeacherLessons.jsx"));
 const TeacherQuizzes = lazy(() => import("./pages/teacher/TeacherQuizzes.jsx"));
 const TeacherStudents = lazy(() => import("./pages/teacher/TeacherStudents.jsx"));
+const TeacherAssignments = lazy(() => import("./pages/teacher/TeacherAssignments.jsx"));
 const ProfessorGradesPage = lazy(() => import("./pages/teacher/ProfessorGradesPage.jsx"));
 const ProfessorExamPage = lazy(() => import("./pages/teacher/ProfessorExamPage.jsx"));
 const StudentGradesPage = lazy(() => import("./pages/student/StudentGradesPage.jsx"));
 const StudentTranscriptPage = lazy(() => import("./pages/student/StudentTranscriptPage.jsx"));
 const AdminSmisDashboard = lazy(() => import("./pages/AdminSmisDashboard.jsx"));
-const SmisPortalLogin = lazy(() => import("./pages/SmisPortalLogin.jsx"));
 
 function RootRedirect() {
   const { isAuthenticated, role } = useAppPreferences();
@@ -113,6 +115,9 @@ function AppLayout() {
             <Routes>
               <Route path="/" element={<RootRedirect />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/login/student" element={<StudentLogin />} />
+              <Route path="/login/staff" element={<StaffLogin />} />
+              <Route path="/login/admin" element={<AdminLogin />} />
               <Route path="/change-password" element={<ChangeTemporaryPassword />} />
               <Route path="/register" element={<Navigate to="/login" replace />} />
               <Route path="/signup" element={<Navigate to="/login" replace />} />
@@ -150,7 +155,14 @@ function AppLayout() {
                 }
               />
               <Route path="/contact" element={<Contact />} />
-              <Route path="/profile" element={<ProfilePage />} />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/certificate/:kodiUnik" element={<CertificateVerify />} />
               <Route
                 path="/admin"
@@ -265,14 +277,6 @@ function AppLayout() {
                 }
               />
               <Route
-                path="/admin/group-applications"
-                element={
-                  <ProtectedRoute requiredRole="admin">
-                    <AdminGroupApplications />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
                 path="/admin/roles"
                 element={
                   <ProtectedRoute requiredRole="admin">
@@ -301,6 +305,14 @@ function AppLayout() {
                 element={
                   <ProtectedRoute requiredRole="admin">
                     <AdminProfilePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/smis"
+                element={
+                  <ProtectedRoute requiredRole="admin">
+                    <AdminSmisDashboard />
                   </ProtectedRoute>
                 }
               />
@@ -382,7 +394,9 @@ function AppLayout() {
                 <Route path="lessons" element={<TeacherLessons />} />
                 <Route path="quizzes" element={<TeacherQuizzes />} />
                 <Route path="students" element={<TeacherStudents />} />
+                <Route path="assignments" element={<TeacherAssignments />} />
                 <Route path="grades" element={<ProfessorGradesPage />} />
+                <Route path="smis/exams" element={<ProfessorExamPage />} />
                 <Route path="profile" element={<TeacherProfilePage />} />
               </Route>
               <Route

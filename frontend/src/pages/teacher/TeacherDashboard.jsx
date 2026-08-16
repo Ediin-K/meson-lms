@@ -53,14 +53,6 @@ export default function TeacherDashboard() {
       bg: "bg-violet-100 dark:bg-violet-900/40",
     },
     {
-      title: t("teacherDashboard.services.stats.title"),
-      desc: t("teacherDashboard.services.stats.desc"),
-      icon: AnalyticsRounded,
-      path: "/teacher/reports",
-      color: "text-sky-600",
-      bg: "bg-sky-100 dark:bg-sky-900/40",
-    },
-    {
       title: t("teacherDashboard.services.grades.title"),
       desc: t("teacherDashboard.services.grades.desc"),
       icon: GradeRounded,
