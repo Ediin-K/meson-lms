@@ -51,8 +51,11 @@ const EMPTY_FORM = {
   departmentId: "", currentSemester: 1,
 };
 
-/* ─── Roles selectable when creating/editing a user ─────────────── */
-const USER_ROLES = ["student", "teacher", "assistant", "parent", "admin"];
+/* ─── Roles selectable when creating/editing a user ───────────────
+ * "assistant"/"parent" are deliberately excluded: those roles have no
+ * dashboard or permissions built for them, so assigning one creates an
+ * account with nowhere to go after login. */
+const USER_ROLES = ["student", "teacher", "admin"];
 
 export default function AdminUsers() {
   const navigate = useNavigate();

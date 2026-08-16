@@ -42,8 +42,11 @@ import java.time.LocalDateTime;
 @Transactional
 public class UserService {
 
+    // "prind"/"parent" and "assistant" are deliberately excluded: neither role has a
+    // dashboard or any permission checks built for it, so assigning one creates an
+    // account with nowhere to go and nothing it can do after logging in.
     private static final Set<String> ALLOWED_ASSIGNABLE_ROLES = Set.of(
-            "student", "teacher", "admin", "prind", "parent", "instructor", "assistant"
+            "student", "teacher", "admin", "instructor"
     );
 
     private static final Set<String> PROFILE_ROLES = Set.of("student", "teacher", "assistant");
