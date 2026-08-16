@@ -105,6 +105,9 @@ public class SmisService {
 
     @Transactional
     public ExamApplicationResponse cancelApplication(Long studentId, Long applicationId) {
+        if (!getCurrentUser().getId().equals(studentId) && !hasRole("ADMIN")) {
+            throw new AccessDeniedException("Nuk keni qasje per kete student");
+        }
         ExamApplication application = examApplicationRepository.findByIdAndStudentId(applicationId, studentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Paraqitja e provimit nuk u gjet"));
         if (application.getGrade() != null || application.getStatus() == ExamApplicationStatus.GRADED) {
@@ -117,6 +120,9 @@ public class SmisService {
 
     @Transactional
     public ExamApplicationResponse refuseGrade(Long studentId, Long applicationId) {
+        if (!getCurrentUser().getId().equals(studentId) && !hasRole("ADMIN")) {
+            throw new AccessDeniedException("Nuk keni qasje per kete student");
+        }
         ExamApplication application = examApplicationRepository.findByIdAndStudentId(applicationId, studentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Paraqitja e provimit nuk u gjet"));
         if (application.getGrade() == null || application.getStatus() != ExamApplicationStatus.GRADED) {

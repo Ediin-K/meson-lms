@@ -45,8 +45,6 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/error").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/subjects", "/api/subjects/**").permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/resources/*/view", "/api/resources/*/download").permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/files/*/view", "/api/files/*/download", "/api/files/download/*").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/certificates/kod/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/account/*/photo").permitAll()
                         .anyRequest().authenticated()

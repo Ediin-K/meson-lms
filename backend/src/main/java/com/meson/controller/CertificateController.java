@@ -19,21 +19,25 @@ public class CertificateController {
     private final CertificateService certificateService;
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<CertificateResponse>> getAll() {
         return ResponseEntity.ok(certificateService.getAll());
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CertificateResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(certificateService.getById(id));
     }
 
+    // Intentionally public: this is the certificate-authenticity verification-by-code endpoint.
     @GetMapping("/kod/{kodiUnik}")
     public ResponseEntity<CertificateResponse> getByKodiUnik(@PathVariable String kodiUnik) {
         return ResponseEntity.ok(certificateService.getByKodiUnik(kodiUnik));
     }
 
     @GetMapping("/user/{userId}")
+    @PreAuthorize("hasRole('ADMIN') or @securityAccessService.canAccessStudent(#userId)")
     public ResponseEntity<List<CertificateResponse>> getByUserId(@PathVariable Long userId) {
         return ResponseEntity.ok(certificateService.getByUserId(userId));
     }
