@@ -411,7 +411,7 @@ export default function LessonDetail() {
                             <Button
                                 fullWidth
                                 variant="contained"
-                                onClick={() => { setCompletion(null); navigate('/profile') }}
+                                onClick={() => { setCompletion(null); navigate('/student/profile') }}
                                 className="!rounded-xl !normal-case !bg-emerald-600 hover:!bg-emerald-700"
                                 startIcon={<WorkspacePremiumRounded />}
                             >
