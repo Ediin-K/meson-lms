@@ -13,7 +13,6 @@ import CategoryRounded from '@mui/icons-material/CategoryRounded'
 import GroupsRounded from '@mui/icons-material/GroupsRounded'
 import CalendarMonthRounded from '@mui/icons-material/CalendarMonthRounded'
 import AdminPanelSettingsRounded from '@mui/icons-material/AdminPanelSettingsRounded'
-import PersonAddRounded from '@mui/icons-material/PersonAddRounded'
 import ManageAccountsRounded from '@mui/icons-material/ManageAccountsRounded'
 import LabelRounded from '@mui/icons-material/LabelRounded'
 import ArrowForwardRounded from '@mui/icons-material/ArrowForwardRounded'
@@ -181,14 +180,6 @@ export default function AdminProfilePage() {
       path: '/admin/roles',
       color: 'text-teal-600 dark:text-teal-400',
       bg: 'bg-teal-100 dark:bg-teal-900/40',
-    },
-    {
-      title: t('adminProfile.quickLinks.groupApplications'),
-      desc: t('adminProfile.quickLinks.groupApplicationsDesc'),
-      icon: PersonAddRounded,
-      path: '/admin/group-applications',
-      color: 'text-pink-600 dark:text-pink-400',
-      bg: 'bg-pink-100 dark:bg-pink-900/40',
     },
     {
       title: t('adminProfile.quickLinks.userClaims'),

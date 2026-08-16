@@ -62,36 +62,6 @@ public class StudentGroupRequestService {
     }
 
     @Transactional
-    public StudentGroupRequestResponse apply(Long userId, ApplyGroupRequest request) {
-        StudentProfile profile = requireStudentProfile(userId);
-        validateStudentDepartment(profile);
-
-        if (profile.getApprovedDepartmentGroup() != null) {
-            throw new RuntimeException("Ke tashme nje grup te aprovuar");
-        }
-
-        if (studentGroupRequestRepository.existsByStudentIdAndStatus(userId, GroupRequestStatus.PENDING)) {
-            throw new RuntimeException("Ke nje aplikim ne pritje");
-        }
-
-        DepartmentGroup group = departmentGroupService.getEntity(request.getDepartmentGroupId());
-        validateGroupMatchesStudent(profile, group);
-        departmentGroupService.assertGroupAcceptsStudents(group);
-
-        User student = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Studenti nuk u gjet"));
-
-        StudentGroupRequest application = StudentGroupRequest.builder()
-                .student(student)
-                .departmentGroup(group)
-                .status(GroupRequestStatus.PENDING)
-                .appliedAt(LocalDateTime.now())
-                .build();
-
-        return toResponse(studentGroupRequestRepository.save(application));
-    }
-
-    @Transactional
     public DepartmentGroupResponse selectGroup(Long userId, ApplyGroupRequest request) {
         StudentProfile profile = requireStudentProfile(userId);
         validateStudentDepartment(profile);
@@ -118,48 +88,6 @@ public class StudentGroupRequestService {
                 .build());
 
         return departmentGroupService.toResponse(group);
-    }
-
-    @Transactional
-    public StudentGroupRequestResponse approve(Long requestId, Long adminUserId) {
-        StudentGroupRequest request = getRequest(requestId);
-        if (request.getStatus() != GroupRequestStatus.PENDING) {
-            throw new RuntimeException("Vetem aplikimet ne pritje mund te aprovohen");
-        }
-
-        DepartmentGroup group = request.getDepartmentGroup();
-        departmentGroupService.assertGroupAcceptsStudents(group);
-
-        User admin = userRepository.findById(adminUserId)
-                .orElseThrow(() -> new RuntimeException("Admini nuk u gjet"));
-
-        StudentProfile profile = studentProfileRepository.findByUserId(request.getStudent().getId())
-                .orElseThrow(() -> new RuntimeException("Profili i studentit nuk u gjet"));
-
-        assignStudentToGroup(profile, group, admin);
-
-        request.setStatus(GroupRequestStatus.APPROVED);
-        request.setApprovedAt(LocalDateTime.now());
-        request.setApprovedBy(admin);
-
-        return toResponse(studentGroupRequestRepository.save(request));
-    }
-
-    @Transactional
-    public StudentGroupRequestResponse reject(Long requestId, Long adminUserId) {
-        StudentGroupRequest request = getRequest(requestId);
-        if (request.getStatus() != GroupRequestStatus.PENDING) {
-            throw new RuntimeException("Vetem aplikimet ne pritje mund te refuzohen");
-        }
-
-        User admin = userRepository.findById(adminUserId)
-                .orElseThrow(() -> new RuntimeException("Admini nuk u gjet"));
-
-        request.setStatus(GroupRequestStatus.REJECTED);
-        request.setApprovedAt(LocalDateTime.now());
-        request.setApprovedBy(admin);
-
-        return toResponse(studentGroupRequestRepository.save(request));
     }
 
     @Transactional
@@ -192,15 +120,6 @@ public class StudentGroupRequestService {
         }
         profile.setApprovedDepartmentGroup(null);
         studentProfileRepository.save(profile);
-    }
-
-    @Transactional(readOnly = true)
-    public List<StudentGroupRequestResponse> getAdminRequests(
-            GroupRequestStatus status, Long departmentId, Long departmentGroupId) {
-        return studentGroupRequestRepository.findAdminRequests(status, departmentId, departmentGroupId)
-                .stream()
-                .map(this::toResponse)
-                .toList();
     }
 
     private void assignStudentToGroup(StudentProfile profile, DepartmentGroup group, User admin) {
@@ -369,11 +288,6 @@ public class StudentGroupRequestService {
                 .map(scheduleSessionService::toResponse)
                 .filter(java.util.Objects::nonNull)
                 .toList();
-    }
-
-    private StudentGroupRequest getRequest(Long requestId) {
-        return studentGroupRequestRepository.findById(requestId)
-                .orElseThrow(() -> new RuntimeException("Aplikimi nuk u gjet"));
     }
 
     private StudentProfile requireStudentProfile(Long userId) {

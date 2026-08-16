@@ -36,15 +36,6 @@ public class StudentGroupController {
     }
 
     @PreAuthorize("hasRole('ADMIN') or @securityAccessService.canAccessStudent(#userId)")
-    @PostMapping("/{userId}/groups/apply")
-    public ResponseEntity<StudentGroupRequestResponse> apply(
-            @PathVariable Long userId,
-            @Valid @RequestBody ApplyGroupRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(studentGroupRequestService.apply(userId, request));
-    }
-
-    @PreAuthorize("hasRole('ADMIN') or @securityAccessService.canAccessStudent(#userId)")
     @PostMapping("/{userId}/groups/select")
     public ResponseEntity<DepartmentGroupResponse> select(
             @PathVariable Long userId,

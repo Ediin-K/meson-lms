@@ -148,9 +148,6 @@ class AdminEndpointsSmokeTest {
     void adminSchedulesList() throws Exception { ok("/api/schedules"); }
 
     @Test
-    void adminGroupRequestsList() throws Exception { ok("/api/admin/group-requests"); }
-
-    @Test
     void adminDepartmentGroupsForDepartment() throws Exception {
         ok("/api/departments/" + departmentId + "/department-groups");
     }
