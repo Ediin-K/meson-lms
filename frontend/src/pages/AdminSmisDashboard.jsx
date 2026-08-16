@@ -46,11 +46,8 @@ export default function AdminSmisDashboard() {
   const manageLinks = [
     ['Students', '/admin/users'],
     ['Professors', '/admin/teachers'],
-    ['Courses', '/admin/courses'],
-    ['Programs', '/admin/categories'],
-    ['Exam registrations', '/admin/smis'],
-    ['Grades', '/admin/smis'],
-    ['Payments', '/admin/smis'],
+    ['Courses', '/admin/subjects'],
+    ['Programs', '/admin/departments'],
     ['Basic reports', '/admin/reports'],
   ]
 

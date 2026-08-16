@@ -1,7 +1,10 @@
 ﻿import { Box, Card, CardContent, Typography } from '@mui/material'
 import WorkspacePremiumRounded from '@mui/icons-material/WorkspacePremiumRounded'
+import { useNavigate } from 'react-router-dom'
 
 export default function ProfileCertificatesSection({ certificates, t }) {
+  const navigate = useNavigate()
+
   return (
     <Card elevation={0} className="rounded-2xl border border-slate-200/80 bg-white dark:!border-slate-700/80 dark:!bg-slate-900">
       <CardContent className="!p-6">
@@ -18,7 +21,8 @@ export default function ProfileCertificatesSection({ certificates, t }) {
             {certificates.map((cert) => (
               <Box
                 key={cert.id}
-                className="rounded-xl border border-green-100 bg-green-50/50 p-4 dark:border-green-900/40 dark:bg-green-900/10"
+                onClick={() => navigate(`/certificate/${cert.kodiUnik}`)}
+                className="cursor-pointer rounded-xl border border-green-100 bg-green-50/50 p-4 transition-colors hover:border-green-300 dark:border-green-900/40 dark:bg-green-900/10 dark:hover:border-green-700"
               >
                 <Typography variant="body2" className="!font-semibold !text-slate-800 dark:!text-white">
                   {cert.subjectTitulli}
@@ -26,7 +30,7 @@ export default function ProfileCertificatesSection({ certificates, t }) {
                 <Typography variant="caption" className="!mt-1 !block !text-slate-500">
                   {t('studentProfile.issued')}: {new Date(cert.dataLeshimit).toLocaleDateString()}
                 </Typography>
-                <Typography variant="caption" className="!mt-1 !block !font-mono !text-green-600 dark:!text-green-400">
+                <Typography variant="caption" className="!mt-1 !block !font-mono !text-green-600 dark:!text-green-400 underline">
                   #{cert.kodiUnik}
                 </Typography>
               </Box>

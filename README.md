@@ -241,8 +241,9 @@ For protected endpoints:
 | POST | `/api/quizzes/{id}/submit` | Student | Submit answers |
 | GET | `/api/teacher/quizzes/{id}/results` | Teacher | View student scores |
 
-Quiz scoring is calculated in the backend. Students do not receive the answer key and
-do not see their individual score after submission.
+Quiz scoring is calculated in the backend. Students see their own percentage score
+immediately after submitting, but do not receive the answer key or per-question
+correctness.
 
 ### University Operations
 

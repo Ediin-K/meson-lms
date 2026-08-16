@@ -15,28 +15,8 @@ export const getAvailableGroups = async (userId) => {
   return response.data;
 };
 
-export const applyToGroup = async (userId, departmentGroupId) => {
-  const response = await axiosInstance.post(`/student/${userId}/groups/apply`, { departmentGroupId });
-  return response.data;
-};
-
 export const selectGroup = async (userId, departmentGroupId) => {
   const response = await axiosInstance.post(`/student/${userId}/groups/select`, { departmentGroupId });
-  return response.data;
-};
-
-export const getAdminGroupRequests = async (params = {}) => {
-  const response = await axiosInstance.get("/admin/group-requests", { params });
-  return response.data;
-};
-
-export const approveGroupRequest = async (requestId) => {
-  const response = await axiosInstance.post(`/admin/group-requests/${requestId}/approve`);
-  return response.data;
-};
-
-export const rejectGroupRequest = async (requestId) => {
-  const response = await axiosInstance.post(`/admin/group-requests/${requestId}/reject`);
   return response.data;
 };
 

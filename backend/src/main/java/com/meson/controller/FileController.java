@@ -1,9 +1,12 @@
 package com.meson.controller;
 
 import com.meson.entity.LessonResource;
+import com.meson.entity.User;
 import com.meson.exception.BadRequestException;
 import com.meson.exception.ResourceNotFoundException;
+import com.meson.repository.EnrollmentRepository;
 import com.meson.repository.LessonResourceRepository;
+import com.meson.repository.UserRepository;
 import com.meson.service.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -12,6 +15,8 @@ import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.charset.StandardCharsets;
@@ -25,6 +30,8 @@ public class FileController {
 
     private final FileStorageService fileStorageService;
     private final LessonResourceRepository lessonResourceRepository;
+    private final EnrollmentRepository enrollmentRepository;
+    private final UserRepository userRepository;
 
     @GetMapping("/{id}/view")
     public ResponseEntity<Resource> viewResource(@PathVariable Long id) {
@@ -49,6 +56,8 @@ public class FileController {
         LessonResource resource = lessonResourceRepository.findByIdWithLessonSubject(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Skedari nuk u gjet."));
 
+        assertCanAccess(resource);
+
         Resource file;
         try {
             file = fileStorageService.loadAsResource(resource.getPath());
@@ -72,6 +81,32 @@ public class FileController {
         }
 
         return response.body(file);
+    }
+
+    /** Only the resource's own subject teacher, an enrolled student, or an admin may view/download it. */
+    private void assertCanAccess(LessonResource resource) {
+        var subject = resource.getLesson().getModule().getSubject();
+
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            throw new AccessDeniedException("Kerkohet identifikimi per te aksesuar kete material.");
+        }
+        boolean isAdmin = auth.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+        if (isAdmin) {
+            return;
+        }
+
+        User currentUser = userRepository.findByEmail(auth.getName())
+                .orElseThrow(() -> new AccessDeniedException("Perdoruesi nuk u gjet."));
+
+        boolean isSubjectTeacher = subject.getTeacher() != null
+                && subject.getTeacher().getId().equals(currentUser.getId());
+        boolean isEnrolled = enrollmentRepository.existsByUserIdAndSubjectId(currentUser.getId(), subject.getId());
+
+        if (!isSubjectTeacher && !isEnrolled) {
+            throw new AccessDeniedException("Nuk keni qasje ne kete material.");
+        }
     }
 
     private MediaType resolveMediaType(LessonResource resource, Resource file) {

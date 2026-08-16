@@ -35,6 +35,13 @@ export default function TeacherLessons() {
           <Typography variant="body2" className="text-slate-400 dark:text-slate-600 italic">
             {t("teacherLessons.hint")}
           </Typography>
+          <Button
+            variant="contained"
+            onClick={() => navigate("/teacher/subjects")}
+            className="!mt-6 !rounded-2xl !px-6 !py-2 !normal-case !font-bold"
+          >
+            {t("teacherDashboard.services.subjects.title")}
+          </Button>
         </Box>
 
         <div className="mt-16 pt-10 border-t border-slate-100 dark:border-slate-800">
