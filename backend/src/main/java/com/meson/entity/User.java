@@ -12,7 +12,7 @@ import java.util.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(exclude = { "userRoles", "userClaims", "userTokens", "refreshTokens" })
+@EqualsAndHashCode(exclude = { "userRoles", "userClaims", "userTokens", "refreshTokens", "notifications" })
 public class User {
 
     @Id
@@ -84,4 +84,8 @@ public class User {
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private Set<RefreshToken> refreshTokens;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private Set<Notification> notifications;
 }

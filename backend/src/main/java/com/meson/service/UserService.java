@@ -70,6 +70,7 @@ public class UserService {
     private final SubjectSubgroupTeacherRepository subjectSubgroupTeacherRepository;
     private final ScheduleSessionRepository scheduleSessionRepository;
     private final UserTokenRepository userTokenRepository;
+
     private Role resolveAllowedRole(String requestedRole) {
         String dbRole = normalizeRoleForDB(requestedRole.trim().toLowerCase());
         if (!ALLOWED_ASSIGNABLE_ROLES.contains(dbRole)) {

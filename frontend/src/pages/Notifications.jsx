@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import Typography from '@mui/material/Typography'
 import Card from '@mui/material/Card'
 import Container from '@mui/material/Container'
@@ -12,49 +12,43 @@ import Snackbar from '@mui/material/Snackbar'
 import Alert from '@mui/material/Alert'
 import Zoom from '@mui/material/Zoom'
 import Footer from '../components/ui/Footer.jsx'
-
-const MOCK_NOTIFICATIONS = [
-  {
-    id: 1,
-    title: 'Mbledhje Lënda “Struktura diskrete”',
-    message: 'E premte 10:00, salla 404. Pjesëmarrja është e detyrueshme për studentët e vitit të dytë.',
-    date: '1 Maj 2026',
-    unread: true,
-  },
-  {
-    id: 2,
-    title: 'Materialet e javës 7',
-    message: 'Materialet janë publikuar në lëndën “Sisteme dhe sinjale”. Ju lutem kontrolloni seksionin e dokumenteve.',
-    date: '28 Prill 2026',
-    unread: false,
-  },
-  {
-    id: 3,
-    title: 'Provimi i ndërmjetëm',
-    message: 'Afati i fundit për regjistrimin e provimit në SEMS është data 5 Maj.',
-    date: '25 Prill 2026',
-    unread: false,
-  },
-]
+import { getNotifications, markAsRead as markAsReadRequest, markAllAsRead as markAllAsReadRequest } from '../services/notificationService.js'
+import { formatDateTime } from '../lib/dateFormat.js'
 
 export default function Notifications() {
-  const { t } = useAppPreferences()
-  const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS)
+  const { t, locale } = useAppPreferences()
+  const [notifications, setNotifications] = useState([])
   const [snackbarMessage, setSnackbarMessage] = useState("")
   const [openSnackbar, setOpenSnackbar] = useState(false)
 
-  const markAsRead = (id) => {
+  useEffect(() => {
+    getNotifications()
+      .then(data => setNotifications(data.map(n => ({ ...n, unread: !n.read }))))
+      .catch(() => {})
+  }, [])
+
+  const markAsRead = async (id) => {
     setNotifications(prev =>
       prev.map(n => (n.id === id ? { ...n, unread: false } : n))
     )
     setSnackbarMessage("Njoftimi u shënua si i lexuar.")
     setOpenSnackbar(true)
+    try {
+      await markAsReadRequest(id)
+    } catch {
+      // best-effort UI state, silently ignore
+    }
   }
 
-  const markAllAsRead = () => {
+  const markAllAsRead = async () => {
     setNotifications(prev => prev.map(n => ({ ...n, unread: false })))
     setSnackbarMessage("Të gjitha njoftimet u shënuan si të lexuara.")
     setOpenSnackbar(true)
+    try {
+      await markAllAsReadRequest()
+    } catch {
+      // best-effort UI state, silently ignore
+    }
   }
 
   return (
@@ -120,7 +114,7 @@ export default function Notifications() {
                         {notif.title}
                       </Typography>
                       <Typography variant="caption" className="font-medium! text-slate-500! dark:text-slate-400! whitespace-nowrap">
-                        {notif.date}
+                        {formatDateTime(notif.createdAt, locale)}
                       </Typography>
                     </div>
                     <Typography variant="body2" className="text-slate-600! dark:text-slate-300! leading-relaxed!">
