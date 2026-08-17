@@ -14,29 +14,17 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  IconButton,
   Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   CircularProgress,
   Alert,
   Snackbar,
-  Zoom,
   Tooltip,
-  Autocomplete,
 } from "@mui/material";
 import SearchRounded from "@mui/icons-material/SearchRounded";
-import AddRounded from "@mui/icons-material/AddRounded";
 import ArrowBackRounded from "@mui/icons-material/ArrowBackRounded";
-import EditRounded from "@mui/icons-material/EditRounded";
-import DeleteRounded from "@mui/icons-material/DeleteRounded";
 import TokenRounded from "@mui/icons-material/TokenRounded";
 import Footer from "../components/ui/Footer";
 import axiosInstance from "../services/axiosInstance";
-
-const EMPTY_FORM = { userId: null, loginProvider: "", tokenName: "", tokenValue: "" };
 
 const getErrorMessage = (error, fallback) =>
   error?.response?.data?.message || error?.message || fallback;
@@ -47,16 +35,8 @@ export default function AdminUserTokens() {
   const isDark = mode === "dark";
 
   const [tokens, setTokens] = useState([]);
-  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [openDialog, setOpenDialog] = useState(false);
-  const [isEdit, setIsEdit] = useState(false);
-  const [selectedToken, setSelectedToken] = useState(null);
-  const [formData, setFormData] = useState(EMPTY_FORM);
-  const [submitting, setSubmitting] = useState(false);
-  const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState(null);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const [openSnackbar, setOpenSnackbar] = useState(false);
@@ -70,12 +50,8 @@ export default function AdminUserTokens() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [tokensRes, usersRes] = await Promise.all([
-        axiosInstance.get("/user-tokens"),
-        axiosInstance.get("/users"),
-      ]);
-      setTokens(tokensRes.data);
-      setUsers(usersRes.data);
+      const { data } = await axiosInstance.get("/user-tokens");
+      setTokens(data);
     } catch (error) {
       showToast(getErrorMessage(error, t("adminUserTokens.toast.fetchError")), "error");
     } finally {
@@ -92,66 +68,6 @@ export default function AdminUserTokens() {
       t.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       `${t.emri} ${t.mbiemri}`.toLowerCase().includes(searchTerm.toLowerCase()),
   );
-
-  const openAddDialog = () => {
-    setIsEdit(false);
-    setSelectedToken(null);
-    setFormData(EMPTY_FORM);
-    setOpenDialog(true);
-  };
-
-  const openEditDialog = (token) => {
-    setIsEdit(true);
-    setSelectedToken(token);
-    setFormData({
-      userId: token.userId,
-      loginProvider: token.loginProvider || "",
-      tokenName: token.tokenName || "",
-      tokenValue: token.tokenValue || "",
-    });
-    setOpenDialog(true);
-  };
-
-  const handleSubmit = async () => {
-    if (!formData.userId || !formData.loginProvider.trim() || !formData.tokenName.trim() || !formData.tokenValue.trim()) {
-      showToast(t("adminUserTokens.toast.validationError"), "error");
-      return;
-    }
-    setSubmitting(true);
-    try {
-      if (isEdit && selectedToken) {
-        await axiosInstance.put(`/user-tokens/${selectedToken.id}`, formData);
-        showToast(t("adminUserTokens.toast.updated"));
-      } else {
-        await axiosInstance.post("/user-tokens", formData);
-        showToast(t("adminUserTokens.toast.created"));
-      }
-      setOpenDialog(false);
-      await loadData();
-    } catch (error) {
-      showToast(getErrorMessage(error, t("adminUserTokens.toast.saveError")), "error");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!deleteTarget) return;
-    setSubmitting(true);
-    try {
-      await axiosInstance.delete(`/user-tokens/${deleteTarget.id}`);
-      showToast(t("adminUserTokens.toast.deleted"));
-      setOpenDeleteConfirm(false);
-      setDeleteTarget(null);
-      await loadData();
-    } catch (error) {
-      showToast(getErrorMessage(error, t("adminUserTokens.toast.deleteError")), "error");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const selectedUser = users.find((u) => u.id === formData.userId) || null;
 
   const truncate = (str, n = 32) => (str?.length > n ? str.slice(0, n) + "…" : str);
 
@@ -210,14 +126,6 @@ export default function AdminUserTokens() {
               }}
               sx={inputSx}
             />
-            <Button
-              variant="contained"
-              startIcon={<AddRounded />}
-              onClick={openAddDialog}
-              className="rounded-xl! py-2.5! px-6! normal-case! font-bold! bg-orange-600! hover:bg-orange-700! shadow-lg shadow-orange-500/20"
-            >
-              {t("adminUserTokens.addBtn")}
-            </Button>
           </div>
         </Box>
 
@@ -236,13 +144,12 @@ export default function AdminUserTokens() {
                     <TableCell sx={headCellSx}>{t("adminUserTokens.tableLoginProvider")}</TableCell>
                     <TableCell sx={headCellSx}>{t("adminUserTokens.tableTokenName")}</TableCell>
                     <TableCell sx={headCellSx}>{t("adminUserTokens.tableTokenValue")}</TableCell>
-                    <TableCell sx={headCellSx} align="right">{t("adminUserTokens.tableActions")}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {filteredTokens.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} align="center" sx={{ fontSize: "0.85rem" }}>
+                      <TableCell colSpan={5} align="center" sx={{ fontSize: "0.85rem" }}>
                         {t("adminUserTokens.noTokens")}
                       </TableCell>
                     </TableRow>
@@ -269,20 +176,6 @@ export default function AdminUserTokens() {
                             </span>
                           </Tooltip>
                         </TableCell>
-                        <TableCell align="right">
-                          <Tooltip title={t("adminUserTokens.tooltipEdit")} slots={{ transition: Zoom }}>
-                            <IconButton size="small" onClick={() => openEditDialog(token)}
-                              className="text-sky-500! hover:bg-sky-50! dark:hover:bg-sky-900/30!">
-                              <EditRounded fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title={t("adminUserTokens.tooltipDelete")} slots={{ transition: Zoom }}>
-                            <IconButton size="small" onClick={() => { setDeleteTarget(token); setOpenDeleteConfirm(true); }}
-                              className="text-red-500! hover:bg-red-50! dark:hover:bg-red-900/30!">
-                              <DeleteRounded fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                        </TableCell>
                       </TableRow>
                     ))
                   )}
@@ -292,77 +185,6 @@ export default function AdminUserTokens() {
           )}
         </Card>
       </Container>
-
-      {/* Add/Edit Dialog */}
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth
-        slotProps={{ paper: { className: "rounded-3xl! dark:bg-slate-900!" } }}>
-        <DialogTitle className="font-bold! text-slate-900! dark:text-white!">
-          {isEdit ? t("adminUserTokens.editDialogTitle") : t("adminUserTokens.addDialogTitle")}
-        </DialogTitle>
-        <DialogContent className="flex flex-col gap-4 pt-4!">
-          <Autocomplete
-            options={users}
-            getOptionLabel={(u) => `${u.emri} ${u.mbiemri} (${u.email})`}
-            value={selectedUser}
-            onChange={(_, val) => setFormData((p) => ({ ...p, userId: val?.id ?? null }))}
-            renderInput={(params) => (
-              <TextField {...params} label={t("adminUserTokens.fieldUser")} size="small"
-                slotProps={{ inputLabel: { className: "dark:text-slate-400!" } }} />
-            )}
-          />
-          <TextField label={t("adminUserTokens.fieldLoginProvider")} value={formData.loginProvider}
-            onChange={(e) => setFormData((p) => ({ ...p, loginProvider: e.target.value }))}
-            fullWidth size="small" helperText={t("adminUserTokens.fieldLoginProviderHelper")}
-            slotProps={{
-              inputLabel: { className: "dark:text-slate-400!" },
-              htmlInput: { className: "dark:text-white!" },
-            }} />
-          <TextField label={t("adminUserTokens.fieldTokenName")} value={formData.tokenName}
-            onChange={(e) => setFormData((p) => ({ ...p, tokenName: e.target.value }))}
-            fullWidth size="small" helperText={t("adminUserTokens.fieldTokenNameHelper")}
-            slotProps={{
-              inputLabel: { className: "dark:text-slate-400!" },
-              htmlInput: { className: "dark:text-white!" },
-            }} />
-          <TextField label={t("adminUserTokens.fieldTokenValue")} value={formData.tokenValue}
-            onChange={(e) => setFormData((p) => ({ ...p, tokenValue: e.target.value }))}
-            fullWidth size="small" multiline rows={3}
-            slotProps={{
-              inputLabel: { className: "dark:text-slate-400!" },
-              htmlInput: { className: "dark:text-white! font-mono text-xs" },
-            }} />
-        </DialogContent>
-        <DialogActions className="p-4!">
-          <Button onClick={() => setOpenDialog(false)} className="normal-case! text-slate-600! dark:text-slate-400!">
-            {t("adminUserTokens.cancel")}
-          </Button>
-          <Button variant="contained" onClick={handleSubmit} disabled={submitting}
-            className="normal-case! rounded-xl! bg-orange-600! hover:bg-orange-700!">
-            {submitting ? <CircularProgress size={18} className="text-white!" /> : isEdit ? t("adminUserTokens.save") : t("adminUserTokens.create")}
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Delete Confirm */}
-      <Dialog open={openDeleteConfirm} onClose={() => setOpenDeleteConfirm(false)} maxWidth="xs" fullWidth
-        slotProps={{ paper: { className: "rounded-3xl! dark:bg-slate-900!" } }}>
-        <DialogTitle className="font-bold! text-slate-900! dark:text-white!">{t("adminUserTokens.deleteTitle")}</DialogTitle>
-        <DialogContent>
-          <Alert severity="warning" className="rounded-2xl!">
-            {t("adminUserTokens.deleteWarning")} <strong>{deleteTarget?.tokenName}</strong> {t("adminUserTokens.deleteWarningOf")}{" "}
-            <strong>{deleteTarget?.emri} {deleteTarget?.mbiemri}</strong>?
-          </Alert>
-        </DialogContent>
-        <DialogActions className="p-4!">
-          <Button onClick={() => setOpenDeleteConfirm(false)} className="normal-case! text-slate-600! dark:text-slate-400!">
-            {t("adminUserTokens.cancel")}
-          </Button>
-          <Button variant="contained" color="error" onClick={handleDelete} disabled={submitting}
-            className="normal-case! rounded-xl!">
-            {submitting ? <CircularProgress size={18} className="text-white!" /> : t("adminUserTokens.delete")}
-          </Button>
-        </DialogActions>
-      </Dialog>
 
       <Snackbar open={openSnackbar} autoHideDuration={3500} onClose={() => setOpenSnackbar(false)}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}>

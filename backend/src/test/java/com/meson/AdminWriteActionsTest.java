@@ -113,13 +113,6 @@ class AdminWriteActionsTest {
     }
 
     @Test
-    void createUserToken() throws Exception {
-        mockMvc.perform(post("/api/user-tokens").contentType("application/json")
-                .content("{\"userId\":" + studentId + ",\"loginProvider\":\"Local\",\"tokenName\":\"x\",\"tokenValue\":\"y\"}"))
-                .andExpect(status().isCreated());
-    }
-
-    @Test
     void assignUserRole() throws Exception {
         mockMvc.perform(post("/api/user-roles").contentType("application/json")
                 .content("{\"userId\":" + studentId + ",\"roleId\":" + studentRoleId + "}"))
