@@ -30,6 +30,7 @@ public class EnrollmentService {
     private final SubjectSubgroupTeacherRepository subjectSubgroupTeacherRepository;
     private final AcademicTermService academicTermService;
     private final EmailService emailService;
+    private final NotificationService notificationService;
 
     public org.springframework.data.domain.Page<EnrollmentResponse> getPage(String search, String status,
             org.springframework.data.domain.Pageable pageable) {
@@ -172,6 +173,13 @@ public class EnrollmentService {
             emailService.sendEnrollmentConfirmedEmail(enrollment.getUser(), enrollment.getSubject());
         } catch (RuntimeException e) {
             log.warn("Failed to send enrollment-confirmed email for enrollment {}: {}", enrollment.getId(), e.getMessage());
+        }
+        try {
+            notificationService.create(enrollment.getUser(),
+                    "Regjistrimi u konfirmua",
+                    "Regjistrimi juaj në lëndën \"" + enrollment.getSubject().getTitulli() + "\" u konfirmua.");
+        } catch (RuntimeException e) {
+            log.warn("Failed to create enrollment-confirmed notification for enrollment {}: {}", enrollment.getId(), e.getMessage());
         }
     }
 

@@ -41,6 +41,7 @@ public class GradeService {
     private final SubjectRepository subjectRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final EmailService emailService;
+    private final NotificationService notificationService;
     private final GradeAuditLogRepository gradeAuditLogRepository;
 
     @Transactional(readOnly = true)
@@ -166,6 +167,13 @@ public class GradeService {
             emailService.sendGradePostedEmail(grade.getStudent(), grade.getSubject(), grade.getGrade());
         } catch (RuntimeException e) {
             log.warn("Failed to send grade-posted email for grade {}: {}", grade.getId(), e.getMessage());
+        }
+        try {
+            notificationService.create(grade.getStudent(),
+                    "Nota u vendos",
+                    "Nota juaj për \"" + grade.getSubject().getTitulli() + "\" u vendos: " + grade.getGrade() + ".");
+        } catch (RuntimeException e) {
+            log.warn("Failed to create grade-posted notification for grade {}: {}", grade.getId(), e.getMessage());
         }
     }
 

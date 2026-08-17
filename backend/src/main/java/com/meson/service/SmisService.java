@@ -6,6 +6,7 @@ import com.meson.exception.BadRequestException;
 import com.meson.exception.ResourceNotFoundException;
 import com.meson.repository.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SmisService {
@@ -33,6 +35,8 @@ public class SmisService {
     private final SubjectSubgroupRepository subjectSubgroupRepository;
     private final SubjectSubgroupTeacherRepository subjectSubgroupTeacherRepository;
     private final AcademicTermService academicTermService;
+    private final EmailService emailService;
+    private final NotificationService notificationService;
 
     @Transactional(readOnly = true)
     public List<SmisCourseResponse> getAvailableCourses() {
@@ -182,7 +186,25 @@ public class SmisService {
         application.setGradeAssignedAt(savedGrade.getAssignedAt());
         application.setRejectedAt(null);
 
-        return toResponse(examApplicationRepository.save(application));
+        ExamApplicationResponse response = toResponse(examApplicationRepository.save(application));
+        notifyExamGraded(savedGrade);
+        return response;
+    }
+
+    /** Best-effort: a notification/email failure must never undo a grade that was already posted. */
+    private void notifyExamGraded(Grade grade) {
+        try {
+            emailService.sendGradePostedEmail(grade.getStudent(), grade.getSubject(), grade.getGrade());
+        } catch (RuntimeException e) {
+            log.warn("Failed to send exam-graded email for grade {}: {}", grade.getId(), e.getMessage());
+        }
+        try {
+            notificationService.create(grade.getStudent(),
+                    "Nota u vendos",
+                    "Nota juaj për \"" + grade.getSubject().getTitulli() + "\" u vendos: " + grade.getGrade() + ".");
+        } catch (RuntimeException e) {
+            log.warn("Failed to create exam-graded notification for grade {}: {}", grade.getId(), e.getMessage());
+        }
     }
 
     @Transactional
