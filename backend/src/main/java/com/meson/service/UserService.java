@@ -46,7 +46,7 @@ public class UserService {
     // dashboard or any permission checks built for it, so assigning one creates an
     // account with nowhere to go and nothing it can do after logging in.
     private static final Set<String> ALLOWED_ASSIGNABLE_ROLES = Set.of(
-            "student", "teacher", "admin", "instructor"
+            "student", "teacher", "admin", "instructor", "department_head"
     );
 
     private static final Set<String> PROFILE_ROLES = Set.of("student", "teacher", "assistant");

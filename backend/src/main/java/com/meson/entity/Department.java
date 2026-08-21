@@ -31,4 +31,8 @@ public class Department {
     @OneToMany(mappedBy="department", fetch = FetchType.LAZY)
     private List<Subject> subjects = new ArrayList<>();
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "head_user_id")
+    private User head;
+
 }

@@ -43,6 +43,13 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     @org.springframework.data.jpa.repository.Query(
             "SELECT COUNT(DISTINCT e.user.id) FROM Enrollment e WHERE e.subject.teacher.id = :teacherId")
     long countDistinctStudentsByTeacherId(Long teacherId);
+
+    @EntityGraph(attributePaths = {"user", "subject"})
+    List<Enrollment> findBySubjectDepartmentId(Long departmentId);
+
+    @org.springframework.data.jpa.repository.Query(
+            "SELECT COUNT(DISTINCT e.user.id) FROM Enrollment e WHERE e.subject.department.id = :departmentId")
+    long countDistinctStudentsByDepartmentId(Long departmentId);
     long countBySubjectId(Long subjectId);
 
     /** Enrollment count for many subjects in one grouped query, instead of one count per subject. */

@@ -17,7 +17,7 @@ public class RoleService{
     // Every hasRole(...) check in the app is keyed off these three normalized names.
     // Renaming or deleting one would silently break authorization for that entire
     // user class, so they're protected here regardless of who has that role today.
-    private static final Set<String> PROTECTED_NORMALIZED_NAMES = Set.of("ADMIN", "TEACHER", "STUDENT");
+    private static final Set<String> PROTECTED_NORMALIZED_NAMES = Set.of("ADMIN", "TEACHER", "STUDENT", "DEPARTMENT_HEAD");
 
     public List<RoleResponse> getAll(){
         return roleRepository.findAll()
