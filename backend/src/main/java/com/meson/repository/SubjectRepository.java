@@ -23,6 +23,9 @@ public interface SubjectRepository extends JpaRepository<Subject, Long> {
     List<Subject> findByDepartmentIdAndStatusi(Long departmentId, SubjectStatus statusi);
 
     @EntityGraph(attributePaths = {"teacher", "department"})
+    List<Subject> findByDepartmentId(Long departmentId);
+
+    @EntityGraph(attributePaths = {"teacher", "department"})
     List<Subject> findByTeacherId(Long teacherId);
 
     List<Subject> findByTitulliContainingIgnoreCase(String titulli);

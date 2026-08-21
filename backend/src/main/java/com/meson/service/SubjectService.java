@@ -29,6 +29,7 @@ public class SubjectService {
     private final EnrollmentRepository enrollmentRepository;
     private final SubjectGroupRepository subjectGroupRepository;
     private final ScheduleSessionRepository scheduleSessionRepository;
+    private final SecurityAccessService securityAccessService;
 
     public List<SubjectResponse> getAll() {
         return subjectRepository.findAll()
@@ -72,12 +73,14 @@ public class SubjectService {
     public SubjectResponse update(Long id, SubjectRequest request) {
         Subject subject = subjectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Lënda nuk u gjet"));
+        assertCanManageDepartment(subject.getDepartment().getId());
 
         User teacher = userRepository.findById(request.getTeacherId())
                 .orElseThrow(() -> new ResourceNotFoundException("Mesuesi nuk u gjet"));
 
         Department department = departmentRepository.findById(request.getDepartmentId())
                 .orElseThrow(() -> new ResourceNotFoundException("Departamenti nuk u gjet"));
+        assertCanManageDepartment(department.getId());
 
         subject.setTitulli(request.getTitulli());
         subject.setCode(normalizeCode(request.getCode()));
@@ -95,9 +98,9 @@ public class SubjectService {
 
     @org.springframework.transaction.annotation.Transactional
     public void delete(Long id) {
-        if (!subjectRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Lënda nuk u gjet");
-        }
+        Subject subject = subjectRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Lënda nuk u gjet"));
+        assertCanManageDepartment(subject.getDepartment().getId());
         if (moduleRepository.countBySubjectId(id) > 0) {
             throw new RuntimeException(
                 "Kjo lëndë ka module. Fshijini modulet para se të fshini lëndën.");
@@ -149,6 +152,14 @@ public class SubjectService {
                 .stream()
                 .map(this::toResponse)
                 .toList();
+    }
+
+    /** ADMIN bypasses; DEPARTMENT_HEAD only allowed on their own department. */
+    private void assertCanManageDepartment(Long departmentId) {
+        if (!securityAccessService.canManageDepartment(departmentId)) {
+            throw new org.springframework.security.access.AccessDeniedException(
+                    "Nuk keni qasje ne kete departament");
+        }
     }
 
     private String normalizeEnrollmentKey(String enrollmentKey) {

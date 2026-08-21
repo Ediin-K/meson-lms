@@ -64,7 +64,7 @@ public class GradeController {
     }
 
     @GetMapping("/audit-log")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER') or hasRole('DEPARTMENT_HEAD')")
     public ResponseEntity<Page<GradeAuditLogResponse>> getAuditLog(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {

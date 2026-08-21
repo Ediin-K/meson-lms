@@ -13,6 +13,7 @@ import com.meson.entity.Grade;
 import com.meson.entity.User;
 import com.meson.exception.ResourceNotFoundException;
 import com.meson.repository.SubjectRepository;
+import com.meson.repository.DepartmentRepository;
 import com.meson.repository.EnrollmentRepository;
 import com.meson.repository.GradeAuditLogRepository;
 import com.meson.repository.GradeRepository;
@@ -43,6 +44,7 @@ public class GradeService {
     private final EmailService emailService;
     private final NotificationService notificationService;
     private final GradeAuditLogRepository gradeAuditLogRepository;
+    private final DepartmentRepository departmentRepository;
 
     @Transactional(readOnly = true)
     public StudentGradesSummaryResponse getByStudentId(Long studentId) {
@@ -154,6 +156,15 @@ public class GradeService {
         }
         if (hasRole("TEACHER")) {
             List<Long> subjectIds = subjectRepository.findByTeacherId(getCurrentUser().getId())
+                    .stream().map(Subject::getId).toList();
+            return gradeAuditLogRepository.findBySubjectIdIn(subjectIds, pageable)
+                    .map(this::toAuditResponse);
+        }
+        if (hasRole("DEPARTMENT_HEAD")) {
+            Long departmentId = departmentRepository.findByHeadId(getCurrentUser().getId())
+                    .map(d -> d.getId())
+                    .orElseThrow(() -> new AccessDeniedException("Nuk jeni caktuar si kryetar departamenti"));
+            List<Long> subjectIds = subjectRepository.findByDepartmentId(departmentId)
                     .stream().map(Subject::getId).toList();
             return gradeAuditLogRepository.findBySubjectIdIn(subjectIds, pageable)
                     .map(this::toAuditResponse);

@@ -41,14 +41,14 @@ public class SubjectController {
         return ResponseEntity.ok(subjectService.getBySemester(semester));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('DEPARTMENT_HEAD') and @securityAccessService.canManageDepartment(#request.departmentId))")
     @PostMapping
     public ResponseEntity<SubjectResponse> create(@Valid @RequestBody SubjectRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(subjectService.create(request));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('DEPARTMENT_HEAD')")
     @PutMapping("/{id}")
     public ResponseEntity<SubjectResponse> update(
             @Valid @PathVariable Long id,
@@ -56,7 +56,7 @@ public class SubjectController {
         return ResponseEntity.ok(subjectService.update(id, request));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('DEPARTMENT_HEAD')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         subjectService.delete(id);

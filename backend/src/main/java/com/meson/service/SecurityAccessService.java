@@ -1,6 +1,8 @@
 package com.meson.service;
 
+import com.meson.entity.Department;
 import com.meson.entity.User;
+import com.meson.repository.DepartmentRepository;
 import com.meson.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 public class SecurityAccessService {
 
     private final UserRepository userRepository;
+    private final DepartmentRepository departmentRepository;
 
     public boolean canAccessStudent(Long userId) {
         if (hasRole("ADMIN")) {
@@ -29,6 +32,27 @@ public class SecurityAccessService {
                 .map(User::getId)
                 .map(id -> id.equals(userId))
                 .orElse(false);
+    }
+
+    /** ADMIN can manage any department. DEPARTMENT_HEAD only their own. */
+    public boolean canManageDepartment(Long departmentId) {
+        if (hasRole("ADMIN")) {
+            return true;
+        }
+        if (departmentId == null) {
+            return false;
+        }
+        String email = currentEmail();
+        if (email == null) {
+            return false;
+        }
+        return userRepository.findByEmail(email)
+                .map(User::getId)
+                .flatMap(userId -> departmentRepository.findById(departmentId)
+                        .map(Department::getHead)
+                        .map(User::getId)
+                        .filter(headId -> headId.equals(userId)))
+                .isPresent();
     }
 
     private boolean hasRole(String role) {

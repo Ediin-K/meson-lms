@@ -3,6 +3,7 @@ package com.meson;
 import com.meson.entity.*;
 import com.meson.entity.Module;
 import com.meson.repository.*;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,6 +87,20 @@ class AssignmentWorkflowTest {
 
         enroll(student, subject);
         enroll(student2, subject);
+    }
+
+    // Without this, the Module/Lesson/Subject created above outlive this class and break
+    // whichever test class runs next and tries to delete subjects (same gotcha documented
+    // in EnrollmentAccessControlTest).
+    @AfterEach
+    void tearDown() {
+        submissionRepository.deleteAll();
+        assignmentRepository.deleteAll();
+        enrollmentRepository.deleteAll();
+        lessonRepository.deleteAll();
+        moduleRepository.deleteAll();
+        subjectRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     private User newUser(String name, String email, String role) {
