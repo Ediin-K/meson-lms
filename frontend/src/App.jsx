@@ -63,6 +63,7 @@ const TeacherQuizzes = lazy(() => import("./pages/teacher/TeacherQuizzes.jsx"));
 const TeacherStudents = lazy(() => import("./pages/teacher/TeacherStudents.jsx"));
 const TeacherAssignments = lazy(() => import("./pages/teacher/TeacherAssignments.jsx"));
 const ProfessorGradesPage = lazy(() => import("./pages/teacher/ProfessorGradesPage.jsx"));
+const TeacherGradeAuditLog = lazy(() => import("./pages/teacher/TeacherGradeAuditLog.jsx"));
 const ProfessorExamPage = lazy(() => import("./pages/teacher/ProfessorExamPage.jsx"));
 const StudentGradesPage = lazy(() => import("./pages/student/StudentGradesPage.jsx"));
 const StudentTranscriptPage = lazy(() => import("./pages/student/StudentTranscriptPage.jsx"));
@@ -403,6 +404,7 @@ function AppLayout() {
                 <Route path="students" element={<TeacherStudents />} />
                 <Route path="assignments" element={<TeacherAssignments />} />
                 <Route path="grades" element={<ProfessorGradesPage />} />
+                <Route path="grade-audit-log" element={<TeacherGradeAuditLog />} />
                 <Route path="smis/exams" element={<ProfessorExamPage />} />
                 <Route path="profile" element={<TeacherProfilePage />} />
               </Route>
