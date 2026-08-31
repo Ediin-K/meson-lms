@@ -147,6 +147,13 @@ public class SubjectService {
                 .toList();
     }
 
+    public List<SubjectResponse> getByDepartmentId(Long departmentId) {
+        return subjectRepository.findByDepartmentId(departmentId)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
     public List<SubjectResponse> getBySemester(Integer semester) {
         return subjectRepository.findBySemester(semester)
                 .stream()

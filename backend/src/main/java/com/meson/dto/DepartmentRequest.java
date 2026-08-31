@@ -26,4 +26,7 @@ public class DepartmentRequest {
     @Max(value = 12, message = "Numri i semestrave nuk mund të kalojë 12")
     private Integer numSemesters;
 
+    /** Optional — the user set as head of this department. Null clears the head. */
+    private Long headUserId;
+
 }

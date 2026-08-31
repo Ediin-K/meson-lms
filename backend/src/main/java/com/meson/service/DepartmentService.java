@@ -3,7 +3,9 @@ package com.meson.service;
 import com.meson.dto.DepartmentRequest;
 import com.meson.dto.DepartmentResponse;
 import com.meson.entity.Department;
+import com.meson.entity.User;
 import com.meson.repository.DepartmentRepository;
+import com.meson.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,7 @@ import java.util.List;
 public class DepartmentService {
 
     private final DepartmentRepository departmentRepository;
+    private final UserRepository userRepository;
 
     public List<DepartmentResponse> getAll() {
         return departmentRepository.findAll()
@@ -39,6 +42,7 @@ public class DepartmentService {
         department.setEmertimi(request.getEmertimi());
         department.setPershkrimi(request.getPershkrimi());
         department.setNumSemesters(request.getNumSemesters());
+        department.setHead(resolveHead(request.getHeadUserId()));
 
         return toResponse(departmentRepository.save(department));
     }
@@ -56,6 +60,7 @@ public class DepartmentService {
         department.setEmertimi(request.getEmertimi());
         department.setPershkrimi(request.getPershkrimi());
         department.setNumSemesters(request.getNumSemesters());
+        department.setHead(resolveHead(request.getHeadUserId()));
 
         return toResponse(departmentRepository.save(department));
     }
@@ -71,12 +76,23 @@ public class DepartmentService {
         departmentRepository.deleteById(id);
     }
 
+    private User resolveHead(Long headUserId) {
+        if (headUserId == null) {
+            return null;
+        }
+        return userRepository.findById(headUserId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Përdoruesi nuk u gjet"));
+    }
+
     private DepartmentResponse toResponse(Department department) {
+        User head = department.getHead();
         return DepartmentResponse.builder()
                 .id(department.getId())
                 .emertimi(department.getEmertimi())
                 .pershkrimi(department.getPershkrimi())
                 .numSemesters(department.getNumSemesters())
+                .headUserId(head != null ? head.getId() : null)
+                .headName(head != null ? head.getEmri() + " " + head.getMbiemri() : null)
                 .build();
     }
 }

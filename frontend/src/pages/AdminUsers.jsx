@@ -55,7 +55,7 @@ const EMPTY_FORM = {
  * "assistant"/"parent" are deliberately excluded: those roles have no
  * dashboard or permissions built for them, so assigning one creates an
  * account with nowhere to go after login. */
-const USER_ROLES = ["student", "teacher", "admin"];
+const USER_ROLES = ["student", "teacher", "admin", "department_head"];
 
 export default function AdminUsers() {
   const navigate = useNavigate();
@@ -345,11 +345,11 @@ export default function AdminUsers() {
               {t("adminUsers.listTitle")}
             </Typography>
             <Box className="flex flex-wrap items-center gap-2">
-              {["all", "student", "teacher", "assistant", "admin", "parent"].map((r) => (
+              {["all", "student", "teacher", "assistant", "admin", "department_head", "parent"].map((r) => (
                 <Button key={r} size="small"
                   onClick={() => { setRoleFilter(r); setPage(0); }}
                   className={`!rounded-full !px-4 !py-1 !normal-case !text-xs !font-bold ${roleFilter === r ? "!bg-slate-900 !text-white dark:!bg-white dark:!text-slate-900" : "!text-slate-500 hover:!bg-slate-100 dark:hover:!bg-slate-800"}`}>
-                  {r === "all" ? t("adminUsers.filterAll") : r.charAt(0).toUpperCase() + r.slice(1)}
+                  {r === "all" ? t("adminUsers.filterAll") : r.split("_").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")}
                 </Button>
               ))}
             </Box>

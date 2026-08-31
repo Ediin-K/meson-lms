@@ -160,7 +160,9 @@ export default function Login({ portalType }) {
             ? '/teacher'
             : role === 'student'
               ? '/student'
-              : '/'
+              : role === 'department_head'
+                ? '/department-head'
+                : '/'
       navigate(destination, { replace: true })
     } catch (error) {
       setGlobalError(error?.message || 'Gabim në login')

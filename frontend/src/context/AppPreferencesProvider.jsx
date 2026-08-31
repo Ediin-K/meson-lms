@@ -19,7 +19,7 @@ function readStoredRole() {
     const raw = localStorage.getItem(STORAGE_ROLE)
     if (!raw) return 'guest'
     const v = raw.toLowerCase()
-    if (['guest', 'student', 'teacher', 'parent', 'admin'].includes(v)) {
+    if (['guest', 'student', 'teacher', 'parent', 'admin', 'department_head'].includes(v)) {
       return v
     }
   } catch { void 0 }
@@ -60,7 +60,7 @@ export function AppPreferencesProvider({ children }) {
   }, [])
 
   const setRole = useCallback((next) => {
-    const allowed = ['guest', 'student', 'teacher', 'parent', 'admin']
+    const allowed = ['guest', 'student', 'teacher', 'parent', 'admin', 'department_head']
     const v = allowed.includes(next?.toLowerCase()) ? next.toLowerCase() : 'guest'
     setRoleState(v)
     localStorage.setItem(STORAGE_ROLE, v)

@@ -40,6 +40,7 @@ import CategoryOutlinedIcon from "@mui/icons-material/CategoryOutlined";
 import GroupsRounded from "@mui/icons-material/GroupsRounded";
 import Footer from "../components/ui/Footer";
 import { getDepartmentGroups } from "../services/departmentGroupService";
+import { getAllTeachers } from "../services/teacherService";
 import {
   getAllDepartments,
   createDepartment,
@@ -47,7 +48,7 @@ import {
   deleteDepartment,
 } from "../services/departmentService";
 
-const EMPTY_FORM = { emertimi: "", pershkrimi: "", numSemesters: 6 };
+const EMPTY_FORM = { emertimi: "", pershkrimi: "", numSemesters: 6, headUserId: "" };
 
 export default function AdminDepartments() {
   const navigate = useNavigate();
@@ -71,6 +72,7 @@ export default function AdminDepartments() {
   const [departmentGroups, setDepartmentGroups] = useState([]);
   const [groupsLoading, setGroupsLoading] = useState(false);
   const [groupsSemester, setGroupsSemester] = useState(1);
+  const [teachers, setTeachers] = useState([]);
 
   const showToast = (message, severity = "success") => {
     setSnackbarSeverity(severity);
@@ -104,6 +106,7 @@ export default function AdminDepartments() {
 
   useEffect(() => {
     loadDepartments();
+    getAllTeachers().then(setTeachers).catch(() => {});
   }, [loadDepartments]);
 
   const filteredDepartments = departments.filter(
@@ -138,6 +141,7 @@ export default function AdminDepartments() {
       emertimi: department.emertimi || "",
       pershkrimi: department.pershkrimi || "",
       numSemesters: department.numSemesters ?? 6,
+      headUserId: department.headUserId || "",
     });
     setOpenDialog(true);
   };
@@ -157,7 +161,7 @@ export default function AdminDepartments() {
       return;
     }
 
-    const payload = { ...formData, numSemesters };
+    const payload = { ...formData, numSemesters, headUserId: formData.headUserId || null };
 
     setSubmitting(true);
 
@@ -298,6 +302,9 @@ export default function AdminDepartments() {
                     <TableCell className="font-bold! text-slate-700! dark:text-slate-200!">
                       {t("adminDepartments.tableSemestra")}
                     </TableCell>
+                    <TableCell className="font-bold! text-slate-700! dark:text-slate-200!">
+                      {t("adminDepartments.tableHead")}
+                    </TableCell>
                     <TableCell
                       align="right"
                       className="font-bold! text-slate-700! dark:text-slate-200!"
@@ -309,7 +316,7 @@ export default function AdminDepartments() {
                 <TableBody>
                   {filteredDepartments.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={4}>
+                      <TableCell colSpan={5}>
                         <Box className="flex flex-col items-center justify-center py-20 gap-4">
                           <div className="h-16 w-16 rounded-2xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center">
                             <CategoryOutlinedIcon className="text-4xl! text-amber-400" />
@@ -339,6 +346,9 @@ export default function AdminDepartments() {
                         </TableCell>
                         <TableCell className="text-slate-700! dark:text-slate-200! font-semibold! text-sm!">
                           {department.numSemesters ?? "—"}
+                        </TableCell>
+                        <TableCell className="text-slate-500! text-sm!">
+                          {department.headName || "—"}
                         </TableCell>
                         <TableCell align="right">
                           <Box className="flex justify-end items-center gap-1">
@@ -481,6 +491,30 @@ export default function AdminDepartments() {
                   },
                 }}
               />
+              <FormControl fullWidth>
+                <InputLabel sx={{ color: isDark ? "#cbd5e1" : "#64748b" }}>
+                  {t("adminDepartments.fieldHeadUserId")}
+                </InputLabel>
+                <Select
+                  label={t("adminDepartments.fieldHeadUserId")}
+                  value={formData.headUserId}
+                  onChange={handleFieldChange("headUserId")}
+                  sx={{
+                    borderRadius: "12px",
+                    color: isDark ? "#f1f5f9" : "#1e293b",
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: isDark ? "#334155" : "#cbd5e1",
+                    },
+                  }}
+                >
+                  <MenuItem value="">{t("adminDepartments.fieldHeadNone")}</MenuItem>
+                  {teachers.map((tc) => (
+                    <MenuItem key={tc.id} value={tc.id}>
+                      {tc.emri} {tc.mbiemri} — ID: {tc.id}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Box>
           </DialogContent>
           <DialogActions className="p-4! gap-2">
