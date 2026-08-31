@@ -64,6 +64,8 @@ const TeacherStudents = lazy(() => import("./pages/teacher/TeacherStudents.jsx")
 const TeacherAssignments = lazy(() => import("./pages/teacher/TeacherAssignments.jsx"));
 const ProfessorGradesPage = lazy(() => import("./pages/teacher/ProfessorGradesPage.jsx"));
 const TeacherGradeAuditLog = lazy(() => import("./pages/teacher/TeacherGradeAuditLog.jsx"));
+const TeacherAttendance = lazy(() => import("./pages/teacher/TeacherAttendance.jsx"));
+const StudentAttendancePage = lazy(() => import("./pages/student/StudentAttendancePage.jsx"));
 const ProfessorExamPage = lazy(() => import("./pages/teacher/ProfessorExamPage.jsx"));
 const StudentGradesPage = lazy(() => import("./pages/student/StudentGradesPage.jsx"));
 const StudentTranscriptPage = lazy(() => import("./pages/student/StudentTranscriptPage.jsx"));
@@ -373,6 +375,14 @@ function AppLayout() {
                 }
               />
               <Route
+                path="/student/attendance"
+                element={
+                  <ProtectedRoute requiredRole="student">
+                    <StudentAttendancePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/student/smis"
                 element={
                   <ProtectedRoute requiredRole="student">
@@ -405,6 +415,7 @@ function AppLayout() {
                 <Route path="assignments" element={<TeacherAssignments />} />
                 <Route path="grades" element={<ProfessorGradesPage />} />
                 <Route path="grade-audit-log" element={<TeacherGradeAuditLog />} />
+                <Route path="attendance" element={<TeacherAttendance />} />
                 <Route path="smis/exams" element={<ProfessorExamPage />} />
                 <Route path="profile" element={<TeacherProfilePage />} />
               </Route>

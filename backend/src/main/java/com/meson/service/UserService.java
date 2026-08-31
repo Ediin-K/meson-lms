@@ -21,6 +21,7 @@ import com.meson.repository.QuizAttemptRepository;
 import com.meson.repository.RoleRepository;
 import com.meson.repository.ScheduleSessionRepository;
 import com.meson.repository.StudentGroupRequestRepository;
+import com.meson.repository.AttendanceRecordRepository;
 import com.meson.repository.StudentGroupSelectionRepository;
 import com.meson.repository.StudentProfileRepository;
 import com.meson.repository.UserRepository;
@@ -70,6 +71,7 @@ public class UserService {
     private final SubjectSubgroupTeacherRepository subjectSubgroupTeacherRepository;
     private final ScheduleSessionRepository scheduleSessionRepository;
     private final UserTokenRepository userTokenRepository;
+    private final AttendanceRecordRepository attendanceRecordRepository;
 
     private Role resolveAllowedRole(String requestedRole) {
         String dbRole = normalizeRoleForDB(requestedRole.trim().toLowerCase());
@@ -244,11 +246,15 @@ public class UserService {
         }
 
         // Teacher-specific: schedule sessions and group assignments
+        // Attendance records FK to schedule_sessions, so must be cleared before the sessions themselves.
+        attendanceRecordRepository.deleteByScheduleSessionTeacherId(id);
         scheduleSessionRepository.deleteByTeacherId(id);
         subjectGroupTeacherRepository.deleteByTeacherId(id);
         subjectSubgroupTeacherRepository.deleteByTeacherId(id);
 
         // Student-specific and general: all user-owned data
+        attendanceRecordRepository.deleteByStudentId(id);
+        attendanceRecordRepository.deleteByMarkedById(id);
         lessonProgressRepository.deleteByStudentId(id);
         assignmentSubmissionRepository.deleteByStudentId(id);
         quizAttemptRepository.deleteByUserId(id);

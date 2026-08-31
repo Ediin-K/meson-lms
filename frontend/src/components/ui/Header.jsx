@@ -353,6 +353,10 @@ export default function Header() {
                       label: t('header.grades'),
                       href: role === 'student' ? '/student/grades' : role === 'teacher' ? '/teacher/grades' : null,
                     },
+                    {
+                      label: t('header.attendance'),
+                      href: role === 'student' ? '/student/attendance' : role === 'teacher' ? '/teacher/attendance' : null,
+                    },
                     { label: t('header.help'), href: '/contact' },
                   ].filter(({ href }) => href).map(({ label, href }) => (
                     <button

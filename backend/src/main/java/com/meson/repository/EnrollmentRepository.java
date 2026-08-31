@@ -21,6 +21,12 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     @EntityGraph(attributePaths = {"user", "subject", "subject.teacher", "subjectGroup", "subjectSubgroup"})
     List<Enrollment> findBySubjectId(Long subjectId);
 
+    @EntityGraph(attributePaths = {"user", "subject"})
+    List<Enrollment> findBySubjectGroupId(Long subjectGroupId);
+
+    @EntityGraph(attributePaths = {"user", "subject"})
+    List<Enrollment> findBySubjectSubgroupId(Long subjectSubgroupId);
+
     @EntityGraph(attributePaths = {"subject"})
     List<Enrollment> findByUserIdAndStatusi(Long userId, EnrollmentStatus statusi);
     Optional<Enrollment> findByUserIdAndSubjectId(Long userId, Long subjectId);
