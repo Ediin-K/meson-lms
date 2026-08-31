@@ -2,6 +2,7 @@ package com.meson.controller;
 
 import com.meson.dto.DepartmentHeadDashboardResponse;
 import com.meson.dto.EnrollmentResponse;
+import com.meson.dto.SubjectResponse;
 import com.meson.service.DepartmentHeadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,5 +27,10 @@ public class DepartmentHeadController {
     @GetMapping("/students")
     public ResponseEntity<List<EnrollmentResponse>> getStudents() {
         return ResponseEntity.ok(departmentHeadService.getStudents());
+    }
+
+    @GetMapping("/subjects")
+    public ResponseEntity<List<SubjectResponse>> getSubjects() {
+        return ResponseEntity.ok(departmentHeadService.getSubjects());
     }
 }

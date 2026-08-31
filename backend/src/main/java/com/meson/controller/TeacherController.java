@@ -21,6 +21,7 @@ public class TeacherController {
 
     private final TeacherService teacherService;
 
+    @PreAuthorize("hasRole('ADMIN') or hasRole('DEPARTMENT_HEAD')")
     @GetMapping
     public ResponseEntity<List<TeacherResponse>> getAllTeachers() {
         return ResponseEntity.ok(teacherService.getAllTeachers());

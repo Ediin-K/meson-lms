@@ -2,6 +2,7 @@ package com.meson.service;
 
 import com.meson.dto.DepartmentHeadDashboardResponse;
 import com.meson.dto.EnrollmentResponse;
+import com.meson.dto.SubjectResponse;
 import com.meson.entity.Department;
 import com.meson.entity.Enrollment;
 import com.meson.entity.Subject;
@@ -23,6 +24,7 @@ public class DepartmentHeadService {
 
     private final DepartmentRepository departmentRepository;
     private final SubjectRepository subjectRepository;
+    private final SubjectService subjectService;
     private final EnrollmentRepository enrollmentRepository;
     private final UserRepository userRepository;
 
@@ -41,6 +43,11 @@ public class DepartmentHeadService {
                 .teacherCount(teacherCount)
                 .studentCount(enrollmentRepository.countDistinctStudentsByDepartmentId(department.getId()))
                 .build();
+    }
+
+    public List<SubjectResponse> getSubjects() {
+        Department department = getOwnDepartment();
+        return subjectService.getByDepartmentId(department.getId());
     }
 
     public List<EnrollmentResponse> getStudents() {

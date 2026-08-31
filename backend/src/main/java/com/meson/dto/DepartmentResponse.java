@@ -14,4 +14,6 @@ public class DepartmentResponse {
     private String emertimi;
     private String pershkrimi;
     private Integer numSemesters;
+    private Long headUserId;
+    private String headName;
 }

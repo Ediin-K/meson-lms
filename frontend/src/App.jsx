@@ -67,6 +67,12 @@ const ProfessorExamPage = lazy(() => import("./pages/teacher/ProfessorExamPage.j
 const StudentGradesPage = lazy(() => import("./pages/student/StudentGradesPage.jsx"));
 const StudentTranscriptPage = lazy(() => import("./pages/student/StudentTranscriptPage.jsx"));
 const AdminSmisDashboard = lazy(() => import("./pages/AdminSmisDashboard.jsx"));
+const DepartmentHeadLayout = lazy(() => import("./layouts/DepartmentHeadLayout.jsx"));
+const DepartmentHeadDashboard = lazy(() => import("./pages/departmentHead/DepartmentHeadDashboard.jsx"));
+const DepartmentHeadSubjects = lazy(() => import("./pages/departmentHead/DepartmentHeadSubjects.jsx"));
+const DepartmentHeadTeachers = lazy(() => import("./pages/departmentHead/DepartmentHeadTeachers.jsx"));
+const DepartmentHeadStudents = lazy(() => import("./pages/departmentHead/DepartmentHeadStudents.jsx"));
+const DepartmentHeadGradeAuditLog = lazy(() => import("./pages/departmentHead/DepartmentHeadGradeAuditLog.jsx"));
 
 function RootRedirect() {
   const { isAuthenticated, role } = useAppPreferences();
@@ -78,6 +84,7 @@ function RootRedirect() {
   if (role === "admin") return <Navigate to="/admin" replace />;
   if (role === "teacher") return <Navigate to="/teacher" replace />;
   if (role === "student") return <Navigate to="/student" replace />;
+  if (role === "department_head") return <Navigate to="/department-head" replace />;
 
   return <Home />;
 }
@@ -398,6 +405,20 @@ function AppLayout() {
                 <Route path="grades" element={<ProfessorGradesPage />} />
                 <Route path="smis/exams" element={<ProfessorExamPage />} />
                 <Route path="profile" element={<TeacherProfilePage />} />
+              </Route>
+              <Route
+                path="/department-head"
+                element={
+                  <ProtectedRoute requiredRole="department_head">
+                    <DepartmentHeadLayout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route index element={<DepartmentHeadDashboard />} />
+                <Route path="subjects" element={<DepartmentHeadSubjects />} />
+                <Route path="teachers" element={<DepartmentHeadTeachers />} />
+                <Route path="students" element={<DepartmentHeadStudents />} />
+                <Route path="grade-audit-log" element={<DepartmentHeadGradeAuditLog />} />
               </Route>
               <Route
                 path="/notifications"

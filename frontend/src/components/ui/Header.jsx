@@ -111,6 +111,13 @@ export default function Header() {
           contactLink,
           libraryLink,
         ]
+      case 'department_head':
+        return [
+          { label: t('header.navDashboard'), href: '/department-head' },
+          { label: t('departmentHead.dashboard.subjectsTile.title'), href: '/department-head/subjects' },
+          { label: t('departmentHead.dashboard.teachersTile.title'), href: '/department-head/teachers' },
+          contactLink,
+        ]
       case 'student':
       default:
         return [
@@ -331,7 +338,8 @@ export default function Header() {
                   <img src={accountPhotoSrc(avatar.id)} alt="" className="h-full w-full object-cover" />
                 ) : role?.toLowerCase() === 'admin' ? 'A' :
                  role?.toLowerCase() === 'teacher' ? 'T' :
-                 role?.toLowerCase() === 'student' ? 'S' : 'G'}
+                 role?.toLowerCase() === 'student' ? 'S' :
+                 role?.toLowerCase() === 'department_head' ? 'D' : 'G'}
               </button>
               {profileOpen ? (
                 <div
@@ -459,13 +467,14 @@ export default function Header() {
             <div className="mt-4 flex flex-col gap-2 border-t border-slate-200/80 pt-4">
               <div className="flex items-center gap-3 rounded-xl bg-sky-50/70 px-3 py-2 ring-1 ring-slate-200/60">
                 <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-indigo-700 text-sm font-bold text-white shadow-sm">
-                  {role?.toLowerCase() === 'admin' ? 'A' : 
-                   role?.toLowerCase() === 'teacher' ? 'T' : 
-                   role?.toLowerCase() === 'student' ? 'S' : 'G'}
+                  {role?.toLowerCase() === 'admin' ? 'A' :
+                   role?.toLowerCase() === 'teacher' ? 'T' :
+                   role?.toLowerCase() === 'student' ? 'S' :
+                   role?.toLowerCase() === 'department_head' ? 'D' : 'G'}
                 </span>
                 <div>
                   <p className="text-sm font-semibold text-slate-800">
-                    {role === 'admin' ? 'Admin' : role === 'teacher' ? 'Teacher' : t('header.studentLabel')}
+                    {role === 'admin' ? 'Admin' : role === 'teacher' ? 'Teacher' : role === 'department_head' ? t('adminUsers.form.roleDepartment_head') : t('header.studentLabel')}
                   </p>
                   <p className="text-xs text-slate-500 capitalize">{role}</p>
                 </div>
