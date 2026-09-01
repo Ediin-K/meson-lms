@@ -76,6 +76,7 @@ const DepartmentHeadSubjects = lazy(() => import("./pages/departmentHead/Departm
 const DepartmentHeadTeachers = lazy(() => import("./pages/departmentHead/DepartmentHeadTeachers.jsx"));
 const DepartmentHeadStudents = lazy(() => import("./pages/departmentHead/DepartmentHeadStudents.jsx"));
 const DepartmentHeadGradeAuditLog = lazy(() => import("./pages/departmentHead/DepartmentHeadGradeAuditLog.jsx"));
+const DepartmentHeadAttendance = lazy(() => import("./pages/departmentHead/DepartmentHeadAttendance.jsx"));
 
 function RootRedirect() {
   const { isAuthenticated, role } = useAppPreferences();
@@ -431,6 +432,7 @@ function AppLayout() {
                 <Route path="subjects" element={<DepartmentHeadSubjects />} />
                 <Route path="teachers" element={<DepartmentHeadTeachers />} />
                 <Route path="students" element={<DepartmentHeadStudents />} />
+                <Route path="attendance" element={<DepartmentHeadAttendance />} />
                 <Route path="grade-audit-log" element={<DepartmentHeadGradeAuditLog />} />
               </Route>
               <Route

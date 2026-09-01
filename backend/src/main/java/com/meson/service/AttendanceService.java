@@ -91,8 +91,17 @@ public class AttendanceService {
 
     @Transactional(readOnly = true)
     public AttendanceSummaryResponse getForStudent(Long studentId) {
-        List<AttendanceRecord> records = attendanceRecordRepository.findByStudentIdOrderBySessionDateDesc(studentId);
+        return summarize(attendanceRecordRepository.findByStudentIdOrderBySessionDateDesc(studentId));
+    }
 
+    /** Same shape as getForStudent, but only the student's records within one department's subjects. */
+    @Transactional(readOnly = true)
+    public AttendanceSummaryResponse getForStudentInDepartment(Long studentId, Long departmentId) {
+        return summarize(attendanceRecordRepository
+                .findByStudentIdAndScheduleSessionSubjectDepartmentIdOrderBySessionDateDesc(studentId, departmentId));
+    }
+
+    private AttendanceSummaryResponse summarize(List<AttendanceRecord> records) {
         int present = 0;
         int absent = 0;
         int late = 0;

@@ -21,6 +21,15 @@ public interface AttendanceRecordRepository extends JpaRepository<AttendanceReco
     @EntityGraph(attributePaths = {"scheduleSession", "scheduleSession.subject"})
     List<AttendanceRecord> findByStudentIdOrderBySessionDateDesc(Long studentId);
 
+    /** Department Head attendance summary: every record across one department's subjects. */
+    @EntityGraph(attributePaths = {"student"})
+    List<AttendanceRecord> findByScheduleSessionSubjectDepartmentId(Long departmentId);
+
+    /** Department Head drill-down: one student's records, scoped to one department's subjects. */
+    @EntityGraph(attributePaths = {"scheduleSession", "scheduleSession.subject"})
+    List<AttendanceRecord> findByStudentIdAndScheduleSessionSubjectDepartmentIdOrderBySessionDateDesc(
+            Long studentId, Long departmentId);
+
     void deleteByStudentId(Long studentId);
 
     void deleteByMarkedById(Long markedById);
