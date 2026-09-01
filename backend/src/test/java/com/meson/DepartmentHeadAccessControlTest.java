@@ -313,4 +313,17 @@ class DepartmentHeadAccessControlTest {
         mockMvc.perform(get("/api/department-head/attendance"))
                 .andExpect(status().isForbidden());
     }
+
+    // ---- deleting a department head unassigns them; the department survives (head_user_id FK is RESTRICT) ----
+
+    @Test
+    @WithMockUser(username = ADMIN_EMAIL, roles = "ADMIN")
+    void deletingDepartmentHeadUserUnassignsThemFromDepartment() throws Exception {
+        mockMvc.perform(delete("/api/users/" + headA.getId()))
+                .andExpect(status().isNoContent());
+
+        assertThat(userRepository.findById(headA.getId())).isEmpty();
+        Department reloaded = departmentRepository.findById(deptA.getId()).orElseThrow();
+        assertThat(reloaded.getHead()).isNull();
+    }
 }

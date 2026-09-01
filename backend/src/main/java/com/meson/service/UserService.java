@@ -270,6 +270,9 @@ public class UserService {
 
         studentProfileRepository.deleteByUserId(id);
 
+        // Department Head: unassign (don't cascade-delete the department itself)
+        departmentRepository.clearHeadByUserId(id);
+
         // Fshi eksplicit para cascade (siguri shtesë)
         userTokenRepository.deleteByUserId(id);
 
