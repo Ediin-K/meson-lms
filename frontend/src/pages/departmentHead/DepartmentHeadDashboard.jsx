@@ -12,6 +12,7 @@ import {
 import AutoStoriesRounded from "@mui/icons-material/AutoStoriesRounded";
 import SchoolRounded from "@mui/icons-material/SchoolRounded";
 import PeopleRounded from "@mui/icons-material/PeopleRounded";
+import EventAvailableRounded from "@mui/icons-material/EventAvailableRounded";
 import HistoryRounded from "@mui/icons-material/HistoryRounded";
 import ArrowForwardRounded from "@mui/icons-material/ArrowForwardRounded";
 import ApartmentRounded from "@mui/icons-material/ApartmentRounded";
@@ -56,6 +57,14 @@ export default function DepartmentHeadDashboard() {
       path: "/department-head/students",
       color: "text-indigo-600",
       bg: "bg-indigo-100 dark:bg-indigo-900/40",
+    },
+    {
+      title: t("departmentHead.dashboard.attendanceTile.title"),
+      desc: t("departmentHead.dashboard.attendanceTile.desc"),
+      icon: EventAvailableRounded,
+      path: "/department-head/attendance",
+      color: "text-sky-600",
+      bg: "bg-sky-100 dark:bg-sky-900/40",
     },
     {
       title: t("departmentHead.dashboard.auditTile.title"),

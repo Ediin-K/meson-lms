@@ -12,7 +12,10 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -40,28 +43,28 @@ class DepartmentHeadAccessControlTest {
     @Autowired AssignmentSubmissionRepository submissionRepository;
     @Autowired EnrollmentRepository enrollmentRepository;
     @Autowired GradeAuditLogRepository gradeAuditLogRepository;
+    @Autowired ScheduleSessionRepository scheduleSessionRepository;
+    @Autowired AttendanceRecordRepository attendanceRecordRepository;
 
     private User headA;
     private User teacher;
+    private User studentA;
+    private User studentB;
     private Department deptA;
     private Department deptB;
     private Subject subjectA;
     private Subject subjectB;
+    private ScheduleSession sessionA;
+    private ScheduleSession sessionB;
 
     @BeforeEach
     void setUp() {
-        gradeAuditLogRepository.deleteAll();
-        submissionRepository.deleteAll();
-        assignmentRepository.deleteAll();
-        enrollmentRepository.deleteAll();
-        lessonRepository.deleteAll();
-        moduleRepository.deleteAll();
-        subjectRepository.deleteAll();
-        departmentRepository.deleteAll();
-        userRepository.deleteAll();
+        cleanUp();
 
         headA = newUser("HeadA", HEAD_A_EMAIL, "DEPARTMENT_HEAD");
         teacher = newUser("Teacher", "depthead.teacher@test.com", "TEACHER");
+        studentA = newUser("StudentA", "depthead.studenta@test.com", "STUDENT");
+        studentB = newUser("StudentB", "depthead.studentb@test.com", "STUDENT");
         newUser("Admin", ADMIN_EMAIL, "ADMIN");
 
         deptA = newDepartment("Dept A " + System.nanoTime(), headA);
@@ -69,11 +72,20 @@ class DepartmentHeadAccessControlTest {
 
         subjectA = newSubject(teacher, deptA, "Subject A " + System.nanoTime());
         subjectB = newSubject(teacher, deptB, "Subject B " + System.nanoTime());
+
+        sessionA = newSession(subjectA);
+        sessionB = newSession(subjectB);
     }
 
     @AfterEach
     void tearDown() {
+        cleanUp();
+    }
+
+    private void cleanUp() {
         gradeAuditLogRepository.deleteAll();
+        attendanceRecordRepository.deleteAll();
+        scheduleSessionRepository.deleteAll();
         submissionRepository.deleteAll();
         assignmentRepository.deleteAll();
         enrollmentRepository.deleteAll();
@@ -113,6 +125,39 @@ class DepartmentHeadAccessControlTest {
         s.setEcts(5);
         s.setCreatedAt(LocalDateTime.now());
         return subjectRepository.save(s);
+    }
+
+    private ScheduleSession newSession(Subject subject) {
+        return scheduleSessionRepository.save(ScheduleSession.builder()
+                .subject(subject)
+                .teacher(teacher)
+                .sessionType(ScheduleSessionType.LECTURE)
+                .dayOfWeek(DayOfWeek.MONDAY)
+                .startTime(LocalTime.of(10, 0))
+                .endTime(LocalTime.of(11, 30))
+                .capacity(30)
+                .status("ACTIVE")
+                .build());
+    }
+
+    private void enroll(User student, Subject subject) {
+        Enrollment e = new Enrollment();
+        e.setUser(student);
+        e.setSubject(subject);
+        e.setStatusi(EnrollmentStatus.AKTIV);
+        e.setDataRegjistrimit(LocalDateTime.now());
+        enrollmentRepository.save(e);
+    }
+
+    private void attend(ScheduleSession session, User student, LocalDate date, AttendanceStatus status) {
+        attendanceRecordRepository.save(AttendanceRecord.builder()
+                .scheduleSession(session)
+                .sessionDate(date)
+                .student(student)
+                .status(status)
+                .markedBy(teacher)
+                .markedAt(LocalDateTime.now())
+                .build());
     }
 
     // ---- subject create: DEPARTMENT_HEAD scoped to own department ----
@@ -204,6 +249,68 @@ class DepartmentHeadAccessControlTest {
     void departmentHeadWithNoAssignedDepartmentGetsForbiddenOnAuditLog() throws Exception {
         newUser("Unassigned", "depthead.noassignment@test.com", "DEPARTMENT_HEAD");
         mockMvc.perform(get("/api/grades/audit-log"))
+                .andExpect(status().isForbidden());
+    }
+
+    // ---- attendance: DEPARTMENT_HEAD sees only their own department ----
+
+    @Test
+    @WithMockUser(username = HEAD_A_EMAIL, roles = "DEPARTMENT_HEAD")
+    void attendanceSummaryOnlyShowsOwnDepartment() throws Exception {
+        enroll(studentA, subjectA);
+        enroll(studentB, subjectB);
+        attend(sessionA, studentA, LocalDate.of(2026, 9, 1), AttendanceStatus.ABSENT);
+        attend(sessionB, studentB, LocalDate.of(2026, 9, 1), AttendanceStatus.PRESENT);
+
+        mockMvc.perform(get("/api/department-head/attendance"))
+                .andExpect(status().isOk())
+                .andExpect(result -> {
+                    String json = result.getResponse().getContentAsString();
+                    assertThat(json).contains(studentA.getEmri());
+                    assertThat(json).doesNotContain(studentB.getEmri());
+                });
+    }
+
+    @Test
+    @WithMockUser(username = HEAD_A_EMAIL, roles = "DEPARTMENT_HEAD")
+    void attendanceSummaryIncludesEnrolledStudentWithNoRecords() throws Exception {
+        enroll(studentA, subjectA);
+
+        mockMvc.perform(get("/api/department-head/attendance"))
+                .andExpect(status().isOk())
+                .andExpect(result -> {
+                    String json = result.getResponse().getContentAsString();
+                    assertThat(json).contains(studentA.getEmri());
+                    assertThat(json).contains("\"totalSessions\":0");
+                });
+    }
+
+    @Test
+    @WithMockUser(username = HEAD_A_EMAIL, roles = "DEPARTMENT_HEAD")
+    void attendanceDrilldownScopedToOwnDepartment() throws Exception {
+        enroll(studentA, subjectA);
+        enroll(studentB, subjectB);
+
+        mockMvc.perform(get("/api/department-head/attendance/" + studentA.getId()))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/api/department-head/attendance/" + studentB.getId()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "depthead.noassignment@test.com", roles = "DEPARTMENT_HEAD")
+    void departmentHeadWithNoAssignedDepartmentGetsForbiddenOnAttendance() throws Exception {
+        newUser("Unassigned", "depthead.noassignment@test.com", "DEPARTMENT_HEAD");
+        mockMvc.perform(get("/api/department-head/attendance"))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(get("/api/department-head/attendance/" + studentA.getId()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "depthead.teacher@test.com", roles = "TEACHER")
+    void nonDepartmentHeadCannotAccessAttendanceSummary() throws Exception {
+        mockMvc.perform(get("/api/department-head/attendance"))
                 .andExpect(status().isForbidden());
     }
 }

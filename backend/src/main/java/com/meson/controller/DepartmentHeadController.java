@@ -1,5 +1,7 @@
 package com.meson.controller;
 
+import com.meson.dto.AttendanceSummaryResponse;
+import com.meson.dto.DepartmentAttendanceStudentRow;
 import com.meson.dto.DepartmentHeadDashboardResponse;
 import com.meson.dto.EnrollmentResponse;
 import com.meson.dto.SubjectResponse;
@@ -32,5 +34,15 @@ public class DepartmentHeadController {
     @GetMapping("/subjects")
     public ResponseEntity<List<SubjectResponse>> getSubjects() {
         return ResponseEntity.ok(departmentHeadService.getSubjects());
+    }
+
+    @GetMapping("/attendance")
+    public ResponseEntity<List<DepartmentAttendanceStudentRow>> getAttendanceSummary() {
+        return ResponseEntity.ok(departmentHeadService.getAttendanceSummary());
+    }
+
+    @GetMapping("/attendance/{studentId}")
+    public ResponseEntity<AttendanceSummaryResponse> getStudentAttendance(@PathVariable Long studentId) {
+        return ResponseEntity.ok(departmentHeadService.getStudentAttendance(studentId));
     }
 }

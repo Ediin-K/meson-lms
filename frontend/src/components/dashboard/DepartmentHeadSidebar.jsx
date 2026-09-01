@@ -3,6 +3,7 @@ import DashboardRounded from "@mui/icons-material/DashboardRounded";
 import AutoStoriesRounded from "@mui/icons-material/AutoStoriesRounded";
 import SchoolRounded from "@mui/icons-material/SchoolRounded";
 import PeopleRounded from "@mui/icons-material/PeopleRounded";
+import EventAvailableRounded from "@mui/icons-material/EventAvailableRounded";
 import HistoryRounded from "@mui/icons-material/HistoryRounded";
 
 const SidebarLink = ({ to, icon: Icon, label }) => (
@@ -27,6 +28,7 @@ export default function DepartmentHeadSidebar() {
     { to: "/department-head/subjects", icon: AutoStoriesRounded, label: "Subjects" },
     { to: "/department-head/teachers", icon: SchoolRounded, label: "Teachers" },
     { to: "/department-head/students", icon: PeopleRounded, label: "Students" },
+    { to: "/department-head/attendance", icon: EventAvailableRounded, label: "Attendance" },
     { to: "/department-head/grade-audit-log", icon: HistoryRounded, label: "Grade Audit" },
   ];
 
