@@ -1,5 +1,6 @@
 package com.meson.controller;
 
+import com.meson.dto.AdminAttendanceStudentRow;
 import com.meson.dto.AttendanceMarkRequest;
 import com.meson.dto.AttendanceRosterEntryResponse;
 import com.meson.dto.AttendanceSummaryResponse;
@@ -43,5 +44,19 @@ public class AttendanceController {
     @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER') or @securityAccessService.canAccessStudent(#studentId)")
     public ResponseEntity<AttendanceSummaryResponse> getForStudent(@PathVariable Long studentId) {
         return ResponseEntity.ok(attendanceService.getForStudent(studentId));
+    }
+
+    @GetMapping("/admin/summary")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<AdminAttendanceStudentRow>> getAdminSummary() {
+        return ResponseEntity.ok(attendanceService.getAdminAttendanceSummary());
+    }
+
+    @GetMapping("/admin/student/{studentId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<AttendanceSummaryResponse> getAdminStudentAttendance(
+            @PathVariable Long studentId,
+            @RequestParam Long departmentId) {
+        return ResponseEntity.ok(attendanceService.getAdminStudentAttendance(studentId, departmentId));
     }
 }

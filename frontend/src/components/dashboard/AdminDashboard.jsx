@@ -155,6 +155,14 @@ export default function AdminDashboard() {
       bg: "bg-rose-100 dark:bg-rose-900/40",
     },
     {
+      title: t("home.admin.services.attendance.title"),
+      desc: t("home.admin.services.attendance.desc"),
+      icon: EventAvailableRounded,
+      path: "/admin/attendance",
+      color: "text-sky-600",
+      bg: "bg-sky-100 dark:bg-sky-900/40",
+    },
+    {
       title: t("home.admin.services.certificates.title"),
       desc: t("home.admin.services.certificates.desc"),
       icon: WorkspacePremiumRounded,

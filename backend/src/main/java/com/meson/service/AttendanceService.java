@@ -1,5 +1,6 @@
 package com.meson.service;
 
+import com.meson.dto.AdminAttendanceStudentRow;
 import com.meson.dto.AttendanceMarkRequest;
 import com.meson.dto.AttendanceRecordResponse;
 import com.meson.dto.AttendanceRosterEntryResponse;
@@ -7,6 +8,7 @@ import com.meson.dto.AttendanceSummaryResponse;
 import com.meson.entity.AttendanceRecord;
 import com.meson.entity.Enrollment;
 import com.meson.entity.ScheduleSession;
+import com.meson.entity.Subject;
 import com.meson.entity.User;
 import com.meson.exception.BadRequestException;
 import com.meson.exception.ResourceNotFoundException;
@@ -22,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -99,6 +103,63 @@ public class AttendanceService {
     public AttendanceSummaryResponse getForStudentInDepartment(Long studentId, Long departmentId) {
         return summarize(attendanceRecordRepository
                 .findByStudentIdAndScheduleSessionSubjectDepartmentIdOrderBySessionDateDesc(studentId, departmentId));
+    }
+
+    /**
+     * Admin-wide attendance: one row per (student, department) pair across every department,
+     * tallied by status. Enrolled students with no records yet still appear (0 sessions) so
+     * coverage gaps show. Subjects with no department are excluded. Sorted worst-first:
+     * students with sessions before those without, then ascending present %.
+     */
+    @Transactional(readOnly = true)
+    public List<AdminAttendanceStudentRow> getAdminAttendanceSummary() {
+        Map<RowKey, AdminAttendanceStudentRow> rows = new LinkedHashMap<>();
+
+        for (Enrollment enrollment : enrollmentRepository.findAllWithSubjectDepartment()) {
+            rowFor(rows, enrollment.getUser(), enrollment.getSubject());
+        }
+
+        for (AttendanceRecord record : attendanceRecordRepository.findAllWithStudentAndDepartment()) {
+            AdminAttendanceStudentRow row = rowFor(rows, record.getStudent(),
+                    record.getScheduleSession().getSubject());
+            switch (record.getStatus()) {
+                case PRESENT -> row.setPresentCount(row.getPresentCount() + 1);
+                case ABSENT -> row.setAbsentCount(row.getAbsentCount() + 1);
+                case LATE -> row.setLateCount(row.getLateCount() + 1);
+                case EXCUSED -> row.setExcusedCount(row.getExcusedCount() + 1);
+            }
+        }
+
+        List<AdminAttendanceStudentRow> result = new ArrayList<>(rows.values());
+        for (AdminAttendanceStudentRow row : result) {
+            int total = row.getPresentCount() + row.getAbsentCount() + row.getLateCount() + row.getExcusedCount();
+            row.setTotalSessions(total);
+            row.setPresentPercentage(total > 0 ? (row.getPresentCount() * 100.0) / total : 0.0);
+        }
+        result.sort(Comparator
+                .comparing((AdminAttendanceStudentRow r) -> r.getTotalSessions() == 0)
+                .thenComparing(AdminAttendanceStudentRow::getPresentPercentage)
+                .thenComparing(AdminAttendanceStudentRow::getDepartmentName)
+                .thenComparing(AdminAttendanceStudentRow::getStudentName));
+        return result;
+    }
+
+    /** Admin drill-down: one student's dated history, scoped to one department. Admin sees all — no ownership check. */
+    @Transactional(readOnly = true)
+    public AttendanceSummaryResponse getAdminStudentAttendance(Long studentId, Long departmentId) {
+        return getForStudentInDepartment(studentId, departmentId);
+    }
+
+    private record RowKey(Long studentId, Long departmentId) {}
+
+    private AdminAttendanceStudentRow rowFor(Map<RowKey, AdminAttendanceStudentRow> rows, User student, Subject subject) {
+        RowKey key = new RowKey(student.getId(), subject.getDepartment().getId());
+        return rows.computeIfAbsent(key, k -> AdminAttendanceStudentRow.builder()
+                .studentId(student.getId())
+                .studentName(student.getEmri() + " " + student.getMbiemri())
+                .departmentId(subject.getDepartment().getId())
+                .departmentName(subject.getDepartment().getEmertimi())
+                .build());
     }
 
     private AttendanceSummaryResponse summarize(List<AttendanceRecord> records) {

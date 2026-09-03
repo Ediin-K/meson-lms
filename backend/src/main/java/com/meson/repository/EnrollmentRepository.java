@@ -53,6 +53,11 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     @EntityGraph(attributePaths = {"user", "subject"})
     List<Enrollment> findBySubjectDepartmentId(Long departmentId);
 
+    /** Admin-wide attendance summary: every enrollment whose subject has a department. */
+    @org.springframework.data.jpa.repository.Query("SELECT e FROM Enrollment e "
+            + "JOIN FETCH e.user JOIN FETCH e.subject s JOIN FETCH s.department")
+    List<Enrollment> findAllWithSubjectDepartment();
+
     @org.springframework.data.jpa.repository.Query(
             "SELECT COUNT(DISTINCT e.user.id) FROM Enrollment e WHERE e.subject.department.id = :departmentId")
     long countDistinctStudentsByDepartmentId(Long departmentId);
