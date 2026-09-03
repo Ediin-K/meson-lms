@@ -13,6 +13,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
@@ -43,7 +44,10 @@ class AttendanceAccessControlTest {
     @Autowired EnrollmentRepository enrollmentRepository;
     @Autowired AttendanceRecordRepository attendanceRecordRepository;
 
+    private User teacherA;
     private User studentA;
+    private Department dept;
+    private Subject subjectA;
     private ScheduleSession sessionA;
 
     @BeforeEach
@@ -55,18 +59,18 @@ class AttendanceAccessControlTest {
         departmentRepository.deleteAll();
         userRepository.deleteAll();
 
-        User teacherA = newUser("TeacherA", TEACHER_A_EMAIL, "TEACHER");
+        teacherA = newUser("TeacherA", TEACHER_A_EMAIL, "TEACHER");
         User teacherB = newUser("TeacherB", TEACHER_B_EMAIL, "TEACHER");
         studentA = newUser("StudentA", STUDENT_A_EMAIL, "STUDENT");
         newUser("StudentB", STUDENT_B_EMAIL, "STUDENT");
         newUser("Admin", ADMIN_EMAIL, "ADMIN");
 
-        Department dept = newDepartment("Attendance Dept " + System.nanoTime());
+        dept = newDepartment("Attendance Dept " + System.nanoTime());
 
-        Subject subject = newSubject(teacherA, dept, "Attendance Subject " + System.nanoTime());
-        sessionA = newSession(subject, teacherA);
+        subjectA = newSubject(teacherA, dept, "Attendance Subject " + System.nanoTime());
+        sessionA = newSession(subjectA, teacherA);
 
-        enroll(studentA, subject);
+        enroll(studentA, subjectA);
     }
 
     @AfterEach
@@ -130,6 +134,17 @@ class AttendanceAccessControlTest {
         e.setStatusi(EnrollmentStatus.AKTIV);
         e.setDataRegjistrimit(LocalDateTime.now());
         enrollmentRepository.save(e);
+    }
+
+    private void attend(ScheduleSession session, User student, LocalDate date, AttendanceStatus status) {
+        attendanceRecordRepository.save(AttendanceRecord.builder()
+                .scheduleSession(session)
+                .sessionDate(date)
+                .student(student)
+                .status(status)
+                .markedBy(teacherA)
+                .markedAt(LocalDateTime.now())
+                .build());
     }
 
     // ---- roster: TEACHER scoped to sessions they own ----
@@ -196,6 +211,69 @@ class AttendanceAccessControlTest {
     @WithMockUser(username = STUDENT_B_EMAIL, roles = "STUDENT")
     void studentCannotViewAnotherStudentsAttendance() throws Exception {
         mockMvc.perform(get("/api/attendance/student/" + studentA.getId()))
+                .andExpect(status().isForbidden());
+    }
+
+    // ---- admin-wide (cross-department) attendance summary ----
+
+    @Test
+    @WithMockUser(username = ADMIN_EMAIL, roles = "ADMIN")
+    void adminAttendanceSummaryShowsStudentsAcrossDepartments() throws Exception {
+        Department deptB = newDepartment("Attendance Dept B " + System.nanoTime());
+        Subject subjectB = newSubject(teacherA, deptB, "Attendance Subject B " + System.nanoTime());
+        ScheduleSession sessionB = newSession(subjectB, teacherA);
+        User studentB = userRepository.findByEmail(STUDENT_B_EMAIL).orElseThrow();
+        enroll(studentB, subjectB);
+
+        attend(sessionA, studentA, LocalDate.of(2026, 9, 1), AttendanceStatus.ABSENT);
+        attend(sessionB, studentB, LocalDate.of(2026, 9, 1), AttendanceStatus.PRESENT);
+
+        mockMvc.perform(get("/api/attendance/admin/summary"))
+                .andExpect(status().isOk())
+                .andExpect(result -> {
+                    String json = result.getResponse().getContentAsString();
+                    assertThat(json).contains(studentA.getEmri());
+                    assertThat(json).contains(studentB.getEmri());
+                    assertThat(json).contains(dept.getEmertimi());
+                    assertThat(json).contains(deptB.getEmertimi());
+                });
+    }
+
+    @Test
+    @WithMockUser(username = ADMIN_EMAIL, roles = "ADMIN")
+    void adminAttendanceSummaryIncludesEnrolledStudentWithNoRecords() throws Exception {
+        mockMvc.perform(get("/api/attendance/admin/summary"))
+                .andExpect(status().isOk())
+                .andExpect(result -> {
+                    String json = result.getResponse().getContentAsString();
+                    assertThat(json).contains(studentA.getEmri());
+                    assertThat(json).contains("\"totalSessions\":0");
+                });
+    }
+
+    @Test
+    @WithMockUser(username = ADMIN_EMAIL, roles = "ADMIN")
+    void adminAttendanceDrilldownReturnsHistory() throws Exception {
+        attend(sessionA, studentA, LocalDate.of(2026, 9, 1), AttendanceStatus.LATE);
+
+        mockMvc.perform(get("/api/attendance/admin/student/" + studentA.getId())
+                        .param("departmentId", String.valueOf(dept.getId())))
+                .andExpect(status().isOk())
+                .andExpect(result -> assertThat(result.getResponse().getContentAsString())
+                        .contains("\"totalSessions\":1"));
+    }
+
+    @Test
+    @WithMockUser(username = TEACHER_A_EMAIL, roles = "TEACHER")
+    void teacherCannotAccessAdminAttendanceSummary() throws Exception {
+        mockMvc.perform(get("/api/attendance/admin/summary"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = STUDENT_A_EMAIL, roles = "STUDENT")
+    void studentCannotAccessAdminAttendanceSummary() throws Exception {
+        mockMvc.perform(get("/api/attendance/admin/summary"))
                 .andExpect(status().isForbidden());
     }
 }

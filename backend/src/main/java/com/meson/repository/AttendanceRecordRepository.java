@@ -3,6 +3,7 @@ package com.meson.repository;
 import com.meson.entity.AttendanceRecord;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -29,6 +30,14 @@ public interface AttendanceRecordRepository extends JpaRepository<AttendanceReco
     @EntityGraph(attributePaths = {"scheduleSession", "scheduleSession.subject"})
     List<AttendanceRecord> findByStudentIdAndScheduleSessionSubjectDepartmentIdOrderBySessionDateDesc(
             Long studentId, Long departmentId);
+
+    /** Admin-wide attendance summary: every record whose subject has a department. */
+    @Query("select a from AttendanceRecord a "
+            + "join fetch a.student "
+            + "join fetch a.scheduleSession ss "
+            + "join fetch ss.subject s "
+            + "join fetch s.department")
+    List<AttendanceRecord> findAllWithStudentAndDepartment();
 
     void deleteByStudentId(Long studentId);
 

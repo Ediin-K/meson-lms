@@ -35,6 +35,7 @@ const AdminSubjects = lazy(() => import("./pages/AdminSubjects.jsx"));
 const AdminDepartments = lazy(() => import("./pages/AdminDepartments.jsx"));
 const AdminAcademicTerms = lazy(() => import("./pages/AdminAcademicTerms.jsx"));
 const AdminGradeAuditLog = lazy(() => import("./pages/AdminGradeAuditLog.jsx"));
+const AdminAttendance = lazy(() => import("./pages/AdminAttendance.jsx"));
 const AdminTeachers = lazy(() => import("./pages/AdminTeachers.jsx"));
 const AdminEnrollments = lazy(() => import("./pages/AdminEnrollments.jsx"));
 const AdminCertificates = lazy(() => import("./pages/AdminCertificates.jsx"));
@@ -236,6 +237,14 @@ function AppLayout() {
                 element={
                   <ProtectedRoute requiredRole="admin">
                     <AdminGradeAuditLog />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/attendance"
+                element={
+                  <ProtectedRoute requiredRole="admin">
+                    <AdminAttendance />
                   </ProtectedRoute>
                 }
               />

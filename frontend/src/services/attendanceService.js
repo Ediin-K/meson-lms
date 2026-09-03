@@ -19,3 +19,15 @@ export const getStudentAttendance = async (studentId) => {
   const response = await axiosInstance.get(`${ATTENDANCE_API}/student/${studentId}`);
   return response.data;
 };
+
+export const getAdminAttendanceSummary = async () => {
+  const response = await axiosInstance.get(`${ATTENDANCE_API}/admin/summary`);
+  return response.data;
+};
+
+export const getAdminStudentAttendance = async (studentId, departmentId) => {
+  const response = await axiosInstance.get(`${ATTENDANCE_API}/admin/student/${studentId}`, {
+    params: { departmentId },
+  });
+  return response.data;
+};
