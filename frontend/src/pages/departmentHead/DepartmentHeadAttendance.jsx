@@ -30,8 +30,10 @@ import {
 import ArrowBackRounded from "@mui/icons-material/ArrowBackRounded";
 import EventAvailableRounded from "@mui/icons-material/EventAvailableRounded";
 import CloseRounded from "@mui/icons-material/CloseRounded";
+import DownloadRounded from "@mui/icons-material/DownloadRounded";
 import Footer from "../../components/ui/Footer";
 import { getAttendanceSummary, getStudentAttendance, getSubjects } from "../../services/departmentHeadService";
+import { downloadCsv } from "../../utils/csvExport";
 
 const STATUS_STYLE = {
   PRESENT: "!bg-emerald-100 !text-emerald-800 dark:!bg-emerald-950/60 dark:!text-emerald-300",
@@ -138,6 +140,26 @@ export default function DepartmentHeadAttendance() {
 
   const pctLabel = (row) => (row.totalSessions === 0 ? "—" : `${row.presentPercentage.toFixed(0)}%`);
 
+  const exportCsv = () => {
+    const headers = [
+      t("departmentHead.attendance.tableName"),
+      t("departmentHead.attendance.tableSessions"),
+      t("departmentHead.attendance.tablePresentPct"),
+      t("departmentHead.attendance.tableAbsent"),
+      t("departmentHead.attendance.tableLate"),
+      t("departmentHead.attendance.tableExcused"),
+    ];
+    const csvRows = rows.map((row) => [
+      row.studentName,
+      row.totalSessions,
+      row.totalSessions === 0 ? "" : row.presentPercentage.toFixed(0),
+      row.absentCount,
+      row.lateCount,
+      row.excusedCount,
+    ]);
+    downloadCsv(`vijueshmeria-departamenti-${new Date().toISOString().slice(0, 10)}.csv`, headers, csvRows);
+  };
+
   return (
     <section className="flex flex-col min-h-screen">
       <Container maxWidth="lg" className="grow py-8 mt-4 sm:mt-8">
@@ -201,6 +223,15 @@ export default function DepartmentHeadAttendance() {
               {t("departmentHead.attendance.filterClear")}
             </Button>
           ) : null}
+          <Button
+            startIcon={<DownloadRounded />}
+            onClick={exportCsv}
+            disabled={rows.length === 0}
+            className="normal-case! ml-auto!"
+            variant="outlined"
+          >
+            {t("departmentHead.attendance.exportCsv")}
+          </Button>
         </Box>
 
         <Card
