@@ -20,14 +20,16 @@ export const getStudentAttendance = async (studentId) => {
   return response.data;
 };
 
-export const getAdminAttendanceSummary = async () => {
-  const response = await axiosInstance.get(`${ATTENDANCE_API}/admin/summary`);
+export const getAdminAttendanceSummary = async ({ departmentId, subjectId, dateFrom, dateTo } = {}) => {
+  const response = await axiosInstance.get(`${ATTENDANCE_API}/admin/summary`, {
+    params: { departmentId, subjectId, dateFrom, dateTo },
+  });
   return response.data;
 };
 
-export const getAdminStudentAttendance = async (studentId, departmentId) => {
+export const getAdminStudentAttendance = async (studentId, { departmentId, subjectId, dateFrom, dateTo } = {}) => {
   const response = await axiosInstance.get(`${ATTENDANCE_API}/admin/student/${studentId}`, {
-    params: { departmentId },
+    params: { departmentId, subjectId, dateFrom, dateTo },
   });
   return response.data;
 };

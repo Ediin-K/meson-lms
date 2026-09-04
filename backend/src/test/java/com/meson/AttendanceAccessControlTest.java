@@ -263,6 +263,63 @@ class AttendanceAccessControlTest {
                         .contains("\"totalSessions\":1"));
     }
 
+    // ---- admin-wide summary: subject + date-range filters ----
+
+    @Test
+    @WithMockUser(username = ADMIN_EMAIL, roles = "ADMIN")
+    void adminAttendanceSummarySubjectFilterExcludesOtherSubject() throws Exception {
+        Subject subjectC = newSubject(teacherA, dept, "Attendance Subject C " + System.nanoTime());
+        ScheduleSession sessionC = newSession(subjectC, teacherA);
+        User studentC = userRepository.findByEmail(STUDENT_B_EMAIL).orElseThrow();
+        enroll(studentC, subjectC);
+
+        attend(sessionA, studentA, LocalDate.of(2026, 9, 1), AttendanceStatus.PRESENT);
+        attend(sessionC, studentC, LocalDate.of(2026, 9, 1), AttendanceStatus.PRESENT);
+
+        mockMvc.perform(get("/api/attendance/admin/summary").param("subjectId", String.valueOf(subjectA.getId())))
+                .andExpect(status().isOk())
+                .andExpect(result -> {
+                    String json = result.getResponse().getContentAsString();
+                    assertThat(json).contains(studentA.getEmri());
+                    assertThat(json).doesNotContain(studentC.getEmri());
+                });
+    }
+
+    @Test
+    @WithMockUser(username = ADMIN_EMAIL, roles = "ADMIN")
+    void adminAttendanceSummaryDateRangeRecomputesPercentage() throws Exception {
+        attend(sessionA, studentA, LocalDate.of(2026, 9, 1), AttendanceStatus.ABSENT);
+        attend(sessionA, studentA, LocalDate.of(2026, 10, 1), AttendanceStatus.PRESENT);
+
+        mockMvc.perform(get("/api/attendance/admin/summary")
+                        .param("dateFrom", "2026-10-01").param("dateTo", "2026-10-31"))
+                .andExpect(status().isOk())
+                .andExpect(result -> {
+                    String json = result.getResponse().getContentAsString();
+                    assertThat(json).contains(studentA.getEmri());
+                    assertThat(json).contains("\"totalSessions\":1");
+                    assertThat(json).contains("\"presentPercentage\":100.0");
+                });
+    }
+
+    @Test
+    @WithMockUser(username = ADMIN_EMAIL, roles = "ADMIN")
+    void adminAttendanceDrilldownRespectsSubjectFilter() throws Exception {
+        Subject subjectC = newSubject(teacherA, dept, "Attendance Subject D " + System.nanoTime());
+        ScheduleSession sessionC = newSession(subjectC, teacherA);
+        enroll(studentA, subjectC);
+
+        attend(sessionA, studentA, LocalDate.of(2026, 9, 1), AttendanceStatus.PRESENT);
+        attend(sessionC, studentA, LocalDate.of(2026, 9, 2), AttendanceStatus.ABSENT);
+
+        mockMvc.perform(get("/api/attendance/admin/student/" + studentA.getId())
+                        .param("departmentId", String.valueOf(dept.getId()))
+                        .param("subjectId", String.valueOf(subjectA.getId())))
+                .andExpect(status().isOk())
+                .andExpect(result -> assertThat(result.getResponse().getContentAsString())
+                        .contains("\"totalSessions\":1"));
+    }
+
     @Test
     @WithMockUser(username = TEACHER_A_EMAIL, roles = "TEACHER")
     void teacherCannotAccessAdminAttendanceSummary() throws Exception {

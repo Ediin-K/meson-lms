@@ -25,11 +25,13 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  TextField,
 } from "@mui/material";
 import ArrowBackRounded from "@mui/icons-material/ArrowBackRounded";
 import EventAvailableRounded from "@mui/icons-material/EventAvailableRounded";
 import CloseRounded from "@mui/icons-material/CloseRounded";
 import Footer from "../components/ui/Footer";
+import axiosInstance from "../services/axiosInstance";
 import { getAdminAttendanceSummary, getAdminStudentAttendance } from "../services/attendanceService";
 
 const STATUS_STYLE = {
@@ -69,24 +71,39 @@ export default function AdminAttendance() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [departmentFilter, setDepartmentFilter] = useState("ALL");
 
-  const [selected, setSelected] = useState(null); // { studentId, studentName, departmentId }
+  const [allSubjects, setAllSubjects] = useState([]);
+  const [departmentFilter, setDepartmentFilter] = useState("ALL");
+  const [subjectId, setSubjectId] = useState("ALL");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const filtersActive = departmentFilter !== "ALL" || subjectId !== "ALL" || Boolean(dateFrom) || Boolean(dateTo);
+
+  const [selected, setSelected] = useState(null); // { studentId, studentName, departmentId, departmentName }
   const [detail, setDetail] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState("");
+
+  useEffect(() => {
+    axiosInstance.get("/subjects").then(({ data }) => setAllSubjects(data)).catch(() => {});
+  }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
-      setRows(await getAdminAttendanceSummary());
+      setRows(await getAdminAttendanceSummary({
+        departmentId: departmentFilter === "ALL" ? undefined : departmentFilter,
+        subjectId: subjectId === "ALL" ? undefined : subjectId,
+        dateFrom: dateFrom || undefined,
+        dateTo: dateTo || undefined,
+      }));
     } catch (err) {
       setError(err?.response?.data?.message || t("adminAttendance.loadError"));
     } finally {
       setLoading(false);
     }
-  }, [t]);
+  }, [departmentFilter, subjectId, dateFrom, dateTo, t]);
 
   useEffect(() => {
     load();
@@ -94,18 +111,30 @@ export default function AdminAttendance() {
 
   const departments = useMemo(() => {
     const seen = new Map();
-    rows.forEach((r) => {
-      if (!seen.has(r.departmentId)) seen.set(r.departmentId, r.departmentName);
+    allSubjects.forEach((s) => {
+      if (s.departmentId != null && !seen.has(s.departmentId)) seen.set(s.departmentId, s.departmentName);
     });
     return [...seen.entries()]
       .map(([id, name]) => ({ id, name }))
       .sort((a, b) => a.name.localeCompare(b.name));
-  }, [rows]);
+  }, [allSubjects]);
 
-  const visibleRows = useMemo(
-    () => (departmentFilter === "ALL" ? rows : rows.filter((r) => String(r.departmentId) === String(departmentFilter))),
-    [rows, departmentFilter],
+  const subjectOptions = useMemo(
+    () => allSubjects.filter((s) => departmentFilter === "ALL" || String(s.departmentId) === String(departmentFilter)),
+    [allSubjects, departmentFilter],
   );
+
+  const handleDepartmentChange = (value) => {
+    setDepartmentFilter(value);
+    setSubjectId("ALL");
+  };
+
+  const clearFilters = () => {
+    setDepartmentFilter("ALL");
+    setSubjectId("ALL");
+    setDateFrom("");
+    setDateTo("");
+  };
 
   const openStudent = useCallback(async (row) => {
     setSelected(row);
@@ -113,13 +142,18 @@ export default function AdminAttendance() {
     setDetailError("");
     setDetailLoading(true);
     try {
-      setDetail(await getAdminStudentAttendance(row.studentId, row.departmentId));
+      setDetail(await getAdminStudentAttendance(row.studentId, {
+        departmentId: row.departmentId,
+        subjectId: subjectId === "ALL" ? undefined : subjectId,
+        dateFrom: dateFrom || undefined,
+        dateTo: dateTo || undefined,
+      }));
     } catch (err) {
       setDetailError(err?.response?.data?.message || t("adminAttendance.loadError"));
     } finally {
       setDetailLoading(false);
     }
-  }, [t]);
+  }, [subjectId, dateFrom, dateTo, t]);
 
   const closeDialog = () => {
     setSelected(null);
@@ -156,14 +190,14 @@ export default function AdminAttendance() {
 
         {error ? <Alert severity="error" className="!mb-4">{error}</Alert> : null}
 
-        {!loading && departments.length > 0 ? (
-          <FormControl size="small" className="!mb-4 !min-w-[240px]">
+        <Box className="mb-4 flex flex-wrap items-end gap-3">
+          <FormControl size="small" className="!min-w-[220px]">
             <InputLabel id="admin-attendance-dept-filter">{t("adminAttendance.filterDepartment")}</InputLabel>
             <Select
               labelId="admin-attendance-dept-filter"
               label={t("adminAttendance.filterDepartment")}
               value={departmentFilter}
-              onChange={(e) => setDepartmentFilter(e.target.value)}
+              onChange={(e) => handleDepartmentChange(e.target.value)}
             >
               <MenuItem value="ALL">{t("adminAttendance.filterAll")}</MenuItem>
               {departments.map((d) => (
@@ -171,7 +205,42 @@ export default function AdminAttendance() {
               ))}
             </Select>
           </FormControl>
-        ) : null}
+          <FormControl size="small" className="!min-w-[220px]">
+            <InputLabel id="admin-attendance-subject-filter">{t("adminAttendance.filterSubject")}</InputLabel>
+            <Select
+              labelId="admin-attendance-subject-filter"
+              label={t("adminAttendance.filterSubject")}
+              value={subjectId}
+              onChange={(e) => setSubjectId(e.target.value)}
+            >
+              <MenuItem value="ALL">{t("adminAttendance.filterSubjectAll")}</MenuItem>
+              {subjectOptions.map((s) => (
+                <MenuItem key={s.id} value={String(s.id)}>{s.titulli}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <TextField
+            size="small"
+            type="date"
+            label={t("adminAttendance.filterDateFrom")}
+            value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+          />
+          <TextField
+            size="small"
+            type="date"
+            label={t("adminAttendance.filterDateTo")}
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+          />
+          {filtersActive ? (
+            <Button onClick={clearFilters} className="normal-case!">
+              {t("adminAttendance.filterClear")}
+            </Button>
+          ) : null}
+        </Box>
 
         <Card
           elevation={0}
@@ -196,7 +265,7 @@ export default function AdminAttendance() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {visibleRows.length === 0 ? (
+                  {rows.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={7}>
                         <Box className="flex flex-col items-center justify-center py-20 gap-2">
@@ -207,7 +276,7 @@ export default function AdminAttendance() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    visibleRows.map((row) => (
+                    rows.map((row) => (
                       <TableRow
                         key={`${row.studentId}-${row.departmentId}`}
                         hover

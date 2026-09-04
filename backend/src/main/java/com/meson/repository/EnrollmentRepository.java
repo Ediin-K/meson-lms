@@ -53,10 +53,17 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     @EntityGraph(attributePaths = {"user", "subject"})
     List<Enrollment> findBySubjectDepartmentId(Long departmentId);
 
-    /** Admin-wide attendance summary: every enrollment whose subject has a department. */
+    /**
+     * DH + Admin attendance summary: every enrollment whose subject has a department, optionally
+     * narrowed to one department and/or one subject. Any null filter is ignored.
+     */
     @org.springframework.data.jpa.repository.Query("SELECT e FROM Enrollment e "
-            + "JOIN FETCH e.user JOIN FETCH e.subject s JOIN FETCH s.department")
-    List<Enrollment> findAllWithSubjectDepartment();
+            + "JOIN FETCH e.user JOIN FETCH e.subject s JOIN FETCH s.department "
+            + "WHERE (:departmentId IS NULL OR s.department.id = :departmentId) "
+            + "AND (:subjectId IS NULL OR s.id = :subjectId)")
+    List<Enrollment> findForAttendanceSummary(
+            @org.springframework.data.repository.query.Param("departmentId") Long departmentId,
+            @org.springframework.data.repository.query.Param("subjectId") Long subjectId);
 
     @org.springframework.data.jpa.repository.Query(
             "SELECT COUNT(DISTINCT e.user.id) FROM Enrollment e WHERE e.subject.department.id = :departmentId")

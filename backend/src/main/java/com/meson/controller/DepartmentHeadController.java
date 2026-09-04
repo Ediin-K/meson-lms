@@ -7,10 +7,12 @@ import com.meson.dto.EnrollmentResponse;
 import com.meson.dto.SubjectResponse;
 import com.meson.service.DepartmentHeadService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -37,12 +39,19 @@ public class DepartmentHeadController {
     }
 
     @GetMapping("/attendance")
-    public ResponseEntity<List<DepartmentAttendanceStudentRow>> getAttendanceSummary() {
-        return ResponseEntity.ok(departmentHeadService.getAttendanceSummary());
+    public ResponseEntity<List<DepartmentAttendanceStudentRow>> getAttendanceSummary(
+            @RequestParam(required = false) Long subjectId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo) {
+        return ResponseEntity.ok(departmentHeadService.getAttendanceSummary(subjectId, dateFrom, dateTo));
     }
 
     @GetMapping("/attendance/{studentId}")
-    public ResponseEntity<AttendanceSummaryResponse> getStudentAttendance(@PathVariable Long studentId) {
-        return ResponseEntity.ok(departmentHeadService.getStudentAttendance(studentId));
+    public ResponseEntity<AttendanceSummaryResponse> getStudentAttendance(
+            @PathVariable Long studentId,
+            @RequestParam(required = false) Long subjectId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo) {
+        return ResponseEntity.ok(departmentHeadService.getStudentAttendance(studentId, subjectId, dateFrom, dateTo));
     }
 }
