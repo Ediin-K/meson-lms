@@ -314,6 +314,61 @@ class DepartmentHeadAccessControlTest {
                 .andExpect(status().isForbidden());
     }
 
+    // ---- attendance summary: subject + date-range filters ----
+
+    @Test
+    @WithMockUser(username = HEAD_A_EMAIL, roles = "DEPARTMENT_HEAD")
+    void attendanceSummarySubjectFilterExcludesOtherSubject() throws Exception {
+        Subject subjectC = newSubject(teacher, deptA, "Subject C " + System.nanoTime());
+        ScheduleSession sessionC = newSession(subjectC);
+        enroll(studentA, subjectA);
+        enroll(studentB, subjectC);
+        attend(sessionA, studentA, LocalDate.of(2026, 9, 1), AttendanceStatus.PRESENT);
+        attend(sessionC, studentB, LocalDate.of(2026, 9, 1), AttendanceStatus.PRESENT);
+
+        mockMvc.perform(get("/api/department-head/attendance").param("subjectId", String.valueOf(subjectA.getId())))
+                .andExpect(status().isOk())
+                .andExpect(result -> {
+                    String json = result.getResponse().getContentAsString();
+                    assertThat(json).contains(studentA.getEmri());
+                    assertThat(json).doesNotContain(studentB.getEmri());
+                });
+    }
+
+    @Test
+    @WithMockUser(username = HEAD_A_EMAIL, roles = "DEPARTMENT_HEAD")
+    void attendanceSummaryDateRangeRecomputesPercentage() throws Exception {
+        enroll(studentA, subjectA);
+        attend(sessionA, studentA, LocalDate.of(2026, 9, 1), AttendanceStatus.ABSENT);
+        attend(sessionA, studentA, LocalDate.of(2026, 10, 1), AttendanceStatus.PRESENT);
+
+        mockMvc.perform(get("/api/department-head/attendance")
+                        .param("dateFrom", "2026-10-01").param("dateTo", "2026-10-31"))
+                .andExpect(status().isOk())
+                .andExpect(result -> {
+                    String json = result.getResponse().getContentAsString();
+                    assertThat(json).contains("\"totalSessions\":1");
+                    assertThat(json).contains("\"presentPercentage\":100.0");
+                });
+    }
+
+    @Test
+    @WithMockUser(username = HEAD_A_EMAIL, roles = "DEPARTMENT_HEAD")
+    void attendanceDrilldownRespectsSubjectFilter() throws Exception {
+        Subject subjectC = newSubject(teacher, deptA, "Subject D " + System.nanoTime());
+        ScheduleSession sessionC = newSession(subjectC);
+        enroll(studentA, subjectA);
+        enroll(studentA, subjectC);
+        attend(sessionA, studentA, LocalDate.of(2026, 9, 1), AttendanceStatus.PRESENT);
+        attend(sessionC, studentA, LocalDate.of(2026, 9, 2), AttendanceStatus.ABSENT);
+
+        mockMvc.perform(get("/api/department-head/attendance/" + studentA.getId())
+                        .param("subjectId", String.valueOf(subjectA.getId())))
+                .andExpect(status().isOk())
+                .andExpect(result -> assertThat(result.getResponse().getContentAsString())
+                        .contains("\"totalSessions\":1"));
+    }
+
     // ---- deleting a department head unassigns them; the department survives (head_user_id FK is RESTRICT) ----
 
     @Test

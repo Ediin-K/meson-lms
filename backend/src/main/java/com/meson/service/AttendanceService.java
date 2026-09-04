@@ -98,28 +98,35 @@ public class AttendanceService {
         return summarize(attendanceRecordRepository.findByStudentIdOrderBySessionDateDesc(studentId));
     }
 
-    /** Same shape as getForStudent, but only the student's records within one department's subjects. */
+    /**
+     * Same shape as getForStudent, but only the student's records within one department's
+     * subjects, optionally narrowed to one subject and/or a date range (any null is ignored).
+     */
     @Transactional(readOnly = true)
-    public AttendanceSummaryResponse getForStudentInDepartment(Long studentId, Long departmentId) {
+    public AttendanceSummaryResponse getForStudentInDepartment(Long studentId, Long departmentId,
+            Long subjectId, LocalDate from, LocalDate to) {
         return summarize(attendanceRecordRepository
-                .findByStudentIdAndScheduleSessionSubjectDepartmentIdOrderBySessionDateDesc(studentId, departmentId));
+                .findForStudentDrilldown(studentId, departmentId, subjectId, from, to));
     }
 
     /**
-     * Admin-wide attendance: one row per (student, department) pair across every department,
-     * tallied by status. Enrolled students with no records yet still appear (0 sessions) so
-     * coverage gaps show. Subjects with no department are excluded. Sorted worst-first:
-     * students with sessions before those without, then ascending present %.
+     * DH + Admin attendance summary: one row per (student, department) pair, tallied by status,
+     * optionally narrowed to one department, one subject, and/or a date range (any null is
+     * ignored — DH always passes its own department; Admin may pass none for "all departments").
+     * Enrolled students with no matching records still appear (0 sessions) so coverage gaps show.
+     * Subjects with no department are excluded. Sorted worst-first: students with sessions before
+     * those without, then ascending present %.
      */
     @Transactional(readOnly = true)
-    public List<AdminAttendanceStudentRow> getAdminAttendanceSummary() {
+    public List<AdminAttendanceStudentRow> getAdminAttendanceSummary(Long departmentId, Long subjectId,
+            LocalDate from, LocalDate to) {
         Map<RowKey, AdminAttendanceStudentRow> rows = new LinkedHashMap<>();
 
-        for (Enrollment enrollment : enrollmentRepository.findAllWithSubjectDepartment()) {
+        for (Enrollment enrollment : enrollmentRepository.findForAttendanceSummary(departmentId, subjectId)) {
             rowFor(rows, enrollment.getUser(), enrollment.getSubject());
         }
 
-        for (AttendanceRecord record : attendanceRecordRepository.findAllWithStudentAndDepartment()) {
+        for (AttendanceRecord record : attendanceRecordRepository.findForSummary(departmentId, subjectId, from, to)) {
             AdminAttendanceStudentRow row = rowFor(rows, record.getStudent(),
                     record.getScheduleSession().getSubject());
             switch (record.getStatus()) {
@@ -146,8 +153,9 @@ public class AttendanceService {
 
     /** Admin drill-down: one student's dated history, scoped to one department. Admin sees all — no ownership check. */
     @Transactional(readOnly = true)
-    public AttendanceSummaryResponse getAdminStudentAttendance(Long studentId, Long departmentId) {
-        return getForStudentInDepartment(studentId, departmentId);
+    public AttendanceSummaryResponse getAdminStudentAttendance(Long studentId, Long departmentId,
+            Long subjectId, LocalDate from, LocalDate to) {
+        return getForStudentInDepartment(studentId, departmentId, subjectId, from, to);
     }
 
     private record RowKey(Long studentId, Long departmentId) {}

@@ -21,12 +21,17 @@ import {
   DialogContent,
   DialogActions,
   IconButton,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  TextField,
 } from "@mui/material";
 import ArrowBackRounded from "@mui/icons-material/ArrowBackRounded";
 import EventAvailableRounded from "@mui/icons-material/EventAvailableRounded";
 import CloseRounded from "@mui/icons-material/CloseRounded";
 import Footer from "../../components/ui/Footer";
-import { getAttendanceSummary, getStudentAttendance } from "../../services/departmentHeadService";
+import { getAttendanceSummary, getStudentAttendance, getSubjects } from "../../services/departmentHeadService";
 
 const STATUS_STYLE = {
   PRESENT: "!bg-emerald-100 !text-emerald-800 dark:!bg-emerald-950/60 dark:!text-emerald-300",
@@ -66,26 +71,46 @@ export default function DepartmentHeadAttendance() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const [subjects, setSubjects] = useState([]);
+  const [subjectId, setSubjectId] = useState("ALL");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const filtersActive = subjectId !== "ALL" || Boolean(dateFrom) || Boolean(dateTo);
+
   const [selected, setSelected] = useState(null); // { studentId, studentName }
   const [detail, setDetail] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState("");
 
+  useEffect(() => {
+    getSubjects().then(setSubjects).catch(() => {});
+  }, []);
+
   const load = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
-      setRows(await getAttendanceSummary());
+      setRows(await getAttendanceSummary({
+        subjectId: subjectId === "ALL" ? undefined : subjectId,
+        dateFrom: dateFrom || undefined,
+        dateTo: dateTo || undefined,
+      }));
     } catch (err) {
       setError(err?.response?.data?.message || t("departmentHead.attendance.loadError"));
     } finally {
       setLoading(false);
     }
-  }, [t]);
+  }, [subjectId, dateFrom, dateTo, t]);
 
   useEffect(() => {
     load();
   }, [load]);
+
+  const clearFilters = () => {
+    setSubjectId("ALL");
+    setDateFrom("");
+    setDateTo("");
+  };
 
   const openStudent = useCallback(async (row) => {
     setSelected(row);
@@ -93,13 +118,17 @@ export default function DepartmentHeadAttendance() {
     setDetailError("");
     setDetailLoading(true);
     try {
-      setDetail(await getStudentAttendance(row.studentId));
+      setDetail(await getStudentAttendance(row.studentId, {
+        subjectId: subjectId === "ALL" ? undefined : subjectId,
+        dateFrom: dateFrom || undefined,
+        dateTo: dateTo || undefined,
+      }));
     } catch (err) {
       setDetailError(err?.response?.data?.message || t("departmentHead.attendance.loadError"));
     } finally {
       setDetailLoading(false);
     }
-  }, [t]);
+  }, [subjectId, dateFrom, dateTo, t]);
 
   const closeDialog = () => {
     setSelected(null);
@@ -135,6 +164,44 @@ export default function DepartmentHeadAttendance() {
         </Box>
 
         {error ? <Alert severity="error" className="!mb-4">{error}</Alert> : null}
+
+        <Box className="mb-4 flex flex-wrap items-end gap-3">
+          <FormControl size="small" className="!min-w-[220px]">
+            <InputLabel id="dh-attendance-subject-filter">{t("departmentHead.attendance.filterSubject")}</InputLabel>
+            <Select
+              labelId="dh-attendance-subject-filter"
+              label={t("departmentHead.attendance.filterSubject")}
+              value={subjectId}
+              onChange={(e) => setSubjectId(e.target.value)}
+            >
+              <MenuItem value="ALL">{t("departmentHead.attendance.filterSubjectAll")}</MenuItem>
+              {subjects.map((s) => (
+                <MenuItem key={s.id} value={String(s.id)}>{s.titulli}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <TextField
+            size="small"
+            type="date"
+            label={t("departmentHead.attendance.filterDateFrom")}
+            value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+          />
+          <TextField
+            size="small"
+            type="date"
+            label={t("departmentHead.attendance.filterDateTo")}
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+          />
+          {filtersActive ? (
+            <Button onClick={clearFilters} className="normal-case!">
+              {t("departmentHead.attendance.filterClear")}
+            </Button>
+          ) : null}
+        </Box>
 
         <Card
           elevation={0}

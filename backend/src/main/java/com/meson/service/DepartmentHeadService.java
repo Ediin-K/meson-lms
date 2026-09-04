@@ -20,6 +20,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -69,22 +70,23 @@ public class DepartmentHeadService {
     }
 
     /**
-     * One row per student enrolled in a department subject, tallied by attendance status.
-     * Students with no attendance records yet still appear (0 sessions) so coverage gaps show.
+     * One row per student enrolled in a department subject, tallied by attendance status,
+     * optionally narrowed to one subject and/or a date range (any null is ignored).
+     * Students with no matching records still appear (0 sessions) so coverage gaps show.
      * Sorted worst-first: students with sessions before those without, then ascending present %.
      */
-    public List<DepartmentAttendanceStudentRow> getAttendanceSummary() {
+    public List<DepartmentAttendanceStudentRow> getAttendanceSummary(Long subjectId, LocalDate from, LocalDate to) {
         Department department = getOwnDepartment();
         Long departmentId = department.getId();
 
         Map<Long, String> studentNames = new LinkedHashMap<>();
-        for (Enrollment enrollment : enrollmentRepository.findBySubjectDepartmentId(departmentId)) {
+        for (Enrollment enrollment : enrollmentRepository.findForAttendanceSummary(departmentId, subjectId)) {
             User student = enrollment.getUser();
             studentNames.putIfAbsent(student.getId(), fullName(student));
         }
 
         Map<Long, int[]> tally = new HashMap<>(); // [present, absent, late, excused]
-        for (AttendanceRecord record : attendanceRecordRepository.findByScheduleSessionSubjectDepartmentId(departmentId)) {
+        for (AttendanceRecord record : attendanceRecordRepository.findForSummary(departmentId, subjectId, from, to)) {
             User student = record.getStudent();
             studentNames.putIfAbsent(student.getId(), fullName(student));
             int[] counts = tally.computeIfAbsent(student.getId(), k -> new int[4]);
@@ -120,13 +122,16 @@ public class DepartmentHeadService {
         return rows;
     }
 
-    /** Full dated history + stats for one student, scoped to this head's own department. */
-    public AttendanceSummaryResponse getStudentAttendance(Long studentId) {
+    /**
+     * Full dated history + stats for one student, scoped to this head's own department,
+     * optionally narrowed to one subject and/or a date range (any null is ignored).
+     */
+    public AttendanceSummaryResponse getStudentAttendance(Long studentId, Long subjectId, LocalDate from, LocalDate to) {
         Department department = getOwnDepartment();
         if (!enrollmentRepository.existsByUserIdAndSubjectDepartmentId(studentId, department.getId())) {
             throw new AccessDeniedException("Studenti nuk i përket departamentit tuaj");
         }
-        return attendanceService.getForStudentInDepartment(studentId, department.getId());
+        return attendanceService.getForStudentInDepartment(studentId, department.getId(), subjectId, from, to);
     }
 
     private Department getOwnDepartment() {

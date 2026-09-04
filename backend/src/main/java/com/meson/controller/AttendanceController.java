@@ -48,15 +48,22 @@ public class AttendanceController {
 
     @GetMapping("/admin/summary")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<AdminAttendanceStudentRow>> getAdminSummary() {
-        return ResponseEntity.ok(attendanceService.getAdminAttendanceSummary());
+    public ResponseEntity<List<AdminAttendanceStudentRow>> getAdminSummary(
+            @RequestParam(required = false) Long departmentId,
+            @RequestParam(required = false) Long subjectId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo) {
+        return ResponseEntity.ok(attendanceService.getAdminAttendanceSummary(departmentId, subjectId, dateFrom, dateTo));
     }
 
     @GetMapping("/admin/student/{studentId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AttendanceSummaryResponse> getAdminStudentAttendance(
             @PathVariable Long studentId,
-            @RequestParam Long departmentId) {
-        return ResponseEntity.ok(attendanceService.getAdminStudentAttendance(studentId, departmentId));
+            @RequestParam Long departmentId,
+            @RequestParam(required = false) Long subjectId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo) {
+        return ResponseEntity.ok(attendanceService.getAdminStudentAttendance(studentId, departmentId, subjectId, dateFrom, dateTo));
     }
 }

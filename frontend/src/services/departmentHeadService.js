@@ -15,12 +15,16 @@ export const getSubjects = async () => {
   return data;
 };
 
-export const getAttendanceSummary = async () => {
-  const { data } = await axiosInstance.get("/department-head/attendance");
+export const getAttendanceSummary = async ({ subjectId, dateFrom, dateTo } = {}) => {
+  const { data } = await axiosInstance.get("/department-head/attendance", {
+    params: { subjectId, dateFrom, dateTo },
+  });
   return data;
 };
 
-export const getStudentAttendance = async (studentId) => {
-  const { data } = await axiosInstance.get(`/department-head/attendance/${studentId}`);
+export const getStudentAttendance = async (studentId, { subjectId, dateFrom, dateTo } = {}) => {
+  const { data } = await axiosInstance.get(`/department-head/attendance/${studentId}`, {
+    params: { subjectId, dateFrom, dateTo },
+  });
   return data;
 };
