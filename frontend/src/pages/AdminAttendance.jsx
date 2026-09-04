@@ -30,9 +30,11 @@ import {
 import ArrowBackRounded from "@mui/icons-material/ArrowBackRounded";
 import EventAvailableRounded from "@mui/icons-material/EventAvailableRounded";
 import CloseRounded from "@mui/icons-material/CloseRounded";
+import DownloadRounded from "@mui/icons-material/DownloadRounded";
 import Footer from "../components/ui/Footer";
 import axiosInstance from "../services/axiosInstance";
 import { getAdminAttendanceSummary, getAdminStudentAttendance } from "../services/attendanceService";
+import { downloadCsv } from "../utils/csvExport";
 
 const STATUS_STYLE = {
   PRESENT: "!bg-emerald-100 !text-emerald-800 dark:!bg-emerald-950/60 dark:!text-emerald-300",
@@ -163,6 +165,28 @@ export default function AdminAttendance() {
 
   const pctLabel = (row) => (row.totalSessions === 0 ? "—" : `${row.presentPercentage.toFixed(0)}%`);
 
+  const exportCsv = () => {
+    const headers = [
+      t("adminAttendance.tableName"),
+      t("adminAttendance.tableDepartment"),
+      t("adminAttendance.tableSessions"),
+      t("adminAttendance.tablePresentPct"),
+      t("adminAttendance.tableAbsent"),
+      t("adminAttendance.tableLate"),
+      t("adminAttendance.tableExcused"),
+    ];
+    const csvRows = rows.map((row) => [
+      row.studentName,
+      row.departmentName,
+      row.totalSessions,
+      row.totalSessions === 0 ? "" : row.presentPercentage.toFixed(0),
+      row.absentCount,
+      row.lateCount,
+      row.excusedCount,
+    ]);
+    downloadCsv(`vijueshmeria-admin-${new Date().toISOString().slice(0, 10)}.csv`, headers, csvRows);
+  };
+
   return (
     <section className="flex flex-col min-h-screen">
       <Container maxWidth="lg" className="grow py-8 mt-4 sm:mt-8">
@@ -240,6 +264,15 @@ export default function AdminAttendance() {
               {t("adminAttendance.filterClear")}
             </Button>
           ) : null}
+          <Button
+            startIcon={<DownloadRounded />}
+            onClick={exportCsv}
+            disabled={rows.length === 0}
+            className="normal-case! ml-auto!"
+            variant="outlined"
+          >
+            {t("adminAttendance.exportCsv")}
+          </Button>
         </Box>
 
         <Card
