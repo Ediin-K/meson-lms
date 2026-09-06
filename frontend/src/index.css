@@ -203,28 +203,67 @@ button:disabled,
 @supports not ((-webkit-backdrop-filter: blur(2px)) or (backdrop-filter: blur(2px))) {
   .glass,
   .glass-nav,
-  .glass-nav.is-scrolled {
-    background-color: rgba(255, 255, 255, 0.96);
+  .glass-nav.is-scrolled,
+  .MuiDialog-paper,
+  .MuiPopover-paper,
+  .MuiMenu-paper {
+    background-color: rgba(255, 255, 255, 0.97) !important;
   }
   .dark .glass,
   .dark .glass-nav,
-  .dark .glass-nav.is-scrolled {
-    background-color: rgba(15, 23, 42, 0.97);
+  .dark .glass-nav.is-scrolled,
+  .dark .MuiDialog-paper,
+  .dark .MuiPopover-paper,
+  .dark .MuiMenu-paper {
+    background-color: rgba(15, 23, 42, 0.98) !important;
+  }
+  .MuiOutlinedInput-root,
+  .MuiInputBase-root.MuiInputBase-formControl,
+  .MuiButton-outlined {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+  }
+  .dark .MuiOutlinedInput-root,
+  .dark .MuiInputBase-root.MuiInputBase-formControl,
+  .dark .MuiButton-outlined {
+    background-color: rgba(17, 24, 39, 0.95) !important;
   }
 }
 
 @media (prefers-reduced-transparency: reduce) {
   .glass,
   .glass-nav,
-  .glass-nav.is-scrolled {
-    background-color: rgba(255, 255, 255, 0.98);
+  .glass-nav.is-scrolled,
+  .MuiDialog-paper,
+  .MuiPopover-paper,
+  .MuiMenu-paper,
+  .MuiOutlinedInput-root,
+  .MuiInputBase-root.MuiInputBase-formControl,
+  .MuiButton-outlined,
+  .MuiButton-text {
+    background-color: rgba(255, 255, 255, 0.98) !important;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
   .dark .glass,
   .dark .glass-nav,
-  .dark .glass-nav.is-scrolled {
-    background-color: rgba(15, 23, 42, 0.98);
+  .dark .glass-nav.is-scrolled,
+  .dark .MuiDialog-paper,
+  .dark .MuiPopover-paper,
+  .dark .MuiMenu-paper,
+  .dark .MuiOutlinedInput-root,
+  .dark .MuiInputBase-root.MuiInputBase-formControl,
+  .dark .MuiButton-outlined {
+    background-color: rgba(15, 23, 42, 0.98) !important;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .MuiButton-text {
+    background-color: transparent !important;
+  }
+  .dark .MuiButton-text {
+    background-color: transparent !important;
+  }
+  .MuiBackdrop-root:not(.MuiBackdrop-invisible) {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
@@ -276,13 +315,76 @@ button:disabled,
   animation: marquee 60s linear infinite;
 }
 
+/* Frosted-glass MUI overlays: dialogs (add/edit boxes), Select menus, popovers.
+   Fills are translucent; text inside stays fully opaque so forms read fine.
+   The blurred, lightened backdrop below lets the page show through softly. */
+.MuiDialog-paper,
+.MuiPopover-paper,
+.MuiMenu-paper {
+  background-color: rgba(255, 255, 255, 0.62) !important;
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  backdrop-filter: blur(30px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.55) !important;
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.65),
+    0 24px 60px -12px rgba(15, 23, 42, 0.28) !important;
+}
+
 .dark .MuiDialog-paper,
 .dark .MuiPopover-paper,
 .dark .MuiMenu-paper {
-  background-color: #0f172a !important;
+  background-color: rgba(15, 23, 42, 0.58) !important;
   color: #f8fafc !important;
-  border: 1px solid #334155 !important;
-  box-shadow: 0 30px 70px rgba(2, 6, 23, 0.65) !important;
+  border: 1px solid rgba(148, 163, 184, 0.2) !important;
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.08),
+    0 30px 70px rgba(2, 6, 23, 0.6) !important;
+}
+
+/* Keep the whole dialog one uniform sheet of glass — no sub-section paints
+   its own fill over the frosted paper (both themes). */
+.MuiDialogTitle-root,
+.MuiDialogContent-root,
+.MuiDialogActions-root {
+  background-color: transparent !important;
+}
+
+.MuiBackdrop-root:not(.MuiBackdrop-invisible) {
+  background-color: rgba(2, 6, 23, 0.4) !important;
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+}
+
+/* ── Frosted form controls ──────────────────────────────────────────
+   Text fields, selects and secondary buttons get a translucent, lightly
+   blurred fill. Typed text, labels, borders and focus rings stay solid;
+   primary (contained) buttons stay opaque so the main action reads first. */
+.MuiOutlinedInput-root,
+.MuiInputBase-root.MuiInputBase-formControl {
+  background-color: rgba(255, 255, 255, 0.5) !important;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.dark .MuiOutlinedInput-root,
+.dark .MuiInputBase-root.MuiInputBase-formControl {
+  background-color: rgba(15, 23, 42, 0.42) !important;
+}
+
+.MuiButton-outlined,
+.MuiButton-text {
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.MuiButton-outlined {
+  background-color: rgba(255, 255, 255, 0.45) !important;
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.55);
+}
+
+.dark .MuiButton-outlined {
+  background-color: rgba(15, 23, 42, 0.4) !important;
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.07);
 }
 
 .dark .MuiDialogTitle-root,
