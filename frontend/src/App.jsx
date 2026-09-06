@@ -36,6 +36,7 @@ const AdminDepartments = lazy(() => import("./pages/AdminDepartments.jsx"));
 const AdminAcademicTerms = lazy(() => import("./pages/AdminAcademicTerms.jsx"));
 const AdminGradeAuditLog = lazy(() => import("./pages/AdminGradeAuditLog.jsx"));
 const AdminAttendance = lazy(() => import("./pages/AdminAttendance.jsx"));
+const AdminAttendanceDetail = lazy(() => import("./pages/AdminAttendanceDetail.jsx"));
 const AdminTeachers = lazy(() => import("./pages/AdminTeachers.jsx"));
 const AdminEnrollments = lazy(() => import("./pages/AdminEnrollments.jsx"));
 const AdminCertificates = lazy(() => import("./pages/AdminCertificates.jsx"));
@@ -78,6 +79,7 @@ const DepartmentHeadTeachers = lazy(() => import("./pages/departmentHead/Departm
 const DepartmentHeadStudents = lazy(() => import("./pages/departmentHead/DepartmentHeadStudents.jsx"));
 const DepartmentHeadGradeAuditLog = lazy(() => import("./pages/departmentHead/DepartmentHeadGradeAuditLog.jsx"));
 const DepartmentHeadAttendance = lazy(() => import("./pages/departmentHead/DepartmentHeadAttendance.jsx"));
+const DepartmentHeadAttendanceDetail = lazy(() => import("./pages/departmentHead/DepartmentHeadAttendanceDetail.jsx"));
 
 function RootRedirect() {
   const { isAuthenticated, role } = useAppPreferences();
@@ -245,6 +247,14 @@ function AppLayout() {
                 element={
                   <ProtectedRoute requiredRole="admin">
                     <AdminAttendance />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/attendance/:studentId"
+                element={
+                  <ProtectedRoute requiredRole="admin">
+                    <AdminAttendanceDetail />
                   </ProtectedRoute>
                 }
               />
@@ -442,6 +452,7 @@ function AppLayout() {
                 <Route path="teachers" element={<DepartmentHeadTeachers />} />
                 <Route path="students" element={<DepartmentHeadStudents />} />
                 <Route path="attendance" element={<DepartmentHeadAttendance />} />
+                <Route path="attendance/:studentId" element={<DepartmentHeadAttendanceDetail />} />
                 <Route path="grade-audit-log" element={<DepartmentHeadGradeAuditLog />} />
               </Route>
               <Route
