@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useAppPreferences } from "../../context/appPreferencesContext";
 import {
   Typography,
@@ -16,11 +16,6 @@ import {
   CircularProgress,
   Alert,
   Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  IconButton,
   FormControl,
   InputLabel,
   Select,
@@ -29,10 +24,9 @@ import {
 } from "@mui/material";
 import ArrowBackRounded from "@mui/icons-material/ArrowBackRounded";
 import EventAvailableRounded from "@mui/icons-material/EventAvailableRounded";
-import CloseRounded from "@mui/icons-material/CloseRounded";
 import DownloadRounded from "@mui/icons-material/DownloadRounded";
 import Footer from "../../components/ui/Footer";
-import { getAttendanceSummary, getStudentAttendance, getSubjects } from "../../services/departmentHeadService";
+import { getAttendanceSummary, getSubjects } from "../../services/departmentHeadService";
 import { downloadCsv } from "../../utils/csvExport";
 
 const STATUS_STYLE = {
@@ -49,40 +43,21 @@ function pctChipClass(row) {
   return STATUS_STYLE.ABSENT;
 }
 
-function StatItem({ label, value, highlight }) {
-  return (
-    <Box className="flex flex-1 flex-col rounded-lg border border-slate-300 bg-white px-5 py-4 dark:border-slate-700 dark:bg-slate-900">
-      <Typography variant="caption" className="!font-semibold !uppercase !tracking-wide !text-slate-500 dark:!text-slate-400">
-        {label}
-      </Typography>
-      <Typography
-        variant="h4"
-        className={`!mt-1 !font-bold !tabular-nums ${highlight ? "!text-sky-700 dark:!text-sky-400" : "!text-slate-800 dark:!text-white"}`}
-      >
-        {value}
-      </Typography>
-    </Box>
-  );
-}
-
 export default function DepartmentHeadAttendance() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useAppPreferences();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const subjectId = searchParams.get("subjectId") || "ALL";
+  const dateFrom = searchParams.get("dateFrom") || "";
+  const dateTo = searchParams.get("dateTo") || "";
+  const filtersActive = subjectId !== "ALL" || Boolean(dateFrom) || Boolean(dateTo);
 
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
   const [subjects, setSubjects] = useState([]);
-  const [subjectId, setSubjectId] = useState("ALL");
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
-  const filtersActive = subjectId !== "ALL" || Boolean(dateFrom) || Boolean(dateTo);
-
-  const [selected, setSelected] = useState(null); // { studentId, studentName }
-  const [detail, setDetail] = useState(null);
-  const [detailLoading, setDetailLoading] = useState(false);
-  const [detailError, setDetailError] = useState("");
 
   useEffect(() => {
     getSubjects().then(setSubjects).catch(() => {});
@@ -108,34 +83,31 @@ export default function DepartmentHeadAttendance() {
     load();
   }, [load]);
 
-  const clearFilters = () => {
-    setSubjectId("ALL");
-    setDateFrom("");
-    setDateTo("");
+  const updateParams = (updates) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      Object.entries(updates).forEach(([key, value]) => {
+        if (!value || value === "ALL") next.delete(key);
+        else next.set(key, value);
+      });
+      return next;
+    }, { replace: true });
   };
 
-  const openStudent = useCallback(async (row) => {
-    setSelected(row);
-    setDetail(null);
-    setDetailError("");
-    setDetailLoading(true);
-    try {
-      setDetail(await getStudentAttendance(row.studentId, {
-        subjectId: subjectId === "ALL" ? undefined : subjectId,
-        dateFrom: dateFrom || undefined,
-        dateTo: dateTo || undefined,
-      }));
-    } catch (err) {
-      setDetailError(err?.response?.data?.message || t("departmentHead.attendance.loadError"));
-    } finally {
-      setDetailLoading(false);
-    }
-  }, [subjectId, dateFrom, dateTo, t]);
+  const clearFilters = () => setSearchParams({}, { replace: true });
 
-  const closeDialog = () => {
-    setSelected(null);
-    setDetail(null);
-    setDetailError("");
+  const openStudent = (row) => {
+    const qs = new URLSearchParams();
+    if (subjectId !== "ALL") qs.set("subjectId", subjectId);
+    if (dateFrom) qs.set("dateFrom", dateFrom);
+    if (dateTo) qs.set("dateTo", dateTo);
+    const query = qs.toString();
+    navigate(`${row.studentId}${query ? `?${query}` : ""}`, {
+      state: {
+        studentName: row.studentName,
+        from: `${location.pathname}${location.search}`,
+      },
+    });
   };
 
   const pctLabel = (row) => (row.totalSessions === 0 ? "—" : `${row.presentPercentage.toFixed(0)}%`);
@@ -194,7 +166,7 @@ export default function DepartmentHeadAttendance() {
               labelId="dh-attendance-subject-filter"
               label={t("departmentHead.attendance.filterSubject")}
               value={subjectId}
-              onChange={(e) => setSubjectId(e.target.value)}
+              onChange={(e) => updateParams({ subjectId: e.target.value })}
             >
               <MenuItem value="ALL">{t("departmentHead.attendance.filterSubjectAll")}</MenuItem>
               {subjects.map((s) => (
@@ -207,7 +179,7 @@ export default function DepartmentHeadAttendance() {
             type="date"
             label={t("departmentHead.attendance.filterDateFrom")}
             value={dateFrom}
-            onChange={(e) => setDateFrom(e.target.value)}
+            onChange={(e) => updateParams({ dateFrom: e.target.value })}
             InputLabelProps={{ shrink: true }}
           />
           <TextField
@@ -215,7 +187,7 @@ export default function DepartmentHeadAttendance() {
             type="date"
             label={t("departmentHead.attendance.filterDateTo")}
             value={dateTo}
-            onChange={(e) => setDateTo(e.target.value)}
+            onChange={(e) => updateParams({ dateTo: e.target.value })}
             InputLabelProps={{ shrink: true }}
           />
           {filtersActive ? (
@@ -302,72 +274,6 @@ export default function DepartmentHeadAttendance() {
         </Card>
       </Container>
       <Footer />
-
-      <Dialog open={Boolean(selected)} onClose={closeDialog} maxWidth="md" fullWidth>
-        <DialogTitle className="flex! items-center! justify-between! font-bold!">
-          {selected?.studentName}
-          <IconButton onClick={closeDialog} size="small">
-            <CloseRounded />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent dividers>
-          {detailLoading ? (
-            <Box className="flex justify-center py-16">
-              <CircularProgress />
-            </Box>
-          ) : detailError ? (
-            <Alert severity="error">{detailError}</Alert>
-          ) : detail ? (
-            <>
-              <Box className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <StatItem
-                  label={t("departmentHead.attendance.statPresentPct")}
-                  value={detail.totalSessions > 0 ? `${detail.presentPercentage.toFixed(0)}%` : "—"}
-                  highlight
-                />
-                <StatItem label={t("departmentHead.attendance.statPresent")} value={detail.presentCount} />
-                <StatItem label={t("departmentHead.attendance.statAbsent")} value={detail.absentCount} />
-                <StatItem label={t("departmentHead.attendance.statLateExcused")} value={detail.lateCount + detail.excusedCount} />
-              </Box>
-              <TableContainer className="rounded-lg! border! border-slate-300! bg-white! dark:border-slate-700! dark:bg-slate-900!">
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell className="font-bold!">{t("departmentHead.attendance.historyDate")}</TableCell>
-                      <TableCell className="font-bold!">{t("departmentHead.attendance.historySubject")}</TableCell>
-                      <TableCell className="font-bold!">{t("departmentHead.attendance.historyStatus")}</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {detail.records.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={3} align="center" className="py-10!">
-                          {t("departmentHead.attendance.noHistory")}
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      detail.records.map((r) => (
-                        <TableRow key={r.id}>
-                          <TableCell>{r.sessionDate}</TableCell>
-                          <TableCell>{r.subjectTitulli}</TableCell>
-                          <TableCell>
-                            <Chip size="small" label={t(`teacherAttendance.status.${r.status}`)} className={STATUS_STYLE[r.status]} />
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </>
-          ) : null}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={closeDialog} className="normal-case!">
-            {t("departmentHead.attendance.close")}
-          </Button>
-        </DialogActions>
-      </Dialog>
     </section>
   );
 }
