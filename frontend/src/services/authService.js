@@ -2,6 +2,21 @@
 
 const API_URL = 'http://localhost:8080/api/auth';
 
+const ROLE_PRIORITY = ['admin', 'department_head', 'teacher', 'student'];
+
+/** Persist the role set from an auth response so a page reload restores it. */
+function persistRoles(data) {
+    const roles = (data.roles?.length ? data.roles : [data.role])
+        .map((r) => String(r || '').toLowerCase())
+        .filter(Boolean);
+    const primary = ROLE_PRIORITY.find((r) => roles.includes(r)) || roles[0] || 'guest';
+    try {
+        localStorage.setItem('meson-roles', JSON.stringify(roles.length ? roles : ['guest']));
+        localStorage.setItem('meson-active-role', primary);
+        localStorage.setItem('meson-role', primary);
+    } catch { void 0 }
+}
+
 export const login = async (email, password) => {
     const response = await fetch(`${API_URL}/login`, {
         method: 'POST',
@@ -34,7 +49,7 @@ export const login = async (email, password) => {
     if (!data.mustChangePassword) {
         localStorage.setItem('userId', data.userId)
         localStorage.setItem('email', email)
-        localStorage.setItem('meson-role', data.role ?? '')
+        persistRoles(data)
     }
 
     return {
@@ -63,7 +78,7 @@ export const changeTemporaryPassword = async (currentPassword, newPassword) => {
     const data = await response.json();
     localStorage.setItem('userId', data.userId)
     localStorage.setItem('email', data.email)
-    localStorage.setItem('meson-role', data.role ?? '')
+    persistRoles(data)
     return data;
 };
 
@@ -73,6 +88,8 @@ export const logout = async () => {
     } catch { void 0 }
     localStorage.removeItem('email')
     localStorage.removeItem('meson-role')
+    localStorage.removeItem('meson-roles')
+    localStorage.removeItem('meson-active-role')
     localStorage.removeItem('userId')
     localStorage.removeItem('lastSubjectId')
 };

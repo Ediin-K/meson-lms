@@ -28,8 +28,23 @@ function ThemeToggleIcon({ dark }) {
   )
 }
 
+const ROLE_HOME = {
+  admin: '/admin',
+  department_head: '/department-head',
+  teacher: '/teacher',
+  student: '/student',
+}
+
+function roleLabel(t, r) {
+  if (r === 'admin') return 'Admin'
+  if (r === 'teacher') return 'Teacher'
+  if (r === 'department_head') return t('adminUsers.form.roleDepartment_head')
+  if (r === 'student') return t('header.studentLabel')
+  return r
+}
+
 export default function Header() {
-  const { locale, setLocale, role, colorMode, toggleColorMode, t, isAuthenticated, logout } = useAppPreferences()
+  const { locale, setLocale, role, roles, setActiveRole, colorMode, toggleColorMode, t, isAuthenticated, logout } = useAppPreferences()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [langOpen, setLangOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
@@ -347,6 +362,33 @@ export default function Header() {
                   className="absolute right-0 top-full z-[55] mt-2 w-56 rounded-2xl border border-slate-200/90 bg-white/98 p-2 shadow-xl shadow-slate-900/12"
                   role="menu"
                 >
+                  {roles.length > 1 ? (
+                    <>
+                      <p className="px-3 pt-1 pb-1 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                        {t('header.viewingAs')}
+                      </p>
+                      {roles.map((r) => (
+                        <button
+                          key={r}
+                          type="button"
+                          role="menuitemradio"
+                          aria-checked={r === role}
+                          className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm font-medium outline-none hover:bg-sky-50/90 focus-visible:bg-sky-50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sky-500 ${r === role ? 'text-sky-700' : 'text-slate-700'}`}
+                          onClick={() => {
+                            setProfileOpen(false)
+                            if (r !== role) {
+                              setActiveRole(r)
+                              navigate(ROLE_HOME[r] || '/')
+                            }
+                          }}
+                        >
+                          {roleLabel(t, r)}
+                          {r === role ? <span aria-hidden>✓</span> : null}
+                        </button>
+                      ))}
+                      <div className="my-1 h-px bg-slate-200" />
+                    </>
+                  ) : null}
                   {[
                     { label: t('header.profile'), href: profileHref },
                     {
@@ -478,11 +520,36 @@ export default function Header() {
                 </span>
                 <div>
                   <p className="text-sm font-semibold text-slate-800">
-                    {role === 'admin' ? 'Admin' : role === 'teacher' ? 'Teacher' : role === 'department_head' ? t('adminUsers.form.roleDepartment_head') : t('header.studentLabel')}
+                    {roleLabel(t, role)}
                   </p>
                   <p className="text-xs text-slate-500 capitalize">{role}</p>
                 </div>
               </div>
+              {roles.length > 1 ? (
+                <div className="flex flex-col gap-1 rounded-xl bg-slate-50 px-2 py-2 ring-1 ring-slate-200/60">
+                  <p className="px-1 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                    {t('header.viewingAs')}
+                  </p>
+                  {roles.map((r) => (
+                    <button
+                      key={r}
+                      type="button"
+                      aria-pressed={r === role}
+                      className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm font-medium outline-none hover:bg-slate-900/[0.06] ${r === role ? 'text-sky-700' : 'text-slate-700'}`}
+                      onClick={() => {
+                        setMobileOpen(false)
+                        if (r !== role) {
+                          setActiveRole(r)
+                          navigate(ROLE_HOME[r] || '/')
+                        }
+                      }}
+                    >
+                      {roleLabel(t, r)}
+                      {r === role ? <span aria-hidden>✓</span> : null}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
               <button
                 type="button"
                 className="w-full rounded-xl px-3 py-3 text-left text-sm font-medium text-slate-800 outline-none hover:bg-slate-900/[0.06] focus-visible:ring-2 focus-visible:ring-sky-500"

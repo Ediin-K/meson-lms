@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
 import java.util.function.Function;
 
 @Service
@@ -43,10 +44,10 @@ public class JwtService {
         return Boolean.TRUE.equals(flag);
     }
 
-    public String generateToken(String email, String role) {
+    public String generateToken(String email, List<String> roles) {
         return Jwts.builder()
                 .setSubject(email)
-                .claim("role", role)
+                .claim("roles", roles)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getKey(), SignatureAlgorithm.HS256)
@@ -57,8 +58,21 @@ public class JwtService {
         return extractClaim(token, Claims::getSubject);
     }
 
-    public String extractRole(String token) {
-        return extractClaim(token, claims -> claims.get("role", String.class));
+    /**
+     * All roles carried by the token. Reads the "roles" array claim; falls back to the
+     * legacy singular "role" claim so a token minted just before this change still
+     * authenticates for its remaining lifetime.
+     */
+    @SuppressWarnings("unchecked")
+    public List<String> extractRoles(String token) {
+        return extractClaim(token, claims -> {
+            Object roles = claims.get("roles");
+            if (roles instanceof List<?> list) {
+                return list.stream().map(String::valueOf).toList();
+            }
+            String single = claims.get("role", String.class);
+            return single != null ? List.of(single) : List.of();
+        });
     }
 
     public boolean isTokenValid(String token, String email) {

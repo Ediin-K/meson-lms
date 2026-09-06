@@ -29,6 +29,7 @@ public class AccountService {
     private final UserRoleRepository userRoleRepository;
     private final PasswordEncoder passwordEncoder;
     private final FileStorageService fileStorageService;
+    private final RoleResolver roleResolver;
 
     public AccountResponse getCurrentAccount() {
         return toResponse(currentUser());
@@ -123,12 +124,14 @@ public class AccountService {
     }
 
     private AccountResponse toResponse(User user) {
-        String role = userRoleRepository.findByUser(user).stream()
-                .findFirst()
-                .map(UserRole::getRole)
-                .map(r -> r.getEmertimi() != null ? r.getEmertimi().toLowerCase(Locale.ROOT) : "guest")
-                .map(r -> "prind".equals(r) ? "parent" : r)
-                .orElse("guest");
+        var userRoles = userRoleRepository.findByUser(user).stream().map(UserRole::getRole).toList();
+        var primary = roleResolver.primary(userRoles);
+        String role = primary != null && primary.getEmertimi() != null
+                ? primary.getEmertimi().toLowerCase(Locale.ROOT)
+                : "guest";
+        if ("prind".equals(role)) {
+            role = "parent";
+        }
 
         boolean hasPhoto = user.getPhotoPath() != null;
         return AccountResponse.builder()

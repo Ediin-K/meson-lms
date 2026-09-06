@@ -9,7 +9,7 @@ import { changeTemporaryPassword } from '../services/authService.js'
 import { useAppPreferences } from '../context/appPreferencesContext.js'
 
 export default function ChangeTemporaryPassword() {
-    const { setIsAuthenticated, setRole, t } = useAppPreferences()
+    const { setIsAuthenticated, setRoles, t } = useAppPreferences()
     const navigate = useNavigate()
 
     const [currentPassword, setCurrentPassword] = useState('')
@@ -29,7 +29,7 @@ export default function ChangeTemporaryPassword() {
         try {
             const data = await changeTemporaryPassword(currentPassword, newPassword)
             setIsAuthenticated(true)
-            if (data.role) setRole(data.role)
+            if (data.roles?.length || data.role) setRoles(data.roles?.length ? data.roles : [data.role])
             const role = data.role?.toLowerCase()
             const destination =
                 role === 'admin' ? '/admin'

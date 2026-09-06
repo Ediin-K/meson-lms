@@ -49,7 +49,7 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         String email = jwtService.extractEmail(token);
-        String tokenRole = jwtService.extractRole(token);
+        java.util.List<String> tokenRoles = jwtService.extractRoles(token);
 
         // Restricted must-change-password tokens only authenticate the
         // password-change endpoint; everywhere else they carry no authority.
@@ -82,8 +82,10 @@ public class JwtFilter extends OncePerRequestFilter {
             if (userOptional.isPresent() && jwtService.isTokenValid(token, email)) {
 
                 var authorities = new java.util.ArrayList<org.springframework.security.core.GrantedAuthority>();
-                if (tokenRole != null) {
-                    authorities.add(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + tokenRole.toUpperCase()));
+                for (String tokenRole : tokenRoles) {
+                    if (tokenRole != null && !tokenRole.isBlank()) {
+                        authorities.add(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + tokenRole.toUpperCase()));
+                    }
                 }
 
                 // Load UserClaims from DB and add as authorities (format: "claimType:claimValue")
