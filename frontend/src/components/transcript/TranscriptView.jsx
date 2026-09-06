@@ -43,7 +43,7 @@ export default function TranscriptView({ profile, summary }) {
       <div className="grid gap-3 p-5 sm:grid-cols-2 lg:grid-cols-4 lg:p-6">
         {stats.map(([label, value]) => (
           <div key={label} className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-950">
-            <p className="text-xs font-black uppercase tracking-widest text-slate-500">{label}</p>
+            <p className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">{label}</p>
             <p className="mt-1 text-2xl font-black text-slate-950 dark:text-white">{value}</p>
           </div>
         ))}
@@ -65,7 +65,7 @@ export default function TranscriptView({ profile, summary }) {
                   </Typography>
                 </div>
                 <div className="overflow-x-auto">
-                  <table className="min-w-full border-separate border-spacing-0 text-left text-sm">
+                  <table className="min-w-full border-separate border-spacing-0 text-left text-sm text-slate-700 dark:text-slate-200">
                     <thead className="bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200">
                       <tr>
                         {['Kodi', 'Lenda', 'Profesori', 'Nota', 'ECTS', 'Data', 'Koment'].map((h) => (
