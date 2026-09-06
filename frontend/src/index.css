@@ -144,6 +144,132 @@ button:disabled,
 }
 
 
+/* ── Liquid-glass chrome ──────────────────────────────────────────────
+   Shared frosted material for floating chrome: dropdown menus, the mobile
+   drawer, sidebars. Content surfaces (cards, tables, forms) stay solid.
+   `.glass-nav` is the fixed header, with `.is-scrolled` for the state once
+   the page has moved. Fallbacks below keep both readable where backdrop
+   blur is unsupported or the user asked for reduced transparency. */
+.glass {
+  background-color: rgba(255, 255, 255, 0.62);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.6),
+    0 12px 32px -8px rgba(15, 23, 42, 0.18);
+}
+
+.dark .glass {
+  background-color: rgba(15, 23, 42, 0.62);
+  border-color: rgba(148, 163, 184, 0.18);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.08),
+    0 18px 44px -12px rgba(0, 0, 0, 0.6);
+}
+
+.glass-nav {
+  background-color: rgba(255, 255, 255, 0.45);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  backdrop-filter: blur(16px) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.5);
+}
+
+.glass-nav.is-scrolled {
+  background-color: rgba(255, 255, 255, 0.72);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  border-bottom-color: rgba(226, 232, 240, 0.7);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.6),
+    0 8px 30px -6px rgba(15, 23, 42, 0.12);
+}
+
+.dark .glass-nav {
+  background-color: rgba(2, 6, 23, 0.4);
+  border-bottom-color: rgba(148, 163, 184, 0.12);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
+}
+
+.dark .glass-nav.is-scrolled {
+  background-color: rgba(15, 23, 42, 0.7);
+  border-bottom-color: rgba(51, 65, 85, 0.6);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.07),
+    0 8px 30px -6px rgba(0, 0, 0, 0.5);
+}
+
+@supports not ((-webkit-backdrop-filter: blur(2px)) or (backdrop-filter: blur(2px))) {
+  .glass,
+  .glass-nav,
+  .glass-nav.is-scrolled,
+  .MuiDialog-paper,
+  .MuiPopover-paper,
+  .MuiMenu-paper {
+    background-color: rgba(255, 255, 255, 0.97) !important;
+  }
+  .dark .glass,
+  .dark .glass-nav,
+  .dark .glass-nav.is-scrolled,
+  .dark .MuiDialog-paper,
+  .dark .MuiPopover-paper,
+  .dark .MuiMenu-paper {
+    background-color: rgba(15, 23, 42, 0.98) !important;
+  }
+  .MuiOutlinedInput-root,
+  .MuiInputBase-root.MuiInputBase-formControl,
+  .MuiButton-outlined {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+  }
+  .dark .MuiOutlinedInput-root,
+  .dark .MuiInputBase-root.MuiInputBase-formControl,
+  .dark .MuiButton-outlined {
+    background-color: rgba(17, 24, 39, 0.95) !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass,
+  .glass-nav,
+  .glass-nav.is-scrolled,
+  .MuiDialog-paper,
+  .MuiPopover-paper,
+  .MuiMenu-paper,
+  .MuiOutlinedInput-root,
+  .MuiInputBase-root.MuiInputBase-formControl,
+  .MuiButton-outlined,
+  .MuiButton-text {
+    background-color: rgba(255, 255, 255, 0.98) !important;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .dark .glass,
+  .dark .glass-nav,
+  .dark .glass-nav.is-scrolled,
+  .dark .MuiDialog-paper,
+  .dark .MuiPopover-paper,
+  .dark .MuiMenu-paper,
+  .dark .MuiOutlinedInput-root,
+  .dark .MuiInputBase-root.MuiInputBase-formControl,
+  .dark .MuiButton-outlined {
+    background-color: rgba(15, 23, 42, 0.98) !important;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .MuiButton-text {
+    background-color: transparent !important;
+  }
+  .dark .MuiButton-text {
+    background-color: transparent !important;
+  }
+  .MuiBackdrop-root:not(.MuiBackdrop-invisible) {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+
 @keyframes float {
   0% { transform: translateY(0px); }
   50% { transform: translateY(-10px); }
@@ -189,13 +315,76 @@ button:disabled,
   animation: marquee 60s linear infinite;
 }
 
+/* Frosted-glass MUI overlays: dialogs (add/edit boxes), Select menus, popovers.
+   Fills are translucent; text inside stays fully opaque so forms read fine.
+   The blurred, lightened backdrop below lets the page show through softly. */
+.MuiDialog-paper,
+.MuiPopover-paper,
+.MuiMenu-paper {
+  background-color: rgba(255, 255, 255, 0.62) !important;
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  backdrop-filter: blur(30px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.55) !important;
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.65),
+    0 24px 60px -12px rgba(15, 23, 42, 0.28) !important;
+}
+
 .dark .MuiDialog-paper,
 .dark .MuiPopover-paper,
 .dark .MuiMenu-paper {
-  background-color: #0f172a !important;
+  background-color: rgba(15, 23, 42, 0.58) !important;
   color: #f8fafc !important;
-  border: 1px solid #334155 !important;
-  box-shadow: 0 30px 70px rgba(2, 6, 23, 0.65) !important;
+  border: 1px solid rgba(148, 163, 184, 0.2) !important;
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.08),
+    0 30px 70px rgba(2, 6, 23, 0.6) !important;
+}
+
+/* Keep the whole dialog one uniform sheet of glass — no sub-section paints
+   its own fill over the frosted paper (both themes). */
+.MuiDialogTitle-root,
+.MuiDialogContent-root,
+.MuiDialogActions-root {
+  background-color: transparent !important;
+}
+
+.MuiBackdrop-root:not(.MuiBackdrop-invisible) {
+  background-color: rgba(2, 6, 23, 0.4) !important;
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+}
+
+/* ── Frosted form controls ──────────────────────────────────────────
+   Text fields, selects and secondary buttons get a translucent, lightly
+   blurred fill. Typed text, labels, borders and focus rings stay solid;
+   primary (contained) buttons stay opaque so the main action reads first. */
+.MuiOutlinedInput-root,
+.MuiInputBase-root.MuiInputBase-formControl {
+  background-color: rgba(255, 255, 255, 0.5) !important;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.dark .MuiOutlinedInput-root,
+.dark .MuiInputBase-root.MuiInputBase-formControl {
+  background-color: rgba(15, 23, 42, 0.42) !important;
+}
+
+.MuiButton-outlined,
+.MuiButton-text {
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.MuiButton-outlined {
+  background-color: rgba(255, 255, 255, 0.45) !important;
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.55);
+}
+
+.dark .MuiButton-outlined {
+  background-color: rgba(15, 23, 42, 0.4) !important;
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.07);
 }
 
 .dark .MuiDialogTitle-root,

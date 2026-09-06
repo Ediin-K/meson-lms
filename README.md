@@ -2,10 +2,12 @@
 
 Meson LMS is a full-stack Learning Management System and SMIS (Student Management
 Information System) built with Spring Boot, React, and MySQL. It supports
-role-based access for administrators, teachers, and students, covering everything
-from course content (subjects, modules, lessons, file resources, assignments,
-quizzes) to real university operations (bulk enrollment, academic terms, transcripts
-and GPA, grade audit trails, and exam registration).
+role-based access for administrators, department heads, teachers, and students
+(one account can hold several roles at once), covering everything from course
+content (subjects, modules, lessons, file resources, assignments, quizzes) to
+real university operations (bulk enrollment, academic terms, transcripts and GPA,
+attendance tracking, grade audit trails, in-app notifications, and exam
+registration).
 
 ## Technologies
 
@@ -38,10 +40,15 @@ and GPA, grade audit trails, and exam registration).
 ## Main Features
 
 - JWT authentication via httpOnly cookies, with refresh tokens
-- Role-based authorization (Admin, Teacher, Student, Assistant)
+- Role-based authorization (Admin, Department Head, Teacher, Student). One account
+  can hold multiple roles; the header has a "Viewing as" switcher that changes the
+  active view while the backend still honours every role the account holds
+- Department Head: a department-scoped admin — own-department dashboard, subject
+  CRUD, teaching-assignment oversight, department grade audit log, and read-only
+  student/attendance visibility for their department
 - Per-account login lockout (7 failed attempts locks for 15 minutes, auto-expires)
   and IP-based login rate limiting
-- Admin, teacher, and student dashboards
+- Admin, department head, teacher, and student dashboards
 - Subject and Department management (CRUD)
 - Module and lesson management, with file upload/preview/download for lesson
   resources
@@ -49,6 +56,10 @@ and GPA, grade audit trails, and exam registration).
 - Quiz creation, publishing, timed attempts, automatic backend scoring, and a
   teacher results dashboard
 - Subject groups/subgroups and schedule management
+- Attendance tracking: teachers mark a roster (present / absent / late / excused)
+  per session and date; students see their own history and stats; department heads
+  and admins get worst-first summaries with subject and date-range filters, CSV
+  export, and a per-student drill-down page
 - Bulk user import via CSV, with per-row partial success, temp passwords, and
   optional email delivery
 - Academic terms that gate enrollment and exam-registration windows
@@ -56,9 +67,11 @@ and GPA, grade audit trails, and exam registration).
 - Transcripts with ECTS-weighted GPA, grouped by semester, printable/exportable;
   admins can view any student's transcript
 - Grade audit trail (who changed a grade, when, and the before/after value),
-  viewable per-grade by teachers and globally by admins
-- Email notifications for grade posting and enrollment confirmation (best-effort,
-  opt-in via `MAIL_ENABLED`)
+  viewable per-grade by teachers, department-scoped by department heads, and
+  globally by admins
+- In-app notifications (bell icon with unread count) plus best-effort email, fired
+  on grade posting, enrollment confirmation, and SMIS exam grading; email is
+  opt-in via `MAIL_ENABLED`
 - Certificate management
 - Cookie/privacy consent UI
 
@@ -206,8 +219,12 @@ For protected endpoints:
 
 | Method | Endpoint | Description |
 |---|---|---|
-| POST | `/api/auth/login` | Login and receive JWT + refresh token |
+| POST | `/api/auth/login` | Login; sets JWT + refresh cookies, returns the account's role list |
 | POST | `/api/auth/refresh` | Refresh expired JWT |
+| POST | `/api/auth/change-temporary-password` | Set a real password after an admin-issued temp one |
+
+The JWT carries every role the account holds, so a single login authenticates for
+all of that account's roles' endpoints.
 
 ### Subjects And Lessons
 
@@ -252,15 +269,51 @@ correctness.
 | POST | `/api/users/bulk-import` | Bulk-create accounts from a CSV upload |
 | GET/POST | `/api/academic-terms` | Manage academic terms (enrollment/exam windows) |
 | GET | `/api/grades/student/{id}` | Student transcript (grades + GPA) |
-| GET | `/api/grades/audit-log` | Global grade audit log (admin) |
+| GET | `/api/grades/audit-log` | Grade audit log (admin: global; department head: own department) |
 | GET | `/api/grades/{id}/history` | Per-grade audit history |
 | POST | `/api/smis/exam-applications` | Register for an exam |
 
+### Attendance
+
+| Method | Endpoint | Role | Description |
+|---|---|---|---|
+| GET | `/api/attendance/sessions/{id}/roster` | Teacher/Admin | Roster for a session on a date |
+| POST | `/api/attendance/sessions/{id}/mark` | Teacher/Admin | Mark statuses for a session/date |
+| GET | `/api/attendance/student/{id}` | self / Teacher / Admin | One student's attendance history + stats |
+| GET | `/api/attendance/admin/summary` | Admin | Cross-department summary (dept/subject/date filters) |
+| GET | `/api/attendance/admin/student/{id}` | Admin | Per-student drill-down |
+
+### Department Head
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/department-head/dashboard` | Own-department counts |
+| GET | `/api/department-head/subjects` | Own-department subjects |
+| GET | `/api/department-head/students` | Students enrolled in own-department subjects |
+| GET | `/api/department-head/attendance` | Own-department attendance summary (subject/date filters) |
+| GET | `/api/department-head/attendance/{studentId}` | Per-student drill-down (department-scoped) |
+
+Subject create/update/delete (`/api/subjects`) also accepts a department head,
+scoped to their own department.
+
+### Notifications
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/notifications` | Current user's notifications |
+| GET | `/api/notifications/unread-count` | Unread count for the bell badge |
+| PATCH | `/api/notifications/{id}/read` | Mark one as read |
+| PATCH | `/api/notifications/read-all` | Mark all as read |
+
 ## Security
 
-- JWT authentication via httpOnly cookies, with refresh tokens.
-- Protected frontend routes use role checks; backend endpoints use Spring Security
-  and `@PreAuthorize`.
+- JWT authentication via httpOnly cookies, with refresh tokens. The token carries
+  the account's full role list, granted as authorities on each request.
+- Protected frontend routes check role membership (a multi-role account may open
+  any of its roles' sections); backend endpoints use Spring Security and
+  `@PreAuthorize`. Department-scoped actions check `hasRole('ADMIN') or
+  (hasRole('DEPARTMENT_HEAD') and <owns this department>)` — admin is never
+  excluded.
 - Passwords are hashed with BCrypt.
 - Per-account login lockout: 7 failed attempts locks the account for 15 minutes,
   auto-expires, no admin action needed.
@@ -279,11 +332,12 @@ correctness.
 
 The main entities, grouped by area:
 
-**Identity & access**: `users`, `roles`, `user_roles`, `user_claims`, `user_tokens`,
-`refresh_tokens`
+**Identity & access**: `users`, `roles`, `user_roles` (many-to-many — an account
+may hold several roles), `user_claims`, `user_tokens`, `refresh_tokens`
 
-**Academic structure**: `universities`, `departments`, `subjects`, `modules`,
-`lessons`, `lesson_resources`, `academic_terms`
+**Academic structure**: `universities`, `departments` (a nullable `head_user_id`
+FK marks the department head), `subjects`, `modules`, `lessons`,
+`lesson_resources`, `academic_terms`
 
 **Enrollment & groups**: `enrollments`, `department_groups`, `subject_groups`,
 `subject_group_teachers`, `subject_subgroups`, `subject_subgroup_teachers`,
@@ -294,7 +348,8 @@ The main entities, grouped by area:
 `quiz_questions`, `quiz_answers`, `quiz_attempts`, `answer_submissions`,
 `lesson_progress`
 
-**Grades & records**: `grades`, `grade_audit_logs`, `certificates`
+**Grades & records**: `grades`, `grade_audit_logs`, `attendance_records`,
+`notifications`, `certificates`
 
 Migrations include indexes and foreign key constraints to preserve relational
 integrity.

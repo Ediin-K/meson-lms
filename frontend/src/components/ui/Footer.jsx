@@ -22,13 +22,13 @@ import {
 } from '../../legal/mesonLegalDocuments.js'
 
 const footerLinkClass =
-  'inline-flex text-slate-300 no-underline transition-colors hover:text-sky-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400'
+  'inline-flex text-slate-600 no-underline transition-colors hover:text-sky-600 dark:text-slate-300 dark:hover:text-sky-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400'
 
 const legalLinkClass =
   'font-medium text-indigo-600 underline decoration-indigo-600/50 underline-offset-2 transition-colors hover:text-indigo-500 dark:text-indigo-400 dark:decoration-indigo-400/50 dark:hover:text-indigo-300'
 
 const columnTitleClass =
-  '!text-xs !font-bold !uppercase !tracking-[0.2em] !text-sky-400/95'
+  '!text-xs !font-bold !uppercase !tracking-[0.2em] !text-sky-600 dark:!text-sky-400/95'
 
 export default function Footer() {
   const year = new Date().getFullYear()
@@ -51,7 +51,7 @@ export default function Footer() {
   return (
     <Box
       component="footer"
-      className="mb-0 w-full rounded-t-3xl rounded-b-none border-t border-sky-500/30 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-slate-200 shadow-[0_-16px_48px_-12px_rgba(15,23,42,0.45)]"
+      className="mb-0 w-full rounded-t-3xl rounded-b-none border-t border-slate-200 bg-gradient-to-b from-slate-50 via-slate-50 to-slate-100 text-slate-700 shadow-[0_-16px_48px_-12px_rgba(15,23,42,0.12)] dark:border-sky-500/30 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 dark:text-slate-200 dark:shadow-[0_-16px_48px_-12px_rgba(15,23,42,0.45)]"
     >
       <div
         className="h-1 w-full bg-gradient-to-r from-slate-950 via-sky-500 to-indigo-900 opacity-90"
@@ -65,7 +65,7 @@ export default function Footer() {
         <div className="grid gap-12 lg:grid-cols-12 lg:gap-10">
           <div className="lg:col-span-4">
             <Typography
-              className="!mb-3 !bg-gradient-to-r !from-white !to-sky-200 !bg-clip-text !text-3xl !font-black !tracking-tight !text-transparent sm:!text-4xl"
+              className="!mb-3 !bg-gradient-to-r !from-slate-900 !to-sky-600 !bg-clip-text !text-3xl !font-black !tracking-tight !text-transparent dark:!from-white dark:!to-sky-200 sm:!text-4xl"
               style={{
                 fontFamily:
                   'ui-rounded, "Nunito", "Segoe UI", system-ui, -apple-system, sans-serif',
@@ -76,7 +76,7 @@ export default function Footer() {
             </Typography>
             <Typography
               variant="body2"
-              className="!mb-8 !max-w-md !leading-relaxed !text-slate-400"
+              className="!mb-8 !max-w-md !leading-relaxed !text-slate-600 dark:!text-slate-400"
             >
               {t('footer.tagline')}
             </Typography>
@@ -87,7 +87,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="LinkedIn"
-                className="!border !border-white/15 !text-slate-300 transition hover:!scale-105 hover:!border-sky-400/60 hover:!bg-sky-500/20 hover:!text-sky-100 active:!scale-95"
+                className="!border !border-slate-300 !text-slate-500 transition hover:!scale-105 hover:!border-sky-400/60 hover:!bg-sky-500/20 hover:!text-sky-700 active:!scale-95 dark:!border-white/15 dark:!text-slate-300 dark:hover:!text-sky-100"
                 size="small"
               >
                 <LinkedIn fontSize="small" />
@@ -98,7 +98,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="X"
-                className="!border !border-white/15 !text-slate-300 transition hover:!scale-105 hover:!border-sky-400/60 hover:!bg-sky-500/20 hover:!text-sky-100 active:!scale-95"
+                className="!border !border-slate-300 !text-slate-500 transition hover:!scale-105 hover:!border-sky-400/60 hover:!bg-sky-500/20 hover:!text-sky-700 active:!scale-95 dark:!border-white/15 dark:!text-slate-300 dark:hover:!text-sky-100"
                 size="small"
               >
                 <XIcon fontSize="small" />
@@ -129,7 +129,7 @@ export default function Footer() {
               <ul className="mt-5 flex list-none flex-col gap-4 p-0">
                 <li className="flex gap-3">
                   <MailOutlineRounded
-                    className="mt-0.5 shrink-0 text-sky-400"
+                    className="mt-0.5 shrink-0 text-sky-500 dark:text-sky-400"
                     fontSize="small"
                   />
                   <div>
@@ -146,7 +146,7 @@ export default function Footer() {
                 </li>
                 <li className="flex gap-3">
                   <PhoneInTalkRounded
-                    className="mt-0.5 shrink-0 text-sky-400"
+                    className="mt-0.5 shrink-0 text-sky-500 dark:text-sky-400"
                     fontSize="small"
                   />
                   <div>
@@ -163,14 +163,14 @@ export default function Footer() {
                 </li>
                 <li className="flex gap-3">
                   <ScheduleRounded
-                    className="mt-0.5 shrink-0 text-sky-400"
+                    className="mt-0.5 shrink-0 text-sky-500 dark:text-sky-400"
                     fontSize="small"
                   />
                   <div>
                     <Typography variant="caption" className="!block !text-slate-500">
                       {t('footer.hours')}
                     </Typography>
-                    <Typography variant="body2" className="!text-slate-300">
+                    <Typography variant="body2" className="!text-slate-700 dark:!text-slate-300">
                       {t('footer.hoursVal')}
                     </Typography>
                   </div>
@@ -184,12 +184,12 @@ export default function Footer() {
               </Typography>
               <div className="mt-5 flex gap-3">
                 <LocationOnOutlined
-                  className="mt-0.5 shrink-0 text-sky-400"
+                  className="mt-0.5 shrink-0 text-sky-500 dark:text-sky-400"
                   fontSize="small"
                 />
                 <Typography
                   variant="body2"
-                  className="!leading-relaxed !whitespace-pre-line !text-slate-400"
+                  className="!leading-relaxed !whitespace-pre-line !text-slate-600 dark:!text-slate-400"
                 >
                   {t('footer.officeVal')}
                 </Typography>
@@ -211,7 +211,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <Divider className="!my-12 !border-slate-700/70" />
+        <Divider className="!my-12 !border-slate-200 dark:!border-slate-700/70" />
 
         <div className="flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
           <Typography variant="body2" className="!text-slate-500">

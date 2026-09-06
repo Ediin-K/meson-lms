@@ -114,15 +114,18 @@ function AppLayout() {
   const isLoginPage = location.pathname === "/login" || location.pathname.startsWith("/login/");
   const isQuizPage = /\/quiz\/\d+/.test(location.pathname);
   const isSmisPage = location.pathname.includes("/smis");
+  // Forced-action screen: user must finish here before doing anything else, so no
+  // nav chrome to wander off through.
+  const isChangePasswordPage = location.pathname === "/change-password";
 
   return (
       <div className="flex min-h-dvh flex-col bg-gradient-to-b from-sky-50 via-[#f0f7fb] to-[#d8e8f2] transition-colors dark:from-slate-950 dark:via-slate-900 dark:to-slate-900">
-        {!isLoginPage && !isQuizPage && <Header />}
+        {!isLoginPage && !isQuizPage && !isChangePasswordPage && <Header />}
         <SessionExpiredDialog />
         <main className="flex flex-col flex-grow">
           <div
             id="main-content"
-            className={`flex flex-col flex-grow ${isLoginPage || isQuizPage || isSmisPage ? "" : "pt-[73px] sm:pt-[81px]"}`}
+            className={`flex flex-col flex-grow ${isLoginPage || isQuizPage || isSmisPage || isChangePasswordPage ? "" : "pt-[73px] sm:pt-[81px]"}`}
             tabIndex={-1}
           >
             <Suspense fallback={<PageFallback />}>

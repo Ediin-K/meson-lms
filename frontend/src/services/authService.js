@@ -45,8 +45,16 @@ export const login = async (email, password) => {
 
     const data = await response.json();
 
-    // Temporary-password logins are not full sessions: don't persist auth state
-    if (!data.mustChangePassword) {
+    if (data.mustChangePassword) {
+        // Temporary-password logins are not full sessions. Wipe any leftover
+        // session state so the app treats the user as unauthenticated until
+        // the password is changed — no half-logged-in access to other pages.
+        localStorage.removeItem('userId')
+        localStorage.removeItem('email')
+        localStorage.removeItem('meson-role')
+        localStorage.removeItem('meson-roles')
+        localStorage.removeItem('meson-active-role')
+    } else {
         localStorage.setItem('userId', data.userId)
         localStorage.setItem('email', email)
         persistRoles(data)
