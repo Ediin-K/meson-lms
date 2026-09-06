@@ -7,6 +7,8 @@ import com.meson.entity.User;
 import com.meson.entity.UserRole;
 import com.meson.entity.UserToken;
 import com.meson.entity.RefreshToken;
+
+import java.util.List;
 import com.meson.exception.AccountLockedException;
 import com.meson.repository.UserRepository;
 import com.meson.repository.UserRoleRepository;
@@ -33,6 +35,7 @@ public class AuthService {
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
     private final UserTokenRepository userTokenRepository;
+    private final RoleResolver roleResolver;
 
     // noRollbackFor: failed-attempt bookkeeping below must survive even though this
     // method throws on every failure path — default rollback-on-RuntimeException
@@ -88,19 +91,11 @@ public class AuthService {
         user.setLockedUntil(null);
         userRepository.save(user);
 
-        Role role = userRoleRepository.findByUser(user)
-                .stream()
-                .findFirst()
-                .map(UserRole::getRole)
-                .orElse(null);
-
-        String roleName = (role != null)
-                ? role.getNormalizedName().toUpperCase()
-                : "GUEST";
-
-        String roleDisplay = (role != null)
-                ? role.getEmertimi().toLowerCase()
-                : "guest";
+        List<Role> roles = userRoleRepository.findByUser(user).stream().map(UserRole::getRole).toList();
+        Role primary = roleResolver.primary(roles);
+        List<String> tokenRoles = roles.isEmpty() ? List.of("GUEST") : roleResolver.normalizedNames(roles);
+        List<String> roleDisplays = roles.isEmpty() ? List.of("guest") : roleResolver.displayNames(roles);
+        String roleDisplay = (primary != null) ? primary.getEmertimi().toLowerCase() : "guest";
 
         if (user.isTemporaryPassword()) {
             // Restricted, short-lived token: only the password-change endpoint accepts it.
@@ -108,10 +103,10 @@ public class AuthService {
             refreshTokenService.revokeAllUserTokens(user);
             userTokenRepository.deleteByUserIdAndLoginProvider(user.getId(), "Local");
             String restrictedToken = jwtService.generatePasswordChangeToken(user.getEmail());
-            return new AuthResponse(restrictedToken, user.getEmail(), roleDisplay, null, user.getId(), true);
+            return new AuthResponse(restrictedToken, user.getEmail(), roleDisplay, roleDisplays, null, user.getId(), true);
         }
 
-        String token = jwtService.generateToken(user.getEmail(), roleName);
+        String token = jwtService.generateToken(user.getEmail(), tokenRoles);
 
         refreshTokenService.revokeAllUserTokens(user);
 
@@ -130,6 +125,7 @@ public class AuthService {
                 token,
                 user.getEmail(),
                 roleDisplay,
+                roleDisplays,
                 refreshToken.getToken(),
                 user.getId()
         );
@@ -161,15 +157,13 @@ public class AuthService {
         refreshTokenService.revokeAllUserTokens(user);
         userTokenRepository.deleteByUserId(user.getId());
 
-        Role role = userRoleRepository.findByUser(user)
-                .stream()
-                .findFirst()
-                .map(UserRole::getRole)
-                .orElse(null);
-        String roleName = (role != null) ? role.getNormalizedName().toUpperCase() : "GUEST";
-        String roleDisplay = (role != null) ? role.getEmertimi().toLowerCase() : "guest";
+        List<Role> roles = userRoleRepository.findByUser(user).stream().map(UserRole::getRole).toList();
+        Role primary = roleResolver.primary(roles);
+        List<String> tokenRoles = roles.isEmpty() ? List.of("GUEST") : roleResolver.normalizedNames(roles);
+        List<String> roleDisplays = roles.isEmpty() ? List.of("guest") : roleResolver.displayNames(roles);
+        String roleDisplay = (primary != null) ? primary.getEmertimi().toLowerCase() : "guest";
 
-        String token = jwtService.generateToken(user.getEmail(), roleName);
+        String token = jwtService.generateToken(user.getEmail(), tokenRoles);
         userTokenRepository.save(UserToken.builder()
                 .user(user)
                 .loginProvider("Local")
@@ -179,6 +173,6 @@ public class AuthService {
 
         RefreshToken refreshToken = refreshTokenService.generateRefreshToken(user);
 
-        return new AuthResponse(token, user.getEmail(), roleDisplay, refreshToken.getToken(), user.getId(), false);
+        return new AuthResponse(token, user.getEmail(), roleDisplay, roleDisplays, refreshToken.getToken(), user.getId(), false);
     }
 }

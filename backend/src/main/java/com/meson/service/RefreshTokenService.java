@@ -3,7 +3,9 @@ package com.meson.service;
 import com.meson.dto.AuthResponse;
 import com.meson.dto.RefreshTokenRequest;
 import com.meson.entity.RefreshToken;
+import com.meson.entity.Role;
 import com.meson.entity.User;
+import com.meson.entity.UserRole;
 import com.meson.entity.UserToken;
 import com.meson.repository.RefreshTokenRepository;
 import com.meson.repository.UserTokenRepository;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -22,6 +25,7 @@ public class RefreshTokenService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final UserTokenRepository userTokenRepository;
     private final JwtService jwtService;
+    private final RoleResolver roleResolver;
 
     public RefreshToken generateRefreshToken(User user) {
         RefreshToken refreshToken = RefreshToken.builder()
@@ -52,19 +56,14 @@ public class RefreshTokenService {
 
         revokeAllUserTokens(user);
 
-        String role = user.getUserRoles()
-                .stream()
-                .findFirst()
-                .map(ur -> ur.getRole().getEmertimi().toLowerCase())
-                .orElse("guest");
+        List<Role> roles = user.getUserRoles() == null ? List.of()
+                : user.getUserRoles().stream().map(UserRole::getRole).toList();
+        Role primary = roleResolver.primary(roles);
+        String role = (primary != null) ? primary.getEmertimi().toLowerCase() : "guest";
+        List<String> roleDisplays = roles.isEmpty() ? List.of("guest") : roleResolver.displayNames(roles);
+        List<String> tokenRoles = roles.isEmpty() ? List.of("GUEST") : roleResolver.normalizedNames(roles);
 
-        String normalizedRole = user.getUserRoles()
-                .stream()
-                .findFirst()
-                .map(ur -> ur.getRole().getNormalizedName().toUpperCase())
-                .orElse("GUEST");
-
-        String newAccessToken = jwtService.generateToken(user.getEmail(), normalizedRole);
+        String newAccessToken = jwtService.generateToken(user.getEmail(), tokenRoles);
 
         // Përditëso access token-in në user_tokens
         userTokenRepository.deleteByUserIdAndLoginProvider(user.getId(), "Local");
@@ -77,7 +76,7 @@ public class RefreshTokenService {
 
         RefreshToken newRefreshToken = generateRefreshToken(user);
 
-        return new AuthResponse(newAccessToken, user.getEmail(), role, newRefreshToken.getToken(), user.getId());
+        return new AuthResponse(newAccessToken, user.getEmail(), role, roleDisplays, newRefreshToken.getToken(), user.getId());
     }
 
     public void logout(RefreshTokenRequest request) {

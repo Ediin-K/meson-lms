@@ -7,6 +7,7 @@ import {
   IconButton, Button, Dialog, DialogTitle, DialogContent, DialogActions,
   FormControl, InputLabel, Select, MenuItem, Avatar, CircularProgress,
   Snackbar, Alert, Tooltip, Zoom, Grid, TablePagination, Divider,
+  Checkbox, ListItemText,
 } from "@mui/material";
 import SearchRounded from "@mui/icons-material/SearchRounded";
 import ArrowBackRounded from "@mui/icons-material/ArrowBackRounded";
@@ -47,7 +48,7 @@ const PROFILE_ROLES = ["student", "teacher", "assistant"];
 
 const EMPTY_FORM = {
   emri: "", mbiemri: "", email: "", password: "",
-  role: "student", statusi: "active",
+  roles: ["student"], statusi: "active",
   departmentId: "", currentSemester: 1,
 };
 
@@ -134,7 +135,7 @@ export default function AdminUsers() {
 
   /* ─── Student group helpers ─── */
   const loadStudentGroupContext = async (user) => {
-    if (user.role !== "student" || !user.departmentId) {
+    if (!user.roles?.includes("student") || !user.departmentId) {
       setStudentGroups([]); setApprovedGroupLabel(""); setGroupAssignId(""); return;
     }
     try {
@@ -190,7 +191,7 @@ export default function AdminUsers() {
     setSelectedUser(user);
     setFormData({
       emri: user.emri || "", mbiemri: user.mbiemri || "", email: user.email || "",
-      phoneNumber: user.phoneNumber || "", role: user.role || "student",
+      phoneNumber: user.phoneNumber || "", roles: user.roles?.length ? user.roles : ["student"],
       statusi: user.statusi || "active", password: "",
       departmentId: user.departmentId || "", currentSemester: user.currentSemester || 1,
     });
@@ -203,10 +204,10 @@ export default function AdminUsers() {
   const field = (k) => (e) => setFormData((f) => ({ ...f, [k]: e.target.value }));
 
   const handleSubmit = async () => {
-    const sendsDept = PROFILE_ROLES.includes(formData.role);
+    const sendsDept = formData.roles.some((r) => PROFILE_ROLES.includes(r));
     const base = {
       emri: formData.emri, mbiemri: formData.mbiemri, email: formData.email,
-      role: formData.role, statusi: formData.statusi,
+      roles: formData.roles, statusi: formData.statusi,
       departmentId: sendsDept && formData.departmentId ? Number(formData.departmentId) : null,
       currentSemester: sendsDept ? Number(formData.currentSemester || 1) : null,
     };
@@ -256,7 +257,7 @@ export default function AdminUsers() {
     "& .MuiSvgIcon-root": { color: isDark ? "#cbd5e1" : "#64748b" },
   };
 
-  const showsDept = PROFILE_ROLES.includes(formData.role);
+  const showsDept = formData.roles.some((r) => PROFILE_ROLES.includes(r));
 
   /* ─── Dialog title / subtitle ─── */
   const dialogTitle = isEdit ? t("adminUsers.form.editTitle") : t("adminUsers.form.addTitle");
@@ -387,22 +388,26 @@ export default function AdminUsers() {
                     <TableRow key={user.id} className="group hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
                       <TableCell className="pl-8! py-5!">
                         <Box className="flex items-center gap-4">
-                          <Avatar className={`!w-11 !h-11 !rounded-2xl !text-sm !font-black bg-gradient-to-br! ${AVATAR_GRADIENT[user.role] || "from-slate-400 to-slate-500"} shadow-md`}>
+                          <Avatar className={`!w-11 !h-11 !rounded-2xl !text-sm !font-black bg-gradient-to-br! ${AVATAR_GRADIENT[user.roles?.[0]] || "from-slate-400 to-slate-500"} shadow-md`}>
                             {user.emri?.charAt(0)}{user.mbiemri?.charAt(0)}
                           </Avatar>
                           <div>
                             <Typography variant="body2" className="font-black! text-slate-900! dark:text-white! flex! items-center gap-1">
                               {user.emri} {user.mbiemri}
-                              {user.role === "admin" && <VerifiedUserRounded className="!text-sky-500 !text-sm" />}
+                              {user.roles?.includes("admin") && <VerifiedUserRounded className="!text-sky-500 !text-sm" />}
                             </Typography>
                             <Typography variant="caption" className="text-slate-500! font-medium!">{user.email}</Typography>
                           </div>
                         </Box>
                       </TableCell>
                       <TableCell>
-                        <span className={`rounded-lg px-3 py-1 text-[10px] font-black uppercase tracking-widest ${ROLE_STYLE[user.role] || "bg-slate-100 text-slate-600"}`}>
-                          {user.role}
-                        </span>
+                        <Box className="flex flex-wrap gap-1">
+                          {(user.roles?.length ? user.roles : ["unknown"]).map((r) => (
+                            <span key={r} className={`rounded-lg px-3 py-1 text-[10px] font-black uppercase tracking-widest ${ROLE_STYLE[r] || "bg-slate-100 text-slate-600"}`}>
+                              {r}
+                            </span>
+                          ))}
+                        </Box>
                       </TableCell>
                       <TableCell>
                         <Box className="flex items-center gap-2">
@@ -417,7 +422,7 @@ export default function AdminUsers() {
                       </TableCell>
                       <TableCell align="right" className="pr-8!">
                         <Box className="flex justify-end gap-1">
-                          {user.role === "student" && (
+                          {user.roles?.includes("student") && (
                             <IconButton size="small" onClick={() => navigate(`/admin/students/${user.id}/transcript`)}
                               className="bg-slate-100! dark:bg-slate-800! text-slate-400! hover:text-sky-600! rounded-xl! transition-all">
                               <DescriptionRounded fontSize="small" />
@@ -485,13 +490,26 @@ export default function AdminUsers() {
                 InputProps={{ className: "rounded-2xl!" }} sx={inputSx}
                 helperText={isEdit ? t("adminUsers.form.passwordHint") : undefined} />
 
-              {/* Role */}
+              {/* Roles — an account may hold more than one */}
               <FormControl fullWidth>
-                <InputLabel sx={{ color: isDark ? "#cbd5e1" : "#64748b" }}>{t("adminUsers.form.role")}</InputLabel>
-                <Select value={formData.role} label={t("adminUsers.form.role")} onChange={field("role")} sx={selectSx}>
+                <InputLabel sx={{ color: isDark ? "#cbd5e1" : "#64748b" }}>{t("adminUsers.form.roles")}</InputLabel>
+                <Select
+                  multiple
+                  value={formData.roles}
+                  label={t("adminUsers.form.roles")}
+                  onChange={(e) => setFormData((f) => ({
+                    ...f,
+                    roles: typeof e.target.value === "string" ? e.target.value.split(",") : e.target.value,
+                  }))}
+                  renderValue={(selected) => selected
+                    .map((r) => t(`adminUsers.form.role${r.charAt(0).toUpperCase()}${r.slice(1)}`))
+                    .join(", ")}
+                  sx={selectSx}
+                >
                   {USER_ROLES.map((r) => (
                     <MenuItem key={r} value={r}>
-                      {t(`adminUsers.form.role${r.charAt(0).toUpperCase()}${r.slice(1)}`)}
+                      <Checkbox checked={formData.roles.includes(r)} />
+                      <ListItemText primary={t(`adminUsers.form.role${r.charAt(0).toUpperCase()}${r.slice(1)}`)} />
                     </MenuItem>
                   ))}
                 </Select>
@@ -517,7 +535,7 @@ export default function AdminUsers() {
                     </Typography>
                   </Divider>
                   <Box className="flex gap-4">
-                    <FormControl fullWidth required={formData.role === "student"}>
+                    <FormControl fullWidth required={formData.roles.includes("student")}>
                       <InputLabel sx={{ color: isDark ? "#cbd5e1" : "#64748b" }}>{t("adminUsers.form.department")}</InputLabel>
                       <Select value={formData.departmentId} label={t("adminUsers.form.department")} onChange={field("departmentId")} sx={selectSx}>
                         <MenuItem value="">{t("adminUsers.form.chooseDept")}</MenuItem>
@@ -532,7 +550,7 @@ export default function AdminUsers() {
                       value={formData.currentSemester}
                       onChange={(e) => {
                         field("currentSemester")(e);
-                        if (isEdit && formData.role === "student" && formData.departmentId) {
+                        if (isEdit && formData.roles.includes("student") && formData.departmentId) {
                           loadStudentGroupContext({ ...selectedUser, departmentId: formData.departmentId, currentSemester: Number(e.target.value) });
                         }
                       }}
@@ -544,7 +562,7 @@ export default function AdminUsers() {
               )}
 
               {/* Group assignment — only for student in edit mode */}
-              {isEdit && formData.role === "student" && formData.departmentId && (
+              {isEdit && formData.roles.includes("student") && formData.departmentId && (
                 <Box className="rounded-2xl border border-slate-200 dark:border-slate-700 p-4 flex flex-col gap-3">
                   <Typography className="!font-black !text-slate-800 dark:!text-white">
                     {t("adminUsers.form.groupAssignTitle")}

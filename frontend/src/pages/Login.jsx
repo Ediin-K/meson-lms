@@ -54,7 +54,7 @@ const portalCopy = {
 }
 
 export default function Login({ portalType }) {
-  const { setIsAuthenticated, colorMode, setRole, t } = useAppPreferences()
+  const { setIsAuthenticated, colorMode, setRoles, t } = useAppPreferences()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [remember, setRemember] = useState(false)
@@ -141,9 +141,8 @@ export default function Login({ portalType }) {
       localStorage.setItem('email', data.email)
       setIsAuthenticated(true)
 
-      if (data.role) {
-        setRole(data.role)
-        localStorage.setItem('meson-role', data.role)
+      if (data.roles?.length || data.role) {
+        setRoles(data.roles?.length ? data.roles : [data.role])
       }
 
       const role = data.role?.toLowerCase()

@@ -31,7 +31,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -82,6 +84,26 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("Role nuk u gjet: " + dbRole));
     }
 
+    /**
+     * The roles a create/update request wants to assign: {@code roles} when the client sent it,
+     * otherwise the single-role {@code role} shorthand, otherwise null (= leave roles untouched).
+     * De-duplicated and lowercased.
+     */
+    private List<String> effectiveRoles(List<String> roles, String role) {
+        List<String> source = roles;
+        if (source == null) {
+            if (role == null || role.isBlank()) {
+                return null;
+            }
+            source = List.of(role);
+        }
+        return source.stream()
+                .filter(r -> r != null && !r.isBlank())
+                .map(r -> r.trim().toLowerCase())
+                .distinct()
+                .toList();
+    }
+
     private String normalizeRoleForDB(String role) {
         if ("parent".equals(role)) return "prind";
         if ("instructor".equals(role)) return "teacher";
@@ -113,29 +135,30 @@ public class UserService {
                 status == null ? "" : status.trim(), pageable);
 
         List<User> users = page.getContent();
-        Map<Long, String> roleByUserId = batchPrimaryRoles(users);
+        Map<Long, List<String>> rolesByUserId = batchRoles(users);
         Map<Long, StudentProfile> profileByUserId = batchStudentProfiles(users);
-        return page.map(user -> toDto(user, roleByUserId.get(user.getId()), profileByUserId.get(user.getId())));
+        return page.map(user -> toDto(user, rolesByUserId.get(user.getId()), profileByUserId.get(user.getId())));
     }
 
     public List<UserDTO> getAll() {
         List<User> users = userRepository.findAllWithRoles();
         Map<Long, StudentProfile> profileByUserId = batchStudentProfiles(users);
         return users.stream()
-                .map(user -> toDto(user, resolvePrimaryRoleFromLoadedRoles(user), profileByUserId.get(user.getId())))
+                .map(user -> toDto(user, resolveRolesFromLoaded(user), profileByUserId.get(user.getId())))
                 .toList();
     }
 
-    /** One query for every listed user's role, instead of a lazy per-row load. */
-    private Map<Long, String> batchPrimaryRoles(List<User> users) {
+    /** Every listed user's full role set in one query, instead of a lazy per-row load. */
+    private Map<Long, List<String>> batchRoles(List<User> users) {
         if (users.isEmpty()) {
             return Map.of();
         }
         List<Long> userIds = users.stream().map(User::getId).toList();
-        Map<Long, String> roleByUserId = new HashMap<>();
+        Map<Long, List<String>> rolesByUserId = new HashMap<>();
         userRoleRepository.findByUserIdIn(userIds).forEach(ur ->
-                roleByUserId.putIfAbsent(ur.getUserId(), normalizeRoleForFrontend(ur.getRoleName())));
-        return roleByUserId;
+                rolesByUserId.computeIfAbsent(ur.getUserId(), k -> new ArrayList<>())
+                        .add(normalizeRoleForFrontend(ur.getRoleName())));
+        return rolesByUserId;
     }
 
     /** One query for every listed user's student profile, instead of one per user. */
@@ -148,11 +171,15 @@ public class UserService {
                 .collect(Collectors.toMap(sp -> sp.getUser().getId(), sp -> sp));
     }
 
-    private String resolvePrimaryRoleFromLoadedRoles(User user) {
+    private List<String> resolveRolesFromLoaded(User user) {
+        if (user.getUserRoles() == null) {
+            return List.of();
+        }
         return user.getUserRoles().stream()
-                .findFirst()
-                .map(userRole -> normalizeRoleForFrontend(userRole.getRole().getEmertimi()))
-                .orElse("unknown");
+                .filter(ur -> ur.getRole() != null)
+                .map(ur -> normalizeRoleForFrontend(ur.getRole().getEmertimi()))
+                .distinct()
+                .toList();
     }
 
     public User getById(Long id) {
@@ -179,16 +206,17 @@ public class UserService {
         user.setLockoutEnabled(false);
         User savedUser = userRepository.save(user);
 
-        if (dto.getRole() != null && !dto.getRole().isEmpty()) {
-            Role role = resolveAllowedRole(dto.getRole());
-            UserRole userRole = UserRole.builder()
-                    .user(savedUser)
-                    .role(role)
-                    .build();
-            userRoleRepository.save(userRole);
+        List<String> requestedRoles = effectiveRoles(dto.getRoles(), dto.getRole());
+        if (requestedRoles != null) {
+            for (String r : requestedRoles) {
+                userRoleRepository.save(UserRole.builder()
+                        .user(savedUser)
+                        .role(resolveAllowedRole(r))
+                        .build());
+            }
         }
 
-        syncStudentProfile(savedUser, dto.getRole(), dto.getDepartmentId(), dto.getCurrentSemester());
+        syncStudentProfile(savedUser, requestedRoles, dto.getDepartmentId(), dto.getCurrentSemester());
 
         return savedUser;
     }
@@ -212,28 +240,37 @@ public class UserService {
             user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         }
 
-        if (dto.getRole() != null && !dto.getRole().isEmpty()) {
-            Role role = resolveAllowedRole(dto.getRole());
-
-            var existingRoles = userRoleRepository.findByUser(user);
-            if (existingRoles.isEmpty()) {
-                UserRole userRole = UserRole.builder()
-                        .user(user)
-                        .role(role)
-                        .build();
-                userRoleRepository.save(userRole);
-            } else {
-                UserRole primaryRole = existingRoles.get(0);
-                primaryRole.setRole(role);
-                userRoleRepository.save(primaryRole);
-
-                if (existingRoles.size() > 1) {
-                    userRoleRepository.deleteAll(existingRoles.subList(1, existingRoles.size()));
-                }
+        List<String> requestedRoles = effectiveRoles(dto.getRoles(), dto.getRole());
+        if (requestedRoles != null) {
+            if (requestedRoles.isEmpty()) {
+                throw new RuntimeException("Përdoruesi duhet të ketë të paktën një rol");
             }
+            // Resolve (and validate) every requested role up front, keyed by id.
+            Map<Long, Role> target = new LinkedHashMap<>();
+            for (String r : requestedRoles) {
+                Role role = resolveAllowedRole(r);
+                target.put(role.getId(), role);
+            }
+
+            List<UserRole> existing = userRoleRepository.findByUser(user);
+            Set<Long> existingRoleIds = existing.stream()
+                    .map(ur -> ur.getRole().getId())
+                    .collect(Collectors.toSet());
+
+            userRoleRepository.deleteAll(existing.stream()
+                    .filter(ur -> !target.containsKey(ur.getRole().getId()))
+                    .toList());
+
+            target.values().stream()
+                    .filter(role -> !existingRoleIds.contains(role.getId()))
+                    .forEach(role -> userRoleRepository.save(UserRole.builder()
+                            .user(user)
+                            .role(role)
+                            .build()));
         }
 
-        syncStudentProfile(user, dto.getRole(), dto.getDepartmentId(), dto.getCurrentSemester());
+        List<String> rolesForProfileSync = requestedRoles != null ? requestedRoles : currentRoleDbNames(user);
+        syncStudentProfile(user, rolesForProfileSync, dto.getDepartmentId(), dto.getCurrentSemester());
 
         return userRepository.save(user);
     }
@@ -280,14 +317,21 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
-    private UserDTO toDto(User user, String role, StudentProfile profile) {
+    /** Role names (db form, e.g. "teacher") the user currently holds. */
+    private List<String> currentRoleDbNames(User user) {
+        return userRoleRepository.findByUser(user).stream()
+                .map(ur -> ur.getRole().getEmertimi().toLowerCase())
+                .toList();
+    }
+
+    private UserDTO toDto(User user, List<String> roles, StudentProfile profile) {
         return new UserDTO(
                 user.getId(),
                 user.getEmri(),
                 user.getMbiemri(),
                 user.getEmail(),
                 user.getStatusi(),
-                role != null ? role : "unknown",
+                roles != null && !roles.isEmpty() ? roles : List.of("unknown"),
                 profile != null && profile.getDepartment() != null ? profile.getDepartment().getId() : null,
                 profile != null && profile.getDepartment() != null ? profile.getDepartment().getEmertimi() : null,
                 profile != null ? profile.getCurrentSemester() : null,
@@ -295,9 +339,11 @@ public class UserService {
         );
     }
 
-    private void syncStudentProfile(User user, String role, Long departmentId, Integer currentSemester) {
-        String normalized = normalizeRoleForFrontend(normalizeRoleForDB(role));
-        if (!PROFILE_ROLES.contains(normalized)) {
+    private void syncStudentProfile(User user, List<String> roles, Long departmentId, Integer currentSemester) {
+        boolean hasProfileRole = roles != null && roles.stream()
+                .map(r -> normalizeRoleForFrontend(normalizeRoleForDB(r)))
+                .anyMatch(PROFILE_ROLES::contains);
+        if (!hasProfileRole) {
             return;
         }
 
