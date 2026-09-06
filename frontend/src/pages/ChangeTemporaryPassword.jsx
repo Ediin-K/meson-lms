@@ -54,9 +54,13 @@ export default function ChangeTemporaryPassword() {
                             {t('auth.tempPasswordTitle')}
                         </Typography>
                     </div>
-                    <Typography variant="body2" className="!text-slate-500 !mb-6">
+                    <Typography variant="body2" className="!text-slate-500 !mb-4">
                         {t('auth.tempPasswordSubtitle')}
                     </Typography>
+
+                    <Alert severity="info" className="!mb-4 !rounded-xl">
+                        {t('auth.tempPasswordLocked')}
+                    </Alert>
 
                     {error && <Alert severity="error" className="!mb-4 !rounded-xl">{error}</Alert>}
 
@@ -97,6 +101,15 @@ export default function ChangeTemporaryPassword() {
                             {loading ? <CircularProgress size={20} className="!text-white" /> : t('auth.tempSubmitBtn')}
                         </Button>
                     </form>
+
+                    <Button
+                        onClick={() => navigate('/login', { replace: true })}
+                        className="!mt-4 !normal-case !text-slate-500"
+                        size="small"
+                        fullWidth
+                    >
+                        {t('auth.tempBackToLogin')}
+                    </Button>
                 </CardContent>
             </Card>
         </Container>
