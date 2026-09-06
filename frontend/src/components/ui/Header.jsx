@@ -183,10 +183,7 @@ export default function Header() {
 
   return (
     <>
-      <header className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 ${isScrolled
-          ? 'border-b border-slate-200/80 bg-white/95 shadow-md backdrop-blur-xl dark:border-slate-700/80 dark:bg-slate-900/95'
-          : 'border-b border-white/40 bg-white/30 shadow-sm backdrop-blur-md dark:border-slate-700/50 dark:bg-slate-900/40'
-        }`}>
+      <header className={`glass-nav fixed top-0 inset-x-0 z-50 transition-all duration-500 ${isScrolled ? 'is-scrolled' : ''}`}>
         <a
           href="#"
           className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-slate-900 focus:px-4 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg"
@@ -280,13 +277,13 @@ export default function Header() {
                   id={langMenuId}
                   role="menu"
                   aria-orientation="vertical"
-                  className="absolute right-0 top-full z-[55] mt-1 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl shadow-slate-900/10 dark:border-slate-600 dark:bg-slate-800"
+                  className="glass absolute right-0 top-full z-[55] mt-1 rounded-xl p-1.5"
                 >
                   <button
                     type="button"
                     role="menuitem"
                     aria-label={t('header.languageSq')}
-                    className="flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-2xl outline-none hover:bg-sky-50 focus-visible:bg-sky-50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sky-500"
+                    className="flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-2xl outline-none hover:bg-sky-50 focus-visible:bg-sky-50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sky-500 dark:hover:bg-white/10 dark:focus-visible:bg-white/10"
                     onClick={() => {
                       setLocale('sq')
                       setLangOpen(false)
@@ -301,7 +298,7 @@ export default function Header() {
                     type="button"
                     role="menuitem"
                     aria-label={t('header.languageEn')}
-                    className="flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-2xl outline-none hover:bg-sky-50 focus-visible:bg-sky-50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sky-500"
+                    className="flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-2xl outline-none hover:bg-sky-50 focus-visible:bg-sky-50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sky-500 dark:hover:bg-white/10 dark:focus-visible:bg-white/10"
                     onClick={() => {
                       setLocale('en')
                       setLangOpen(false)
@@ -359,7 +356,7 @@ export default function Header() {
               {profileOpen ? (
                 <div
                   id={profileMenuId}
-                  className="absolute right-0 top-full z-[55] mt-2 w-56 rounded-2xl border border-slate-200/90 bg-white/98 p-2 shadow-xl shadow-slate-900/12"
+                  className="glass absolute right-0 top-full z-[55] mt-2 w-56 rounded-2xl p-2"
                   role="menu"
                 >
                   {roles.length > 1 ? (
@@ -373,7 +370,7 @@ export default function Header() {
                           type="button"
                           role="menuitemradio"
                           aria-checked={r === role}
-                          className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm font-medium outline-none hover:bg-sky-50/90 focus-visible:bg-sky-50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sky-500 ${r === role ? 'text-sky-700' : 'text-slate-700'}`}
+                          className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm font-medium outline-none hover:bg-sky-50/90 focus-visible:bg-sky-50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sky-500 dark:hover:bg-white/10 dark:focus-visible:bg-white/10 ${r === role ? 'text-sky-700 dark:text-sky-300' : 'text-slate-700 dark:text-slate-200'}`}
                           onClick={() => {
                             setProfileOpen(false)
                             if (r !== role) {
@@ -386,7 +383,7 @@ export default function Header() {
                           {r === role ? <span aria-hidden>✓</span> : null}
                         </button>
                       ))}
-                      <div className="my-1 h-px bg-slate-200" />
+                      <div className="my-1 h-px bg-slate-200 dark:bg-white/10" />
                     </>
                   ) : null}
                   {[
@@ -405,7 +402,7 @@ export default function Header() {
                       key={label}
                       type="button"
                       role="menuitem"
-                      className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm font-medium text-slate-800 outline-none hover:bg-sky-50/90 focus-visible:bg-sky-50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sky-500"
+                      className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm font-medium text-slate-800 outline-none hover:bg-sky-50/90 focus-visible:bg-sky-50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sky-500 dark:text-slate-100 dark:hover:bg-white/10 dark:focus-visible:bg-white/10"
                       onClick={() => {
                         setProfileOpen(false)
                         if (href) navigate(href)
@@ -414,11 +411,11 @@ export default function Header() {
                       {label}
                     </button>
                   ))}
-                  <div className="my-1 h-px bg-slate-200" />
+                  <div className="my-1 h-px bg-slate-200 dark:bg-white/10" />
                   <button
                     type="button"
                     role="menuitem"
-                    className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm font-medium text-rose-600 outline-none hover:bg-rose-50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-rose-400"
+                    className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm font-medium text-rose-600 outline-none hover:bg-rose-50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-rose-400 dark:text-rose-400 dark:hover:bg-rose-500/10"
                     onClick={async () => {
                       setProfileOpen(false)
                       await logout()
@@ -452,7 +449,7 @@ export default function Header() {
         </div>
 
         {mobileOpen ? (
-          <div className="border-t border-slate-200/80 bg-gradient-to-b from-white/98 to-slate-50/90 px-4 py-4 dark:border-slate-700/80 dark:from-slate-900/98 dark:to-slate-950/95 md:hidden sm:px-6">
+          <div className="glass border-x-0 px-4 py-4 md:hidden sm:px-6">
             <div className="mb-4">
               <button
                 type="button"
