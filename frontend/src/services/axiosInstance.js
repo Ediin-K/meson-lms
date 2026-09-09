@@ -10,6 +10,25 @@ const axiosInstance = axios.create({
     withCredentials: true,
 })
 
+/**
+ * Single-flight the token refresh. A page load fires several requests at once; if
+ * the access token has expired they all 401 together. The refresh token is
+ * single-use and rotates on every call, so without this the first refresh wins
+ * and the rest fail on the now-revoked token — spuriously firing "session
+ * expired" while the session is actually fine. All concurrent 401s share one
+ * refresh call and then retry.
+ */
+let refreshPromise = null
+
+function refreshSession() {
+    if (!refreshPromise) {
+        refreshPromise = axios
+            .post(`${API_BASE_URL}/auth/refresh`, {}, { withCredentials: true })
+            .finally(() => { refreshPromise = null })
+    }
+    return refreshPromise
+}
+
 axiosInstance.interceptors.response.use(
     (response) => response,
     async (error) => {
@@ -19,12 +38,9 @@ axiosInstance.interceptors.response.use(
             originalRequest._retry = true
 
             try {
-                await axios.post(
-                    `${API_BASE_URL}/auth/refresh`,
-                    {},
-                    { withCredentials: true }
-                )
-
+                await refreshSession()
+                // A 401 is rejected before the controller runs, so the original
+                // request never executed — retrying it (GET or mutation) is safe.
                 return axiosInstance(originalRequest)
             } catch {
                 // Don't hard-redirect: forms may hold unsaved input. Let the
