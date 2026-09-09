@@ -8,7 +8,7 @@ const STORAGE_ROLES = 'meson-roles'
 const STORAGE_ACTIVE_ROLE = 'meson-active-role'
 const STORAGE_THEME = 'meson-theme'
 
-const ALLOWED_ROLES = ['guest', 'student', 'teacher', 'parent', 'admin', 'department_head']
+const ALLOWED_ROLES = ['guest', 'student', 'teacher', 'admin', 'department_head']
 // Highest privilege first — mirrors the backend RoleResolver.
 const ROLE_PRIORITY = ['admin', 'department_head', 'teacher', 'student']
 
