@@ -10,6 +10,7 @@ import GradeRounded from "@mui/icons-material/GradeRounded";
 import FactCheckRounded from "@mui/icons-material/FactCheckRounded";
 import HistoryRounded from "@mui/icons-material/HistoryRounded";
 import EventAvailableRounded from "@mui/icons-material/EventAvailableRounded";
+import GroupsRounded from "@mui/icons-material/GroupsRounded";
 
 const SidebarLink = ({ to, icon: Icon, label }) => (
   <NavLink
@@ -36,6 +37,7 @@ export default function TeacherSidebar() {
     { to: "/teacher/quizzes", icon: QuizRounded, label: "Quizzes" },
     { to: "/teacher/assignments", icon: AssignmentRounded, label: "Detyrat" },
     { to: "/teacher/students", icon: PeopleRounded, label: "Students" },
+    { to: "/teacher/sections", icon: GroupsRounded, label: "Seksionet e mia" },
     { to: "/teacher/grades", icon: GradeRounded, label: "Notat" },
     { to: "/teacher/attendance", icon: EventAvailableRounded, label: "Prezenca" },
     { to: "/teacher/grade-audit-log", icon: HistoryRounded, label: "Historiku i Notave" },

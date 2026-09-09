@@ -66,6 +66,8 @@ const TeacherStudents = lazy(() => import("./pages/teacher/TeacherStudents.jsx")
 const TeacherAssignments = lazy(() => import("./pages/teacher/TeacherAssignments.jsx"));
 const ProfessorGradesPage = lazy(() => import("./pages/teacher/ProfessorGradesPage.jsx"));
 const TeacherGradeAuditLog = lazy(() => import("./pages/teacher/TeacherGradeAuditLog.jsx"));
+const TeacherSections = lazy(() => import("./pages/teacher/TeacherSections.jsx"));
+const TeacherSectionRoster = lazy(() => import("./pages/teacher/TeacherSectionRoster.jsx"));
 const TeacherAttendance = lazy(() => import("./pages/teacher/TeacherAttendance.jsx"));
 const StudentAttendancePage = lazy(() => import("./pages/student/StudentAttendancePage.jsx"));
 const ProfessorExamPage = lazy(() => import("./pages/teacher/ProfessorExamPage.jsx"));
@@ -435,6 +437,8 @@ function AppLayout() {
                 <Route path="lessons" element={<TeacherLessons />} />
                 <Route path="quizzes" element={<TeacherQuizzes />} />
                 <Route path="students" element={<TeacherStudents />} />
+                <Route path="sections" element={<TeacherSections />} />
+                <Route path="sections/:subjectId" element={<TeacherSectionRoster />} />
                 <Route path="assignments" element={<TeacherAssignments />} />
                 <Route path="grades" element={<ProfessorGradesPage />} />
                 <Route path="grade-audit-log" element={<TeacherGradeAuditLog />} />

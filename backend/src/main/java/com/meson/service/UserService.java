@@ -9,6 +9,7 @@ import com.meson.entity.StudentProfile;
 import com.meson.entity.User;
 import com.meson.entity.UserRole;
 import com.meson.repository.AssignmentSubmissionRepository;
+import com.meson.repository.AssistantReviewRepository;
 import com.meson.repository.CertificateRepository;
 import com.meson.repository.DepartmentRepository;
 import com.meson.repository.SubjectGroupTeacherRepository;
@@ -74,6 +75,7 @@ public class UserService {
     private final ScheduleSessionRepository scheduleSessionRepository;
     private final UserTokenRepository userTokenRepository;
     private final AttendanceRecordRepository attendanceRecordRepository;
+    private final AssistantReviewRepository assistantReviewRepository;
 
     private Role resolveAllowedRole(String requestedRole) {
         String dbRole = normalizeRoleForDB(requestedRole.trim().toLowerCase());
@@ -297,6 +299,8 @@ public class UserService {
         quizAttemptRepository.deleteByUserId(id);
         gradeRepository.deleteByStudentId(id);
         gradeRepository.deleteByProfessorId(id);
+        assistantReviewRepository.deleteByAssistantId(id);
+        assistantReviewRepository.deleteByStudentId(id);
         studentGroupSelectionRepository.deleteByStudentId(id);
         studentGroupRequestRepository.deleteByApprovedById(id);
         studentGroupRequestRepository.deleteByStudentId(id);

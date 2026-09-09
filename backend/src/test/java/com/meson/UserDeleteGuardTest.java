@@ -45,6 +45,7 @@ class UserDeleteGuardTest {
     @Autowired SubjectRepository subjectRepository;
     @Autowired ScheduleSessionRepository scheduleSessionRepository;
     @Autowired AttendanceRecordRepository attendanceRecordRepository;
+    @Autowired AssistantReviewRepository assistantReviewRepository;
 
     private User teacherA;
     private User teacherB;
@@ -69,6 +70,7 @@ class UserDeleteGuardTest {
     }
 
     private void cleanUp() {
+        assistantReviewRepository.deleteAll();
         attendanceRecordRepository.deleteAll();
         scheduleSessionRepository.deleteAll();
         subjectRepository.findAll().stream()
@@ -189,6 +191,34 @@ class UserDeleteGuardTest {
         assertThat(attendanceRecordRepository.findById(recordId)).isEmpty();
         // the session (owned by teacherB, untouched) survives
         assertThat(scheduleSessionRepository.findById(session.getId())).isPresent();
+    }
+
+    @Test
+    @WithMockUser(username = ADMIN, roles = "ADMIN")
+    void deletingAnAssistantClearsTheReviewsTheyWrote() throws Exception {
+        assistantReviewRepository.save(AssistantReview.builder()
+                .assistant(teacherB).student(student).subject(subject)
+                .reviewDate(LocalDate.now()).stars(4).build());
+
+        mockMvc.perform(delete("/api/users/" + teacherB.getId()))
+                .andExpect(status().isNoContent());
+
+        assertThat(userRepository.findById(teacherB.getId())).isEmpty();
+        assertThat(assistantReviewRepository.count()).isZero();
+    }
+
+    @Test
+    @WithMockUser(username = ADMIN, roles = "ADMIN")
+    void deletingAReviewedStudentClearsTheReviews() throws Exception {
+        assistantReviewRepository.save(AssistantReview.builder()
+                .assistant(teacherB).student(student).subject(subject)
+                .stars(5).comment("final").build());
+
+        mockMvc.perform(delete("/api/users/" + student.getId()))
+                .andExpect(status().isNoContent());
+
+        assertThat(userRepository.findById(student.getId())).isEmpty();
+        assertThat(assistantReviewRepository.count()).isZero();
     }
 
     @Test
