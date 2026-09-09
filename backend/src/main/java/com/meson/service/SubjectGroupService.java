@@ -21,6 +21,7 @@ public class SubjectGroupService {
     private final SubjectSubgroupRepository subjectSubgroupRepository;
     private final SubjectGroupTeacherRepository subjectGroupTeacherRepository;
     private final SubjectSubgroupTeacherRepository subjectSubgroupTeacherRepository;
+    private final com.meson.repository.SubjectTeacherRepository subjectTeacherRepository;
     private final DepartmentGroupRepository departmentGroupRepository;
 
     public List<SubjectGroupResponse> getBySubject(Long subjectId) {
@@ -65,10 +66,15 @@ public class SubjectGroupService {
                         .collect(Collectors.groupingBy(a -> a.getSubjectSubgroup().getId(), LinkedHashMap::new,
                                 Collectors.mapping(this::toTeacherResponse, Collectors.toList())));
 
+        List<Long> subjectIds = groups.stream().map(g -> g.getSubject().getId()).distinct().toList();
+        Map<Long, String> subjectNameById = subjectRepository.findAllById(subjectIds).stream()
+                .collect(Collectors.toMap(Subject::getId, Subject::getTitulli));
+
         return groups.stream()
                 .map(group -> SubjectGroupResponse.builder()
                         .id(group.getId())
                         .subjectId(group.getSubject().getId())
+                        .subjectName(subjectNameById.get(group.getSubject().getId()))
                         .name(group.getName())
                         .capacity(group.getCapacity())
                         .schedule(group.getSchedule())
@@ -179,9 +185,15 @@ public class SubjectGroupService {
         subjectGroupTeacherRepository.deleteBySubjectGroupId(group.getId());
         if (teacherIds == null) return;
 
+        Long subjectId = group.getSubject().getId();
         for (Long teacherId : teacherIds) {
             User teacher = userRepository.findById(teacherId)
                     .orElseThrow(() -> new RuntimeException("Mesuesi nuk u gjet"));
+            if (!subjectTeacherRepository.existsBySubjectIdAndTeacherId(subjectId, teacherId)) {
+                throw new com.meson.exception.BadRequestException(
+                        "Mesuesi " + teacher.getEmri() + " nuk eshte ne listen e mesuesve te kesaj lende. "
+                                + "Shtojeni fillimisht te lenda.");
+            }
             subjectGroupTeacherRepository.save(SubjectGroupTeacher.builder()
                     .subjectGroup(group)
                     .teacher(teacher)
@@ -222,6 +234,7 @@ public class SubjectGroupService {
         return SubjectGroupResponse.builder()
                 .id(group.getId())
                 .subjectId(group.getSubject().getId())
+                .subjectName(group.getSubject().getTitulli())
                 .name(group.getName())
                 .capacity(group.getCapacity())
                 .schedule(group.getSchedule())

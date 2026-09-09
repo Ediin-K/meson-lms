@@ -76,6 +76,7 @@ public class UserService {
     private final UserTokenRepository userTokenRepository;
     private final AttendanceRecordRepository attendanceRecordRepository;
     private final AssistantReviewRepository assistantReviewRepository;
+    private final com.meson.repository.SubjectTeacherRepository subjectTeacherRepository;
 
     private Role resolveAllowedRole(String requestedRole) {
         String dbRole = normalizeRoleForDB(requestedRole.trim().toLowerCase());
@@ -278,11 +279,33 @@ public class UserService {
     }
 
     public void delete(Long id) {
-        // Block deletion if teacher has subjects (teacher_id NOT NULL in Subject)
-        if (subjectRepository.countByTeacherId(id) > 0) {
-            throw new RuntimeException(
-                "Ky mësues ka lëndë të caktuara. Fshij ose ricakto lëndët para se të fshish mësuesin.");
+        // Every subject this user teaches, whether as a pool member or (legacy) the
+        // denormalised primary.
+        java.util.Map<Long, com.meson.entity.Subject> subjectsTaught = new java.util.LinkedHashMap<>();
+        subjectTeacherRepository.findByTeacherId(id)
+                .forEach(row -> subjectsTaught.put(row.getSubject().getId(), row.getSubject()));
+        subjectRepository.findByTeacherId(id)
+                .forEach(s -> subjectsTaught.putIfAbsent(s.getId(), s));
+
+        for (com.meson.entity.Subject subject : subjectsTaught.values()) {
+            List<com.meson.entity.SubjectTeacher> pool =
+                    subjectTeacherRepository.findBySubjectIdOrderBySortOrder(subject.getId());
+            int effectiveTeachers = pool.isEmpty() ? 1 : pool.size();
+            if (effectiveTeachers <= 1) {
+                throw new RuntimeException("Ky mësues është i vetmi te lënda \"" + subject.getTitulli()
+                        + "\". Caktoni një mësues tjetër para se ta fshini.");
+            }
+            if (subject.getTeacher() != null && subject.getTeacher().getId().equals(id)) {
+                pool.stream()
+                        .filter(st -> !st.getTeacher().getId().equals(id))
+                        .findFirst()
+                        .ifPresent(next -> {
+                            subject.setTeacher(next.getTeacher());
+                            subjectRepository.save(subject);
+                        });
+            }
         }
+        subjectTeacherRepository.deleteByTeacherId(id);
 
         // Teacher-specific: schedule sessions and group assignments
         // Attendance records FK to schedule_sessions, so must be cleared before the sessions themselves.

@@ -1,14 +1,10 @@
-﻿import { Box, Chip, IconButton, TextField, Typography } from "@mui/material";
+import { Box, IconButton, TextField, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import DeleteRounded from "@mui/icons-material/DeleteRounded";
+import PersonRounded from "@mui/icons-material/PersonRounded";
 import TruncatedSelect from "./TruncatedSelect";
 import RoomInput from "./RoomInput";
 import { computeScheduleEndTime } from "../../../utils/scheduleConflict";
 import { getGroupsTheme, getWizardFieldSx, wizardFieldClass } from "./wizardUi";
-
-const SESSION_OPTIONS = [
-  { value: "LECTURE", label: "Ligjerate" },
-  { value: "EXERCISE", label: "Ushtrime" },
-];
 
 export default function ScheduleEntryCard({
   row,
@@ -16,13 +12,22 @@ export default function ScheduleEntryCard({
   isDark,
   subjectOptions,
   staffForSubject,
-  dayOptions,
   onChange,
   onRemove,
   canRemove,
   rowError,
 }) {
   const t = getGroupsTheme(isDark);
+
+  const isExercise = row.sessionType === "EXERCISE";
+  const hasAssistant = Boolean(
+    staffForSubject?.assistantLabel && staffForSubject.assistantLabel !== "—",
+  );
+  const teacherLabel = isExercise
+    ? hasAssistant
+      ? staffForSubject.assistantLabel
+      : staffForSubject?.professorLabel
+    : staffForSubject?.professorLabel;
 
   const gridFields = (
     <>
@@ -37,46 +42,30 @@ export default function ScheduleEntryCard({
           maxLabelLen={36}
         />
       </Box>
-      <Box className="min-w-0 lg:col-span-2 flex flex-col justify-center gap-1">
-        <Typography variant="caption" sx={{ color: t.textMuted, fontWeight: 600 }}>
-          Stafi (nga hapi i stafit)
-        </Typography>
-        <Box className="flex flex-wrap gap-1">
-          <Chip
-            size="small"
-            label={staffForSubject?.professorLabel ? `Prof: ${staffForSubject.professorLabel}` : "Zgjidh lenden"}
-            variant="outlined"
-            sx={{ borderColor: t.border, color: t.text, maxWidth: "100%" }}
-          />
-          {staffForSubject?.assistantLabel && staffForSubject.assistantLabel !== "—" && (
-            <Chip
-              size="small"
-              label={`Asist: ${staffForSubject.assistantLabel}`}
-              variant="outlined"
-              sx={{ borderColor: t.border, color: t.text }}
-            />
-          )}
-        </Box>
-      </Box>
-      <Box className="min-w-0">
-        <TruncatedSelect
-          label="Lloji"
-          value={row.sessionType}
-          onChange={(e) => onChange(index, "sessionType", e.target.value)}
-          options={SESSION_OPTIONS}
-          isDark={isDark}
-          maxLabelLen={14}
-        />
-      </Box>
-      <Box className="min-w-0">
-        <TruncatedSelect
-          label="Dita"
-          value={row.dayOfWeek}
-          onChange={(e) => onChange(index, "dayOfWeek", e.target.value)}
-          options={dayOptions}
-          isDark={isDark}
-          maxLabelLen={12}
-        />
+      <Box className="min-w-0 lg:col-span-2">
+        <ToggleButtonGroup
+          exclusive
+          size="small"
+          value={row.sessionType || "LECTURE"}
+          onChange={(_, val) => val && onChange(index, "sessionType", val)}
+          fullWidth
+          sx={{
+            "& .MuiToggleButton-root": {
+              textTransform: "none",
+              fontWeight: 700,
+              color: t.textMuted,
+              borderColor: t.border,
+            },
+            "& .Mui-selected": {
+              color: `${t.text} !important`,
+              bgcolor: `${t.hover} !important`,
+              borderColor: `${t.accent} !important`,
+            },
+          }}
+        >
+          <ToggleButton value="LECTURE">Ligjerate</ToggleButton>
+          <ToggleButton value="EXERCISE">Ushtrime</ToggleButton>
+        </ToggleButtonGroup>
       </Box>
       <Box className="min-w-0">
         <TextField
@@ -117,21 +106,26 @@ export default function ScheduleEntryCard({
       className="group rounded-xl border p-3 transition-all duration-200"
       sx={{
         borderColor: rowError ? t.danger : t.border,
-        bgcolor: t.surface,
+        bgcolor: t.card,
         color: t.text,
         "&:hover": { borderColor: t.accent },
       }}
     >
       <Box className="mb-2 flex items-center justify-between gap-2">
-        <Typography variant="caption" sx={{ color: t.accent, fontWeight: 800, textTransform: "uppercase" }}>
-          Sesioni #{index + 1}
-        </Typography>
+        <Box className="flex items-center gap-1.5 min-w-0">
+          <PersonRounded sx={{ fontSize: 16, color: t.accent }} />
+          <Typography variant="caption" sx={{ color: t.text, fontWeight: 700 }} noWrap>
+            {row.subjectId
+              ? `${isExercise ? "Ushtrime" : "Ligjerate"} · ${teacherLabel || "—"}`
+              : "Zgjidh lenden"}
+          </Typography>
+        </Box>
         <IconButton
           size="small"
           color="error"
           onClick={() => onRemove(index)}
           disabled={!canRemove}
-          aria-label="Fshi sesionin"
+          aria-label="Fshi orën"
         >
           <DeleteRounded fontSize="small" />
         </IconButton>
@@ -139,10 +133,10 @@ export default function ScheduleEntryCard({
 
       <Box className="hidden lg:block overflow-x-auto pb-1 -mx-1 px-1">
         <Box
-          className="grid gap-2 min-w-[720px]"
+          className="grid gap-2 min-w-[640px]"
           style={{
             gridTemplateColumns:
-              "minmax(160px,1.4fr) minmax(200px,1.2fr) minmax(100px,0.75fr) minmax(110px,0.85fr) minmax(95px,0.65fr) minmax(95px,0.65fr) minmax(130px,1fr)",
+              "minmax(160px,1.6fr) minmax(150px,1.2fr) minmax(95px,0.7fr) minmax(95px,0.7fr) minmax(130px,1fr)",
           }}
         >
           {gridFields}
@@ -159,6 +153,11 @@ export default function ScheduleEntryCard({
       {row.subjectId && !staffForSubject?.professorId && (
         <Typography variant="caption" sx={{ mt: 1, display: "block", color: t.warning }}>
           Kjo lende nuk ka staf ne hapin e stafit — shtojeni atje fillimisht.
+        </Typography>
+      )}
+      {row.subjectId && isExercise && staffForSubject?.professorId && !hasAssistant && (
+        <Typography variant="caption" sx={{ mt: 1, display: "block", color: t.warning }}>
+          Kjo lende nuk ka asistent — ushtrimet do t'i mbajë profesori.
         </Typography>
       )}
     </Box>

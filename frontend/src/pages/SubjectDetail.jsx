@@ -448,13 +448,12 @@ export default function SubjectDetail() {
                     </Typography>
                     <div className="mt-4 flex flex-wrap gap-4">
                         <span className="text-sm font-semibold text-sky-700 dark:text-sky-400">
-                            👨‍🏫 {subject.teacherName}
+                            👨‍🏫 {subject.teachers?.length
+                              ? subject.teachers.map((t) => t.name).join(", ")
+                              : subject.teacherName}
                         </span>
                         <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">
                             📚 Semestri {subject.semester}
-                        </span>
-                        <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">
-                            📊 {subject.niveli}
                         </span>
                     </div>
                 </Box>

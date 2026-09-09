@@ -118,7 +118,9 @@ public class EnrollmentService {
         Subject course = subjectRepository.findById(request.getSubjectId())
                 .orElseThrow(() -> new ResourceNotFoundException("Lënda nuk u gjet"));
 
-        if (course.getEnrollmentKey() != null && !course.getEnrollmentKey().isEmpty()) {
+        // The enrollment key gates self-enrollment; an admin placing a student is already authorised.
+        if (!hasRole("ADMIN")
+                && course.getEnrollmentKey() != null && !course.getEnrollmentKey().isEmpty()) {
             if (!course.getEnrollmentKey().equals(request.getEnrollmentKey())) {
                 throw new RuntimeException("Kodi i regjistrimit është i gabuar");
             }

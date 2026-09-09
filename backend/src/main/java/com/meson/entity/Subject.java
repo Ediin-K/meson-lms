@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(exclude = {"teacher", "department", "enrollments", "groups"})
+@EqualsAndHashCode(exclude = {"teacher", "department", "enrollments", "groups", "teachers"})
 public class Subject {
 
     @Id
@@ -46,11 +46,6 @@ public class Subject {
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
-    @Column(name = "level")
-    private SubjectLevel niveli = SubjectLevel.FILLESTAR;
-
-    @Builder.Default
-    @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private SubjectStatus statusi = SubjectStatus.DRAFT;
 
@@ -66,6 +61,11 @@ public class Subject {
     @com.fasterxml.jackson.annotation.JsonIgnore
     @ToString.Exclude
     private java.util.Set<SubjectGroup> groups;
+
+    @OneToMany(mappedBy = "subject", cascade = CascadeType.ALL, orphanRemoval = true)
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    @ToString.Exclude
+    private java.util.Set<SubjectTeacher> teachers;
 
     @PrePersist
     protected void onCreate() {

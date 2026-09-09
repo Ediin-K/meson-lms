@@ -11,6 +11,8 @@ const DAY_LABELS = {
   SUNDAY: "E Diele",
 };
 
+const DAY_ORDER = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
+
 function ReviewBlock({ label, children, isDark }) {
   const t = getGroupsTheme(isDark);
   return (
@@ -113,35 +115,47 @@ export default function WizardReviewPanel({
             Asnje sesion orari.
           </Typography>
         ) : (
-          <Box className="flex flex-col gap-2">
-            {validSchedules.map((row, idx) => {
-              const staff = staffBySubject[String(row.subjectId)];
-              const course = subjects.find((c) => String(c.id) === String(row.subjectId));
-              const teacherForSession =
-                row.sessionType === "EXERCISE" && staff?.assistantLabel && staff.assistantLabel !== "—"
-                  ? staff.assistantLabel
-                  : staff?.professorLabel;
+          <Box className="flex flex-col gap-3">
+            {DAY_ORDER.filter((day) => validSchedules.some((r) => r.dayOfWeek === day)).map((day) => {
+              const dayRows = validSchedules
+                .filter((r) => r.dayOfWeek === day)
+                .slice()
+                .sort((a, b) => String(a.startTime).localeCompare(String(b.startTime)));
               return (
-                <Box
-                  key={idx}
-                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 rounded-lg border px-3 py-2 text-sm"
-                  sx={{ borderColor: t.border, bgcolor: t.card, color: t.text }}
-                >
-                  <span title={course?.titulli}>
-                    <strong>Lenda:</strong> {truncateText(course?.titulli, 28)}
-                  </span>
-                  <span>
-                    <strong>Dita:</strong> {DAY_LABELS[row.dayOfWeek] || row.dayOfWeek}
-                  </span>
-                  <span>
-                    <strong>Ora:</strong> {row.startTime}
-                    {row.endTime ? ` – ${row.endTime}` : ""}
-                  </span>
-                  <span>
-                    <strong>Mesues:</strong> {teacherForSession || "—"} ·{" "}
-                    {row.sessionType === "LECTURE" ? "Ligjerate" : "Ushtrime"}
-                    {row.room ? ` · ${row.room}` : ""}
-                  </span>
+                <Box key={day}>
+                  <Typography variant="caption" sx={{ color: t.textMuted, fontWeight: 800, textTransform: "uppercase" }}>
+                    {DAY_LABELS[day] || day}
+                  </Typography>
+                  <Box className="mt-1 flex flex-col gap-2">
+                    {dayRows.map((row, idx) => {
+                      const staff = staffBySubject[String(row.subjectId)];
+                      const course = subjects.find((c) => String(c.id) === String(row.subjectId));
+                      const isExercise = row.sessionType === "EXERCISE";
+                      const teacherForSession =
+                        isExercise && staff?.assistantLabel && staff.assistantLabel !== "—"
+                          ? staff.assistantLabel
+                          : staff?.professorLabel;
+                      return (
+                        <Box
+                          key={idx}
+                          className="grid grid-cols-1 sm:grid-cols-3 gap-2 rounded-lg border px-3 py-2 text-sm"
+                          sx={{ borderColor: t.border, bgcolor: t.card, color: t.text }}
+                        >
+                          <span title={course?.titulli}>
+                            <strong>Lenda:</strong> {truncateText(course?.titulli, 28)}
+                          </span>
+                          <span>
+                            <strong>Ora:</strong> {row.startTime}
+                            {row.endTime ? ` – ${row.endTime}` : ""}
+                            {row.room ? ` · ${row.room}` : ""}
+                          </span>
+                          <span>
+                            <strong>{isExercise ? "Ushtrime" : "Ligjerate"}:</strong> {teacherForSession || "—"}
+                          </span>
+                        </Box>
+                      );
+                    })}
+                  </Box>
                 </Box>
               );
             })}

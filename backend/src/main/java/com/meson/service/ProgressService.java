@@ -29,6 +29,7 @@ public class ProgressService {
     private final EnrollmentRepository     enrollmentRepository;
     private final UserRepository           userRepository;
     private final EnrollmentCompletionService completionService;
+    private final SubjectAccessService     subjectAccessService;
 
     @Transactional
     public LessonViewResponse markLessonViewed(Long lessonId) {
@@ -62,9 +63,7 @@ public class ProgressService {
     }
 
     public SubjectProgressResponse getStudentSubjectProgress(Long subjectId, Long studentId) {
-        User teacher = getCurrentUser();
-        subjectRepository.findByIdAndTeacherId(subjectId, teacher.getId())
-                .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses në këtë kurs."));
+        subjectAccessService.assertManagesSubject(subjectId);
         return buildProgress(subjectId, studentId);
     }
 

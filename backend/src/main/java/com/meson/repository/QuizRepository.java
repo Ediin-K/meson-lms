@@ -23,5 +23,7 @@ public interface QuizRepository extends JpaRepository<Quiz, Long> {
 
     Optional<Quiz> findByIdAndLessonModuleSubjectTeacherId(Long id, Long teacherId);
     long countByLessonModuleSubjectTeacherId(Long teacherId);
+
+    long countByLessonModuleSubjectIdIn(java.util.Collection<Long> subjectIds);
     long countByStatus(QuizStatus status);
 }

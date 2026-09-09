@@ -184,45 +184,86 @@ export default function GroupCreateWizard({
     </Box>
   );
 
-  const renderScheduleBuilder = () => (
-    <Box>
-      <Typography sx={{ color: theme.text, fontWeight: 800, mb: 0.5 }}>Weekly calendar</Typography>
-      <Typography variant="body2" sx={{ color: theme.textMuted, mb: 2 }}>
-        Build multiple sessions per day. Conflicts for the group, professor, and assistant are shown inline.
-      </Typography>
-      {fieldErrors.schedules && (
-        <Typography variant="caption" color="error" className="!mb-2 block">
-          {fieldErrors.schedules}
+  const renderScheduleBuilder = () => {
+    const orderedDays = dayOptions.map((o) => o.value);
+    const rowsByDay = {};
+    scheduleRows.forEach((row, idx) => {
+      (rowsByDay[row.dayOfWeek] || (rowsByDay[row.dayOfWeek] = [])).push({ row, idx });
+    });
+    return (
+      <Box>
+        <Typography sx={{ color: theme.text, fontWeight: 800, mb: 0.5 }}>Weekly calendar</Typography>
+        <Typography variant="body2" sx={{ color: theme.textMuted, mb: 2 }}>
+          Add sessions under each weekday. Lecture is taught by the professor, exercise by the assistant —
+          both come from the staff step. Conflicts are shown inline.
         </Typography>
-      )}
-      <Box className="flex flex-col gap-2">
-        {scheduleRows.map((row, idx) => (
-          <ScheduleEntryCard
-            key={idx}
-            row={row}
-            index={idx}
-            isDark={isDark}
-            subjectOptions={schedulesubjectOptions}
-            staffForSubject={staffBySubject[String(row.subjectId)]}
-            dayOptions={dayOptions}
-            onChange={onScheduleChange}
-            onRemove={(i) => onScheduleChange(i, "_remove", null)}
-            canRemove={scheduleRows.length > 1}
-            rowError={scheduleRowErrors[idx]}
-          />
-        ))}
+        {fieldErrors.schedules && (
+          <Typography variant="caption" color="error" className="!mb-2 block">
+            {fieldErrors.schedules}
+          </Typography>
+        )}
+        <Box className="flex flex-col gap-3">
+          {orderedDays.map((day) => {
+            const entries = rowsByDay[day] || [];
+            const dayLabel = dayOptions.find((o) => o.value === day)?.label || day;
+            return (
+              <Box
+                key={day}
+                className="rounded-xl border p-3"
+                sx={{ borderColor: theme.border, bgcolor: theme.surface }}
+              >
+                <Box className="mb-2 flex items-center justify-between gap-2">
+                  <Typography sx={{ color: theme.text, fontWeight: 800 }}>
+                    {dayLabel}
+                    {entries.length > 0 && (
+                      <Chip
+                        size="small"
+                        label={entries.length}
+                        className="!ml-2 !h-5 !font-bold"
+                        sx={{ bgcolor: theme.hover, color: theme.text }}
+                      />
+                    )}
+                  </Typography>
+                  <Button
+                    size="small"
+                    startIcon={<AddRounded />}
+                    onClick={() => onScheduleChange(-1, "_add", { ...emptyScheduleRow(), dayOfWeek: day })}
+                    className="!rounded-xl !normal-case !font-bold"
+                    variant="outlined"
+                    disabled={schedulesubjectOptions.length === 0}
+                  >
+                    Shto orë
+                  </Button>
+                </Box>
+                {entries.length === 0 ? (
+                  <Typography variant="caption" sx={{ color: theme.textMuted }}>
+                    Pa orë
+                  </Typography>
+                ) : (
+                  <Box className="flex flex-col gap-2">
+                    {entries.map(({ row, idx }) => (
+                      <ScheduleEntryCard
+                        key={idx}
+                        row={row}
+                        index={idx}
+                        isDark={isDark}
+                        subjectOptions={schedulesubjectOptions}
+                        staffForSubject={staffBySubject[String(row.subjectId)]}
+                        onChange={onScheduleChange}
+                        onRemove={(i) => onScheduleChange(i, "_remove", null)}
+                        canRemove={scheduleRows.length > 1}
+                        rowError={scheduleRowErrors[idx]}
+                      />
+                    ))}
+                  </Box>
+                )}
+              </Box>
+            );
+          })}
+        </Box>
       </Box>
-      <Button
-        startIcon={<AddRounded />}
-        onClick={() => onScheduleChange(-1, "_add", emptyScheduleRow())}
-        className="!mt-3 !rounded-xl !normal-case !font-bold"
-        variant="outlined"
-        disabled={schedulesubjectOptions.length === 0}
-      >
-        Shto sesion orari
-      </Button>
-    </Box>
-  );
+    );
+  };
 
   return (
     <Box className="animate-fadeIn">
