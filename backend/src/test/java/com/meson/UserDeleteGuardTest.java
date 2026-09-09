@@ -46,6 +46,7 @@ class UserDeleteGuardTest {
     @Autowired ScheduleSessionRepository scheduleSessionRepository;
     @Autowired AttendanceRecordRepository attendanceRecordRepository;
     @Autowired AssistantReviewRepository assistantReviewRepository;
+    @Autowired SubjectTeacherRepository subjectTeacherRepository;
 
     private User teacherA;
     private User teacherB;
@@ -71,6 +72,7 @@ class UserDeleteGuardTest {
 
     private void cleanUp() {
         assistantReviewRepository.deleteAll();
+        subjectTeacherRepository.deleteAll();
         attendanceRecordRepository.deleteAll();
         scheduleSessionRepository.deleteAll();
         subjectRepository.findAll().stream()
@@ -142,7 +144,7 @@ class UserDeleteGuardTest {
     void teacherWithAssignedSubjectCannotBeDeleted() throws Exception {
         mockMvc.perform(delete("/api/users/" + teacherA.getId()))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message", containsString("caktuara")));
+                .andExpect(jsonPath("$.message", containsString("vetmi")));
 
         assertThat(userRepository.findById(teacherA.getId())).isPresent();
     }
@@ -219,6 +221,21 @@ class UserDeleteGuardTest {
 
         assertThat(userRepository.findById(student.getId())).isEmpty();
         assertThat(assistantReviewRepository.count()).isZero();
+    }
+
+    @Test
+    @WithMockUser(username = ADMIN, roles = "ADMIN")
+    void deletingACoTeacherLeavesTheSubjectWithTheRemainingTeacher() throws Exception {
+        subjectTeacherRepository.save(com.meson.entity.SubjectTeacher.builder()
+                .subject(subject).teacher(teacherA).sortOrder(0).build());
+        subjectTeacherRepository.save(com.meson.entity.SubjectTeacher.builder()
+                .subject(subject).teacher(teacherB).sortOrder(1).build());
+
+        mockMvc.perform(delete("/api/users/" + teacherB.getId()))
+                .andExpect(status().isNoContent());
+
+        assertThat(subjectTeacherRepository.existsBySubjectIdAndTeacherId(subject.getId(), teacherB.getId())).isFalse();
+        assertThat(subjectRepository.findById(subject.getId())).isPresent();
     }
 
     @Test

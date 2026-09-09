@@ -18,19 +18,21 @@ public class TeacherStudentService {
 
     private final EnrollmentRepository enrollmentRepository;
     private final UserRepository userRepository;
+    private final SubjectAccessService subjectAccessService;
 
+    /** All students across the subjects the current teacher is in the pool of. */
     public List<EnrollmentResponse> getStudentsByTeacher() {
         User teacher = getCurrentUser();
-        return enrollmentRepository.findBySubjectTeacherId(teacher.getId()).stream()
+        List<Long> subjectIds = subjectAccessService.subjectIdsFor(teacher.getId());
+        return subjectIds.stream()
+                .flatMap(sid -> enrollmentRepository.findBySubjectId(sid).stream())
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
 
     public List<EnrollmentResponse> getStudentsBySubject(Long subjectId) {
-        User teacher = getCurrentUser();
-        
+        subjectAccessService.assertManagesSubject(subjectId);
         return enrollmentRepository.findBySubjectId(subjectId).stream()
-                .filter(e -> e.getSubject().getTeacher().getId().equals(teacher.getId()))
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }

@@ -166,7 +166,7 @@ class DepartmentHeadAccessControlTest {
     @WithMockUser(username = HEAD_A_EMAIL, roles = "DEPARTMENT_HEAD")
     void departmentHeadCanCreateSubjectInOwnDepartment() throws Exception {
         String body = "{\"titulli\":\"New Subject " + System.nanoTime() + "\",\"pershkrimi\":\"d\","
-                + "\"teacherId\":" + teacher.getId() + ",\"departmentId\":" + deptA.getId() + ",\"semester\":1}";
+                + "\"teacherId\":" + teacher.getId() + ",\"departmentId\":" + deptA.getId() + ",\"semester\":1,\"enrollmentKey\":\"KEY-DH\"}";
         mockMvc.perform(post("/api/subjects").contentType("application/json").content(body))
                 .andExpect(status().isCreated());
     }
@@ -175,7 +175,7 @@ class DepartmentHeadAccessControlTest {
     @WithMockUser(username = HEAD_A_EMAIL, roles = "DEPARTMENT_HEAD")
     void departmentHeadCannotCreateSubjectInOtherDepartment() throws Exception {
         String body = "{\"titulli\":\"New Subject " + System.nanoTime() + "\",\"pershkrimi\":\"d\","
-                + "\"teacherId\":" + teacher.getId() + ",\"departmentId\":" + deptB.getId() + ",\"semester\":1}";
+                + "\"teacherId\":" + teacher.getId() + ",\"departmentId\":" + deptB.getId() + ",\"semester\":1,\"enrollmentKey\":\"KEY-DH\"}";
         mockMvc.perform(post("/api/subjects").contentType("application/json").content(body))
                 .andExpect(status().isForbidden());
     }
@@ -186,7 +186,7 @@ class DepartmentHeadAccessControlTest {
     @WithMockUser(username = HEAD_A_EMAIL, roles = "DEPARTMENT_HEAD")
     void departmentHeadCanUpdateOwnDepartmentSubject() throws Exception {
         String body = "{\"titulli\":\"" + subjectA.getTitulli() + " Updated\",\"pershkrimi\":\"d\","
-                + "\"teacherId\":" + teacher.getId() + ",\"departmentId\":" + deptA.getId() + ",\"semester\":1}";
+                + "\"teacherId\":" + teacher.getId() + ",\"departmentId\":" + deptA.getId() + ",\"semester\":1,\"enrollmentKey\":\"KEY-DH\"}";
         mockMvc.perform(put("/api/subjects/" + subjectA.getId()).contentType("application/json").content(body))
                 .andExpect(status().isOk());
     }
@@ -195,7 +195,7 @@ class DepartmentHeadAccessControlTest {
     @WithMockUser(username = HEAD_A_EMAIL, roles = "DEPARTMENT_HEAD")
     void departmentHeadCannotUpdateOtherDepartmentSubject() throws Exception {
         String body = "{\"titulli\":\"" + subjectB.getTitulli() + " Updated\",\"pershkrimi\":\"d\","
-                + "\"teacherId\":" + teacher.getId() + ",\"departmentId\":" + deptB.getId() + ",\"semester\":1}";
+                + "\"teacherId\":" + teacher.getId() + ",\"departmentId\":" + deptB.getId() + ",\"semester\":1,\"enrollmentKey\":\"KEY-DH\"}";
         mockMvc.perform(put("/api/subjects/" + subjectB.getId()).contentType("application/json").content(body))
                 .andExpect(status().isForbidden());
     }
@@ -212,7 +212,7 @@ class DepartmentHeadAccessControlTest {
     @WithMockUser(username = ADMIN_EMAIL, roles = "ADMIN")
     void adminCanManageSubjectInAnyDepartment() throws Exception {
         String body = "{\"titulli\":\"" + subjectB.getTitulli() + " Updated\",\"pershkrimi\":\"d\","
-                + "\"teacherId\":" + teacher.getId() + ",\"departmentId\":" + deptB.getId() + ",\"semester\":1}";
+                + "\"teacherId\":" + teacher.getId() + ",\"departmentId\":" + deptB.getId() + ",\"semester\":1,\"enrollmentKey\":\"KEY-DH\"}";
         mockMvc.perform(put("/api/subjects/" + subjectB.getId()).contentType("application/json").content(body))
                 .andExpect(status().isOk());
     }

@@ -4,13 +4,10 @@ import com.meson.dto.ModuleRequest;
 import com.meson.dto.ModuleResponse;
 import com.meson.entity.Subject;
 import com.meson.entity.Module;
-import com.meson.entity.User;
+import com.meson.exception.ResourceNotFoundException;
 import com.meson.repository.SubjectRepository;
 import com.meson.repository.ModuleRepository;
-import com.meson.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,21 +20,21 @@ public class TeacherModuleService {
 
     private final ModuleRepository moduleRepository;
     private final SubjectRepository subjectRepository;
-    private final UserRepository userRepository;
     private final com.meson.repository.LessonRepository lessonRepository;
     private final EnrollmentCompletionService completionService;
+    private final SubjectAccessService subjectAccessService;
 
     public List<ModuleResponse> getModulesBySubject(Long subjectId) {
-        User teacher = getCurrentUser();
-        return moduleRepository.findBySubjectIdAndSubjectTeacherId(subjectId, teacher.getId()).stream()
+        subjectAccessService.assertManagesSubject(subjectId);
+        return moduleRepository.findBySubjectIdOrderByRradhitjaAsc(subjectId).stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
 
     public ModuleResponse createModule(ModuleRequest request) {
-        User teacher = getCurrentUser();
-        Subject course = subjectRepository.findByIdAndTeacherId(request.getSubjectId(), teacher.getId())
-                .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses në këtë kurs ose Lënda nuk ekziston."));
+        subjectAccessService.assertManagesSubject(request.getSubjectId());
+        Subject course = subjectRepository.findById(request.getSubjectId())
+                .orElseThrow(() -> new ResourceNotFoundException("Lënda nuk ekziston."));
 
         Module module = Module.builder()
                 .titulli(request.getTitulli())
@@ -50,9 +47,7 @@ public class TeacherModuleService {
     }
 
     public ModuleResponse updateModule(Long id, ModuleRequest request) {
-        User teacher = getCurrentUser();
-        Module module = moduleRepository.findByIdAndSubjectTeacherId(id, teacher.getId())
-                .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses në këtë modul ose moduli nuk ekziston."));
+        Module module = loadManagedModule(id);
 
         module.setTitulli(request.getTitulli());
         module.setPershkrimi(request.getPershkrimi());
@@ -63,20 +58,18 @@ public class TeacherModuleService {
 
     @Transactional
     public void deleteModule(Long id) {
-        User teacher = getCurrentUser();
-        Module module = moduleRepository.findByIdAndSubjectTeacherId(id, teacher.getId())
-                .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses në këtë modul ose moduli nuk ekziston."));
-
+        Module module = loadManagedModule(id);
         Long subjectId = module.getSubject().getId();
         moduleRepository.delete(module);
         // Deleting a module drops its lessons, changing what "complete" means.
         completionService.recalculateSubject(subjectId);
     }
 
-    private User getCurrentUser() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Përdoruesi nuk u gjet."));
+    private Module loadManagedModule(Long id) {
+        Module module = moduleRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Moduli nuk ekziston."));
+        subjectAccessService.assertManagesSubject(module.getSubject().getId());
+        return module;
     }
 
     private ModuleResponse toResponse(Module module) {

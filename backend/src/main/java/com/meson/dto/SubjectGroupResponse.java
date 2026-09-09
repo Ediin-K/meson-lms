@@ -10,6 +10,7 @@ import java.util.List;
 public class SubjectGroupResponse {
     private Long id;
     private Long subjectId;
+    private String subjectName;
     private String name;
     private Integer capacity;
     private String schedule;

@@ -6,8 +6,6 @@ import com.meson.exception.BadRequestException;
 import com.meson.exception.ResourceNotFoundException;
 import com.meson.repository.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,22 +23,18 @@ public class TeacherQuizService {
     private final QuizAnswerRepository answerRepository;
     private final QuizAttemptRepository attemptRepository;
     private final LessonRepository lessonRepository;
-    private final UserRepository userRepository;
     private final QuizService quizService;
     private final QuizQuestionHelper questionHelper;
+    private final SubjectAccessService subjectAccessService;
 
     public List<QuizResponse> getQuizzesByLesson(Long lessonId) {
-        User teacher = getCurrentUser();
-        lessonRepository.findByIdAndModuleSubjectTeacherId(lessonId, teacher.getId())
-                .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses ne kete leksion."));
+        assertManagesLesson(lessonId);
         return quizService.toQuizResponses(quizRepository.findByLessonId(lessonId));
     }
 
     @Transactional
     public QuizResponse createQuiz(QuizRequest request) {
-        User teacher = getCurrentUser();
-        Lesson lesson = lessonRepository.findByIdAndModuleSubjectTeacherId(request.getLessonId(), teacher.getId())
-                .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses ne kete leksion."));
+        Lesson lesson = assertManagesLesson(request.getLessonId());
 
         Quiz quiz = Quiz.builder()
                 .titulli(request.getTitulli())
@@ -57,9 +51,7 @@ public class TeacherQuizService {
 
     @Transactional
     public QuizResponse updateQuiz(Long id, QuizRequest request) {
-        User teacher = getCurrentUser();
-        Quiz quiz = quizRepository.findByIdAndLessonModuleSubjectTeacherId(id, teacher.getId())
-                .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses ne kete kuiz."));
+        Quiz quiz = loadManagedQuiz(id);
 
         if (!QuizStatus.DRAFT.equals(quiz.getStatus())) {
             throw new BadRequestException("Vetem kuizet DRAFT mund te modifikohen. Mbylleni kuizin aktiv fillimisht.");
@@ -78,9 +70,7 @@ public class TeacherQuizService {
 
     @Transactional
     public QuizResponse activateQuiz(Long id) {
-        User teacher = getCurrentUser();
-        Quiz quiz = quizRepository.findByIdAndLessonModuleSubjectTeacherId(id, teacher.getId())
-                .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses ne kete kuiz."));
+        Quiz quiz = loadManagedQuiz(id);
 
         if (QuizStatus.ACTIVE.equals(quiz.getStatus())) {
             throw new BadRequestException("Kuizi eshte tashme aktiv.");
@@ -101,9 +91,7 @@ public class TeacherQuizService {
 
     @Transactional
     public QuizResponse closeQuiz(Long id) {
-        User teacher = getCurrentUser();
-        Quiz quiz = quizRepository.findByIdAndLessonModuleSubjectTeacherId(id, teacher.getId())
-                .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses ne kete kuiz."));
+        Quiz quiz = loadManagedQuiz(id);
 
         if (!QuizStatus.ACTIVE.equals(quiz.getStatus())) {
             throw new BadRequestException("Mund te mbyllet vetem kuizi aktiv.");
@@ -120,9 +108,7 @@ public class TeacherQuizService {
     }
 
     public List<QuizAttemptResponse> getResults(Long quizId) {
-        User teacher = getCurrentUser();
-        quizRepository.findByIdAndLessonModuleSubjectTeacherId(quizId, teacher.getId())
-                .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses ne kete kuiz."));
+        loadManagedQuiz(quizId);
 
         return attemptRepository.findByQuizIdOrderBySubmittedAtDesc(quizId).stream()
                 .filter(attempt -> Boolean.TRUE.equals(attempt.getSubmitted()))
@@ -131,9 +117,7 @@ public class TeacherQuizService {
     }
 
     public List<QuizAttemptResponse> getAllAttempts(Long quizId) {
-        User teacher = getCurrentUser();
-        quizRepository.findByIdAndLessonModuleSubjectTeacherId(quizId, teacher.getId())
-                .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses ne kete kuiz."));
+        loadManagedQuiz(quizId);
 
         return attemptRepository.findByQuizIdOrderByStartedAtDesc(quizId).stream()
                 .map(quizService::toAttemptResponse)
@@ -142,9 +126,7 @@ public class TeacherQuizService {
 
     @Transactional
     public void deleteQuiz(Long id) {
-        User teacher = getCurrentUser();
-        Quiz quiz = quizRepository.findByIdAndLessonModuleSubjectTeacherId(id, teacher.getId())
-                .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses ne kete kuiz."));
+        Quiz quiz = loadManagedQuiz(id);
 
         if (QuizStatus.ACTIVE.equals(quiz.getStatus())) {
             throw new BadRequestException("Nuk mund te fshihet kuizi aktiv. Mbylleni fillimisht.");
@@ -154,9 +136,7 @@ public class TeacherQuizService {
     }
 
     public List<QuizQuestionResponse> getQuestionsByQuiz(Long quizId) {
-        User teacher = getCurrentUser();
-        quizRepository.findByIdAndLessonModuleSubjectTeacherId(quizId, teacher.getId())
-                .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses ne kete kuiz."));
+        loadManagedQuiz(quizId);
 
         List<QuizQuestion> questions = questionRepository.findByQuizIdOrderByRradhitjaAsc(quizId);
         Map<Long, List<QuizAnswer>> answersByQuestion = batchAnswersByQuestion(questions);
@@ -176,9 +156,7 @@ public class TeacherQuizService {
     }
 
     public QuizQuestionResponse createQuestion(QuizQuestionRequest request) {
-        User teacher = getCurrentUser();
-        Quiz quiz = quizRepository.findByIdAndLessonModuleSubjectTeacherId(request.getQuizId(), teacher.getId())
-                .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses ne kete kuiz."));
+        Quiz quiz = loadManagedQuiz(request.getQuizId());
 
         if (!QuizStatus.DRAFT.equals(quiz.getStatus())) {
             throw new BadRequestException("Pyetjet mund te shtohen vetem ne kuizin DRAFT.");
@@ -197,12 +175,9 @@ public class TeacherQuizService {
 
     @Transactional
     public QuizAnswerResponse addAnswer(Long questionId, QuizAnswerRequest request) {
-        User teacher = getCurrentUser();
         QuizQuestion question = questionRepository.findById(questionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Pyetja nuk u gjet."));
-
-        quizRepository.findByIdAndLessonModuleSubjectTeacherId(question.getQuiz().getId(), teacher.getId())
-                .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses ne kete pyetje."));
+        loadManagedQuiz(question.getQuiz().getId());
 
         QuizAnswer answer = QuizAnswer.builder()
                 .pergjigja(request.getPergjigja())
@@ -213,10 +188,18 @@ public class TeacherQuizService {
         return toAnswerResponse(answerRepository.save(answer));
     }
 
-    private User getCurrentUser() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("Perdoruesi nuk u gjet."));
+    private Lesson assertManagesLesson(Long lessonId) {
+        Lesson lesson = lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new ResourceNotFoundException("Leksioni nuk u gjet."));
+        subjectAccessService.assertManagesSubject(lesson.getModule().getSubject().getId());
+        return lesson;
+    }
+
+    private Quiz loadManagedQuiz(Long id) {
+        Quiz quiz = quizRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Kuizi nuk u gjet."));
+        subjectAccessService.assertManagesSubject(quiz.getLesson().getModule().getSubject().getId());
+        return quiz;
     }
 
     private QuizQuestionResponse toQuestionResponseWithOptions(QuizQuestion question, List<QuizAnswer> answers) {

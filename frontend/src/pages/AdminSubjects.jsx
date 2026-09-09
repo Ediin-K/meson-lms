@@ -25,6 +25,8 @@ import {
   Select,
   MenuItem,
   Chip,
+  Checkbox,
+  ListItemText,
   CircularProgress,
   Tooltip,
   Zoom,
@@ -44,7 +46,6 @@ import AutoStoriesRounded from "@mui/icons-material/AutoStoriesRounded";
 import LayersRounded from "@mui/icons-material/LayersRounded";
 import Footer from "../components/ui/Footer";
 import axiosInstance from "../services/axiosInstance";
-import { getDepartmentGroups } from "../services/departmentGroupService";
 import { getAllDepartments } from "../services/departmentService";
 import { getAllTeachers } from "../services/teacherService";
 
@@ -61,12 +62,11 @@ const EMPTY_FORM = {
   titulli: "",
   code: "",
   pershkrimi: "",
-  teacherId: "",
+  teacherIds: [],
   departmentId: "",
   semester: 1,
   enrollmentKey: "",
   ects: 5,
-  niveli: "FILLESTAR",
   statusi: "DRAFT",
 };
 
@@ -91,21 +91,8 @@ export default function AdminSubjects() {
   const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [groupDialog, setGroupDialog] = useState({ open: false, subject: null });
-  const [subjectGroups, setSubjectGroups] = useState([]);
-  const [groupForm, setGroupForm] = useState({
-    name: "",
-    capacity: "",
-    teacherIds: "",
-    departmentGroupId: "",
-  });
   const [departments, setDepartments] = useState([]);
   const [teachers, setTeachers] = useState([]);
-  const [departmentGroupsForSubject, setDepartmentGroupsForSubject] = useState([]);
-  const [editingGroupId, setEditingGroupId] = useState(null);
-  const [subgroupForms, setSubgroupForms] = useState({});
-  const [editingSubgroupId, setEditingSubgroupId] = useState(null);
-  const [editingSubgroupGroupId, setEditingSubgroupGroupId] = useState(null);
 
   const fetchSubjects = async () => {
     setLoading(true);
@@ -134,39 +121,6 @@ export default function AdminSubjects() {
     await axiosInstance.delete(`/subjects/${id}`);
   };
 
-  const fetchSubjectGroups = async (subjectId) => {
-    const { data } = await axiosInstance.get(`/subjects/${subjectId}/groups`);
-    return data;
-  };
-
-  const createGroup = async (subjectId, payload) => {
-    const { data } = await axiosInstance.post(`/subjects/${subjectId}/groups`, payload);
-    return data;
-  };
-
-  const updateGroup = async (groupId, payload) => {
-    const { data } = await axiosInstance.put(`/subject-groups/${groupId}`, payload);
-    return data;
-  };
-
-  const deleteGroup = async (groupId) => {
-    await axiosInstance.delete(`/subject-groups/${groupId}`);
-  };
-
-  const createSubgroup = async (groupId, payload) => {
-    const { data } = await axiosInstance.post(`/subject-groups/${groupId}/subgroups`, payload);
-    return data;
-  };
-
-  const updateSubgroup = async (subgroupId, payload) => {
-    const { data } = await axiosInstance.put(`/subject-subgroups/${subgroupId}`, payload);
-    return data;
-  };
-
-  const deleteSubgroup = async (subgroupId) => {
-    await axiosInstance.delete(`/subject-subgroups/${subgroupId}`);
-  };
-
   const handleOpenAdd = () => {
     setIsEdit(false);
     setSelectedSubject(null);
@@ -182,12 +136,13 @@ export default function AdminSubjects() {
       titulli: subject.titulli,
       code: subject.code || "",
       pershkrimi: subject.pershkrimi,
-      teacherId: subject.teacherId,
+      teacherIds: subject.teachers?.length
+        ? subject.teachers.map((t) => t.id)
+        : subject.teacherId ? [subject.teacherId] : [],
       departmentId: subject.departmentId,
       semester: subject.semester,
       enrollmentKey: subject.enrollmentKey || "",
       ects: subject.ects ?? 5,
-      niveli: subject.niveli,
       statusi: subject.statusi,
     });
     setFormError(null);
@@ -238,141 +193,6 @@ export default function AdminSubjects() {
       setError(err.message || t("adminSubjects.toast.deleteError"));
       setOpenDeleteConfirm(false);
       setDeleteTarget(null);
-    }
-  };
-
-  const parseIds = (value) =>
-      String(value || "")
-          .split(",")
-          .map((id) => Number(id.trim()))
-          .filter(Boolean);
-
-  const handleOpenGroups = async (subject) => {
-    try {
-      setGroupDialog({ open: true, subject });
-      setGroupForm({ name: "", capacity: "", teacherIds: "", departmentGroupId: "" });
-      if (subject.departmentId) {
-        setDepartmentGroupsForSubject(await getDepartmentGroups(subject.departmentId));
-      } else {
-        setDepartmentGroupsForSubject([]);
-      }
-      setEditingGroupId(null);
-      setSubgroupForms({});
-      setEditingSubgroupId(null);
-      setEditingSubgroupGroupId(null);
-      setSubjectGroups(await fetchSubjectGroups(subject.id));
-    } catch (err) {
-      setError(err.message || t("adminSubjects.toast.groupsError"));
-    }
-  };
-
-  const handleCreateGroup = async () => {
-    if (!groupDialog.subject || !groupForm.name.trim()) return;
-
-    try {
-      const payload = {
-        name: groupForm.name.trim(),
-        capacity: groupForm.capacity ? Number(groupForm.capacity) : null,
-        teacherIds: parseIds(groupForm.teacherIds),
-        departmentGroupId: groupForm.departmentGroupId ? Number(groupForm.departmentGroupId) : null,
-      };
-
-      if (editingGroupId) {
-        await updateGroup(editingGroupId, payload);
-      } else {
-        await createGroup(groupDialog.subject.id, payload);
-      }
-
-      setGroupForm({ name: "", capacity: "", teacherIds: "", departmentGroupId: "" });
-      setEditingGroupId(null);
-      setSubjectGroups(await fetchSubjectGroups(groupDialog.subject.id));
-      setSnackbarMessage(editingGroupId ? t("adminSubjects.groups.groupUpdated") : t("adminSubjects.groups.groupCreated"));
-      setOpenSnackbar(true);
-    } catch (err) {
-      setError(err.message || t("adminSubjects.toast.groupCreateError"));
-    }
-  };
-
-  const handleCreateSubgroup = async (groupId) => {
-    const form = subgroupForms[groupId] || {};
-    if (!groupDialog.subject || !form.name?.trim()) return;
-
-    try {
-      const payload = {
-        name: form.name.trim(),
-        capacity: form.capacity ? Number(form.capacity) : null,
-        assistantIds: parseIds(form.assistantIds),
-      };
-
-      if (editingSubgroupId && editingSubgroupGroupId === groupId) {
-        await updateSubgroup(editingSubgroupId, payload);
-      } else {
-        await createSubgroup(groupId, payload);
-      }
-
-      setSubgroupForms((prev) => ({ ...prev, [groupId]: {} }));
-      setEditingSubgroupId(null);
-      setEditingSubgroupGroupId(null);
-      setSubjectGroups(await fetchSubjectGroups(groupDialog.subject.id));
-      setSnackbarMessage(
-          editingSubgroupId && editingSubgroupGroupId === groupId
-              ? t("adminSubjects.groups.subgroupUpdated")
-              : t("adminSubjects.groups.subgroupCreated"),
-      );
-      setOpenSnackbar(true);
-    } catch (err) {
-      setError(err.message || t("adminSubjects.toast.subgroupCreateError"));
-    }
-  };
-
-  const handleEditGroup = (group) => {
-    setEditingGroupId(group.id);
-    setGroupForm({
-      name: group.name || "",
-      capacity: group.capacity || "",
-      teacherIds: group.teachers?.map((teacher) => teacher.id).join(", ") || "",
-      departmentGroupId: group.departmentGroupId || "",
-    });
-  };
-
-  const handleDeleteGroup = async (group) => {
-    if (!window.confirm(`${t("adminSubjects.groups.tooltipDeleteGroup")} ${group.name}?`)) return;
-
-    try {
-      await deleteGroup(group.id);
-      setSubjectGroups(await fetchSubjectGroups(groupDialog.subject.id));
-      setSnackbarMessage(t("adminSubjects.groups.groupDeleted"));
-      setOpenSnackbar(true);
-    } catch (err) {
-      setError(err.message || t("adminSubjects.toast.groupDeleteError"));
-    }
-  };
-
-  const handleEditSubgroup = (groupId, subgroup) => {
-    setEditingSubgroupId(subgroup.id);
-    setEditingSubgroupGroupId(groupId);
-    setSubgroupForms((prev) => ({
-      ...prev,
-      [groupId]: {
-        name: subgroup.name || "",
-        capacity: subgroup.capacity || "",
-        assistantIds: subgroup.assistants?.map((assistant) => assistant.id).join(", ") || "",
-      },
-    }));
-  };
-
-  const handleDeleteSubgroup = async (subgroup) => {
-    if (!window.confirm(`${t("adminSubjects.groups.tooltipDeleteGroup")} ${subgroup.name}?`)) return;
-
-    try {
-      await deleteSubgroup(subgroup.id);
-      setEditingSubgroupId(null);
-      setEditingSubgroupGroupId(null);
-      setSubjectGroups(await fetchSubjectGroups(groupDialog.subject.id));
-      setSnackbarMessage(t("adminSubjects.groups.subgroupDeleted"));
-      setOpenSnackbar(true);
-    } catch (err) {
-      setError(err.message || t("adminSubjects.toast.subgroupDeleteError"));
     }
   };
 
@@ -666,7 +486,9 @@ export default function AdminSubjects() {
                                   {subject.ects ?? 5}
                                 </TableCell>
                                 <TableCell className="text-slate-600! dark:text-slate-400! font-bold! text-sm!">
-                                  {subject.teacherName}
+                                  {subject.teachers?.length
+                                    ? subject.teachers.map((t) => t.name).join(", ")
+                                    : subject.teacherName}
                                 </TableCell>
                                 <TableCell>
                                   <Chip
@@ -688,15 +510,6 @@ export default function AdminSubjects() {
                                           className="bg-slate-100! dark:bg-slate-800! text-slate-400! hover:text-sky-600! rounded-xl! transition-all"
                                       >
                                         <EditRounded fontSize="small" />
-                                      </IconButton>
-                                    </Tooltip>
-                                    <Tooltip title={t("adminSubjects.tooltips.groups")}>
-                                      <IconButton
-                                          size="small"
-                                          onClick={() => handleOpenGroups(subject)}
-                                          className="bg-slate-100! dark:bg-slate-800! text-slate-400! hover:text-indigo-600! rounded-xl! transition-all"
-                                      >
-                                        <LayersRounded fontSize="small" />
                                       </IconButton>
                                     </Tooltip>
                                     <Tooltip title={t("adminSubjects.tooltips.delete")}>
@@ -854,9 +667,18 @@ export default function AdminSubjects() {
                       {t("adminSubjects.form.instructorId")}
                     </InputLabel>
                     <Select
+                      multiple
                       label={t("adminSubjects.form.instructorId")}
-                      value={formData.teacherId}
-                      onChange={field("teacherId")}
+                      value={formData.teacherIds}
+                      onChange={(e) => setFormData((f) => ({ ...f, teacherIds: e.target.value }))}
+                      renderValue={(ids) =>
+                        ids
+                          .map((id) => {
+                            const tc = teachers.find((x) => x.id === id);
+                            return tc ? `${tc.emri} ${tc.mbiemri}` : id;
+                          })
+                          .join(", ")
+                      }
                       className="rounded-2xl!"
                       sx={{
                         color: isDark ? "#f1f5f9" : "#1e293b",
@@ -867,7 +689,8 @@ export default function AdminSubjects() {
                     >
                       {teachers.map((tc) => (
                         <MenuItem key={tc.id} value={tc.id}>
-                          {tc.emri} {tc.mbiemri} — ID: {tc.id}
+                          <Checkbox checked={formData.teacherIds.includes(tc.id)} />
+                          <ListItemText primary={`${tc.emri} ${tc.mbiemri}`} />
                         </MenuItem>
                       ))}
                     </Select>
@@ -952,31 +775,6 @@ export default function AdminSubjects() {
                 <Box className="flex gap-4">
                   <FormControl fullWidth>
                     <InputLabel sx={{ color: isDark ? "#cbd5e1" : "#64748b" }}>
-                      {t("adminSubjects.form.level")}
-                    </InputLabel>
-                    <Select variant="outlined"
-                            value={formData.niveli}
-                            label={t("adminSubjects.form.level")}
-                            onChange={field("niveli")}
-                            sx={{
-                              borderRadius: "1rem",
-                              color: isDark ? "#f1f5f9" : "#1e293b",
-                              "& .MuiOutlinedInput-notchedOutline": {
-                                borderColor: isDark ? "#334155" : "#cbd5e1",
-                              },
-                              "& .MuiSvgIcon-root": {
-                                color: isDark ? "#cbd5e1" : "#64748b",
-                              },
-                            }}
-                    >
-                      <MenuItem value="FILLESTAR">{t("adminSubjects.form.levelBeginner")}</MenuItem>
-                      <MenuItem value="MESEM">{t("adminSubjects.form.levelIntermediate")}</MenuItem>
-                      <MenuItem value="AVANCUAR">{t("adminSubjects.form.levelAdvanced")}</MenuItem>
-                    </Select>
-                  </FormControl>
-
-                  <FormControl fullWidth>
-                    <InputLabel sx={{ color: isDark ? "#cbd5e1" : "#64748b" }}>
                       {t("adminSubjects.form.status")}
                     </InputLabel>
                     <Select variant="outlined"
@@ -1005,6 +803,7 @@ export default function AdminSubjects() {
                 <TextField
                     label={t("adminSubjects.form.enrollmentKey")}
                     fullWidth
+                    required
                     value={formData.enrollmentKey}
                     onChange={field("enrollmentKey")}
                     InputProps={{ className: "rounded-2xl!" }}
@@ -1036,8 +835,9 @@ export default function AdminSubjects() {
                   onClick={handleSubmit}
                   disabled={
                       !formData.titulli ||
-                      !formData.teacherId ||
+                      !formData.teacherIds?.length ||
                       !formData.departmentId ||
+                      !formData.enrollmentKey?.trim() ||
                       saving
                   }
                   className="rounded-2xl! px-10! py-3! normal-case! font-black! bg-sky-600! hover:bg-sky-700! shadow-lg shadow-sky-500/20"
@@ -1053,234 +853,6 @@ export default function AdminSubjects() {
             </DialogActions>
           </Dialog>
 
-          {}
-          <Dialog
-              open={groupDialog.open}
-              onClose={() => setGroupDialog({ open: false, subject: null })}
-              maxWidth="md"
-              fullWidth
-              TransitionComponent={Zoom}
-              PaperProps={{
-                sx: {
-                  borderRadius: "2rem",
-                  p: 2,
-                  backgroundColor: isDark ? "#0f172a" : "white",
-                },
-              }}
-          >
-            <DialogTitle className="px-6! pt-6! pb-2!">
-              <Typography variant="h5" className="font-black! text-slate-900! dark:text-white!">
-                {t("adminSubjects.groups.dialogTitle")}
-              </Typography>
-              <Typography variant="body2" className="text-slate-500! dark:text-slate-400!">
-                {groupDialog.subject?.titulli}
-              </Typography>
-            </DialogTitle>
-            <DialogContent className="px-6! py-4!">
-              <Box className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
-                <TextField
-                    label={t("adminSubjects.groups.groupNameLabel")}
-                    placeholder="G1"
-                    value={groupForm.name}
-                    onChange={(e) => setGroupForm((prev) => ({ ...prev, name: e.target.value }))}
-                />
-                <FormControl fullWidth>
-                  <InputLabel>{t("adminSubjects.groups.deptGroupLabel")}</InputLabel>
-                  <Select
-                      value={groupForm.departmentGroupId}
-                      label={t("adminSubjects.groups.deptGroupLabel")}
-                      onChange={(e) => setGroupForm((prev) => ({ ...prev, departmentGroupId: e.target.value }))}
-                  >
-                    <MenuItem value="">{t("adminSubjects.groups.noLink")}</MenuItem>
-                    {departmentGroupsForSubject.map((dg) => (
-                        <MenuItem key={dg.id} value={dg.id}>
-                          {dg.name} ({dg.currentStudents}/{dg.maxCapacity})
-                        </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                <TextField
-                    label={t("adminSubjects.groups.capacityLabel")}
-                    type="number"
-                    value={groupForm.capacity}
-                    onChange={(e) => setGroupForm((prev) => ({ ...prev, capacity: e.target.value }))}
-                />
-                <TextField
-                    label={t("adminSubjects.groups.professorIds")}
-                    placeholder="2, 5"
-                    value={groupForm.teacherIds}
-                    onChange={(e) => setGroupForm((prev) => ({ ...prev, teacherIds: e.target.value }))}
-                />
-              </Box>
-              <Button
-                  variant="contained"
-                  startIcon={<AddRounded />}
-                  onClick={handleCreateGroup}
-                  disabled={!groupForm.name.trim()}
-                  className="rounded-xl! normal-case! font-bold! bg-indigo-600! mb-6!"
-              >
-                {editingGroupId ? t("adminSubjects.groups.saveGroup") : t("adminSubjects.groups.addGroup")}
-              </Button>
-              {editingGroupId && (
-                  <Button
-                      variant="text"
-                      onClick={() => {
-                        setEditingGroupId(null);
-                        setGroupForm({ name: "", capacity: "", teacherIds: "", departmentGroupId: "" });
-                      }}
-                      className="rounded-xl! normal-case! font-bold! text-slate-500! dark:text-slate-300! mb-6! ml-2!"
-                  >
-                    {t("adminSubjects.groups.cancelEdit")}
-                  </Button>
-              )}
-
-              <Box className="flex flex-col gap-4">
-                {subjectGroups.map((group) => {
-                  const form = subgroupForms[group.id] || {};
-                  return (
-                      <Box key={group.id} className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4">
-                        <Box className="flex flex-col md:flex-row md:items-start md:justify-between gap-2 mb-3">
-                          <div>
-                            <Typography className="font-black! text-slate-900! dark:text-white!">
-                              {t("adminSubjects.groups.groupPrefix")}{group.name}
-                            </Typography>
-                            <Typography variant="caption" className="text-slate-500!">
-                              {t("adminSubjects.groups.professorPrefix")}{group.teachers?.map((tc) => tc.name).join(", ") || "-"}
-                            </Typography>
-                          </div>
-                          <Box className="flex gap-1">
-                            <Tooltip title={t("adminSubjects.groups.tooltipEditGroup")}>
-                              <IconButton
-                                  size="small"
-                                  onClick={() => handleEditGroup(group)}
-                                  className="bg-indigo-50! text-indigo-700! hover:bg-indigo-100! dark:bg-indigo-900/30! dark:text-indigo-200! dark:hover:bg-indigo-900/50!"
-                              >
-                                <EditRounded fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip title={t("adminSubjects.groups.tooltipDeleteGroup")}>
-                              <IconButton
-                                  size="small"
-                                  onClick={() => handleDeleteGroup(group)}
-                                  className="bg-rose-50! text-rose-700! hover:bg-rose-100! dark:bg-rose-900/30! dark:text-rose-200! dark:hover:bg-rose-900/50!"
-                              >
-                                <DeleteRounded fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                          </Box>
-                        </Box>
-
-                        <Box className="flex flex-wrap gap-2 mb-4">
-                          {group.subgroups?.map((subgroup) => (
-                              <Box
-                                  key={subgroup.id}
-                                  className="flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 px-2 py-1 dark:border-slate-700 dark:bg-slate-800/70"
-                              >
-                          <span className="text-sm font-semibold text-slate-700 dark:text-slate-100">
-                            {subgroup.name}
-                            {subgroup.assistants?.length
-                                ? ` - ${subgroup.assistants.map((a) => a.name).join(", ")}`
-                                : ""}
-                          </span>
-                                <IconButton
-                                    size="small"
-                                    onClick={() => handleEditSubgroup(group.id, subgroup)}
-                                    className="text-indigo-600! dark:text-indigo-200!"
-                                >
-                                  <EditRounded fontSize="inherit" />
-                                </IconButton>
-                                <IconButton
-                                    size="small"
-                                    onClick={() => handleDeleteSubgroup(subgroup)}
-                                    className="text-rose-600! dark:text-rose-200!"
-                                >
-                                  <DeleteRounded fontSize="inherit" />
-                                </IconButton>
-                              </Box>
-                          ))}
-                        </Box>
-
-                        <Box className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                          <TextField
-                              size="small"
-                              label={t("adminSubjects.groups.subgroupLabel")}
-                              placeholder="G1A"
-                              value={form.name || ""}
-                              onChange={(e) =>
-                                  setSubgroupForms((prev) => ({
-                                    ...prev,
-                                    [group.id]: { ...form, name: e.target.value },
-                                  }))
-                              }
-                          />
-                          <TextField
-                              size="small"
-                              label={t("adminSubjects.groups.capacityLabel")}
-                              type="number"
-                              value={form.capacity || ""}
-                              onChange={(e) =>
-                                  setSubgroupForms((prev) => ({
-                                    ...prev,
-                                    [group.id]: { ...form, capacity: e.target.value },
-                                  }))
-                              }
-                          />
-                          <TextField
-                              size="small"
-                              label={t("adminSubjects.groups.assistantIds")}
-                              placeholder="7, 9"
-                              value={form.assistantIds || ""}
-                              onChange={(e) =>
-                                  setSubgroupForms((prev) => ({
-                                    ...prev,
-                                    [group.id]: { ...form, assistantIds: e.target.value },
-                                  }))
-                              }
-                          />
-                        </Box>
-                        <Button
-                            size="small"
-                            variant="outlined"
-                            onClick={() => handleCreateSubgroup(group.id)}
-                            disabled={!form.name?.trim()}
-                            className="rounded-xl! normal-case! font-bold! mt-3! border-indigo-300! text-indigo-700! hover:bg-indigo-50! dark:border-indigo-500! dark:text-indigo-200! dark:hover:bg-indigo-900/30!"
-                        >
-                          {editingSubgroupGroupId === group.id ? t("adminSubjects.groups.saveSubgroup") : t("adminSubjects.groups.addSubgroup")}
-                        </Button>
-                        {editingSubgroupGroupId === group.id && (
-                            <Button
-                                size="small"
-                                variant="text"
-                                onClick={() => {
-                                  setEditingSubgroupId(null);
-                                  setEditingSubgroupGroupId(null);
-                                  setSubgroupForms((prev) => ({ ...prev, [group.id]: {} }));
-                                }}
-                                className="rounded-xl! normal-case! font-bold! mt-3! ml-2! text-slate-500! dark:text-slate-300!"
-                            >
-                              {t("adminSubjects.form.cancel")}
-                            </Button>
-                        )}
-                      </Box>
-                  );
-                })}
-
-                {subjectGroups.length === 0 && (
-                    <Typography className="text-slate-500! text-center! py-8!">
-                      {t("adminSubjects.groups.noGroups")}
-                    </Typography>
-                )}
-              </Box>
-            </DialogContent>
-            <DialogActions className="px-8! pb-8!">
-              <Button
-                  onClick={() => setGroupDialog({ open: false, subject: null })}
-                  className="rounded-xl! normal-case! font-bold!"
-              >
-                {t("adminSubjects.groups.close")}
-              </Button>
-            </DialogActions>
-          </Dialog>
 
           {}
           <Dialog

@@ -77,7 +77,7 @@ export default function TranscriptView({ profile, summary }) {
                       {sem.grades.map((row) => (
                         <tr key={row.id} className="bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800/70">
                           <td className="border-b border-slate-100 px-3 py-3 font-bold text-sky-800 dark:border-slate-800 dark:text-sky-300">
-                            MESON{String(row.subjectId).padStart(3, '0')}
+                            {row.subjectKodi || `MESON${String(row.subjectId).padStart(3, '0')}`}
                           </td>
                           <td className="border-b border-slate-100 px-3 py-3 font-semibold dark:border-slate-800">{row.subjectTitulli}</td>
                           <td className="border-b border-slate-100 px-3 py-3 dark:border-slate-800">{row.professorEmri}</td>

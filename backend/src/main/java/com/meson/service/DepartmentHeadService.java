@@ -34,6 +34,7 @@ public class DepartmentHeadService {
 
     private final DepartmentRepository departmentRepository;
     private final SubjectRepository subjectRepository;
+    private final com.meson.repository.SubjectTeacherRepository subjectTeacherRepository;
     private final SubjectService subjectService;
     private final EnrollmentRepository enrollmentRepository;
     private final UserRepository userRepository;
@@ -43,8 +44,11 @@ public class DepartmentHeadService {
     public DepartmentHeadDashboardResponse getDashboard() {
         Department department = getOwnDepartment();
         List<Subject> subjects = subjectRepository.findByDepartmentId(department.getId());
-        long teacherCount = subjects.stream()
-                .map(s -> s.getTeacher().getId())
+        long teacherCount = subjects.isEmpty() ? 0 : subjectTeacherRepository
+                .findBySubjectIdInOrderBySubjectIdAscSortOrderAsc(
+                        subjects.stream().map(Subject::getId).toList())
+                .stream()
+                .map(st -> st.getTeacher().getId())
                 .distinct()
                 .count();
 

@@ -31,6 +31,7 @@ public class SmisService {
     private final ExamApplicationRepository examApplicationRepository;
     private final GradeRepository gradeRepository;
     private final SubjectGroupRepository subjectGroupRepository;
+    private final com.meson.repository.SubjectTeacherRepository subjectTeacherRepository;
     private final SubjectGroupTeacherRepository subjectGroupTeacherRepository;
     private final SubjectSubgroupRepository subjectSubgroupRepository;
     private final SubjectSubgroupTeacherRepository subjectSubgroupTeacherRepository;
@@ -299,17 +300,15 @@ public class SmisService {
     private Map<Long, Set<Long>> batchTeacherIdsBySubject(List<Subject> subjects) {
         Map<Long, Set<Long>> teacherIdsBySubject = new HashMap<>();
         for (Subject subject : subjects) {
-            Set<Long> ids = new HashSet<>();
-            if (subject.getTeacher() != null) {
-                ids.add(subject.getTeacher().getId());
-            }
-            teacherIdsBySubject.put(subject.getId(), ids);
+            teacherIdsBySubject.put(subject.getId(), new HashSet<>());
         }
         if (subjects.isEmpty()) {
             return teacherIdsBySubject;
         }
 
         List<Long> subjectIds = subjects.stream().map(Subject::getId).toList();
+        subjectTeacherRepository.findBySubjectIdInOrderBySubjectIdAscSortOrderAsc(subjectIds).forEach(st ->
+                teacherIdsBySubject.get(st.getSubject().getId()).add(st.getTeacher().getId()));
         List<SubjectGroup> groups = subjectGroupRepository.findBySubjectIdIn(subjectIds);
         if (groups.isEmpty()) {
             return teacherIdsBySubject;

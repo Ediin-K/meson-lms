@@ -45,6 +45,7 @@ public class AssignmentService {
     private final UserRepository userRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final FileStorageService fileStorageService;
+    private final SubjectAccessService subjectAccessService;
 
     @Value("${app.upload.assignment.max-size-mb:20}")
     private long maxFileSizeMb;
@@ -64,8 +65,9 @@ public class AssignmentService {
 
     public AssignmentResponse create(AssignmentCreateRequest request, Long teacherId) {
         if (request.getLessonId() == null) throw new RuntimeException("Leksioni është i detyrueshëm");
-        Lesson lesson = lessonRepository.findByIdAndModuleSubjectTeacherId(request.getLessonId(), teacherId)
-                .orElseThrow(() -> new RuntimeException("Leksioni nuk u gjet ose nuk keni akses"));
+        Lesson lesson = lessonRepository.findById(request.getLessonId())
+                .orElseThrow(() -> new ResourceNotFoundException("Leksioni nuk u gjet"));
+        subjectAccessService.assertManagesSubject(lesson.getModule().getSubject().getId(), teacherId);
         if (assignmentRepository.findByLessonId(lesson.getId()).isPresent())
             throw new RuntimeException("Ky leksion ka tashmë një detyrë");
         validateAssignmentFields(request);
@@ -127,7 +129,11 @@ public class AssignmentService {
     }
 
     public List<AssignmentResponse> getTeacherAssignments(Long teacherId) {
-        return assignmentRepository.findByLessonModuleSubjectTeacherId(teacherId)
+        List<Long> subjectIds = subjectAccessService.subjectIdsFor(teacherId);
+        if (subjectIds.isEmpty()) {
+            return List.of();
+        }
+        return assignmentRepository.findByLessonModuleSubjectIdIn(subjectIds)
                 .stream().map(this::toResponse).toList();
     }
 
@@ -429,19 +435,22 @@ public class AssignmentService {
     }
 
     private Assignment findTeacherAssignment(Long id, Long teacherId) {
-        return assignmentRepository.findByIdAndLessonModuleSubjectTeacherId(id, teacherId)
-                .orElseThrow(() -> new RuntimeException("Detyra nuk u gjet ose nuk keni akses"));
+        Assignment a = findAssignment(id);
+        subjectAccessService.assertManagesSubject(
+                a.getLesson().getModule().getSubject().getId(), teacherId);
+        return a;
     }
 
     private Assignment findTeacherAssignmentByLesson(Long lessonId, Long teacherId) {
-        return assignmentRepository.findByLessonId(lessonId)
-                .filter(a -> a.getLesson().getModule().getSubject().getTeacher().getId().equals(teacherId))
-                .orElseThrow(() -> new RuntimeException("Detyra nuk u gjet ose nuk keni akses"));
+        Assignment a = assignmentRepository.findByLessonId(lessonId)
+                .orElseThrow(() -> new ResourceNotFoundException("Detyra nuk u gjet"));
+        subjectAccessService.assertManagesSubject(
+                a.getLesson().getModule().getSubject().getId(), teacherId);
+        return a;
     }
 
     private void verifyTeacherOwnsLesson(Lesson lesson, Long teacherId) {
-        if (!lesson.getModule().getSubject().getTeacher().getId().equals(teacherId))
-            throw new RuntimeException("Nuk keni akses në këtë leksion");
+        subjectAccessService.assertManagesSubject(lesson.getModule().getSubject().getId(), teacherId);
     }
 
     private void cleanupFiles(Assignment a) {

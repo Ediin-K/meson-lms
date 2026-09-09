@@ -5,6 +5,7 @@ import {
   Box,
   Button,
   Card,
+  Checkbox,
   Chip,
   CircularProgress,
   Container,
@@ -12,10 +13,12 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
   FormControl,
   IconButton,
   InputAdornment,
   InputLabel,
+  ListItemText,
   MenuItem,
   Select,
   Snackbar,
@@ -26,16 +29,24 @@ import {
   TableHead,
   TableRow,
   TextField,
+  Tooltip,
   Typography,
   Zoom,
 } from "@mui/material";
 import ArrowBackRounded from "@mui/icons-material/ArrowBackRounded";
 import AddRounded from "@mui/icons-material/AddRounded";
 import DeleteRounded from "@mui/icons-material/DeleteRounded";
+import EditRounded from "@mui/icons-material/EditRounded";
 import GroupsRounded from "@mui/icons-material/GroupsRounded";
 import PeopleRounded from "@mui/icons-material/PeopleRounded";
 import SearchRounded from "@mui/icons-material/SearchRounded";
 import VisibilityRounded from "@mui/icons-material/VisibilityRounded";
+import {
+  createSubjectSubgroup,
+  deleteSubjectSubgroup,
+  updateSubjectSubgroup,
+} from "../services/subjectGroupService";
+import { getAllTeachers } from "../services/teacherService";
 import Footer from "../components/ui/Footer";
 import { useAppPreferences } from "../context/appPreferencesContext";
 import GroupCreateWizard from "../components/admin/groupWizard/GroupCreateWizard";
@@ -137,6 +148,11 @@ export default function AdminGroups() {
   const [detailDialog, setDetailDialog] = useState(null);
   const [membersDialog, setMembersDialog] = useState({ open: false, group: null, members: [], loading: false });
 
+  const [allTeachers, setAllTeachers] = useState([]);
+  const [subgroupForms, setSubgroupForms] = useState({});
+  const [editingSubgroup, setEditingSubgroup] = useState(null); // { subjectGroupId, id }
+  const [savingSubgroup, setSavingSubgroup] = useState(false);
+
   const showToast = (message, severity = "success") => {
     setToast({ open: true, message, severity });
   };
@@ -192,6 +208,7 @@ export default function AdminGroups() {
 
   useEffect(() => {
     loadCategories().catch(() => {});
+    getAllTeachers().then(setAllTeachers).catch(() => {});
   }, [loadCategories]);
 
   useEffect(() => {
@@ -409,11 +426,82 @@ export default function AdminGroups() {
 
   const openDetail = async (group) => {
     try {
+      setSubgroupForms({});
+      setEditingSubgroup(null);
       setDetailDialog({ loading: true, group, data: null });
       const data = await getDepartmentGroupDetail(group.id);
       setDetailDialog({ loading: false, group, data });
     } catch (error) {
       setDetailDialog(null);
+      showToast(getErrorMessage(error, "Gabim"), "error");
+    }
+  };
+
+  const refreshDetail = async () => {
+    if (!detailDialog?.group) return;
+    const data = await getDepartmentGroupDetail(detailDialog.group.id);
+    setDetailDialog((prev) => (prev ? { ...prev, data } : prev));
+  };
+
+  const subgroupForm = (subjectGroupId) =>
+    subgroupForms[subjectGroupId] || { name: "", capacity: "", assistantIds: [] };
+
+  const patchSubgroupForm = (subjectGroupId, patch) =>
+    setSubgroupForms((prev) => ({
+      ...prev,
+      [subjectGroupId]: { ...subgroupForm(subjectGroupId), ...patch },
+    }));
+
+  const startEditSubgroup = (subjectGroupId, subgroup) => {
+    setEditingSubgroup({ subjectGroupId, id: subgroup.id });
+    patchSubgroupForm(subjectGroupId, {
+      name: subgroup.name || "",
+      capacity: subgroup.capacity || "",
+      assistantIds: subgroup.assistants?.map((a) => a.id) || [],
+    });
+  };
+
+  const cancelEditSubgroup = (subjectGroupId) => {
+    setEditingSubgroup(null);
+    setSubgroupForms((prev) => ({ ...prev, [subjectGroupId]: { name: "", capacity: "", assistantIds: [] } }));
+  };
+
+  const submitSubgroup = async (subjectGroupId) => {
+    const form = subgroupForm(subjectGroupId);
+    if (!form.name.trim()) return;
+    setSavingSubgroup(true);
+    try {
+      const payload = {
+        name: form.name.trim(),
+        capacity: form.capacity ? Number(form.capacity) : null,
+        assistantIds: form.assistantIds || [],
+      };
+      const editing = editingSubgroup && editingSubgroup.subjectGroupId === subjectGroupId;
+      if (editing) {
+        await updateSubjectSubgroup(editingSubgroup.id, payload);
+        showToast(t("adminGroups.subgroupUpdated"));
+      } else {
+        await createSubjectSubgroup(subjectGroupId, payload);
+        showToast(t("adminGroups.subgroupCreated"));
+      }
+      setEditingSubgroup(null);
+      setSubgroupForms((prev) => ({ ...prev, [subjectGroupId]: { name: "", capacity: "", assistantIds: [] } }));
+      await refreshDetail();
+    } catch (error) {
+      showToast(getErrorMessage(error, "Gabim"), "error");
+    } finally {
+      setSavingSubgroup(false);
+    }
+  };
+
+  const removeSubgroup = async (subgroup) => {
+    if (!window.confirm(`${t("adminGroups.confirmDeleteSubgroup")} ${subgroup.name}?`)) return;
+    try {
+      await deleteSubjectSubgroup(subgroup.id);
+      showToast(t("adminGroups.subgroupDeleted"));
+      if (editingSubgroup?.id === subgroup.id) setEditingSubgroup(null);
+      await refreshDetail();
+    } catch (error) {
       showToast(getErrorMessage(error, "Gabim"), "error");
     }
   };
@@ -716,30 +804,151 @@ export default function AdminGroups() {
             {detailDialog?.loading ? (
               <CircularProgress size={28} />
             ) : (
-              <Table size="small" sx={tableContainerSx(isDark)}>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>{t("adminGroups.detailDay")}</TableCell>
-                    <TableCell>{t("adminGroups.detailTime")}</TableCell>
-                    <TableCell>{t("adminGroups.detailSubject")}</TableCell>
-                    <TableCell>{t("adminGroups.detailProfessor")}</TableCell>
-                    <TableCell>{t("adminGroups.detailRoom")}</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {(detailDialog?.data?.schedules || []).map((s) => (
-                    <TableRow key={s.id}>
-                      <TableCell>{DAY_LABELS[s.dayOfWeek] || s.dayOfWeek}</TableCell>
-                      <TableCell>
-                        {String(s.startTime).slice(0, 5)} – {String(s.endTime).slice(0, 5)}
-                      </TableCell>
-                      <TableCell>{s.subjectTitle}</TableCell>
-                      <TableCell>{s.teacherName}</TableCell>
-                      <TableCell>{s.room || "—"}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <Box className="flex flex-col gap-5 pt-1">
+                <Box>
+                  <Typography sx={{ fontWeight: 800 }}>{t("adminGroups.subgroupsHeading")}</Typography>
+                  <Typography variant="caption" sx={{ color: theme.textMuted }}>
+                    {t("adminGroups.subgroupsHint")}
+                  </Typography>
+
+                  {(detailDialog?.data?.subjectGroups || []).length === 0 ? (
+                    <Typography variant="body2" sx={{ color: theme.textMuted, mt: 1 }}>
+                      {t("adminGroups.noSubjectGroups")}
+                    </Typography>
+                  ) : (
+                    <Box className="flex flex-col gap-3 mt-2">
+                      {detailDialog.data.subjectGroups.map((sg) => {
+                        const form = subgroupForm(sg.id);
+                        const isEditing = editingSubgroup && editingSubgroup.subjectGroupId === sg.id;
+                        return (
+                          <Box
+                            key={sg.id}
+                            sx={{ border: `1px solid ${theme.border}`, borderRadius: 2, p: 1.5 }}
+                          >
+                            <Typography sx={{ fontWeight: 700 }}>{sg.subjectName || sg.name}</Typography>
+
+                            <Box className="flex flex-wrap gap-1.5 my-2">
+                              {(sg.subgroups || []).length === 0 ? (
+                                <Typography variant="caption" sx={{ color: theme.textMuted }}>—</Typography>
+                              ) : (
+                                sg.subgroups.map((sub) => (
+                                  <Chip
+                                    key={sub.id}
+                                    size="small"
+                                    label={
+                                      sub.assistants?.length
+                                        ? `${sub.name} · ${sub.assistants.map((a) => a.name).join(", ")}`
+                                        : `${sub.name} · ${t("adminGroups.noAssistants")}`
+                                    }
+                                    onClick={() => startEditSubgroup(sg.id, sub)}
+                                    onDelete={() => removeSubgroup(sub)}
+                                  />
+                                ))
+                              )}
+                            </Box>
+
+                            <Box className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                              <TextField
+                                size="small"
+                                label={t("adminGroups.subgroupNameLabel")}
+                                value={form.name}
+                                onChange={(e) => patchSubgroupForm(sg.id, { name: e.target.value })}
+                                sx={getWizardFieldSx(isDark)}
+                              />
+                              <TextField
+                                size="small"
+                                type="number"
+                                label={t("adminGroups.subgroupCapacityLabel")}
+                                value={form.capacity}
+                                onChange={(e) => patchSubgroupForm(sg.id, { capacity: e.target.value })}
+                                sx={getWizardFieldSx(isDark)}
+                              />
+                              <FormControl size="small" sx={getWizardFieldSx(isDark)}>
+                                <InputLabel>{t("adminGroups.subgroupAssistantsLabel")}</InputLabel>
+                                <Select
+                                  multiple
+                                  label={t("adminGroups.subgroupAssistantsLabel")}
+                                  value={form.assistantIds}
+                                  onChange={(e) => patchSubgroupForm(sg.id, { assistantIds: e.target.value })}
+                                  MenuProps={getMenuPaperSx(isDark)}
+                                  renderValue={(ids) =>
+                                    ids
+                                      .map((id) => {
+                                        const tc = allTeachers.find((x) => x.id === id);
+                                        return tc ? `${tc.emri} ${tc.mbiemri}` : id;
+                                      })
+                                      .join(", ")
+                                  }
+                                >
+                                  {allTeachers.map((tc) => (
+                                    <MenuItem key={tc.id} value={tc.id}>
+                                      <Checkbox size="small" checked={form.assistantIds.includes(tc.id)} />
+                                      <ListItemText primary={`${tc.emri} ${tc.mbiemri}`} />
+                                    </MenuItem>
+                                  ))}
+                                </Select>
+                              </FormControl>
+                            </Box>
+
+                            <Box className="flex gap-1 mt-2">
+                              <Button
+                                size="small"
+                                variant="contained"
+                                disabled={!form.name.trim() || savingSubgroup}
+                                onClick={() => submitSubgroup(sg.id)}
+                                sx={primaryButtonSx()}
+                                className="!rounded-xl !normal-case !font-bold"
+                              >
+                                {isEditing ? t("adminGroups.saveSubgroup") : t("adminGroups.addSubgroup")}
+                              </Button>
+                              {isEditing && (
+                                <Button
+                                  size="small"
+                                  onClick={() => cancelEditSubgroup(sg.id)}
+                                  className="!rounded-xl !normal-case !font-bold"
+                                  sx={{ color: theme.textMuted }}
+                                >
+                                  {t("adminGroups.cancelEdit")}
+                                </Button>
+                              )}
+                            </Box>
+                          </Box>
+                        );
+                      })}
+                    </Box>
+                  )}
+                </Box>
+
+                <Divider sx={{ borderColor: theme.border }} />
+
+                <Box>
+                  <Typography sx={{ fontWeight: 800, mb: 1 }}>{t("adminGroups.scheduleHeading")}</Typography>
+                  <Table size="small" sx={tableContainerSx(isDark)}>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>{t("adminGroups.detailDay")}</TableCell>
+                        <TableCell>{t("adminGroups.detailTime")}</TableCell>
+                        <TableCell>{t("adminGroups.detailSubject")}</TableCell>
+                        <TableCell>{t("adminGroups.detailProfessor")}</TableCell>
+                        <TableCell>{t("adminGroups.detailRoom")}</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {(detailDialog?.data?.schedules || []).map((s) => (
+                        <TableRow key={s.id}>
+                          <TableCell>{DAY_LABELS[s.dayOfWeek] || s.dayOfWeek}</TableCell>
+                          <TableCell>
+                            {String(s.startTime).slice(0, 5)} – {String(s.endTime).slice(0, 5)}
+                          </TableCell>
+                          <TableCell>{s.subjectTitle}</TableCell>
+                          <TableCell>{s.teacherName}</TableCell>
+                          <TableCell>{s.room || "—"}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </Box>
+              </Box>
             )}
           </DialogContent>
           <DialogActions>

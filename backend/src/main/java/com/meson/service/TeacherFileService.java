@@ -4,6 +4,7 @@ import com.meson.dto.LessonResourceResponse;
 import com.meson.entity.Lesson;
 import com.meson.entity.LessonResource;
 import com.meson.entity.User;
+import com.meson.exception.ResourceNotFoundException;
 import com.meson.repository.LessonRepository;
 import com.meson.repository.LessonResourceRepository;
 import com.meson.repository.UserRepository;
@@ -26,12 +27,10 @@ public class TeacherFileService {
     private final LessonRepository lessonRepository;
     private final UserRepository userRepository;
     private final LessonResourceMapper lessonResourceMapper;
+    private final SubjectAccessService subjectAccessService;
 
     public List<LessonResourceResponse> getResourcesByLesson(Long lessonId) {
-        User teacher = getCurrentUser();
-        lessonRepository.findByIdAndModuleSubjectTeacherId(lessonId, teacher.getId())
-                .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses në këtë lëndë."));
-
+        loadManagedLesson(lessonId);
         return lessonResourceRepository.findByLessonId(lessonId).stream()
                 .map(lessonResourceMapper::toResponse)
                 .collect(Collectors.toList());
@@ -40,8 +39,7 @@ public class TeacherFileService {
     @Transactional
     public LessonResourceResponse uploadFile(Long lessonId, MultipartFile file) {
         User teacher = getCurrentUser();
-        Lesson lesson = lessonRepository.findByIdAndModuleSubjectTeacherId(lessonId, teacher.getId())
-                .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses në këtë lëndë."));
+        Lesson lesson = loadManagedLesson(lessonId);
 
         String originalFilename = file.getOriginalFilename();
         if (originalFilename == null || !isValidExtension(originalFilename)) {
@@ -66,16 +64,19 @@ public class TeacherFileService {
 
     @Transactional
     public void deleteFile(Long resourceId) {
-        User teacher = getCurrentUser();
         LessonResource resource = lessonResourceRepository.findById(resourceId)
-                .orElseThrow(() -> new RuntimeException("Skedari nuk u gjet."));
-
-        if (!resource.getLesson().getModule().getSubject().getTeacher().getId().equals(teacher.getId())) {
-            throw new AccessDeniedException("Ju nuk keni akses për të fshirë këtë skedar.");
-        }
+                .orElseThrow(() -> new ResourceNotFoundException("Skedari nuk u gjet."));
+        subjectAccessService.assertManagesSubject(resource.getLesson().getModule().getSubject().getId());
 
         fileStorageService.delete(resource.getPath());
         lessonResourceRepository.delete(resource);
+    }
+
+    private Lesson loadManagedLesson(Long lessonId) {
+        Lesson lesson = lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new ResourceNotFoundException("Leksioni nuk u gjet."));
+        subjectAccessService.assertManagesSubject(lesson.getModule().getSubject().getId());
+        return lesson;
     }
 
     private boolean isValidExtension(String filename) {

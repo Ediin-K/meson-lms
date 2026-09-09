@@ -6,14 +6,11 @@ import com.meson.dto.LessonResourceResponse;
 import com.meson.entity.Lesson;
 import com.meson.entity.LessonResource;
 import com.meson.entity.Module;
-import com.meson.entity.User;
+import com.meson.exception.ResourceNotFoundException;
 import com.meson.repository.LessonRepository;
 import com.meson.repository.ModuleRepository;
-import com.meson.repository.UserRepository;
 import com.meson.repository.LessonResourceRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,17 +24,13 @@ public class TeacherLessonService {
 
     private final LessonRepository lessonRepository;
     private final ModuleRepository moduleRepository;
-    private final UserRepository userRepository;
     private final LessonResourceRepository lessonResourceRepository;
     private final LessonResourceMapper lessonResourceMapper;
     private final EnrollmentCompletionService completionService;
+    private final SubjectAccessService subjectAccessService;
 
     public List<LessonResponse> getLessonsByModule(Long moduleId) {
-        User teacher = getCurrentUser();
-        
-        moduleRepository.findByIdAndSubjectTeacherId(moduleId, teacher.getId())
-                .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses në këtë modul ose moduli nuk ekziston."));
-
+        assertManagesModule(moduleId);
         List<Lesson> lessons = lessonRepository.findByModuleIdOrderByRradhitjaAsc(moduleId);
         Map<Long, List<LessonResource>> resourcesByLesson = batchResourcesByLesson(lessons);
         return lessons.stream()
@@ -56,9 +49,7 @@ public class TeacherLessonService {
     }
 
     public LessonResponse createLesson(LessonRequest request) {
-        User teacher = getCurrentUser();
-        Module module = moduleRepository.findByIdAndSubjectTeacherId(request.getModuleId(), teacher.getId())
-                .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses në këtë modul ose moduli nuk ekziston."));
+        Module module = assertManagesModule(request.getModuleId());
 
         Lesson lesson = Lesson.builder()
                 .titulli(request.getTitulli())
@@ -77,9 +68,7 @@ public class TeacherLessonService {
     }
 
     public LessonResponse updateLesson(Long id, LessonRequest request) {
-        User teacher = getCurrentUser();
-        Lesson lesson = lessonRepository.findByIdAndModuleSubjectTeacherId(id, teacher.getId())
-                .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses në këtë lëndë ose lënda nuk ekziston."));
+        Lesson lesson = loadManagedLesson(id);
 
         lesson.setTitulli(request.getTitulli());
         lesson.setPermbajtja(request.getPermbajtja());
@@ -93,20 +82,25 @@ public class TeacherLessonService {
 
     @Transactional
     public void deleteLesson(Long id) {
-        User teacher = getCurrentUser();
-        Lesson lesson = lessonRepository.findByIdAndModuleSubjectTeacherId(id, teacher.getId())
-                .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses në këtë lëndë ose lënda nuk ekziston."));
-
+        Lesson lesson = loadManagedLesson(id);
         Long subjectId = lesson.getModule().getSubject().getId();
         lessonRepository.delete(lesson);
         // Removing material may push a student to 100% of what remains.
         completionService.recalculateSubject(subjectId);
     }
 
-    private User getCurrentUser() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Përdoruesi nuk u gjet."));
+    private Module assertManagesModule(Long moduleId) {
+        Module module = moduleRepository.findById(moduleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Moduli nuk ekziston."));
+        subjectAccessService.assertManagesSubject(module.getSubject().getId());
+        return module;
+    }
+
+    private Lesson loadManagedLesson(Long id) {
+        Lesson lesson = lessonRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Leksioni nuk ekziston."));
+        subjectAccessService.assertManagesSubject(lesson.getModule().getSubject().getId());
+        return lesson;
     }
 
     private LessonResponse toResponse(Lesson lesson) {

@@ -55,11 +55,10 @@ const EMPTY_FORM = {
   titulli: "",
   code: "",
   pershkrimi: "",
-  teacherId: "",
+  teacherIds: [],
   semester: 1,
   enrollmentKey: "",
   ects: 5,
-  niveli: "FILLESTAR",
   statusi: "DRAFT",
 };
 
@@ -125,11 +124,12 @@ export default function DepartmentHeadSubjects() {
       titulli: subject.titulli,
       code: subject.code || "",
       pershkrimi: subject.pershkrimi,
-      teacherId: subject.teacherId,
+      teacherIds: subject.teachers?.length
+        ? subject.teachers.map((tc) => tc.id)
+        : subject.teacherId ? [subject.teacherId] : [],
       semester: subject.semester,
       enrollmentKey: subject.enrollmentKey || "",
       ects: subject.ects ?? 5,
-      niveli: subject.niveli,
       statusi: subject.statusi,
     });
     setFormError(null);
@@ -327,9 +327,20 @@ export default function DepartmentHeadSubjects() {
             <TextField label={t("adminSubjects.form.description")} fullWidth multiline rows={3} value={formData.pershkrimi} onChange={field("pershkrimi")} />
             <FormControl fullWidth>
               <InputLabel>{t("adminSubjects.form.instructorId")}</InputLabel>
-              <Select label={t("adminSubjects.form.instructorId")} value={formData.teacherId} onChange={field("teacherId")}>
+              <Select
+                multiple
+                label={t("adminSubjects.form.instructorId")}
+                value={formData.teacherIds}
+                onChange={(e) => setFormData((f) => ({ ...f, teacherIds: e.target.value }))}
+                renderValue={(ids) =>
+                  ids.map((id) => {
+                    const tc = teachers.find((x) => x.id === id);
+                    return tc ? `${tc.emri} ${tc.mbiemri}` : id;
+                  }).join(", ")
+                }
+              >
                 {teachers.map((tc) => (
-                  <MenuItem key={tc.id} value={tc.id}>{tc.emri} {tc.mbiemri} — ID: {tc.id}</MenuItem>
+                  <MenuItem key={tc.id} value={tc.id}>{tc.emri} {tc.mbiemri}</MenuItem>
                 ))}
               </Select>
             </FormControl>
@@ -346,14 +357,6 @@ export default function DepartmentHeadSubjects() {
             </Box>
             <Box className="flex gap-4">
               <FormControl fullWidth>
-                <InputLabel>{t("adminSubjects.form.level")}</InputLabel>
-                <Select label={t("adminSubjects.form.level")} value={formData.niveli} onChange={field("niveli")}>
-                  <MenuItem value="FILLESTAR">{t("adminSubjects.form.levelBeginner")}</MenuItem>
-                  <MenuItem value="MESEM">{t("adminSubjects.form.levelIntermediate")}</MenuItem>
-                  <MenuItem value="AVANCUAR">{t("adminSubjects.form.levelAdvanced")}</MenuItem>
-                </Select>
-              </FormControl>
-              <FormControl fullWidth>
                 <InputLabel>{t("adminSubjects.form.status")}</InputLabel>
                 <Select label={t("adminSubjects.form.status")} value={formData.statusi} onChange={field("statusi")}>
                   <MenuItem value="DRAFT">{t("adminSubjects.form.statusDraft")}</MenuItem>
@@ -362,7 +365,7 @@ export default function DepartmentHeadSubjects() {
                 </Select>
               </FormControl>
             </Box>
-            <TextField label={t("adminSubjects.form.enrollmentKey")} fullWidth value={formData.enrollmentKey} onChange={field("enrollmentKey")} />
+            <TextField label={t("adminSubjects.form.enrollmentKey")} fullWidth required value={formData.enrollmentKey} onChange={field("enrollmentKey")} />
           </Box>
         </DialogContent>
         <DialogActions className="px-8! pb-8! pt-4! gap-2">
@@ -372,7 +375,7 @@ export default function DepartmentHeadSubjects() {
           <Button
             variant="contained"
             onClick={handleSubmit}
-            disabled={!formData.titulli || !formData.teacherId || saving}
+            disabled={!formData.titulli || !formData.teacherIds?.length || !formData.enrollmentKey?.trim() || saving}
             className="rounded-2xl! px-8! normal-case! font-black! bg-sky-600! hover:bg-sky-700!"
           >
             {saving ? <CircularProgress size={20} className="text-white!" /> : isEdit ? t("adminSubjects.form.update") : t("adminSubjects.form.addSubject")}

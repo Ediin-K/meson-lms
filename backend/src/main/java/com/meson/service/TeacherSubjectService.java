@@ -25,10 +25,16 @@ public class TeacherSubjectService {
     private final ModuleRepository moduleRepository;
     private final QuizRepository quizRepository;
     private final AssignmentRepository assignmentRepository;
+    private final SubjectAccessService subjectAccessService;
+
+    private List<Subject> myPoolSubjects() {
+        User teacher = getCurrentUser();
+        List<Long> ids = subjectAccessService.subjectIdsFor(teacher.getId());
+        return ids.isEmpty() ? List.of() : subjectRepository.findAllById(ids);
+    }
 
     public List<SubjectResponse> getOwnSubjects() {
-        User teacher = getCurrentUser();
-        List<Subject> subjects = subjectRepository.findByTeacherId(teacher.getId());
+        List<Subject> subjects = myPoolSubjects();
         if (subjects.isEmpty()) {
             return List.of();
         }
@@ -49,21 +55,20 @@ public class TeacherSubjectService {
     }
 
     public SubjectResponse getOwnSubjectById(Long id) {
-        User teacher = getCurrentUser();
-        Subject subject = subjectRepository.findByIdAndTeacherId(id, teacher.getId())
-                .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses në këtë lëndë ose lënda nuk ekziston."));
+        subjectAccessService.assertManagesSubject(id);
+        Subject subject = subjectRepository.findById(id)
+                .orElseThrow(() -> new com.meson.exception.ResourceNotFoundException("Lënda nuk ekziston."));
         return toResponse(subject);
     }
 
     public SubjectResponse updateSubjectBasicInfo(Long id, SubjectRequest request) {
-        User teacher = getCurrentUser();
-        Subject subject = subjectRepository.findByIdAndTeacherId(id, teacher.getId())
-                .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses në këtë lëndë ose lënda nuk ekziston."));
+        subjectAccessService.assertManagesSubject(id);
+        Subject subject = subjectRepository.findById(id)
+                .orElseThrow(() -> new com.meson.exception.ResourceNotFoundException("Lënda nuk ekziston."));
 
         subject.setTitulli(request.getTitulli());
         subject.setPershkrimi(request.getPershkrimi());
         subject.setEcts(request.getEcts() != null ? request.getEcts() : 5);
-        subject.setNiveli(request.getNiveli());
         subject.setStatusi(request.getStatusi());
         subject.setSemester(request.getSemester());
 
@@ -71,11 +76,18 @@ public class TeacherSubjectService {
     }
 
     public TeacherStatsDTO getStats() {
-        User teacher = getCurrentUser();
-        long totalSubjects = subjectRepository.countByTeacherId(teacher.getId());
-        long totalStudents = enrollmentRepository.countDistinctStudentsByTeacherId(teacher.getId());
-        long totalQuizzes = quizRepository.countByLessonModuleSubjectTeacherId(teacher.getId());
-        long totalAssignments = assignmentRepository.countByLessonModuleSubjectTeacherId(teacher.getId());
+        List<Long> subjectIds = myPoolSubjects().stream().map(Subject::getId).toList();
+        if (subjectIds.isEmpty()) {
+            return new TeacherStatsDTO(0, 0, 0, 0);
+        }
+        long totalSubjects = subjectIds.size();
+        long totalStudents = subjectIds.stream()
+                .flatMap(sid -> enrollmentRepository.findBySubjectId(sid).stream())
+                .map(e -> e.getUser().getId())
+                .distinct()
+                .count();
+        long totalQuizzes = quizRepository.countByLessonModuleSubjectIdIn(subjectIds);
+        long totalAssignments = assignmentRepository.findByLessonModuleSubjectIdIn(subjectIds).size();
 
         return new TeacherStatsDTO(totalSubjects, totalStudents, totalQuizzes, totalAssignments);
     }
@@ -104,7 +116,6 @@ public class TeacherSubjectService {
                 .departmentName(subject.getDepartment() != null ? subject.getDepartment().getEmertimi() : null)
                 .semester(subject.getSemester())
                 .ects(subject.getEcts())
-                .niveli(subject.getNiveli())
                 .statusi(subject.getStatusi())
                 .moduleCount((int) moduleCount)
                 .studentCount((int) studentCount)

@@ -45,6 +45,7 @@ public class GradeService {
     private final NotificationService notificationService;
     private final GradeAuditLogRepository gradeAuditLogRepository;
     private final DepartmentRepository departmentRepository;
+    private final SubjectAccessService subjectAccessService;
 
     @Transactional(readOnly = true)
     public StudentGradesSummaryResponse getByStudentId(Long studentId) {
@@ -64,16 +65,20 @@ public class GradeService {
 
     @Transactional(readOnly = true)
     public List<GradeResponse> getBySubjectId(Long subjectId) {
-        assertCanManageSubject(subjectId);
+        subjectAccessService.assertManagesSubject(subjectId);
+        java.util.Set<Long> gradable = hasRole("ADMIN")
+                ? null
+                : new java.util.HashSet<>(subjectAccessService.gradableStudentIds(subjectId));
         return gradeRepository.findBySubjectId(subjectId)
                 .stream()
+                .filter(g -> gradable == null || gradable.contains(g.getStudent().getId()))
                 .map(this::toResponse)
                 .toList();
     }
 
     @Transactional
     public GradeResponse create(GradeRequest request) {
-        assertCanManageSubject(request.getSubjectId());
+        subjectAccessService.assertCanGradeStudent(request.getSubjectId(), request.getStudentId());
 
         if (gradeRepository.existsByStudentIdAndSubjectId(request.getStudentId(), request.getSubjectId())) {
             throw new RuntimeException("Studenti ka nje note ekzistuese per kete kurs");
@@ -111,7 +116,7 @@ public class GradeService {
         Grade grade = gradeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Nota nuk u gjet"));
 
-        assertCanManageSubject(grade.getSubject().getId());
+        subjectAccessService.assertCanGradeStudent(grade.getSubject().getId(), grade.getStudent().getId());
 
         if (!grade.getStudent().getId().equals(request.getStudentId())
                 || !grade.getSubject().getId().equals(request.getSubjectId())) {
@@ -132,7 +137,7 @@ public class GradeService {
     public void delete(Long id) {
         Grade grade = gradeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Nota nuk u gjet"));
-        assertCanManageSubject(grade.getSubject().getId());
+        subjectAccessService.assertCanGradeStudent(grade.getSubject().getId(), grade.getStudent().getId());
         logAudit(grade, GradeAuditAction.DELETED, grade.getGrade(), null);
         gradeRepository.delete(grade);
     }
@@ -155,8 +160,7 @@ public class GradeService {
             return gradeAuditLogRepository.findAll(pageable).map(this::toAuditResponse);
         }
         if (hasRole("TEACHER")) {
-            List<Long> subjectIds = subjectRepository.findByTeacherId(getCurrentUser().getId())
-                    .stream().map(Subject::getId).toList();
+            List<Long> subjectIds = subjectAccessService.subjectIdsFor(getCurrentUser().getId());
             return gradeAuditLogRepository.findBySubjectIdIn(subjectIds, pageable)
                     .map(this::toAuditResponse);
         }
@@ -225,15 +229,7 @@ public class GradeService {
     }
 
     private void assertCanManageSubject(Long subjectId) {
-        if (hasRole("ADMIN")) {
-            return;
-        }
-        if (!hasRole("TEACHER")) {
-            throw new AccessDeniedException("Nuk keni qasje per te menaxhuar notat");
-        }
-        User teacher = getCurrentUser();
-        subjectRepository.findByIdAndTeacherId(subjectId, teacher.getId())
-                .orElseThrow(() -> new AccessDeniedException("Ju nuk keni akses ne kete kurs"));
+        subjectAccessService.assertManagesSubject(subjectId);
     }
 
     private StudentGradesSummaryResponse buildSummary(List<GradeResponse> grades, int totalEnrolledEcts) {
@@ -286,6 +282,14 @@ public class GradeService {
         return course.getEcts();
     }
 
+    /** Same rule as SmisService.courseCode: the real code if set, else MESON### from the id. */
+    private static String subjectCode(Subject subject) {
+        if (subject.getCode() != null && !subject.getCode().isBlank()) {
+            return subject.getCode();
+        }
+        return "MESON" + String.format("%03d", subject.getId());
+    }
+
     private GradeResponse toResponse(Grade grade) {
         return GradeResponse.builder()
                 .id(grade.getId())
@@ -294,6 +298,7 @@ public class GradeService {
                 .studentMbiemri(grade.getStudent().getMbiemri())
                 .subjectId(grade.getSubject().getId())
                 .subjectTitulli(grade.getSubject().getTitulli())
+                .subjectKodi(subjectCode(grade.getSubject()))
                 .subjectEcts(resolveSubjectEcts(grade.getSubject()))
                 .subjectSemester(grade.getSubject().getSemester())
                 .professorId(grade.getProfessor().getId())

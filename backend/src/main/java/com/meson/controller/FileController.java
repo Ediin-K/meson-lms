@@ -32,6 +32,7 @@ public class FileController {
     private final LessonResourceRepository lessonResourceRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final UserRepository userRepository;
+    private final com.meson.service.SubjectAccessService subjectAccessService;
 
     @GetMapping("/{id}/view")
     public ResponseEntity<Resource> viewResource(@PathVariable Long id) {
@@ -100,8 +101,7 @@ public class FileController {
         User currentUser = userRepository.findByEmail(auth.getName())
                 .orElseThrow(() -> new AccessDeniedException("Perdoruesi nuk u gjet."));
 
-        boolean isSubjectTeacher = subject.getTeacher() != null
-                && subject.getTeacher().getId().equals(currentUser.getId());
+        boolean isSubjectTeacher = subjectAccessService.isSubjectTeacher(currentUser.getId(), subject.getId());
         boolean isEnrolled = enrollmentRepository.existsByUserIdAndSubjectId(currentUser.getId(), subject.getId());
 
         if (!isSubjectTeacher && !isEnrolled) {

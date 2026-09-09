@@ -15,6 +15,8 @@ public class GradeResponse {
     private String studentMbiemri;
     private Long subjectId;
     private String subjectTitulli;
+    /** The subject's own catalog code, or a MESON### fallback derived from the id. */
+    private String subjectKodi;
     private Integer subjectEcts;
     private Integer subjectSemester;
     private Long professorId;
