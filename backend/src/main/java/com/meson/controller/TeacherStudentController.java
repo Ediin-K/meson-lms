@@ -1,7 +1,9 @@
 package com.meson.controller;
 
+import com.meson.dto.AssistantReviewsForStudentResponse;
 import com.meson.dto.SubjectProgressResponse;
 import com.meson.dto.EnrollmentResponse;
+import com.meson.service.AssistantService;
 import com.meson.service.ProgressService;
 import com.meson.service.TeacherStudentService;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ public class TeacherStudentController {
 
     private final TeacherStudentService teacherStudentService;
     private final ProgressService progressService;
+    private final AssistantService assistantService;
 
     @GetMapping("/students")
     public ResponseEntity<List<EnrollmentResponse>> getStudentsByTeacher() {
@@ -35,5 +38,13 @@ public class TeacherStudentController {
             @PathVariable Long subjectId,
             @PathVariable Long studentId) {
         return ResponseEntity.ok(progressService.getStudentSubjectProgress(subjectId, studentId));
+    }
+
+    /** The subject owner's read-only view of the assistant reviews for one of their students. */
+    @GetMapping("/subjects/{subjectId}/students/{studentId}/assistant-reviews")
+    public ResponseEntity<AssistantReviewsForStudentResponse> getAssistantReviews(
+            @PathVariable Long subjectId,
+            @PathVariable Long studentId) {
+        return ResponseEntity.ok(assistantService.getReviewsForSubjectOwner(subjectId, studentId));
     }
 }

@@ -12,6 +12,15 @@ public interface SubjectSubgroupTeacherRepository extends JpaRepository<SubjectS
 
     @EntityGraph(attributePaths = {"teacher"})
     List<SubjectSubgroupTeacher> findBySubjectSubgroupIdIn(List<Long> subjectSubgroupIds);
+
+    /** Every subgroup a teacher assists on, with the subgroup → group → subject chain loaded. */
+    @EntityGraph(attributePaths = {
+            "subjectSubgroup",
+            "subjectSubgroup.subjectGroup",
+            "subjectSubgroup.subjectGroup.subject"
+    })
+    List<SubjectSubgroupTeacher> findByTeacherId(Long teacherId);
+
     void deleteBySubjectSubgroupId(Long subjectSubgroupId);
     void deleteByTeacherId(Long teacherId);
 }

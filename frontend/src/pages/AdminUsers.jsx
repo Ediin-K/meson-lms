@@ -32,15 +32,11 @@ const ROLE_STYLE = {
   admin:      "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300",
   teacher:    "bg-sky-100    text-sky-700    dark:bg-sky-900/40    dark:text-sky-300",
   student:    "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
-  assistant:  "bg-amber-100  text-amber-700  dark:bg-amber-900/40  dark:text-amber-300",
-  parent:     "bg-rose-100   text-rose-700   dark:bg-rose-900/40   dark:text-rose-300",
 };
 const AVATAR_GRADIENT = {
   admin:     "from-violet-500 to-purple-600",
   teacher:   "from-sky-500 to-blue-600",
   student:   "from-emerald-500 to-teal-600",
-  assistant: "from-amber-500 to-orange-600",
-  parent:    "from-rose-500 to-pink-600",
 };
 
 /* Roles that store a department + semester profile */
@@ -346,7 +342,7 @@ export default function AdminUsers() {
               {t("adminUsers.listTitle")}
             </Typography>
             <Box className="flex flex-wrap items-center gap-2">
-              {["all", "student", "teacher", "assistant", "admin", "department_head", "parent"].map((r) => (
+              {["all", "student", "teacher", "admin", "department_head"].map((r) => (
                 <Button key={r} size="small"
                   onClick={() => { setRoleFilter(r); setPage(0); }}
                   className={`!rounded-full !px-4 !py-1 !normal-case !text-xs !font-bold ${roleFilter === r ? "!bg-slate-900 !text-white dark:!bg-white dark:!text-slate-900" : "!text-slate-500 hover:!bg-slate-100 dark:hover:!bg-slate-800"}`}>

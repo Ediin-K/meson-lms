@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -13,10 +13,98 @@ import {
   Box,
   Typography,
   Divider,
+  Rating,
+  CircularProgress,
 } from "@mui/material";
 import GradeOutlined from "@mui/icons-material/GradeOutlined";
+import RateReviewOutlined from "@mui/icons-material/RateReviewOutlined";
+import { useAppPreferences } from "../../context/appPreferencesContext";
+import { getAssistantReviewsForStudent } from "../../services/assistantService";
 
 const GRADE_OPTIONS = [5, 6, 7, 8, 9, 10];
+
+/** Read-only: an assistant's dated notes + final review for this student, shown while grading. */
+function AssistantReviewPanel({ subjectId, studentId }) {
+  const { t } = useAppPreferences();
+  const [open, setOpen] = useState(false);
+
+  if (!subjectId || !studentId) return null;
+
+  return (
+    <Box className="rounded-lg border border-slate-200 dark:border-slate-700">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm font-bold text-slate-700 dark:text-slate-200"
+      >
+        <RateReviewOutlined sx={{ fontSize: 18 }} />
+        {t("assistant.viewAssistantReview")}
+        <span className="ml-auto text-slate-400">{open ? "−" : "+"}</span>
+      </button>
+      {open && (
+        <AssistantReviewList
+          key={`${subjectId}-${studentId}`}
+          subjectId={subjectId}
+          studentId={studentId}
+        />
+      )}
+    </Box>
+  );
+}
+
+/** Mounts fresh (keyed) per student, so the fetch runs once with only async state updates. */
+function AssistantReviewList({ subjectId, studentId }) {
+  const { t } = useAppPreferences();
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+    getAssistantReviewsForStudent(subjectId, studentId)
+      .then((d) => { if (active) setData(d); })
+      .catch(() => { if (active) setData({ dated: [], finalReview: null }); });
+    return () => { active = false; };
+  }, [subjectId, studentId]);
+
+  const loading = data === null;
+  const rows = data?.dated || [];
+  const fin = data?.finalReview || null;
+  const empty = !loading && rows.length === 0 && !fin;
+
+  return (
+        <Box className="border-t border-slate-200 px-3 py-3 dark:border-slate-700">
+          {loading ? (
+            <Box className="flex justify-center py-3"><CircularProgress size={20} /></Box>
+          ) : empty ? (
+            <Typography variant="body2" className="!text-slate-500">{t("assistant.teacherPanelEmpty")}</Typography>
+          ) : (
+            <Box className="flex flex-col gap-2">
+              {fin ? (
+                <Box className="rounded-lg bg-emerald-50 px-3 py-2 dark:bg-emerald-950/40">
+                  <Box className="flex items-center gap-2">
+                    <span className="text-xs font-bold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
+                      {t("assistant.teacherPanelFinal")}
+                    </span>
+                    {fin.stars != null ? <Rating value={fin.stars} readOnly size="small" /> : null}
+                    <span className="ml-auto text-xs text-slate-500">{fin.assistantName}</span>
+                  </Box>
+                  {fin.comment ? <Typography variant="body2" className="!mt-1">{fin.comment}</Typography> : null}
+                </Box>
+              ) : null}
+              {rows.map((r) => (
+                <Box key={r.id} className="rounded-lg border border-slate-200 px-3 py-2 dark:border-slate-700">
+                  <Box className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-slate-600 dark:text-slate-300">{r.reviewDate}</span>
+                    {r.stars != null ? <Rating value={r.stars} readOnly size="small" /> : null}
+                    <span className="ml-auto text-xs text-slate-500">{r.assistantName}</span>
+                  </Box>
+                  {r.comment ? <Typography variant="body2" className="!mt-1 !text-slate-600 dark:!text-slate-300">{r.comment}</Typography> : null}
+                </Box>
+              ))}
+            </Box>
+          )}
+    </Box>
+  );
+}
 
 function buildForm(initialData, fixedSubjectId) {
   if (initialData) {
@@ -159,6 +247,11 @@ function GradeFormFields({
             fullWidth
             size="small"
             placeholder="Shkruani vlerësimin ose komentin për studentin..."
+          />
+
+          <AssistantReviewPanel
+            subjectId={form.subjectId || fixedSubjectId}
+            studentId={form.studentId}
           />
         </Box>
       </DialogContent>
